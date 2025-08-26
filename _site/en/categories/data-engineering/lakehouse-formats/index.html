@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lakehouse Table Formats: Delta Lake, Apache Iceberg, Apache Hudi - Data Droid Blog</title>
+  <meta name="description" content="Detailed analysis and comparison of table formats that are the core of modern data lakehouse architecture">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Detailed analysis and comparison of table formats that are the core of modern data lakehouse architecture">
+
+
+
+<title>Lakehouse Table Formats: Delta Lake, Apache Iceberg, Apache Hudi - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Lakehouse Table Formats: Delta Lake, Apache Iceberg, Apache Hudi">
+<meta property="og:description" content="Detailed analysis and comparison of table formats that are the core of modern data lakehouse architecture">
+<meta property="og:url" content="http://localhost:4000/en/categories/data-engineering/lakehouse-formats/">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Lakehouse Table Formats: Delta Lake, Apache Iceberg, Apache Hudi">
+<meta name="twitter:description" content="Detailed analysis and comparison of table formats that are the core of modern data lakehouse architecture">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=your-google-analytics-id"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'your-google-analytics-id');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/system-architecture/">System Architecture</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/dev-tools/">Dev Tools</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      <a href="/categories/data-engineering/lakehouse-formats/" class="lang-btn ">한국어</a>
+      <a href="/en/categories/data-engineering/lakehouse-formats/" class="lang-btn active">English</a>
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data Engineering</span>
+      <span class="post-date">August 22, 2025</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    <h1 class="post-title">Lakehouse Table Formats: Delta Lake, Apache Iceberg, Apache Hudi</h1>
+    <div class="post-tags">
+      
+        <span class="tag">lakehouse</span>
+      
+        <span class="tag">delta-lake</span>
+      
+        <span class="tag">apache-iceberg</span>
+      
+        <span class="tag">apache-hudi</span>
+      
+        <span class="tag">table-format</span>
+      
+        <span class="tag">data-lake</span>
+      
+    </div>
+  </header>
+
+  <div class="post-content">
+    <!-- Table of Contents -->
+    <section class="post-section">
+      <h2>📋 Table of Contents</h2>
+      <ul class="toc">
+        <li><a href="#introduction">1. Introduction</a></li>
+        <li><a href="#delta-lake">2. Delta Lake</a></li>
+        <li><a href="#apache-iceberg">3. Apache Iceberg</a></li>
+        <li><a href="#apache-hudi">4. Apache Hudi</a></li>
+        <li><a href="#comparison">5. Comparison of Three Platforms</a></li>
+        <li><a href="#use-cases">6. Use Cases and Selection Guide</a></li>
+        <li><a href="#conclusion">7. Conclusion</a></li>
+      </ul>
+    </section>
+
+    <!-- 1. Introduction -->
+    <section class="post-section" id="introduction">
+      <h2>1. Introduction</h2>
+      <p>The core of data lakehouse is combining the flexibility of existing data lakes with data warehouse features such as ACID transactions, schema evolution, data quality assurance, etc. What makes this possible is the <strong>Table Format</strong>.</p>
+      
+      <p>The three most widely used table formats currently are:</p>
+      <ul>
+        <li><strong>Delta Lake</strong> - Open source project developed by Databricks</li>
+        <li><strong>Apache Iceberg</strong> - Started by Netflix and moved to Apache Foundation</li>
+        <li><strong>Apache Hudi</strong> - Developed by Uber and moved to Apache Foundation</li>
+      </ul>
+
+      <div class="info-box">
+        <h4>💡 What is a Table Format?</h4>
+        <p>A table format is a standardized way to manage metadata of data stored in data lakes and provide features such as ACID transactions, schema evolution, partitioning, and indexing. This allows data lakes to be used like data warehouses.</p>
+      </div>
+    </section>
+
+    <!-- 2. Delta Lake -->
+    <section class="post-section" id="delta-lake">
+      <h2>2. Delta Lake</h2>
+      
+      <h3>2.1 Overview</h3>
+      <p><strong>Delta Lake</strong> is a table format open-sourced by Databricks in 2019, providing ACID transactions to data lakes through tight integration with Apache Spark.</p>
+      
+      <div class="benefit-box">
+        <h4>🔗 Official Links</h4>
+        <ul>
+          <li><a href="https://delta.io/" target="_blank">Official Website</a></li>
+          <li><a href="https://github.com/delta-io/delta" target="_blank">GitHub Repository</a></li>
+          <li><a href="https://docs.delta.io/" target="_blank">Official Documentation</a></li>
+          <li><a href="https://delta.io/blog/" target="_blank">Blog</a></li>
+        </ul>
+      </div>
+
+      <h3>2.2 Key Features</h3>
+      <ul>
+        <li><strong>ACID Transactions</strong>: Ensures atomicity, consistency, isolation, and durability</li>
+        <li><strong>Schema Enforcement</strong>: Ensures data quality and integrity</li>
+        <li><strong>Schema Evolution</strong>: Supports safe schema changes</li>
+        <li><strong>Time Travel</strong>: Access to past data versions</li>
+        <li><strong>Upsert/Merge</strong>: Efficient data updates</li>
+        <li><strong>Open Format</strong>: Parquet-based, compatible with all tools</li>
+      </ul>
+
+      <h3>2.3 Architecture</h3>
+      <div class="architecture-diagram">
+        <h4>Delta Lake Architecture</h4>
+        <div class="diagram-container">
+          <div class="diagram-layer">
+            <div class="layer-title">Application Layer</div>
+            <div class="layer-items">
+              <div class="item">Spark SQL</div>
+              <div class="item">Spark Streaming</div>
+              <div class="item">BI Tools</div>
+            </div>
+          </div>
+          <div class="diagram-arrow">↓</div>
+          <div class="diagram-layer">
+            <div class="layer-title">Delta Lake Engine</div>
+            <div class="layer-items">
+              <div class="item">Transaction Log</div>
+              <div class="item">Schema Management</div>
+              <div class="item">ACID Guarantees</div>
+            </div>
+          </div>
+          <div class="diagram-arrow">↓</div>
+          <div class="diagram-layer">
+            <div class="layer-title">Storage Layer</div>
+            <div class="layer-items">
+              <div class="item">Parquet Files</div>
+              <div class="item">Transaction Log</div>
+              <div class="item">Checkpoint Files</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>2.4 Code Example</h3>
+      <div class="code-block">
+        <h4>Delta Lake Basic Operations</h4>
+        <pre><code class="language-python"># Write data to Delta table
+df.write.format("delta").mode("overwrite").save("/path/to/delta-table")
+
+# Read from Delta table
+df = spark.read.format("delta").load("/path/to/delta-table")
+
+# Update data
+from delta.tables import DeltaTable
+deltaTable = DeltaTable.forPath(spark, "/path/to/delta-table")
+deltaTable.update(
+  condition = "id = 1",
+  set = {"value": "updated"}
+)
+
+# Time travel
+df = spark.read.format("delta").option("versionAsOf", 0).load("/path/to/delta-table")</code></pre>
+      </div>
+    </section>
+
+    <!-- 3. Apache Iceberg -->
+    <section class="post-section" id="apache-iceberg">
+      <h2>3. Apache Iceberg</h2>
+      
+      <h3>3.1 Overview</h3>
+      <p><strong>Apache Iceberg</strong> is a table format designed for large analytical datasets, providing a clean abstraction over data files and metadata.</p>
+      
+      <div class="benefit-box">
+        <h4>🔗 Official Links</h4>
+        <ul>
+          <li><a href="https://iceberg.apache.org/" target="_blank">Official Website</a></li>
+          <li><a href="https://github.com/apache/iceberg" target="_blank">GitHub Repository</a></li>
+          <li><a href="https://iceberg.apache.org/docs/" target="_blank">Documentation</a></li>
+        </ul>
+      </div>
+
+      <h3>3.2 Key Features</h3>
+      <ul>
+        <li><strong>Hidden Partitioning</strong>: Automatic partition evolution</li>
+        <li><strong>Schema Evolution</strong>: Safe schema changes</li>
+        <li><strong>Partition Evolution</strong>: Change partition schemes without rewriting data</li>
+        <li><strong>Version Rollback</strong>: Rollback to previous table versions</li>
+        <li><strong>Multiple File Formats</strong>: Support for Parquet, ORC, Avro</li>
+      </ul>
+
+      <h3>3.3 Code Example</h3>
+      <div class="code-block">
+        <h4>Iceberg Basic Operations</h4>
+        <pre><code class="language-python"># Write to Iceberg table
+df.writeTo("catalog.db.table").overwritePartitions()
+
+# Read from Iceberg table
+df = spark.read.table("catalog.db.table")
+
+# Update table
+spark.sql("""
+  UPDATE catalog.db.table 
+  SET value = 'updated' 
+  WHERE id = 1
+""")
+
+# Rollback to previous version
+spark.sql("CALL catalog.system.rollback_to_snapshot('catalog.db.table', 12345)")</code></pre>
+      </div>
+    </section>
+
+    <!-- 4. Apache Hudi -->
+    <section class="post-section" id="apache-hudi">
+      <h2>4. Apache Hudi</h2>
+      
+      <h3>4.1 Overview</h3>
+      <p><strong>Apache Hudi</strong> is designed for incremental processing and provides upserts and deletes on data lakes.</p>
+      
+      <div class="benefit-box">
+        <h4>🔗 Official Links</h4>
+        <ul>
+          <li><a href="https://hudi.apache.org/" target="_blank">Official Website</a></li>
+          <li><a href="https://github.com/apache/hudi" target="_blank">GitHub Repository</a></li>
+          <li><a href="https://hudi.apache.org/docs/overview/" target="_blank">Documentation</a></li>
+        </ul>
+      </div>
+
+      <h3>4.2 Key Features</h3>
+      <ul>
+        <li><strong>Upserts</strong>: Efficient insert/update operations</li>
+        <li><strong>Incremental Processing</strong>: Process only changed data</li>
+        <li><strong>Real-time Views</strong>: Read-optimized and real-time views</li>
+        <li><strong>Clustering</strong>: Automatic data organization</li>
+        <li><strong>Compaction</strong>: Automatic file optimization</li>
+      </ul>
+
+      <h3>4.3 Code Example</h3>
+      <div class="code-block">
+        <h4>Hudi Basic Operations</h4>
+        <pre><code class="language-python"># Write to Hudi table
+df.write.format("hudi").options(
+  hudi_options
+).mode("overwrite").save("/path/to/hudi-table")
+
+# Read from Hudi table
+df = spark.read.format("hudi").load("/path/to/hudi-table")
+
+# Incremental query
+df = spark.read.format("hudi").option(
+  "hoodie.datasource.query.type", "incremental"
+).option("hoodie.datasource.read.begin.instanttime", "20230101").load("/path/to/hudi-table")</code></pre>
+      </div>
+    </section>
+
+    <!-- 5. Comparison -->
+    <section class="post-section" id="comparison">
+      <h2>5. Comparison of Three Platforms</h2>
+      
+      <div class="comparison-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Delta Lake</th>
+              <th>Apache Iceberg</th>
+              <th>Apache Hudi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Primary Use Case</strong></td>
+              <td>General purpose, Spark integration</td>
+              <td>Large analytical datasets</td>
+              <td>Incremental processing</td>
+            </tr>
+            <tr>
+              <td><strong>ACID Transactions</strong></td>
+              <td>✅ Full support</td>
+              <td>✅ Full support</td>
+              <td>✅ Full support</td>
+            </tr>
+            <tr>
+              <td><strong>Schema Evolution</strong></td>
+              <td>✅ Supported</td>
+              <td>✅ Advanced features</td>
+              <td>✅ Supported</td>
+            </tr>
+            <tr>
+              <td><strong>Time Travel</strong></td>
+              <td>✅ Version-based</td>
+              <td>✅ Snapshot-based</td>
+              <td>✅ Supported</td>
+            </tr>
+            <tr>
+              <td><strong>Partition Evolution</strong></td>
+              <td>❌ Limited</td>
+              <td>✅ Advanced</td>
+              <td>✅ Supported</td>
+            </tr>
+            <tr>
+              <td><strong>Incremental Processing</strong></td>
+              <td>✅ Supported</td>
+              <td>✅ Supported</td>
+              <td>✅ Specialized</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 6. Use Cases and Selection Guide -->
+    <section class="post-section" id="use-cases">
+      <h2>6. Use Cases and Selection Guide</h2>
+      
+      <h3>6.1 When to Choose Delta Lake</h3>
+      <ul>
+        <li>Already using Apache Spark ecosystem</li>
+        <li>Need tight integration with Databricks</li>
+        <li>Require ACID transactions on data lakes</li>
+        <li>Want simple setup and management</li>
+      </ul>
+
+      <h3>6.2 When to Choose Apache Iceberg</h3>
+      <ul>
+        <li>Working with large analytical datasets</li>
+        <li>Need advanced partition evolution</li>
+        <li>Want multiple engine support (Spark, Flink, Trino)</li>
+        <li>Require sophisticated schema management</li>
+      </ul>
+
+      <h3>6.3 When to Choose Apache Hudi</h3>
+      <ul>
+        <li>Primary focus on incremental processing</li>
+        <li>Need real-time data ingestion</li>
+        <li>Working with change data capture (CDC)</li>
+        <li>Require efficient upserts and deletes</li>
+      </ul>
+
+      <div class="tip-box">
+        <h4>💡 Selection Tips</h4>
+        <p><strong>Delta Lake</strong>: Best for Spark-based environments and quick setup<br>
+        <strong>Apache Iceberg</strong>: Best for complex analytical workloads and multi-engine support<br>
+        <strong>Apache Hudi</strong>: Best for real-time streaming and incremental processing</p>
+      </div>
+    </section>
+
+    <!-- 7. Conclusion -->
+    <section class="post-section" id="conclusion">
+      <h2>7. Conclusion</h2>
+      
+      <p>All three table formats provide excellent ACID transaction support and schema evolution capabilities, making them suitable for modern data lakehouse architectures. The choice depends on your specific use case, existing technology stack, and requirements.</p>
+      
+      <div class="conclusion-summary">
+        <div class="summary-item">
+          <h4>Delta Lake</h4>
+          <p>Best choice for Spark-based environments and Databricks users</p>
+        </div>
+        <div class="summary-item">
+          <h4>Apache Iceberg</h4>
+          <p>Best choice for complex analytical workloads and multi-engine support</p>
+        </div>
+        <div class="summary-item">
+          <h4>Apache Hudi</h4>
+          <p>Best choice for real-time streaming and incremental processing</p>
+        </div>
+      </div>
+
+      <p>As the data lakehouse ecosystem continues to evolve, these formats are becoming more interoperable, and you may find yourself using multiple formats for different use cases within the same organization.</p>
+    </section>
+  </div>
+</article>
+
+    </div>
+  </main>
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/system-architecture/">시스템 아키텍처</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/dev-tools/">개발 도구</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          
+          <li><a href="https://twitter.com/your-twitter-username">Twitter</a></li>
+          
+          
+          <li><a href="https://linkedin.com/in/your-linkedin-username">LinkedIn</a></li>
+          
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

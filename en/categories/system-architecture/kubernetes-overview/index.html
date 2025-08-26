@@ -1,0 +1,387 @@
+---
+layout: default
+lang: en
+title: "What is Kubernetes? - The Core of Container Orchestration"
+description: "Learn about Kubernetes' background, core concepts, key features, and role in modern cloud-native applications in detail."
+date: 2025-08-26
+author: Data Droid
+category: System Architecture
+tags: [Kubernetes, Container, Orchestration, Cloud Native, Microservices, DevOps]
+---
+
+<article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">{{ page.category }}</span>
+      <span class="post-date">{{ page.date | date: "%B %d, %Y" }}</span>
+      <span class="post-author">{{ page.author }}</span>
+    </div>
+    <h1 class="post-title">{{ page.title }}</h1>
+    <div class="post-tags">
+      {% for tag in page.tags %}
+        <span class="tag">{{ tag }}</span>
+      {% endfor %}
+    </div>
+  </header>
+
+  <div class="post-content">
+    <section class="post-section">
+      <h2>📖 Table of Contents</h2>
+      <ul class="toc">
+        <li><a href="#what-is-kubernetes">What is Kubernetes?</a></li>
+        <li><a href="#background">Background of Kubernetes</a></li>
+        <li><a href="#core-concepts">Core Concepts and Architecture</a></li>
+        <li><a href="#key-features">Key Features and Benefits</a></li>
+        <li><a href="#use-cases">Use Cases and Applications</a></li>
+        <li><a href="#challenges">Challenges and Limitations</a></li>
+        <li><a href="#future">Future Prospects and Development</a></li>
+      </ul>
+    </section>
+
+    <section class="post-section" id="what-is-kubernetes">
+      <h2>🐳 What is Kubernetes?</h2>
+      <p>Kubernetes is an <strong>open-source platform for automated deployment, scaling, and management of containerized applications</strong>. The name derives from the Greek word 'κυβερνήτης' meaning 'helmsman' or 'pilot', representing its role in safely navigating containers.</p>
+      
+      <div class="info-box">
+        <h4>💡 Core Definition</h4>
+        <p>Kubernetes is a platform for <strong>container orchestration</strong> that enables efficient management and operation of numerous containers.</p>
+      </div>
+
+      <h3>Understanding Basic Concepts</h3>
+      <p>To understand Kubernetes, you need to grasp these concepts first:</p>
+      
+      <ul>
+        <li><strong>Container</strong>: An independent execution environment containing an application and all files needed for execution</li>
+        <li><strong>Orchestration</strong>: The process of harmoniously managing and coordinating multiple containers</li>
+        <li><strong>Cluster</strong>: A structure that combines multiple servers (nodes) into one system for management</li>
+      </ul>
+    </section>
+
+    <section class="post-section" id="background">
+      <h2>🚀 Background of Kubernetes</h2>
+      <p>Let's examine the background that led to Kubernetes' emergence chronologically.</p>
+
+      <h3>1. Limitations of Traditional Deployment Methods</h3>
+      <p>Until the early 2010s, directly installing applications on physical servers or virtual machines (VMs) was common.</p>
+      
+      <div class="warning-box">
+        <h4>⚠️ Problems with Traditional Methods</h4>
+        <ul>
+          <li><strong>Environment Differences</strong>: Inconsistencies between development, testing, and production environments</li>
+          <li><strong>Lack of Scalability</strong>: Complex and slow server addition when traffic increases</li>
+          <li><strong>Resource Waste</strong>: Each VM having independent OS reduces resource efficiency</li>
+          <li><strong>Deployment Complexity</strong>: Human errors and lack of consistency due to manual deployment</li>
+        </ul>
+      </div>
+
+      <h3>2. Docker's Emergence and Container Revolution</h3>
+      <p>With Docker's appearance in 2013, container technology became mainstream. Docker enabled packaging applications into containers for consistent execution anywhere.</p>
+      
+      <div class="info-box">
+        <h4>🎯 Docker's Advantages</h4>
+        <ul>
+          <li><strong>Consistency</strong>: Ensures identical execution environment across all environments</li>
+          <li><strong>Efficiency</strong>: Saves resources through OS layer sharing</li>
+          <li><strong>Portability</strong>: Smooth transition from development to production</li>
+          <li><strong>Fast Deployment</strong>: Rapid deployment through image-based approach</li>
+        </ul>
+      </div>
+
+      <h3>3. Inspiration from Google's Internal System</h3>
+      <p>Kubernetes was inspired by Google's internal system called <strong>Borg</strong>. Borg is a system managing millions of Google's containers, designed based on over 10 years of operational experience.</p>
+      
+      <div class="tip-box">
+        <h4>💡 Google's Experience</h4>
+        <p>Google accumulated know-how in large-scale container management through Borg and made it open-source, becoming the foundation of Kubernetes.</p>
+      </div>
+
+      <h3>4. Rise of Microservices Architecture</h3>
+      <p>From the mid-2010s, as microservices architecture emerged, the need to deploy and manage multiple small services independently increased.</p>
+      
+      <ul>
+        <li><strong>Service Decomposition</strong>: Breaking down one large application into multiple small services</li>
+        <li><strong>Independent Deployment</strong>: Developing, deploying, and scaling each service independently</li>
+        <li><strong>Increased Complexity</strong>: Growing complexity in inter-service communication, load balancing, and failure handling</li>
+      </ul>
+    </section>
+
+    <section class="post-section" id="core-concepts">
+      <h2>🏗️ Core Concepts and Architecture</h2>
+      <p>Let's examine Kubernetes' core concepts and architecture in detail.</p>
+
+      <h3>1. Cluster Architecture</h3>
+      <p>Kubernetes is designed with a <strong>Master-Worker</strong> structure.</p>
+      
+      <div class="architecture-diagram">
+        <h4>Cluster Components</h4>
+        <ul>
+          <li><strong>Control Plane (Master Node)</strong>
+            <ul>
+              <li><strong>API Server</strong>: Central control unit processing all requests</li>
+              <li><strong>etcd</strong>: Distributed database storing cluster state information</li>
+              <li><strong>Scheduler</strong>: Scheduler placing pods on appropriate nodes</li>
+              <li><strong>Controller Manager</strong>: Monitors and adjusts cluster state</li>
+            </ul>
+          </li>
+          <li><strong>Worker Node</strong>
+            <ul>
+              <li><strong>kubelet</strong>: Agent managing pods on the node</li>
+              <li><strong>kube-proxy</strong>: Proxy handling network communication</li>
+              <li><strong>Container Runtime</strong>: Container execution engines like Docker, containerd</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <h3>2. Core Resource Concepts</h3>
+      <p>Kubernetes provides various resource types for systematic application management.</p>
+      
+      <div class="resource-types">
+        <h4>Major Resource Types</h4>
+        <ul>
+          <li><strong>Pod</strong>: Kubernetes' minimum deployment unit, containing one or more containers</li>
+          <li><strong>Service</strong>: Provides stable network endpoints for pod collections</li>
+          <li><strong>Deployment</strong>: Manages pod replicas and handles updates</li>
+          <li><strong>ConfigMap & Secret</strong>: Manages configuration information and sensitive data</li>
+          <li><strong>PersistentVolume</strong>: Provides persistent storage</li>
+          <li><strong>Namespace</strong>: Logically separates resources within the cluster</li>
+        </ul>
+      </div>
+
+      <h3>3. Declarative Management Approach</h3>
+      <p>Kubernetes adopts a <strong>declarative</strong> management approach.</p>
+      
+      <div class="info-box">
+        <h4>🎯 Declarative vs Imperative</h4>
+        <ul>
+          <li><strong>Imperative</strong>: Specifies "how" to do something</li>
+          <li><strong>Declarative</strong>: Specifies "what" to achieve</li>
+        </ul>
+        <p>Kubernetes automatically finds ways to achieve goals when you declare "I want to run 3 nginx pods."</p>
+      </div>
+    </section>
+
+    <section class="post-section" id="key-features">
+      <h2>⭐ Key Features and Benefits</h2>
+      <p>Let's examine the main features and benefits Kubernetes provides.</p>
+
+      <h3>1. Automated Deployment and Scaling</h3>
+      <div class="feature-card">
+        <h4>🔄 Automated Deployment</h4>
+        <ul>
+          <li><strong>Rolling Updates</strong>: Application updates without service interruption</li>
+          <li><strong>Rollback</strong>: Automatic recovery to previous version when problems occur</li>
+          <li><strong>Blue-Green Deployment</strong>: Deployment by switching between new and existing versions</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <h4>📈 Auto Scaling</h4>
+        <ul>
+          <li><strong>Horizontal Pod Autoscaler (HPA)</strong>: Automatic scaling based on CPU/memory usage</li>
+          <li><strong>Vertical Pod Autoscaler (VPA)</strong>: Automatic adjustment of resource requests</li>
+          <li><strong>Cluster Autoscaler</strong>: Automatic adjustment of node count</li>
+        </ul>
+      </div>
+
+      <h3>2. High Availability and Failure Recovery</h3>
+      <div class="feature-card">
+        <h4>🛡️ High Availability</h4>
+        <ul>
+          <li><strong>Multi-Node Deployment</strong>: Distributes pods across multiple nodes</li>
+          <li><strong>Auto Recovery</strong>: Automatically redistributes to other nodes when node failures occur</li>
+          <li><strong>Load Balancing</strong>: Automatically distributes traffic across multiple pods</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <h4>🔧 Auto Recovery</h4>
+        <ul>
+          <li><strong>Health Check</strong>: Continuously monitors application status</li>
+          <li><strong>Auto-restart</strong>: Automatically restarts pods when failures occur</li>
+          <li><strong>Self-healing</strong>: System detects and recovers from problems automatically</li>
+        </ul>
+      </div>
+
+      <h3>3. Resource Efficiency</h3>
+      <div class="feature-card">
+        <h4>💰 Resource Optimization</h4>
+        <ul>
+          <li><strong>High-Density Placement</strong>: Efficiently places multiple applications on one node</li>
+          <li><strong>Resource Limits</strong>: Explicitly limits CPU and memory usage</li>
+          <li><strong>Overcommit</strong>: Logically allocates more resources than physical resources</li>
+        </ul>
+      </div>
+
+      <h3>4. Portability and Flexibility</h3>
+      <div class="feature-card">
+        <h4>🌍 Cloud Neutrality</h4>
+        <ul>
+          <li><strong>Multi-Cloud</strong>: Works identically across various clouds like AWS, GCP, Azure</li>
+          <li><strong>On-Premises</strong>: Operates in the same way in own data centers</li>
+          <li><strong>Hybrid</strong>: Integrates cloud and on-premises environments</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="post-section" id="use-cases">
+      <h2>🎯 Use Cases and Applications</h2>
+      <p>Let's examine how Kubernetes is actually utilized through various real-world examples.</p>
+
+      <h3>1. Web Applications and Microservices</h3>
+      <div class="use-case">
+        <h4>🌐 E-commerce Platform</h4>
+        <p>Case study of Kubernetes usage in large-scale e-commerce platforms:</p>
+        <ul>
+          <li><strong>User Authentication Service</strong>: Separated as independent microservice for enhanced security</li>
+          <li><strong>Product Catalog</strong>: Automatically scales up/down based on traffic</li>
+          <li><strong>Payment System</strong>: Operates multiple replicas for high availability</li>
+          <li><strong>Order Processing</strong>: Workflow management for asynchronous processing</li>
+        </ul>
+      </div>
+
+      <h3>2. Data Engineering and Analytics</h3>
+      <div class="use-case">
+        <h4>📊 Data Pipeline</h4>
+        <p>Applications in data engineering:</p>
+        <ul>
+          <li><strong>Apache Spark</strong>: Executes large-scale data processing jobs on Kubernetes</li>
+          <li><strong>Apache Kafka</strong>: Messaging system for real-time data streaming</li>
+          <li><strong>Data Warehouse</strong>: Manages scheduling and execution of ETL jobs</li>
+          <li><strong>Machine Learning Pipeline</strong>: Workflow for model training and inference</li>
+        </ul>
+      </div>
+
+      <h3>3. DevOps and CI/CD</h3>
+      <div class="use-case">
+        <h4>🚀 Continuous Deployment</h4>
+        <p>Applications in DevOps pipelines:</p>
+        <ul>
+          <li><strong>Jenkins</strong>: Executes CI/CD pipelines on Kubernetes</li>
+          <li><strong>GitLab CI</strong>: Automatically tests and deploys when code changes</li>
+          <li><strong>ArgoCD</strong>: Manages application deployment using GitOps approach</li>
+          <li><strong>Tekton</strong>: Cloud-native CI/CD pipeline</li>
+        </ul>
+      </div>
+
+      <h3>4. Enterprise Applications</h3>
+      <div class="use-case">
+        <h4>🏢 Enterprise Systems</h4>
+        <p>Applications in enterprise environments:</p>
+        <ul>
+          <li><strong>ERP System</strong>: Operates by separating modules into microservices</li>
+          <li><strong>CRM System</strong>: Scalable architecture for customer data processing and analysis</li>
+          <li><strong>Intranet</strong>: Integrated management and monitoring of internal systems</li>
+          <li><strong>Security System</strong>: Centralized management for access control and auditing</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="post-section" id="challenges">
+      <h2>⚠️ Challenges and Limitations</h2>
+      <p>As important as Kubernetes' advantages are understanding its limitations and challenges.</p>
+
+      <h3>1. Complexity and Learning Curve</h3>
+      <div class="challenge">
+        <h4>📚 Steep Learning Curve</h4>
+        <ul>
+          <li><strong>Concept Understanding</strong>: Need to learn many concepts like Pod, Service, Deployment</li>
+          <li><strong>YAML Writing</strong>: Requires writing complex manifest files</li>
+          <li><strong>Command Mastery</strong>: Must learn kubectl commands and options</li>
+          <li><strong>Debugging</strong>: Difficult to identify causes when problems occur</li>
+        </ul>
+      </div>
+
+      <h3>2. Operational Complexity</h3>
+      <div class="challenge">
+        <h4>🔧 Operational Management Difficulty</h4>
+        <ul>
+          <li><strong>Cluster Management</strong>: High availability and backup management of master nodes</li>
+          <li><strong>Monitoring</strong>: Building integrated monitoring systems in distributed environments</li>
+          <li><strong>Logging</strong>: Collection and analysis of logs distributed across multiple nodes</li>
+          <li><strong>Security</strong>: Complex security configurations like RBAC, network policies, secret management</li>
+        </ul>
+      </div>
+
+      <h3>3. Resource Overhead</h3>
+      <div class="challenge">
+        <h4>💾 System Resource Consumption</h4>
+        <ul>
+          <li><strong>Control Plane</strong>: Master nodes consume significant CPU/memory</li>
+          <li><strong>etcd</strong>: Additional storage needed for cluster state storage</li>
+          <li><strong>Network Overhead</strong>: Additional network layers for inter-service communication</li>
+          <li><strong>Storage</strong>: Complex storage management related to PersistentVolume</li>
+        </ul>
+      </div>
+
+      <h3>4. Limitations for Specific Workloads</h3>
+      <div class="challenge">
+        <h4>🎯 Unsuitable Cases</h4>
+        <ul>
+          <li><strong>Simple Applications</strong>: Simple web apps running on single servers</li>
+          <li><strong>Traditional Monoliths</strong>: Legacy systems difficult to separate into microservices</li>
+          <li><strong>Real-time Performance Critical Cases</strong>: Delays due to network overhead</li>
+          <li><strong>Small Teams</strong>: Small organizations struggling with operational complexity</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="post-section" id="future">
+      <h2>🚀 Future Prospects and Development</h2>
+      <p>Let's examine Kubernetes' present and future, and understand its development direction.</p>
+
+      <h3>1. Current Development Trends</h3>
+      <div class="trend">
+        <h4>🔄 Continuous Improvement</h4>
+        <ul>
+          <li><strong>Performance Enhancement</strong>: Optimization of scheduling algorithms and resource management</li>
+          <li><strong>Usability Improvement</strong>: Enhanced kubectl plugins and dashboard functionality</li>
+          <li><strong>Security Enhancement</strong>: Improved Pod Security Standards and network policies</li>
+          <li><strong>Scalability</strong>: Clusters supporting more nodes and pods</li>
+        </ul>
+      </div>
+
+      <h3>2. New Features and Technologies</h3>
+      <div class="trend">
+        <h4>🆕 Latest Technology Integration</h4>
+        <ul>
+          <li><strong>eBPF</strong>: Networking and security functions at kernel level</li>
+          <li><strong>WebAssembly</strong>: Support for lightweight runtime environments</li>
+          <li><strong>Service Mesh</strong>: Integration with Istio, Linkerd, etc.</li>
+          <li><strong>GitOps</strong>: Declarative infrastructure management approach</li>
+        </ul>
+      </div>
+
+      <h3>3. Ecosystem Expansion</h3>
+      <div class="trend">
+        <h4>🌱 Rich Ecosystem</h4>
+        <ul>
+          <li><strong>Helm</strong>: Kubernetes package manager</li>
+          <li><strong>Operator</strong>: Automation of application-specific operational knowledge</li>
+          <li><strong>CRI-O</strong>: Lightweight container runtime</li>
+          <li><strong>Kubernetes-native Tools</strong>: Various tools optimized for Kubernetes</li>
+        </ul>
+      </div>
+
+      <h3>4. Future Prospects</h3>
+      <div class="trend">
+        <h4>🔮 Future Development Direction</h4>
+        <ul>
+          <li><strong>AI/ML Integration</strong>: Features specialized for machine learning workloads</li>
+          <li><strong>Edge Computing</strong>: Expanded utilization in IoT and edge environments</li>
+          <li><strong>Serverless Integration</strong>: Enhanced serverless functionality through Knative, etc.</li>
+          <li><strong>Multi-Cluster</strong>: Functions for integrated management of multiple clusters</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="post-section">
+      <h2>📝 Conclusion</h2>
+      <p>Kubernetes has established itself as an essential technology for modern cloud-native application development and operations. Emerging with container technology innovation, Kubernetes has greatly improved application scalability and stability by managing the complexity of microservices architecture.</p>
+      
+      <p>However, Kubernetes is not a universal solution. It has challenges like high learning curves and operational complexity, and is not suitable for all workloads. Therefore, it should be introduced carefully considering project requirements and team capabilities.</p>
+      
+      <p>In future posts, we'll cover practical content like actual Kubernetes environment setup, application deployment, and monitoring based on these basic concepts. We'll particularly focus on how to utilize Kubernetes from a data engineering perspective.</p>
+    </section>
+  </div>
+</article>
