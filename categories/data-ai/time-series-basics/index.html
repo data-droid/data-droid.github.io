@@ -1,0 +1,914 @@
+---
+layout: default
+lang: ko
+title: "Part 1: 시계열 예측의 기초 - ARIMA부터 Prophet까지"
+description: "시계열 데이터의 기본 개념과 전통적 통계 방법, Prophet의 등장까지 체계적으로 학습하는 가이드"
+date: 2025-08-31
+author: Data Droid
+category: Data AI
+tags: [시계열예측, ARIMA, Prophet, 통계, Python, 시계열분석]
+---
+
+<article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">{{ page.category }}</span>
+      <span class="post-date">{{ page.date | date: "%Y년 %m월 %d일" }}</span>
+      <span class="post-author">{{ page.author }}</span>
+    </div>
+    <h1 class="post-title">{{ page.title }}</h1>
+    <div class="post-tags">
+      {% for tag in page.tags %}
+        <span class="tag">{{ tag }}</span>
+      {% endfor %}
+    </div>
+  </header>
+
+  <div class="post-content">
+    <section class="post-section">
+      <h2>📖 목차</h2>
+      <ul class="toc">
+        <li><a href="#introduction">시계열 예측이란?</a></li>
+        <li><a href="#time-series-characteristics">시계열 데이터의 특성</a></li>
+        <li><a href="#traditional-methods">전통적 통계 방법</a></li>
+        <li><a href="#arima-models">ARIMA 모델</a></li>
+        <li><a href="#prophet-introduction">Prophet의 등장</a></li>
+        <li><a href="#practical-implementation">실습 구현</a></li>
+        <li><a href="#comparison">방법론 비교</a></li>
+        <li><a href="#next-steps">다음 단계</a></li>
+      </ul>
+    </section>
+
+    <section class="post-section" id="introduction">
+      <h2>🚀 시계열 예측이란?</h2>
+      <p>시계열 예측은 시간의 흐름에 따라 변화하는 데이터를 분석하여 미래 값을 예측하는 기술입니다. 이는 금융, 제조, 유통 등 다양한 분야에서 핵심적인 역할을 합니다.</p>
+      
+      <div class="info-box">
+        <h4>💡 시계열 예측의 중요성</h4>
+        <p>시계열 예측은 단순한 수학적 모델링을 넘어서, 비즈니스 의사결정과 전략 수립에 직접적으로 기여하는 핵심 기술입니다.</p>
+      </div>
+
+      <h3>시계열 데이터의 예시</h3>
+      <ul>
+        <li><strong>금융</strong>: 주가, 환율, 거래량</li>
+        <li><strong>제조</strong>: 생산량, 재고 수준, 설비 가동률</li>
+        <li><strong>유통</strong>: 매출, 고객 방문 수, 상품 판매량</li>
+        <li><strong>에너지</strong>: 전력 소비량, 온도, 습도</li>
+      </ul>
+    </section>
+
+    <section class="post-section" id="time-series-characteristics">
+      <h2>📊 시계열 데이터의 특성</h2>
+      <p>시계열 데이터는 일반적인 데이터와 다른 고유한 특성을 가지고 있습니다.</p>
+      
+      <div class="architecture-diagram">
+        <h3>🔄 시계열 데이터의 구성 요소</h3>
+        <div class="resource-types">
+          <div class="layer">
+            <div class="layer-header">
+              <h4>📈 Trend (추세)</h4>
+            </div>
+            <div class="layer-desc">
+              <p>장기적인 증가 또는 감소 패턴</p>
+              <ul>
+                <li>선형 추세: 일정한 비율로 변화</li>
+                <li>비선형 추세: 가속 또는 감속하는 변화</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="layer">
+            <div class="layer-header">
+              <h4>🌊 Seasonality (계절성)</h4>
+            </div>
+            <div class="layer-desc">
+              <p>일정한 주기로 반복되는 패턴</p>
+              <ul>
+                <li>연간 계절성: 계절별 변화</li>
+                <li>월간 계절성: 월별 변화</li>
+                <li>주간 계절성: 요일별 변화</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="layer">
+            <div class="layer-header">
+              <h4>📊 Cyclical (순환성)</h4>
+            </div>
+            <div class="layer-desc">
+              <p>불규칙한 주기로 반복되는 패턴</p>
+              <ul>
+                <li>경기 순환: 경제 상황에 따른 변화</li>
+                <li>업계 순환: 산업 특성에 따른 변화</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="layer">
+            <div class="layer-header">
+              <h4>🎲 Random (무작위성)</h4>
+            </div>
+            <div class="layer-desc">
+              <p>예측 불가능한 랜덤한 변동</p>
+              <ul>
+                <li>측정 오차</li>
+                <li>외부 충격</li>
+                <li>예측 불가능한 이벤트</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="post-section" id="traditional-methods">
+      <h2>🏛️ 전통적 통계 방법</h2>
+      <p>시계열 예측의 기초가 되는 전통적인 통계적 방법들을 살펴보겠습니다.</p>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h4>Moving Average (이동평균)</h4>
+          <p>최근 N개 데이터의 평균을 사용하여 다음 값을 예측하는 방법</p>
+          <ul>
+            <li>단순 이동평균 (SMA)</li>
+            <li>가중 이동평균 (WMA)</li>
+            <li>지수 이동평균 (EMA)</li>
+          </ul>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <h4>Exponential Smoothing</h4>
+          <p>최근 데이터에 더 높은 가중치를 부여하는 방법</p>
+          <ul>
+            <li>단순 지수평활 (SES)</li>
+            <li>홀트 지수평활 (Holt)</li>
+            <li>윈터스 지수평활 (Winters)</li>
+          </ul>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">📈</div>
+          <h4>Regression Models</h4>
+          <p>시간을 독립변수로 하여 선형 또는 비선형 관계를 모델링</p>
+          <ul>
+            <li>선형 회귀</li>
+            <li>다항 회귀</li>
+            <li>비선형 회귀</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="post-section" id="arima-models">
+      <h2>🔢 ARIMA 모델</h2>
+      <p>ARIMA(AutoRegressive Integrated Moving Average)는 시계열 예측에서 가장 널리 사용되는 전통적 모델입니다.</p>
+      
+      <div class="info-box">
+        <h4>💡 ARIMA 모델의 구성</h4>
+        <p>ARIMA(p,d,q)는 세 개의 파라미터로 구성됩니다:</p>
+        <ul>
+          <li><strong>p (AR)</strong>: 자기회귀 차수</li>
+          <li><strong>d (I)</strong>: 차분 차수</li>
+          <li><strong>q (MA)</strong>: 이동평균 차수</li>
+        </ul>
+      </div>
+
+      <h3>ARIMA 모델의 수학적 표현</h3>
+      <div class="code-block">
+        <pre><code>ARIMA(p,d,q) 모델:
+
+(1 - φ₁B - φ₂B² - ... - φₚBᵖ)(1 - B)ᵈYₜ = 
+(1 - θ₁B - θ₂B² - ... - θqBᵠ)εₜ
+
+여기서:
+- Yₜ: 시계열 데이터
+- B: 후진 이동 연산자
+- φ: AR 계수
+- θ: MA 계수
+- εₜ: 백색잡음
+- d: 차분 차수</code></pre>
+      </div>
+
+      <h3>ARIMA 모델의 장단점</h3>
+      <div class="comparison-table">
+        <table>
+          <thead>
+            <tr>
+              <th>장점</th>
+              <th>단점</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <ul>
+                  <li>수학적으로 견고함</li>
+                  <li>해석이 용이함</li>
+                  <li>예측 구간 제공</li>
+                  <li>계절성 처리 가능 (SARIMA)</li>
+                </ul>
+              </td>
+              <td>
+                <ul>
+                  <li>선형성 가정</li>
+                  <li>정상성 요구</li>
+                  <li>파라미터 튜닝 복잡</li>
+                  <li>비선형 패턴 처리 한계</li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="post-section" id="prophet-introduction">
+      <h2>🌟 Prophet의 등장</h2>
+      <p>Facebook에서 개발한 Prophet은 전통적 방법의 한계를 극복하고 시계열 예측을 대중화한 혁신적인 도구입니다.</p>
+      
+      <div class="warning-box">
+        <h4>⚠️ 전통적 방법의 한계</h4>
+        <p>ARIMA 모델은 복잡한 파라미터 튜닝과 정상성 가정 등으로 인해 실무 적용이 어려웠습니다.</p>
+      </div>
+
+      <h3>Prophet의 핵심 특징</h3>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h4>자동화된 모델링</h4>
+          <p>복잡한 파라미터 튜닝 없이도 높은 성능 달성</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">📅</div>
+          <h4>계절성 자동 처리</h4>
+          <p>연간, 주간, 일간 계절성을 자동으로 감지하고 모델링</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <h4>유연한 추세 모델링</h4>
+          <p>선형, 로그, S자 곡선 등 다양한 추세 패턴 지원</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h4>외생변수 지원</h4>
+          <p>휴일, 이벤트 등 외부 요인을 모델에 반영</p>
+        </div>
+      </div>
+
+      <h3>Prophet 모델의 수학적 구조</h3>
+      <div class="code-block">
+        <pre><code>Prophet 모델:
+
+y(t) = g(t) + s(t) + h(t) + εₜ
+
+여기서:
+- g(t): 추세 함수 (trend)
+- s(t): 계절성 함수 (seasonality)
+- h(t): 휴일 함수 (holidays)
+- εₜ: 오차항
+
+추세 함수 g(t)는 다음 중 하나:
+1. Linear: g(t) = kt + m
+2. Logistic: g(t) = C / (1 + exp(-k(t - m)))
+3. Flat: g(t) = m</code></pre>
+      </div>
+    </section>
+
+    <section class="post-section" id="practical-implementation">
+      <h2>💻 실습 구현</h2>
+      <p>ARIMA와 Prophet을 실제로 구현해보겠습니다.</p>
+      
+      <h3>1. ARIMA 모델 구현</h3>
+      <div class="code-block">
+        <pre><code>import pandas as pd
+import numpy as np
+from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.stattools import adfuller
+import matplotlib.pyplot as plt
+
+# 데이터 로드
+df = pd.read_csv('time_series_data.csv')
+df['date'] = pd.to_datetime(df['date'])
+df.set_index('date', inplace=True)
+
+# 정상성 검정
+def check_stationarity(data):
+    result = adfuller(data)
+    print(f'ADF Statistic: {result[0]:.4f}')
+    print(f'p-value: {result[1]:.4f}')
+    return result[1] < 0.05
+
+# 차분을 통한 정상화
+def make_stationary(data, max_diff=3):
+    for i in range(max_diff):
+        if check_stationarity(data):
+            return data, i
+        data = data.diff().dropna()
+    return data, max_diff
+
+# ARIMA 모델 학습
+def fit_arima(data, order=(1,1,1)):
+    model = ARIMA(data, order=order)
+    fitted_model = model.fit()
+    return fitted_model
+
+# 예측
+def predict_arima(model, steps=12):
+    forecast = model.forecast(steps=steps)
+    return forecast
+
+# 사용 예시
+if check_stationarity(df['value']):
+    print("데이터가 정상적입니다.")
+else:
+    print("데이터를 정상화해야 합니다.")
+    df['value'], diff_order = make_stationary(df['value'])
+    
+# ARIMA 모델 학습
+arima_model = fit_arima(df['value'], order=(1,1,1))
+forecast = predict_arima(arima_model, steps=12)
+print(f"예측값: {forecast}")</code></pre>
+      </div>
+
+      <h3>2. Prophet 모델 구현</h3>
+      <div class="code-block">
+        <pre><code>from fbprophet import Prophet
+import pandas as pd
+
+# Prophet용 데이터 준비
+def prepare_prophet_data(df):
+    prophet_df = df.reset_index()
+    prophet_df.columns = ['ds', 'y']  # Prophet은 'ds'와 'y' 컬럼 필요
+    return prophet_df
+
+# Prophet 모델 학습
+def fit_prophet(data, seasonality_mode='additive'):
+    model = Prophet(
+        seasonality_mode=seasonality_mode,
+        yearly_seasonality=True,
+        weekly_seasonality=True,
+        daily_seasonality=False,
+        changepoint_prior_scale=0.05
+    )
+    
+    # 외생변수 추가 (휴일 등)
+    # model.add_country_holidays(country_name='KR')
+    
+    model.fit(data)
+    return model
+
+# 예측
+def predict_prophet(model, periods=12):
+    future = model.make_future_dataframe(periods=periods)
+    forecast = model.predict(future)
+    return forecast
+
+# 시각화
+def plot_prophet_forecast(model, forecast):
+    fig = model.plot(forecast)
+    model.plot_components(forecast)
+    plt.show()
+
+# 사용 예시
+prophet_df = prepare_prophet_data(df)
+prophet_model = fit_prophet(prophet_df)
+forecast = predict_prophet(prophet_model, periods=12)
+
+# 결과 확인
+print("예측 결과:")
+print(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(12))
+
+# 시각화
+plot_prophet_forecast(prophet_model, forecast)</code></pre>
+      </div>
+    </section>
+
+    <section class="post-section" id="hands-on-practice">
+      <h2>🛠️ 따라하기 실습</h2>
+      <p>이제 실제 데이터로 ARIMA와 Prophet을 직접 구현해보겠습니다!</p>
+      
+      <div class="info-box">
+        <h4>💡 실습 환경 준비</h4>
+        <p>Jupyter Notebook이나 Google Colab에서 다음 라이브러리들을 설치해주세요:</p>
+        <div class="code-block">
+          <pre><code>!pip install pandas numpy matplotlib seaborn statsmodels fbprophet scikit-learn</code></pre>
+        </div>
+      </div>
+
+      <h3>1단계: 샘플 데이터 생성</h3>
+      <p>실습을 위한 시계열 데이터를 생성해보겠습니다.</p>
+      <div class="code-block">
+        <pre><code>import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from datetime import datetime, timedelta
+
+# 시계열 데이터 생성 함수
+def generate_sample_data(n_days=1000):
+    """트렌드, 계절성, 노이즈가 포함된 시계열 데이터 생성"""
+    
+    # 날짜 범위 생성
+    start_date = datetime(2020, 1, 1)
+    dates = [start_date + timedelta(days=i) for i in range(n_days)]
+    
+    # 트렌드 (선형 증가)
+    trend = np.linspace(100, 200, n_days)
+    
+    # 계절성 (연간 + 주간)
+    annual_seasonality = 20 * np.sin(2 * np.pi * np.arange(n_days) / 365.25)
+    weekly_seasonality = 5 * np.sin(2 * np.pi * np.arange(n_days) / 7)
+    
+    # 노이즈
+    noise = np.random.normal(0, 10, n_days)
+    
+    # 최종 데이터
+    values = trend + annual_seasonality + weekly_seasonality + noise
+    
+    # DataFrame 생성
+    df = pd.DataFrame({
+        'date': dates,
+        'value': values
+    })
+    
+    return df
+
+# 데이터 생성 및 확인
+df = generate_sample_data()
+print("생성된 데이터:")
+print(df.head())
+print(f"\n데이터 형태: {df.shape}")
+print(f"날짜 범위: {df['date'].min()} ~ {df['date'].max()}")
+
+# 데이터 시각화
+plt.figure(figsize=(15, 6))
+plt.plot(df['date'], df['value'])
+plt.title('생성된 시계열 데이터')
+plt.xlabel('날짜')
+plt.ylabel('값')
+plt.grid(True, alpha=0.3)
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+# 데이터 통계 정보
+print("\n데이터 통계:")
+print(df['value'].describe())</code></pre>
+      </div>
+
+      <h3>2단계: ARIMA 모델 실습</h3>
+      <p>ARIMA 모델을 단계별로 구현해보겠습니다.</p>
+      <div class="code-block">
+        <pre><code>from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+# 1. 데이터 정상성 검정
+def check_stationarity(data, title="데이터"):
+    """ADF 검정을 통한 정상성 확인"""
+    print(f"=== {title} 정상성 검정 ===")
+    result = adfuller(data)
+    
+    print(f'ADF Statistic: {result[0]:.4f}')
+    print(f'p-value: {result[1]:.4f}')
+    print(f'Critical values:')
+    for key, value in result[4].items():
+        print(f'\t{key}: {value:.3f}')
+    
+    is_stationary = result[1] < 0.05
+    print(f'정상성 여부: {"정상적" if is_stationary else "비정상적"}')
+    print()
+    
+    return is_stationary
+
+# 2. 원본 데이터 정상성 검정
+print("원본 데이터 정상성 검정")
+is_original_stationary = check_stationarity(df['value'], "원본 데이터")
+
+# 3. 차분을 통한 정상화
+def make_stationary(data, max_diff=3):
+    """차분을 통한 정상화"""
+    diff_data = data.copy()
+    diff_order = 0
+    
+    for i in range(max_diff):
+        if check_stationarity(diff_data, f"{i+1}차 차분"):
+            return diff_data, i + 1
+        
+        diff_data = diff_data.diff().dropna()
+        diff_order += 1
+    
+    return diff_data, diff_order
+
+# 차분 적용
+if not is_original_stationary:
+    print("차분을 통한 정상화 수행")
+    stationary_data, diff_order = make_stationary(df['value'])
+    print(f"적용된 차분 차수: {diff_order}")
+else:
+    stationary_data = df['value']
+    diff_order = 0
+
+# 4. ACF, PACF 플롯으로 파라미터 결정
+fig, axes = plt.subplots(2, 1, figsize=(15, 8))
+
+# ACF (자기상관함수)
+plot_acf(stationary_data, ax=axes[0], lags=40)
+axes[0].set_title('ACF (자기상관함수)')
+
+# PACF (부분자기상관함수)
+plot_pacf(stationary_data, ax=axes[1], lags=40)
+axes[0].set_title('PACF (부분자기상관함수)')
+
+plt.tight_layout()
+plt.show()
+
+# 5. ARIMA 모델 학습
+def fit_arima(data, order, diff_order=0):
+    """ARIMA 모델 학습"""
+    try:
+        # 차분이 적용된 경우 order에서 d=0으로 설정
+        if diff_order > 0:
+            model_order = (order[0], 0, order[2])
+        else:
+            model_order = order
+            
+        model = ARIMA(data, order=model_order)
+        fitted_model = model.fit()
+        return fitted_model
+    except Exception as e:
+        print(f"ARIMA 모델 학습 실패: {e}")
+        return None
+
+# 여러 ARIMA 모델 시도
+arima_orders = [(1,1,1), (2,1,2), (1,1,2), (2,1,1)]
+best_aic = float('inf')
+best_model = None
+best_order = None
+
+print("=== ARIMA 모델 비교 ===")
+for order in arima_orders:
+    try:
+        model = fit_arima(df['value'], order, diff_order)
+        if model is not None:
+            aic = model.aic
+            print(f"ARIMA{order}: AIC = {aic:.2f}")
+            
+            if aic < best_aic:
+                best_aic = aic
+                best_model = model
+                best_order = order
+    except:
+        print(f"ARIMA{order}: 학습 실패")
+
+print(f"\n최적 모델: ARIMA{best_order} (AIC: {best_aic:.2f})")
+
+# 6. 최적 모델로 예측
+if best_model is not None:
+    # 학습 데이터와 테스트 데이터 분리
+    train_size = int(len(df) * 0.8)
+    train_data = df['value'][:train_size]
+    test_data = df['value'][train_size:]
+    
+    # 모델 재학습 (학습 데이터만 사용)
+    final_model = fit_arima(train_data, best_order, diff_order)
+    
+    # 예측
+    forecast_steps = len(test_data)
+    forecast = final_model.forecast(steps=forecast_steps)
+    
+    # 결과 시각화
+    plt.figure(figsize=(15, 6))
+    plt.plot(df['date'][:train_size], train_data, label='학습 데이터', color='blue')
+    plt.plot(df['date'][train_size:], test_data, label='실제 테스트 데이터', color='green')
+    plt.plot(df['date'][train_size:], forecast, label='ARIMA 예측', color='red', linestyle='--')
+    
+    plt.title(f'ARIMA{best_order} 모델 예측 결과')
+    plt.xlabel('날짜')
+    plt.ylabel('값')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+    
+    # 성능 평가
+    from sklearn.metrics import mean_absolute_error, mean_squared_error
+    mae = mean_absolute_error(test_data, forecast)
+    rmse = np.sqrt(mean_squared_error(test_data, forecast))
+    
+    print(f"\n=== ARIMA 모델 성능 평가 ===")
+    print(f"MAE: {mae:.2f}")
+    print(f"RMSE: {rmse:.2f}")
+else:
+    print("적절한 ARIMA 모델을 찾지 못했습니다.")</code></pre>
+      </div>
+
+      <h3>3단계: Prophet 모델 실습</h3>
+      <p>Prophet 모델을 구현하고 ARIMA와 비교해보겠습니다.</p>
+      <div class="code-block">
+        <pre><code>from fbprophet import Prophet
+from fbprophet.plot import plot_plotly, plot_components_plotly
+import plotly.graph_objects as go
+
+# 1. Prophet용 데이터 준비
+def prepare_prophet_data(df):
+    """Prophet 모델용 데이터 형식으로 변환"""
+    prophet_df = df.copy()
+    prophet_df.columns = ['ds', 'y']  # Prophet은 'ds'와 'y' 컬럼 필요
+    return prophet_df
+
+# 데이터 변환
+prophet_df = prepare_prophet_data(df)
+print("Prophet 데이터 형식:")
+print(prophet_df.head())
+
+# 2. Prophet 모델 학습
+def fit_prophet(data, seasonality_mode='additive'):
+    """Prophet 모델 학습"""
+    model = Prophet(
+        seasonality_mode=seasonality_mode,
+        yearly_seasonality=True,      # 연간 계절성
+        weekly_seasonality=True,      # 주간 계절성
+        daily_seasonality=False,      # 일간 계절성 (데이터가 일간이므로)
+        changepoint_prior_scale=0.05, # 추세 변화점 유연성
+        seasonality_prior_scale=10.0, # 계절성 강도
+        holidays_prior_scale=10.0     # 휴일 효과 강도
+    )
+    
+    # 한국 휴일 추가 (선택사항)
+    try:
+        model.add_country_holidays(country_name='KR')
+        print("한국 휴일 정보가 추가되었습니다.")
+    except:
+        print("휴일 정보 추가를 건너뜁니다.")
+    
+    # 모델 학습
+    model.fit(data)
+    return model
+
+# 모델 학습
+print("\nProphet 모델 학습 중...")
+prophet_model = fit_prophet(prophet_df)
+print("Prophet 모델 학습 완료!")
+
+# 3. 예측 수행
+def predict_prophet(model, periods=12):
+    """Prophet 모델로 예측"""
+    future = model.make_future_dataframe(periods=periods)
+    forecast = model.predict(future)
+    return forecast
+
+# 예측
+forecast_steps = len(test_data) if 'test_data' in locals() else 12
+prophet_forecast = predict_prophet(prophet_model, periods=forecast_steps)
+
+print("\nProphet 예측 결과:")
+print(prophet_forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_steps))
+
+# 4. Prophet 예측 결과 시각화
+fig = prophet_model.plot(prophet_forecast)
+plt.title('Prophet 모델 예측 결과')
+plt.show()
+
+# 5. Prophet 모델 구성 요소 분석
+fig2 = prophet_model.plot_components(prophet_forecast)
+plt.show()
+
+# 6. ARIMA와 Prophet 비교 (테스트 데이터가 있는 경우)
+if 'test_data' in locals() and 'forecast' in locals():
+    # Prophet 예측값 추출 (테스트 기간에 해당하는 부분)
+    prophet_test_forecast = prophet_forecast[['ds', 'yhat']].tail(forecast_steps)
+    prophet_test_forecast.set_index('ds', inplace=True)
+    
+    # 성능 비교
+    prophet_mae = mean_absolute_error(test_data, prophet_test_forecast['yhat'])
+    prophet_rmse = np.sqrt(mean_squared_error(test_data, prophet_test_forecast['yhat']))
+    
+    print(f"\n=== 모델 성능 비교 ===")
+    print(f"ARIMA{best_order}:")
+    print(f"  MAE: {mae:.2f}")
+    print(f"  RMSE: {rmse:.2f}")
+    print(f"\nProphet:")
+    print(f"  MAE: {prophet_mae:.2f}")
+    print(f"  RMSE: {prophet_rmse:.2f}")
+    
+    # 시각적 비교
+    plt.figure(figsize=(15, 6))
+    plt.plot(df['date'][:train_size], train_data, label='학습 데이터', color='blue')
+    plt.plot(df['date'][train_size:], test_data, label='실제 테스트 데이터', color='green')
+    plt.plot(df['date'][train_size:], forecast, label='ARIMA 예측', color='red', linestyle='--')
+    plt.plot(prophet_test_forecast.index, prophet_test_forecast['yhat'], 
+             label='Prophet 예측', color='orange', linestyle='--')
+    
+    plt.title('ARIMA vs Prophet 모델 비교')
+    plt.xlabel('날짜')
+    plt.ylabel('값')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
+# 7. Prophet 모델의 계절성 분석
+print("\n=== Prophet 모델 계절성 분석 ===")
+print("연간 계절성:", prophet_model.yearly_seasonality)
+print("주간 계절성:", prophet_model.weekly_seasonality)
+print("일간 계절성:", prophet_model.daily_seasonality)
+
+# 8. 향후 예측
+future_dates = prophet_model.make_future_dataframe(periods=30)
+future_forecast = prophet_model.predict(future_dates)
+
+print(f"\n향후 30일 예측:")
+print(future_forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(30))
+
+# 향후 예측 시각화
+fig3 = prophet_model.plot(future_forecast)
+plt.title('향후 30일 예측')
+plt.show()</code></pre>
+      </div>
+
+      <h3>4단계: 실습 결과 분석 및 정리</h3>
+      <p>실습을 통해 얻은 결과를 분석하고 정리해보겠습니다.</p>
+      <div class="code-block">
+        <pre><code># 실습 결과 요약 및 분석
+def analyze_results():
+    """실습 결과 분석 및 요약"""
+    print("=== 시계열 예측 실습 결과 분석 ===")
+    print()
+    
+    print("1. 데이터 특성:")
+    print(f"   - 데이터 크기: {len(df)} 개")
+    print(f"   - 날짜 범위: {df['date'].min().strftime('%Y-%m-%d')} ~ {df['date'].max().strftime('%Y-%m-%d')}")
+    print(f"   - 평균값: {df['value'].mean():.2f}")
+    print(f"   - 표준편차: {df['value'].std():.2f}")
+    print()
+    
+    print("2. ARIMA 모델:")
+    if 'best_order' in locals():
+        print(f"   - 최적 모델: ARIMA{best_order}")
+        print(f"   - AIC: {best_aic:.2f}")
+        if 'mae' in locals():
+            print(f"   - MAE: {mae:.2f}")
+            print(f"   - RMSE: {rmse:.2f}")
+    else:
+        print("   - 모델 학습 실패")
+    print()
+    
+    print("3. Prophet 모델:")
+    print("   - 모델 학습: 성공")
+    if 'prophet_mae' in locals():
+        print(f"   - MAE: {prophet_mae:.2f}")
+        print(f"   - RMSE: {prophet_rmse:.2f}")
+    print()
+    
+    print("4. 모델 비교:")
+    if 'mae' in locals() and 'prophet_mae' in locals():
+        if mae < prophet_mae:
+            print("   - ARIMA 모델이 더 나은 성능을 보임")
+        elif prophet_mae < mae:
+            print("   - Prophet 모델이 더 나은 성능을 보임")
+        else:
+            print("   - 두 모델의 성능이 비슷함")
+        
+        print(f"   - 성능 차이: {abs(mae - prophet_mae):.2f}")
+    print()
+    
+    print("5. 학습 포인트:")
+    print("   - 시계열 데이터의 정상성 검정의 중요성")
+    print("   - ARIMA 모델의 파라미터 선택 방법")
+    print("   - Prophet의 자동화된 모델링 장점")
+    print("   - 실제 데이터에서의 모델 성능 비교")
+
+# 결과 분석 실행
+analyze_results()
+
+# 추가 실습 제안
+print("\n=== 추가 실습 제안 ===")
+print("1. 다른 시계열 데이터로 실험해보기")
+print("2. 다양한 ARIMA 파라미터 조합 시도")
+print("3. Prophet의 계절성 파라미터 조정")
+print("4. 외생변수(휴일, 이벤트) 추가해보기")
+print("5. 모델 앙상블 기법 적용해보기")</code></pre>
+      </div>
+    </section>
+
+    <section class="post-section" id="comparison">
+      <h2>⚖️ 방법론 비교</h2>
+      <p>ARIMA와 Prophet의 성능과 특징을 비교해보겠습니다.</p>
+      
+      <div class="comparison-table">
+        <table>
+          <thead>
+            <tr>
+              <th>비교 항목</th>
+              <th>ARIMA</th>
+              <th>Prophet</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>사용 편의성</strong></td>
+              <td>복잡한 파라미터 튜닝 필요</td>
+              <td>자동화된 모델링</td>
+            </tr>
+            <tr>
+              <td><strong>계절성 처리</strong></td>
+              <td>SARIMA로 제한적 처리</td>
+              <td>다양한 계절성 자동 처리</td>
+            </tr>
+            <tr>
+              <td><strong>외생변수</strong></td>
+              <td>제한적</td>
+              <td>휴일, 이벤트 등 지원</td>
+            </tr>
+            <tr>
+              <td><strong>해석 가능성</strong></td>
+              <td>수학적으로 명확</td>
+              <td>직관적이지만 복잡</td>
+            </tr>
+            <tr>
+              <td><strong>계산 효율성</strong></td>
+              <td>빠름</td>
+              <td>상대적으로 느림</td>
+            </tr>
+            <tr>
+              <td><strong>적용 범위</strong></td>
+              <td>정상 시계열</td>
+              <td>다양한 패턴</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>언제 어떤 방법을 사용할까?</h3>
+      <div class="use-case">
+        <h4>🔄 ARIMA를 사용하는 경우</h4>
+        <ul>
+          <li>데이터가 정상적이고 선형적 패턴을 가질 때</li>
+          <li>수학적 해석이 중요한 경우</li>
+          <li>빠른 예측이 필요한 경우</li>
+          <li>전통적 통계 방법이 요구되는 경우</li>
+        </ul>
+      </div>
+      
+      <div class="use-case">
+        <h4>🌟 Prophet을 사용하는 경우</h4>
+        <ul>
+          <li>복잡한 계절성 패턴이 있을 때</li>
+          <li>외생변수(휴일, 이벤트)가 중요한 경우</li>
+          <li>자동화된 모델링이 필요한 경우</li>
+          <li>비즈니스 사용자가 쉽게 사용해야 하는 경우</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="post-section" id="next-steps">
+      <h2>🚀 다음 단계</h2>
+      <p>이제 시계열 예측의 기초를 다졌습니다. 다음 단계로 넘어가보겠습니다.</p>
+      
+      <div class="next-steps">
+        <div class="step-guide">
+          <h3>🔄 학습한 내용 정리</h3>
+          <ul>
+            <li>시계열 데이터의 4가지 구성 요소 이해</li>
+            <li>ARIMA 모델의 수학적 구조와 적용</li>
+            <li>Prophet의 혁신적 특징과 장점</li>
+            <li>두 방법론의 비교와 선택 기준</li>
+          </ul>
+        </div>
+        
+        <div class="prerequisites">
+          <h3>📋 다음 파트 준비사항</h3>
+          <ul>
+            <li>딥러닝 기초 개념 (LSTM, GRU)</li>
+            <li>PyTorch 또는 TensorFlow 기초</li>
+            <li>시계열 데이터 전처리 경험</li>
+            <li>모델 성능 평가 지표 이해</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="call-to-action">
+        <h3>📚 다음 파트로 이동</h3>
+        <p>Part 2에서는 딥러닝 기반 시계열 모델인 N-BEATS와 DeepAR에 대해 학습하겠습니다.</p>
+        
+        <div class="cta-buttons">
+          <a href="{{ site.baseurl }}/categories/data-ai/time-series-deep-learning/" class="btn btn-primary">
+            🧠 Part 2: 딥러닝의 등장
+          </a>
+          <a href="{{ site.baseurl }}/categories/data-ai/time-series-evolution-overview/" class="btn btn-secondary">
+            📖 시리즈 개요로 돌아가기
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+</article>

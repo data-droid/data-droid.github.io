@@ -1,0 +1,915 @@
+---
+layout: default
+lang: en
+title: "Part 1: Fundamentals of Time Series Forecasting - From ARIMA to Prophet"
+description: "Systematic guide to learn basic concepts of time series data, traditional statistical methods, and the emergence of Prophet"
+date: 2025-08-31
+author: Data Droid
+category: Data AI
+tags: [TimeSeriesForecasting, ARIMA, Prophet, Statistics, Python, TimeSeriesAnalysis]
+---
+
+<article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">{{ page.category }}</span>
+      <span class="post-date">{{ page.date | date: "%B %d, %Y" }}</span>
+      <span class="post-author">{{ page.author }}</span>
+    </div>
+    <h1 class="post-title">{{ page.title }}</h1>
+    <div class="post-tags">
+      {% for tag in page.tags %}
+        <span class="tag">{{ tag }}</span>
+      {% endfor %}
+    </div>
+  </header>
+
+  <div class="post-content">
+    <section class="post-section">
+      <h2>📖 Table of Contents</h2>
+      <ul class="toc">
+        <li><a href="#introduction">What is Time Series Forecasting?</a></li>
+        <li><a href="#time-series-characteristics">Time Series Data Characteristics</a></li>
+        <li><a href="#traditional-methods">Traditional Statistical Methods</a></li>
+        <li><a href="#arima-models">ARIMA Models</a></li>
+        <li><a href="#prophet-introduction">Introduction to Prophet</a></li>
+        <li><a href="#practical-implementation">Practical Implementation</a></li>
+        <li><a href="#hands-on-practice">Hands-on Practice</a></li>
+        <li><a href="#comparison">Methodology Comparison</a></li>
+        <li><a href="#next-steps">Next Steps</a></li>
+      </ul>
+    </section>
+
+    <section class="post-section" id="introduction">
+      <h2>🚀 What is Time Series Forecasting?</h2>
+      <p>Time series forecasting is a technique that analyzes data that changes over time to predict future values. This plays a crucial role in various fields such as finance, manufacturing, and retail.</p>
+      
+      <div class="info-box">
+        <h4>💡 Importance of Time Series Forecasting</h4>
+        <p>Time series forecasting goes beyond simple mathematical modeling and directly contributes to business decision-making and strategy formulation as a core technology.</p>
+      </div>
+
+      <h3>Examples of Time Series Data</h3>
+      <ul>
+        <li><strong>Finance</strong>: Stock prices, exchange rates, trading volume</li>
+        <li><strong>Manufacturing</strong>: Production volume, inventory levels, equipment utilization</li>
+        <li><strong>Retail</strong>: Sales, customer visits, product sales volume</li>
+        <li><strong>Energy</strong>: Power consumption, temperature, humidity</li>
+      </ul>
+    </section>
+
+    <section class="post-section" id="time-series-characteristics">
+      <h2>📊 Time Series Data Characteristics</h2>
+      <p>Time series data has unique characteristics that differ from general data.</p>
+      
+      <div class="architecture-diagram">
+        <h3>🔄 Components of Time Series Data</h3>
+        <div class="resource-types">
+          <div class="layer">
+            <div class="layer-header">
+              <h4>📈 Trend</h4>
+            </div>
+            <div class="layer-desc">
+              <p>Long-term increasing or decreasing patterns</p>
+              <ul>
+                <li>Linear trend: Changes at a constant rate</li>
+                <li>Non-linear trend: Accelerating or decelerating changes</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="layer">
+            <div class="layer-header">
+              <h4>🌊 Seasonality</h4>
+            </div>
+            <div class="layer-desc">
+              <p>Patterns that repeat at regular intervals</p>
+              <ul>
+                <li>Annual seasonality: Seasonal changes</li>
+                <li>Monthly seasonality: Monthly changes</li>
+                <li>Weekly seasonality: Day-of-week changes</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="layer">
+            <div class="layer-header">
+              <h4>📊 Cyclical</h4>
+            </div>
+            <div class="layer-desc">
+              <p>Patterns that repeat at irregular intervals</p>
+              <ul>
+                <li>Business cycles: Changes due to economic conditions</li>
+                <li>Industry cycles: Changes due to industry characteristics</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="layer">
+            <div class="layer-header">
+              <h4>🎲 Random</h4>
+            </div>
+            <div class="layer-desc">
+              <p>Unpredictable random variations</p>
+              <ul>
+                <li>Measurement errors</li>
+                <li>External shocks</li>
+                <li>Unpredictable events</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="post-section" id="traditional-methods">
+      <h2>🏛️ Traditional Statistical Methods</h2>
+      <p>Let's examine the traditional statistical methods that form the foundation of time series forecasting.</p>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h4>Moving Average</h4>
+          <p>Method of predicting the next value using the average of the most recent N data points</p>
+          <ul>
+            <li>Simple Moving Average (SMA)</li>
+            <li>Weighted Moving Average (WMA)</li>
+            <li>Exponential Moving Average (EMA)</li>
+          </ul>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <h4>Exponential Smoothing</h4>
+          <p>Method that gives higher weight to recent data</p>
+          <ul>
+            <li>Simple Exponential Smoothing (SES)</li>
+            <li>Holt Exponential Smoothing</li>
+            <li>Winters Exponential Smoothing</li>
+          </ul>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">📈</div>
+          <h4>Regression Models</h4>
+          <p>Modeling linear or non-linear relationships using time as an independent variable</p>
+          <ul>
+            <li>Linear regression</li>
+            <li>Polynomial regression</li>
+            <li>Non-linear regression</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="post-section" id="arima-models">
+      <h2>🔢 ARIMA Models</h2>
+      <p>ARIMA (AutoRegressive Integrated Moving Average) is the most widely used traditional model in time series forecasting.</p>
+      
+      <div class="info-box">
+        <h4>💡 ARIMA Model Components</h4>
+        <p>ARIMA(p,d,q) consists of three parameters:</p>
+        <ul>
+          <li><strong>p (AR)</strong>: Autoregressive order</li>
+          <li><strong>d (I)</strong>: Integration order</li>
+          <li><strong>q (MA)</strong>: Moving average order</li>
+        </ul>
+      </div>
+
+      <h3>Mathematical Expression of ARIMA Model</h3>
+      <div class="code-block">
+        <pre><code>ARIMA(p,d,q) Model:
+
+(1 - φ₁B - φ₂B² - ... - φₚBᵖ)(1 - B)ᵈYₜ = 
+(1 - θ₁B - θ₂B² - ... - θqBᵠ)εₜ
+
+Where:
+- Yₜ: Time series data
+- B: Backward shift operator
+- φ: AR coefficients
+- θ: MA coefficients
+- εₜ: White noise
+- d: Integration order</code></pre>
+      </div>
+
+      <h3>Pros and Cons of ARIMA Models</h3>
+      <div class="comparison-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Pros</th>
+              <th>Cons</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <ul>
+                  <li>Mathematically robust</li>
+                  <li>Easy to interpret</li>
+                  <li>Provides prediction intervals</li>
+                  <li>Can handle seasonality (SARIMA)</li>
+                </ul>
+              </td>
+              <td>
+                <ul>
+                  <li>Linearity assumption</li>
+                  <li>Requires stationarity</li>
+                  <li>Complex parameter tuning</li>
+                  <li>Limited in handling non-linear patterns</li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="post-section" id="prophet-introduction">
+      <h2>🌟 Introduction to Prophet</h2>
+      <p>Prophet, developed by Facebook, is an innovative tool that overcomes the limitations of traditional methods and democratizes time series forecasting.</p>
+      
+      <div class="warning-box">
+        <h4>⚠️ Limitations of Traditional Methods</h4>
+        <p>ARIMA models were difficult to apply in practice due to complex parameter tuning and stationarity assumptions.</p>
+      </div>
+
+      <h3>Core Features of Prophet</h3>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h4>Automated Modeling</h4>
+          <p>Achieves high performance without complex parameter tuning</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">📅</div>
+          <h4>Automatic Seasonality Handling</h4>
+          <p>Automatically detects and models annual, weekly, and daily seasonality</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <h4>Flexible Trend Modeling</h4>
+          <p>Supports various trend patterns: linear, logarithmic, S-curve, etc.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h4>Exogenous Variable Support</h4>
+          <p>Incorporates external factors like holidays and events into the model</p>
+        </div>
+      </div>
+
+      <h3>Mathematical Structure of Prophet Model</h3>
+      <div class="code-block">
+        <pre><code>Prophet Model:
+
+y(t) = g(t) + s(t) + h(t) + εₜ
+
+Where:
+- g(t): Trend function
+- s(t): Seasonality function
+- h(t): Holiday function
+- εₜ: Error term
+
+Trend function g(t) can be one of:
+1. Linear: g(t) = kt + m
+2. Logistic: g(t) = C / (1 + exp(-k(t - m)))
+3. Flat: g(t) = m</code></pre>
+      </div>
+    </section>
+
+    <section class="post-section" id="practical-implementation">
+      <h2>💻 Practical Implementation</h2>
+      <p>Let's implement ARIMA and Prophet in practice.</p>
+      
+      <h3>1. ARIMA Model Implementation</h3>
+      <div class="code-block">
+        <pre><code>import pandas as pd
+import numpy as np
+from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.stattools import adfuller
+import matplotlib.pyplot as plt
+
+# Data loading
+df = pd.read_csv('time_series_data.csv')
+df['date'] = pd.to_datetime(df['date'])
+df.set_index('date', inplace=True)
+
+# Stationarity test
+def check_stationarity(data):
+    result = adfuller(data)
+    print(f'ADF Statistic: {result[0]:.4f}')
+    print(f'p-value: {result[1]:.4f}')
+    return result[1] < 0.05
+
+# Stationarization through differencing
+def make_stationary(data, max_diff=3):
+    for i in range(max_diff):
+        if check_stationarity(data):
+            return data, i
+        data = data.diff().dropna()
+    return data, max_diff
+
+# ARIMA model training
+def fit_arima(data, order=(1,1,1)):
+    model = ARIMA(data, order=order)
+    fitted_model = model.fit()
+    return fitted_model
+
+# Prediction
+def predict_arima(model, steps=12):
+    forecast = model.forecast(steps=steps)
+    return forecast
+
+# Usage example
+if check_stationarity(df['value']):
+    print("Data is stationary.")
+else:
+    print("Data needs to be stationarized.")
+    df['value'], diff_order = make_stationary(df['value'])
+    
+# ARIMA model training
+arima_model = fit_arima(df['value'], order=(1,1,1))
+forecast = predict_arima(arima_model, steps=12)
+print(f"Forecast: {forecast}")</code></pre>
+      </div>
+
+      <h3>2. Prophet Model Implementation</h3>
+      <div class="code-block">
+        <pre><code>from fbprophet import Prophet
+import pandas as pd
+
+# Prophet data preparation
+def prepare_prophet_data(df):
+    prophet_df = df.reset_index()
+    prophet_df.columns = ['ds', 'y']  # Prophet requires 'ds' and 'y' columns
+    return prophet_df
+
+# Prophet model training
+def fit_prophet(data, seasonality_mode='additive'):
+    model = Prophet(
+        seasonality_mode=seasonality_mode,
+        yearly_seasonality=True,
+        weekly_seasonality=True,
+        daily_seasonality=False,
+        changepoint_prior_scale=0.05
+    )
+    
+    # Add exogenous variables (holidays, etc.)
+    # model.add_country_holidays(country_name='US')
+    
+    model.fit(data)
+    return model
+
+# Prediction
+def predict_prophet(model, periods=12):
+    future = model.make_future_dataframe(periods=periods)
+    forecast = model.predict(future)
+    return forecast
+
+# Visualization
+def plot_prophet_forecast(model, forecast):
+    fig = model.plot(forecast)
+    model.plot_components(forecast)
+    plt.show()
+
+# Usage example
+prophet_df = prepare_prophet_data(df)
+prophet_model = fit_prophet(prophet_df)
+forecast = predict_prophet(prophet_model, periods=12)
+
+# Check results
+print("Forecast results:")
+print(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(12))
+
+# Visualization
+plot_prophet_forecast(prophet_model, forecast)</code></pre>
+      </div>
+    </section>
+
+    <section class="post-section" id="hands-on-practice">
+      <h2>🛠️ Hands-on Practice</h2>
+      <p>Now let's implement ARIMA and Prophet with real data!</p>
+      
+      <div class="info-box">
+        <h4>💡 Practice Environment Setup</h4>
+        <p>Please install the following libraries in Jupyter Notebook or Google Colab:</p>
+        <div class="code-block">
+          <pre><code>!pip install pandas numpy matplotlib seaborn statsmodels fbprophet scikit-learn</code></pre>
+        </div>
+      </div>
+
+      <h3>Step 1: Generate Sample Data</h3>
+      <p>Let's create time series data for practice.</p>
+      <div class="code-block">
+        <pre><code>import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from datetime import datetime, timedelta
+
+# Time series data generation function
+def generate_sample_data(n_days=1000):
+    """Generate time series data with trend, seasonality, and noise"""
+    
+    # Create date range
+    start_date = datetime(2020, 1, 1)
+    dates = [start_date + timedelta(days=i) for i in range(n_days)]
+    
+    # Trend (linear increase)
+    trend = np.linspace(100, 200, n_days)
+    
+    # Seasonality (annual + weekly)
+    annual_seasonality = 20 * np.sin(2 * np.pi * np.arange(n_days) / 365.25)
+    weekly_seasonality = 5 * np.sin(2 * np.pi * np.arange(n_days) / 7)
+    
+    # Noise
+    noise = np.random.normal(0, 10, n_days)
+    
+    # Final data
+    values = trend + annual_seasonality + weekly_seasonality + noise
+    
+    # Create DataFrame
+    df = pd.DataFrame({
+        'date': dates,
+        'value': values
+    })
+    
+    return df
+
+# Generate and check data
+df = generate_sample_data()
+print("Generated data:")
+print(df.head())
+print(f"\nData shape: {df.shape}")
+print(f"Date range: {df['date'].min()} ~ {df['date'].max()}")
+
+# Data visualization
+plt.figure(figsize=(15, 6))
+plt.plot(df['date'], df['value'])
+plt.title('Generated Time Series Data')
+plt.xlabel('Date')
+plt.ylabel('Value')
+plt.grid(True, alpha=0.3)
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+# Data statistics
+print("\nData statistics:")
+print(df['value'].describe())</code></pre>
+      </div>
+
+      <h3>Step 2: ARIMA Model Practice</h3>
+      <p>Let's implement ARIMA model step by step.</p>
+      <div class="code-block">
+        <pre><code>from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+# 1. Data stationarity test
+def check_stationarity(data, title="Data"):
+    """Check stationarity using ADF test"""
+    print(f"=== {title} Stationarity Test ===")
+    result = adfuller(data)
+    
+    print(f'ADF Statistic: {result[0]:.4f}')
+    print(f'p-value: {result[1]:.4f}')
+    print(f'Critical values:')
+    for key, value in result[4].items():
+        print(f'\t{key}: {value:.3f}')
+    
+    is_stationary = result[1] < 0.05
+    print(f'Stationarity: {"Stationary" if is_stationary else "Non-stationary"}')
+    print()
+    
+    return is_stationary
+
+# 2. Original data stationarity test
+print("Original data stationarity test")
+is_original_stationary = check_stationarity(df['value'], "Original data")
+
+# 3. Stationarization through differencing
+def make_stationary(data, max_diff=3):
+    """Stationarize through differencing"""
+    diff_data = data.copy()
+    diff_order = 0
+    
+    for i in range(max_diff):
+        if check_stationarity(diff_data, f"{i+1}st difference"):
+            return diff_data, i + 1
+        
+        diff_data = diff_data.diff().dropna()
+        diff_order += 1
+    
+    return diff_data, diff_order
+
+# Apply differencing
+if not is_original_stationary:
+    print("Performing stationarization through differencing")
+    stationary_data, diff_order = make_stationary(df['value'])
+    print(f"Applied difference order: {diff_order}")
+else:
+    stationary_data = df['value']
+    diff_order = 0
+
+# 4. ACF, PACF plots for parameter determination
+fig, axes = plt.subplots(2, 1, figsize=(15, 8))
+
+# ACF (Autocorrelation Function)
+plot_acf(stationary_data, ax=axes[0], lags=40)
+axes[0].set_title('ACF (Autocorrelation Function)')
+
+# PACF (Partial Autocorrelation Function)
+plot_pacf(stationary_data, ax=axes[1], lags=40)
+axes[1].set_title('PACF (Partial Autocorrelation Function)')
+
+plt.tight_layout()
+plt.show()
+
+# 5. ARIMA model training
+def fit_arima(data, order, diff_order=0):
+    """Train ARIMA model"""
+    try:
+        # If differencing is applied, set d=0 in order
+        if diff_order > 0:
+            model_order = (order[0], 0, order[2])
+        else:
+            model_order = order
+            
+        model = ARIMA(data, order=model_order)
+        fitted_model = model.fit()
+        return fitted_model
+    except Exception as e:
+        print(f"ARIMA model training failed: {e}")
+        return None
+
+# Try multiple ARIMA models
+arima_orders = [(1,1,1), (2,1,2), (1,1,2), (2,1,1)]
+best_aic = float('inf')
+best_model = None
+best_order = None
+
+print("=== ARIMA Model Comparison ===")
+for order in arima_orders:
+    try:
+        model = fit_arima(df['value'], order, diff_order)
+        if model is not None:
+            aic = model.aic
+            print(f"ARIMA{order}: AIC = {aic:.2f}")
+            
+            if aic < best_aic:
+                best_aic = aic
+                best_model = model
+                best_order = order
+    except:
+        print(f"ARIMA{order}: Training failed")
+
+print(f"\nBest model: ARIMA{best_order} (AIC: {best_aic:.2f})")
+
+# 6. Prediction with best model
+if best_model is not None:
+    # Split training and test data
+    train_size = int(len(df) * 0.8)
+    train_data = df['value'][:train_size]
+    test_data = df['value'][train_size:]
+    
+    # Retrain model (using only training data)
+    final_model = fit_arima(train_data, best_order, diff_order)
+    
+    # Prediction
+    forecast_steps = len(test_data)
+    forecast = final_model.forecast(steps=forecast_steps)
+    
+    # Result visualization
+    plt.figure(figsize=(15, 6))
+    plt.plot(df['date'][:train_size], train_data, label='Training Data', color='blue')
+    plt.plot(df['date'][train_size:], test_data, label='Actual Test Data', color='green')
+    plt.plot(df['date'][train_size:], forecast, label='ARIMA Forecast', color='red', linestyle='--')
+    
+    plt.title(f'ARIMA{best_order} Model Forecast Results')
+    plt.xlabel('Date')
+    plt.ylabel('Value')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+    
+    # Performance evaluation
+    from sklearn.metrics import mean_absolute_error, mean_squared_error
+    mae = mean_absolute_error(test_data, forecast)
+    rmse = np.sqrt(mean_squared_error(test_data, forecast))
+    
+    print(f"\n=== ARIMA Model Performance Evaluation ===")
+    print(f"MAE: {mae:.2f}")
+    print(f"RMSE: {rmse:.2f}")
+else:
+    print("Could not find appropriate ARIMA model.")</code></pre>
+      </div>
+
+      <h3>Step 3: Prophet Model Practice</h3>
+      <p>Let's implement Prophet model and compare it with ARIMA.</p>
+      <div class="code-block">
+        <pre><code>from fbprophet import Prophet
+from fbprophet.plot import plot_plotly, plot_components_plotly
+import plotly.graph_objects as go
+
+# 1. Prophet data preparation
+def prepare_prophet_data(df):
+    """Convert to Prophet model data format"""
+    prophet_df = df.copy()
+    prophet_df.columns = ['ds', 'y']  # Prophet requires 'ds' and 'y' columns
+    return prophet_df
+
+# Data conversion
+prophet_df = prepare_prophet_data(df)
+print("Prophet data format:")
+print(prophet_df.head())
+
+# 2. Prophet model training
+def fit_prophet(data, seasonality_mode='additive'):
+    """Train Prophet model"""
+    model = Prophet(
+        seasonality_mode=seasonality_mode,
+        yearly_seasonality=True,      # Annual seasonality
+        weekly_seasonality=True,      # Weekly seasonality
+        daily_seasonality=False,      # Daily seasonality (since data is daily)
+        changepoint_prior_scale=0.05, # Trend change point flexibility
+        seasonality_prior_scale=10.0, # Seasonality strength
+        holidays_prior_scale=10.0     # Holiday effect strength
+    )
+    
+    # Add US holidays (optional)
+    try:
+        model.add_country_holidays(country_name='US')
+        print("US holiday information has been added.")
+    except:
+        print("Skipping holiday information addition.")
+    
+    # Model training
+    model.fit(data)
+    return model
+
+# Model training
+print("\nTraining Prophet model...")
+prophet_model = fit_prophet(prophet_df)
+print("Prophet model training completed!")
+
+# 3. Prediction
+def predict_prophet(model, periods=12):
+    """Predict using Prophet model"""
+    future = model.make_future_dataframe(periods=periods)
+    forecast = model.predict(future)
+    return forecast
+
+# Prediction
+forecast_steps = len(test_data) if 'test_data' in locals() else 12
+prophet_forecast = predict_prophet(prophet_model, periods=forecast_steps)
+
+print("\nProphet forecast results:")
+print(prophet_forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_steps))
+
+# 4. Prophet forecast result visualization
+fig = prophet_model.plot(prophet_forecast)
+plt.title('Prophet Model Forecast Results')
+plt.show()
+
+# 5. Prophet model component analysis
+fig2 = prophet_model.plot_components(prophet_forecast)
+plt.show()
+
+# 6. ARIMA vs Prophet comparison (if test data exists)
+if 'test_data' in locals() and 'forecast' in locals():
+    # Extract Prophet forecast values (for test period)
+    prophet_test_forecast = prophet_forecast[['ds', 'yhat']].tail(forecast_steps)
+    prophet_test_forecast.set_index('ds', inplace=True)
+    
+    # Performance comparison
+    prophet_mae = mean_absolute_error(test_data, prophet_test_forecast['yhat'])
+    prophet_rmse = np.sqrt(mean_squared_error(test_data, prophet_test_forecast['yhat']))
+    
+    print(f"\n=== Model Performance Comparison ===")
+    print(f"ARIMA{best_order}:")
+    print(f"  MAE: {mae:.2f}")
+    print(f"  RMSE: {rmse:.2f}")
+    print(f"\nProphet:")
+    print(f"  MAE: {prophet_mae:.2f}")
+    print(f"  RMSE: {prophet_rmse:.2f}")
+    
+    # Visual comparison
+    plt.figure(figsize=(15, 6))
+    plt.plot(df['date'][:train_size], train_data, label='Training Data', color='blue')
+    plt.plot(df['date'][train_size:], test_data, label='Actual Test Data', color='green')
+    plt.plot(df['date'][train_size:], forecast, label='ARIMA Forecast', color='red', linestyle='--')
+    plt.plot(prophet_test_forecast.index, prophet_test_forecast['yhat'], 
+             label='Prophet Forecast', color='orange', linestyle='--')
+    
+    plt.title('ARIMA vs Prophet Model Comparison')
+    plt.xlabel('Date')
+    plt.ylabel('Value')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
+# 7. Prophet model seasonality analysis
+print("\n=== Prophet Model Seasonality Analysis ===")
+print("Annual seasonality:", prophet_model.yearly_seasonality)
+print("Weekly seasonality:", prophet_model.weekly_seasonality)
+print("Daily seasonality:", prophet_model.daily_seasonality)
+
+# 8. Future prediction
+future_dates = prophet_model.make_future_dataframe(periods=30)
+future_forecast = prophet_model.predict(future_dates)
+
+print(f"\nNext 30 days forecast:")
+print(future_forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(30))
+
+# Future forecast visualization
+fig3 = prophet_model.plot(future_forecast)
+plt.title('Next 30 Days Forecast')
+plt.show()</code></pre>
+      </div>
+
+      <h3>Step 4: Practice Result Analysis and Summary</h3>
+      <p>Let's analyze and summarize the results obtained through practice.</p>
+      <div class="code-block">
+        <pre><code># Practice result summary and analysis
+def analyze_results():
+    """Analyze and summarize practice results"""
+    print("=== Time Series Forecasting Practice Result Analysis ===")
+    print()
+    
+    print("1. Data Characteristics:")
+    print(f"   - Data size: {len(df)} points")
+    print(f"   - Date range: {df['date'].min().strftime('%Y-%m-%d')} ~ {df['date'].max().strftime('%Y-%m-%d')}")
+    print(f"   - Mean value: {df['value'].mean():.2f}")
+    print(f"   - Standard deviation: {df['value'].std():.2f}")
+    print()
+    
+    print("2. ARIMA Model:")
+    if 'best_order' in locals():
+        print(f"   - Best model: ARIMA{best_order}")
+        print(f"   - AIC: {best_aic:.2f}")
+        if 'mae' in locals():
+            print(f"   - MAE: {mae:.2f}")
+            print(f"   - RMSE: {rmse:.2f}")
+    else:
+        print("   - Model training failed")
+    print()
+    
+    print("3. Prophet Model:")
+    print("   - Model training: Success")
+    if 'prophet_mae' in locals():
+        print(f"   - MAE: {prophet_mae:.2f}")
+        print(f"   - RMSE: {prophet_rmse:.2f}")
+    print()
+    
+    print("4. Model Comparison:")
+    if 'mae' in locals() and 'prophet_mae' in locals():
+        if mae < prophet_mae:
+            print("   - ARIMA model shows better performance")
+        elif prophet_mae < mae:
+            print("   - Prophet model shows better performance")
+        else:
+            print("   - Both models show similar performance")
+        
+        print(f"   - Performance difference: {abs(mae - prophet_mae):.2f}")
+    print()
+    
+    print("5. Learning Points:")
+    print("   - Importance of stationarity testing in time series data")
+    print("   - ARIMA model parameter selection methods")
+    print("   - Advantages of Prophet's automated modeling")
+    print("   - Model performance comparison with real data")
+
+# Execute result analysis
+analyze_results()
+
+# Additional practice suggestions
+print("\n=== Additional Practice Suggestions ===")
+print("1. Experiment with different time series data")
+print("2. Try various ARIMA parameter combinations")
+print("3. Adjust Prophet seasonality parameters")
+print("4. Add exogenous variables (holidays, events)")
+print("5. Apply model ensemble techniques")</code></pre>
+      </div>
+    </section>
+
+    <section class="post-section" id="comparison">
+      <h2>⚖️ Methodology Comparison</h2>
+      <p>Let's compare the performance and characteristics of ARIMA and Prophet.</p>
+      
+      <div class="comparison-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Comparison Item</th>
+              <th>ARIMA</th>
+              <th>Prophet</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ease of Use</strong></td>
+              <td>Complex parameter tuning required</td>
+              <td>Automated modeling</td>
+            </tr>
+            <tr>
+              <td><strong>Seasonality Handling</strong></td>
+              <td>Limited handling with SARIMA</td>
+              <td>Automatic handling of various seasonality</td>
+            </tr>
+            <tr>
+              <td><strong>Exogenous Variables</strong></td>
+              <td>Limited</td>
+              <td>Supports holidays, events, etc.</td>
+            </tr>
+            <tr>
+              <td><strong>Interpretability</strong></td>
+              <td>Mathematically clear</td>
+              <td>Intuitive but complex</td>
+            </tr>
+            <tr>
+              <td><strong>Computational Efficiency</strong></td>
+              <td>Fast</td>
+              <td>Relatively slow</td>
+            </tr>
+            <tr>
+              <td><strong>Application Scope</strong></td>
+              <td>Stationary time series</td>
+              <td>Various patterns</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>When to Use Which Method?</h3>
+      <div class="use-case">
+        <h4>🔄 When to Use ARIMA</h4>
+        <ul>
+          <li>When data is stationary and has linear patterns</li>
+          <li>When mathematical interpretation is important</li>
+          <li>When fast prediction is needed</li>
+          <li>When traditional statistical methods are required</li>
+        </ul>
+      </div>
+      
+      <div class="use-case">
+        <h4>🌟 When to Use Prophet</h4>
+        <ul>
+          <li>When there are complex seasonal patterns</li>
+          <li>When exogenous variables (holidays, events) are important</li>
+          <li>When automated modeling is needed</li>
+          <li>When business users need to use it easily</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="post-section" id="next-steps">
+      <h2>🚀 Next Steps</h2>
+      <p>Now that we've covered the fundamentals of time series forecasting, let's move to the next step.</p>
+      
+      <div class="next-steps">
+        <div class="step-guide">
+          <h3>🔄 Summary of Learned Content</h3>
+          <ul>
+            <li>Understanding the 4 components of time series data</li>
+            <li>Mathematical structure and application of ARIMA models</li>
+            <li>Innovative features and advantages of Prophet</li>
+            <li>Comparison and selection criteria of two methodologies</li>
+          </ul>
+        </div>
+        
+        <div class="prerequisites">
+          <h3>📋 Prerequisites for Next Part</h3>
+          <ul>
+            <li>Basic deep learning concepts (LSTM, GRU)</li>
+            <li>PyTorch or TensorFlow basics</li>
+            <li>Time series data preprocessing experience</li>
+            <li>Understanding of model performance evaluation metrics</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="call-to-action">
+        <h3>📚 Move to Next Part</h3>
+        <p>In Part 2, we'll learn about deep learning-based time series models: N-BEATS and DeepAR.</p>
+        
+        <div class="cta-buttons">
+          <a href="{{ site.baseurl }}/en/categories/data-ai/time-series-deep-learning/" class="btn btn-primary">
+            🧠 Part 2: Emergence of Deep Learning
+          </a>
+          <a href="{{ site.baseurl }}/en/categories/data-ai/time-series-evolution-overview/" class="btn btn-secondary">
+            📖 Back to Series Overview
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+</article>
