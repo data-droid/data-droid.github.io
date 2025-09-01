@@ -1,0 +1,406 @@
+---
+layout: default
+lang: en
+title: "Part 2: Deep Learning-Based Time Series Forecasting - N-BEATS and DeepAR"
+description: "Learn the core of deep learning-based time series forecasting models and implement N-BEATS and DeepAR with actual code."
+date: 2025-09-01
+author: Data Droid
+category: Data AI
+tags: [TimeSeriesForecasting, DeepLearning, N-BEATS, DeepAR, PyTorch, MachineLearning]
+---
+
+<div class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">{{ page.category }}</span>
+      <span class="post-date">{{ page.date | date: "%B %d, %Y" }}</span>
+      <span class="post-author">{{ page.author }}</span>
+    </div>
+    <h1 class="post-title">{{ page.title }}</h1>
+    <div class="post-tags">
+      {% for tag in page.tags %}
+        <span class="tag">{{ tag }}</span>
+      {% endfor %}
+    </div>
+  </header>
+
+  <div class="post-content">
+    <!-- Table of Contents -->
+    <div class="toc">
+      <h3>📋 Table of Contents</h3>
+      <ul>
+        <li><a href="#overview">1. Emergence of Deep Learning-Based Time Series Forecasting</a></li>
+        <li><a href="#nbeats">2. N-BEATS: Interpretable Deep Learning Time Series Model</a></li>
+        <li><a href="#deepar">3. DeepAR: Probabilistic Time Series Forecasting</a></li>
+        <li><a href="#implementation">4. Implementation: N-BEATS and DeepAR</a></li>
+        <li><a href="#comparison">5. Model Performance Comparison and Analysis</a></li>
+        <li><a href="#next-steps">6. Next Steps and Extensions</a></li>
+      </ul>
+    </div>
+
+    <section class="post-section" id="overview">
+      <h2>1. Emergence of Deep Learning-Based Time Series Forecasting</h2>
+      
+      <h3>🔄 Limitations of Traditional Methods</h3>
+      <p>Traditional ARIMA or Prophet had the following limitations:</p>
+      <ul>
+        <li><strong>Lack of Complex Pattern Recognition</strong>: Unable to properly capture non-linear and complex time series patterns</li>
+        <li><strong>Feature Engineering Dependency</strong>: Inconvenience of manually extracting and selecting features</li>
+        <li><strong>Scalability Issues</strong>: Performance degradation with large datasets</li>
+        <li><strong>Domain Knowledge Required</strong>: Need to understand parameters and characteristics of each model</li>
+      </ul>
+
+      <h3>🤖 Advantages of Deep Learning</h3>
+      <p>Deep learning-based models overcame these limitations:</p>
+      <ul>
+        <li><strong>Automatic Feature Learning</strong>: Automatically learn complex patterns and features from data</li>
+        <li><strong>Non-linear Relationship Capture</strong>: Model complex relationships using non-linear activation functions of neural networks</li>
+        <li><strong>Large-scale Data Utilization</strong>: Achieve better performance with more data</li>
+        <li><strong>Diverse Domain Application</strong>: Universal application in various fields such as finance, sales, IoT</li>
+      </ul>
+    </section>
+
+    <section class="post-section" id="nbeats">
+      <h2>2. N-BEATS: Interpretable Deep Learning Time Series Model</h2>
+      
+      <h3>🏗️ N-BEATS Architecture</h3>
+      <p>N-BEATS stands for <strong>Neural Basis Expansion Analysis for Time Series</strong> and has the following characteristics:</p>
+      
+      <h4>Core Components</h4>
+      <ol>
+        <li><strong>Backcast Block</strong>: Reconstruct past data to learn patterns</li>
+        <li><strong>Forecast Block</strong>: Perform future predictions</li>
+        <li><strong>Double Residual Stacking</strong>: Improve accuracy by learning residuals step by step</li>
+        <li><strong>Basis Expansion</strong>: Each block specializes in specific patterns (trend, seasonality, general patterns)</li>
+      </ol>
+
+      <h4>Interpretability</h4>
+      <ul>
+        <li>Visualize patterns learned by each block to understand the model's decision-making process</li>
+        <li>Separate and analyze trend, seasonality, and general patterns</li>
+        <li>Provide insights that can be used for business decision-making</li>
+      </ul>
+
+      <h3>📊 Advantages of N-BEATS</h3>
+      <ul>
+        <li><strong>Interpretability</strong>: Clearly understand patterns learned by each block</li>
+        <li><strong>Scalability</strong>: Respond to various time series lengths and complexities</li>
+        <li><strong>Stability</strong>: Less sensitive to overfitting and excellent generalization performance</li>
+        <li><strong>Efficiency</strong>: Relatively fast learning and prediction speed</li>
+      </ul>
+    </section>
+
+    <section class="post-section" id="deepar">
+      <h2>3. DeepAR: Probabilistic Time Series Forecasting</h2>
+      
+      <h3>🎲 Core Concepts of DeepAR</h3>
+      <p>DeepAR stands for <strong>Deep Autoregressive Recurrent Networks</strong> and has the following characteristics:</p>
+      
+      <h4>Probabilistic Forecasting</h4>
+      <ul>
+        <li><strong>Distribution Prediction, Not Point Prediction</strong>: Predict probability distribution, not single values</li>
+        <li><strong>Uncertainty Quantification</strong>: Numerically express confidence in predictions</li>
+        <li><strong>Interval Prediction</strong>: Present prediction ranges through confidence intervals</li>
+      </ul>
+
+      <h4>Autoregressive Structure</h4>
+      <ul>
+        <li><strong>RNN-based</strong>: Sequential pattern learning using LSTM/GRU</li>
+        <li><strong>Past Dependency</strong>: Use previous time point predictions for next predictions</li>
+        <li><strong>Multivariate Support</strong>: Model multiple time series simultaneously</li>
+      </ul>
+
+      <h3>💼 Application Areas of DeepAR</h3>
+      <ul>
+        <li><strong>Inventory Management</strong>: Set safety inventory considering uncertainty in demand forecasting</li>
+        <li><strong>Risk Management</strong>: Evaluate volatility and risk of financial time series</li>
+        <li><strong>Planning</strong>: Business planning considering worst/best scenarios</li>
+      </ul>
+    </section>
+
+    <section class="post-section" id="implementation">
+      <h2>4. Implementation: N-BEATS and DeepAR</h2>
+      
+      <h3>🛠️ Hands-on Practice</h3>
+      
+      <h4>Step 1: Environment Setup and Data Preparation</h4>
+      <pre class="code-block"><code>import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from datetime import datetime, timedelta
+import warnings
+warnings.filterwarnings('ignore')
+
+# Visualization settings
+plt.style.use('seaborn-v0_8')
+sns.set_palette("husl")
+plt.rcParams['figure.figsize'] = (12, 8)
+plt.rcParams['font.size'] = 10
+
+print("✅ Environment setup complete!")</code></pre>
+
+      <h4>Step 2: Time Series Data Generation</h4>
+      <pre class="code-block"><code># Generate complex time series data (trend + seasonality + noise + structural change)
+np.random.seed(42)
+
+# Create time index (2 years of daily data)
+dates = pd.date_range('2023-01-01', '2024-12-31', freq='D')
+n_days = len(dates)
+
+# Basic trend (linear increase + non-linear change)
+trend = np.linspace(100, 200, n_days) + 20 * np.sin(np.linspace(0, 4*np.pi, n_days))
+
+# Seasonality (weekly + monthly + yearly)
+weekly_season = 15 * np.sin(2 * np.pi * np.arange(n_days) / 7)
+monthly_season = 10 * np.sin(2 * np.pi * np.arange(n_days) / 30.44)
+yearly_season = 25 * np.sin(2 * np.pi * np.arange(n_days) / 365.25)
+
+# Structural change (pattern change in the middle)
+structural_change = np.where(np.arange(n_days) > n_days//2, 
+                           30 * np.sin(np.linspace(0, 6*np.pi, n_days//2)), 0)
+
+# Noise
+noise = np.random.normal(0, 8, n_days)
+
+# Final time series
+time_series = trend + weekly_season + monthly_season + yearly_season + structural_change + noise
+
+# Create dataframe
+df = pd.DataFrame({
+    'date': dates,
+    'value': time_series
+})
+
+print("📊 Generated time series data:")
+print(f"Data length: {len(df)}")
+print(f"Start date: {df['date'].min()}")
+print(f"End date: {df['date'].max()}")
+print(f"Mean value: {df['value'].mean():.2f}")
+print(f"Standard deviation: {df['value'].std():.2f}")</code></pre>
+
+      <h4>Step 3: N-BEATS Model Implementation</h4>
+      <pre class="code-block"><code># N-BEATS model implementation (PyTorch-based)
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
+
+class NBEATSBlock(nn.Module):
+    """Basic block of N-BEATS"""
+    def __init__(self, input_size, hidden_size, output_size, block_type='trend'):
+        super(NBEATSBlock, self).__init__()
+        self.block_type = block_type
+        
+        # Linear layers for Backcast and Forecast
+        self.backcast_linear = nn.Linear(input_size, hidden_size)
+        self.forecast_linear = nn.Linear(input_size, hidden_size)
+        
+        # Activation function
+        self.relu = nn.ReLU()
+        
+        # Output layers
+        self.backcast_output = nn.Linear(hidden_size, output_size)
+        self.forecast_output = nn.Linear(hidden_size, output_size)
+        
+    def forward(self, x):
+        # Backcast (past reconstruction)
+        backcast = self.relu(self.backcast_linear(x))
+        backcast = self.backcast_output(backcast)
+        
+        # Forecast (future prediction)
+        forecast = self.relu(self.forecast_linear(x))
+        forecast = self.forecast_output(forecast)
+        
+        return backcast, forecast
+
+class NBEATS(nn.Module):
+    """Complete N-BEATS model"""
+    def __init__(self, input_size, hidden_size, num_blocks, forecast_horizon):
+        super(NBEATS, self).__init__()
+        self.input_size = input_size
+        self.forecast_horizon = forecast_horizon
+        
+        # Create blocks
+        self.blocks = nn.ModuleList([
+            NBEATSBlock(input_size, hidden_size, input_size) 
+            for _ in range(num_blocks)
+        ])
+        
+        # Final prediction layer
+        self.final_forecast = nn.Linear(input_size, forecast_horizon)
+        
+    def forward(self, x):
+        # Store input time series
+        original_input = x
+        current_input = x
+        
+        # Pass through each block
+        for block in self.blocks:
+            backcast, forecast = block(current_input)
+            
+            # Calculate residuals (Double Residual Stacking)
+            current_input = current_input - backcast
+            
+        # Final prediction
+        final_forecast = self.final_forecast(current_input)
+        
+        return final_forecast
+
+print("✅ N-BEATS model class definition complete!")</code></pre>
+
+      <h4>Step 4: DeepAR Model Implementation</h4>
+      <pre class="code-block"><code># DeepAR model implementation (PyTorch-based)
+class DeepAR(nn.Module):
+    """DeepAR model - Probabilistic time series forecasting"""
+    def __init__(self, input_size, hidden_size, num_layers, forecast_horizon, dropout=0.1):
+        super(DeepAR, self).__init__()
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.forecast_horizon = forecast_horizon
+        
+        # LSTM layer
+        self.lstm = nn.LSTM(
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            dropout=dropout if num_layers > 1 else 0,
+            batch_first=True
+        )
+        
+        # Output layers for prediction
+        self.mu_layer = nn.Linear(hidden_size, forecast_horizon)  # Mean
+        self.sigma_layer = nn.Linear(hidden_size, forecast_horizon)  # Standard deviation
+        
+    def forward(self, x):
+        # Time series learning through LSTM
+        lstm_out, _ = self.lstm(x)
+        
+        # Use last time point's hidden state
+        last_hidden = lstm_out[:, -1, :]
+        
+        # Predict mean and standard deviation
+        mu = self.mu_layer(last_hidden)
+        sigma = torch.exp(self.sigma_layer(last_hidden))  # Always positive
+        
+        return mu, sigma
+
+print("✅ DeepAR model class definition complete!")</code></pre>
+
+      <h4>Step 5: Model Training and Prediction</h4>
+      <p>Complete practice code can be found in the <a href="https://github.com/your-repo/time-series-deep-learning" target="_blank">GitHub repository</a>.</p>
+      
+      <div class="info-box">
+        <h4>💡 Practice Tips</h4>
+        <ul>
+          <li>If you have GPU, set <code>device = torch.device('cuda')</code> to improve training speed</li>
+          <li>Learning rate adjustment: Start with <code>lr=0.001</code> and adjust as needed</li>
+          <li>Early Stopping: Stop training when validation loss increases</li>
+          <li>Data normalization: Apply Min-Max Scaling or Standard Scaling</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="post-section" id="comparison">
+      <h2>5. Model Performance Comparison and Analysis</h2>
+      
+      <h3>📊 Model Pros and Cons Analysis</h3>
+      
+      <div class="info-box">
+        <h4>🔵 N-BEATS Model</h4>
+        <p><strong>✅ Advantages:</strong></p>
+        <ul>
+          <li>High interpretability (pattern learning by block)</li>
+          <li>Stable learning and prediction</li>
+          <li>Responds to various time series lengths</li>
+          <li>Less sensitive to overfitting</li>
+        </ul>
+        <p><strong>❌ Disadvantages:</strong></p>
+        <ul>
+          <li>No probabilistic prediction</li>
+          <li>Cannot quantify uncertainty</li>
+          <li>Limitations in learning complex patterns</li>
+        </ul>
+      </div>
+
+      <div class="info-box">
+        <h4>🟣 DeepAR Model</h4>
+        <p><strong>✅ Advantages:</strong></p>
+        <ul>
+          <li>Probabilistic prediction (uncertainty quantification)</li>
+          <li>Provides confidence intervals</li>
+          <li>Sequential dependency learning</li>
+          <li>Multivariate time series support</li>
+        </ul>
+        <p><strong>❌ Disadvantages:</strong></p>
+        <ul>
+          <li>Low interpretability</li>
+          <li>Long training time</li>
+          <li>Complex hyperparameter tuning</li>
+        </ul>
+      </div>
+
+      <h3>💼 Practical Application Guide</h3>
+      <ul>
+        <li><strong>N-BEATS</strong>: When interpretability is important for business decisions, when stable predictions are needed</li>
+        <li><strong>DeepAR</strong>: When uncertainty needs to be considered for risk management, when probabilistic prediction is needed</li>
+        <li><strong>Ensemble</strong>: Possible to achieve better performance by combining both models</li>
+      </ul>
+    </section>
+
+    <section class="post-section" id="next-steps">
+      <h2>6. Next Steps and Extensions</h2>
+      
+      <h3>🚀 Part 3 Preparation</h3>
+      <ul>
+        <li><strong>Transformer-based Models</strong>: Informer, Autoformer, FEDformer</li>
+        <li><strong>Attention Mechanism</strong> for time series forecasting</li>
+        <li><strong>Long-term Dependency Problem</strong> solving</li>
+      </ul>
+
+      <h3>🔧 Practice Extension Ideas</h3>
+      <ul>
+        <li><strong>Real Dataset Application</strong>: Stock prices, sales data, sensor data</li>
+        <li><strong>Hyperparameter Tuning</strong>: Grid Search, Bayesian Optimization</li>
+        <li><strong>Ensemble Methods</strong>: Combine predictions from multiple models for better performance</li>
+        <li><strong>Real-time Prediction</strong>: Online learning for streaming data</li>
+      </ul>
+    </section>
+
+    <section class="post-section">
+      <h2>🎯 Learning Summary</h2>
+      <p>In this Part 2, we covered the core of <strong>deep learning-based time series forecasting</strong>:</p>
+      <ol>
+        <li><strong>N-BEATS</strong>: Interpretable block-based architecture for stable prediction</li>
+        <li><strong>DeepAR</strong>: Probabilistic prediction to quantify uncertainty</li>
+        <li><strong>Practical Implementation</strong>: Actual model implementation using PyTorch and performance comparison</li>
+        <li><strong>Model Selection Guide</strong>: Model selection criteria based on business requirements</li>
+      </ol>
+      
+      <p>In the next Part 3, we will learn <strong>Transformer-based models</strong> for even more powerful time series forecasting methods!</p>
+    </section>
+
+    <!-- Next Steps -->
+    <section class="post-section">
+      <h2>🚀 Next Steps</h2>
+      <p>Now that we've covered deep learning-based time series forecasting, let's advance to Transformer-based models!</p>
+      
+      <div class="call-to-action">
+        <h3>📖 Part 3: Transformer-Based Time Series Forecasting</h3>
+        <p>Learn the latest time series forecasting methods using Attention mechanisms through Informer, Autoformer, and FEDformer.</p>
+        
+        <div class="cta-buttons">
+          <a href="#" class="btn btn-primary">
+            🚀 Part 3 Coming Soon
+          </a>
+          <a href="{{ site.baseurl }}/en/categories/data-ai/time-series-evolution-overview/" class="btn btn-secondary">
+            📚 Series Overview
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+  </div>
+</div>

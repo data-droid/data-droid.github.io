@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="데이터 레이크와 데이터 웨어하우스의 장점을 결합한 레이크하우스">
+
+
+
+<title>데이터 레이크하우스(Lakehouse) 란? - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="데이터 레이크하우스(Lakehouse) 란?">
+<meta property="og:description" content="데이터 레이크와 데이터 웨어하우스의 장점을 결합한 레이크하우스">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2025/08/19/lakehouse-overview.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="데이터 레이크하우스(Lakehouse) 란?">
+<meta name="twitter:description" content="데이터 레이크와 데이터 웨어하우스의 장점을 결합한 레이크하우스">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      <a href="/data-engineering/2025/08/19/lakehouse-overview.html" class="lang-btn active">한국어</a>
+      <a href="/en/data-engineering/2025/08/19/lakehouse-overview.html" class="lang-btn ">English</a>
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 08월 19일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">데이터 레이크하우스(Lakehouse) 란?</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">레이크하우스</span>
+      
+        <span class="tag">데이터 아키텍처</span>
+      
+        <span class="tag">데이터 엔지니어링</span>
+      
+        <span class="tag">Delta Lake</span>
+      
+        <span class="tag">Apache Iceberg</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 12분</span>
+      
+      
+        <span class="difficulty">📊 중급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="데이터-레이크하우스lakehouse-란">데이터 레이크하우스(Lakehouse) 란?</h1>
+
+<p>데이터 레이크하우스(Data Lakehouse)는 데이터 레이크(Data Lake)와 데이터 웨어하우스(Data Warehouse)의 장점을 결합한 아키텍처입니다. 2020년 Databricks에서 처음 제안하였습니다.</p>
+
+<p><strong>💡 핵심 개념</strong></p>
+
+<p>레이크하우스는 <strong>데이터 레이크의 유연성</strong>과 <strong>데이터 웨어하우스의 성능</strong>을 동시에 제공하는 통합된 데이터 플랫폼입니다.</p>
+
+<h2 id="-목차">📖 목차</h2>
+
+<ol>
+  <li><a href="#레이크하우스란-무엇인가">레이크하우스란 무엇인가?</a></li>
+  <li><a href="#기존-아키텍처의-한계">기존 아키텍처의 한계</a></li>
+  <li><a href="#레이크하우스의-장점">레이크하우스의 장점</a></li>
+  <li><a href="#핵심-기술들">핵심 기술들</a></li>
+  <li><a href="#결론">결론</a></li>
+</ol>
+
+<h2 id="️-레이크하우스란-무엇인가">🏗️ 레이크하우스란 무엇인가?</h2>
+
+<p>데이터 레이크하우스(Data Lakehouse)는 데이터 레이크(Data Lake)와 데이터 웨어하우스(Data Warehouse)의 장점을 결합한 아키텍처입니다. 2020년 Databricks에서 처음 제안하였습니다.</p>
+
+<p><strong>💡 핵심 개념</strong></p>
+
+<p>레이크하우스는 <strong>데이터 레이크의 유연성</strong>과 <strong>데이터 웨어하우스의 성능</strong>을 동시에 제공하는 통합된 데이터 플랫폼입니다.</p>
+
+<h2 id="️-기존-아키텍처의-한계">⚠️ 기존 아키텍처의 한계</h2>
+
+<h3 id="데이터-레이크의-문제점">데이터 레이크의 문제점</h3>
+
+<ul>
+  <li><strong>ACID 트랜잭션 부재</strong>: 데이터 일관성 보장 어려움</li>
+  <li><strong>스키마 관리 부족</strong>: 데이터 품질 및 검증 문제</li>
+  <li><strong>쿼리 성능 저하</strong>: 대용량 데이터 분석 시 느린 응답</li>
+  <li><strong>데이터 거버넌스 부재</strong>: 접근 제어 및 감사 기능 부족</li>
+</ul>
+
+<h3 id="데이터-웨어하우스의-한계">데이터 웨어하우스의 한계</h3>
+
+<ul>
+  <li><strong>비용 증가</strong>: 데이터 저장 및 처리 비용이 높음</li>
+  <li><strong>확장성 제한</strong>: 대용량 비정형 데이터 처리 어려움</li>
+  <li><strong>데이터 이동</strong>: ETL 과정에서 데이터 중복 및 지연</li>
+  <li><strong>유연성 부족</strong>: 스키마 변경 시 복잡한 마이그레이션</li>
+</ul>
+
+<h2 id="-레이크하우스의-장점">🚀 레이크하우스의 장점</h2>
+
+<h3 id="-acid-트랜잭션">🔒 ACID 트랜잭션</h3>
+
+<p>데이터 일관성과 무결성을 보장하여 신뢰할 수 있는 데이터 분석 환경 제공</p>
+
+<h3 id="-스키마-관리">📊 스키마 관리</h3>
+
+<p>스키마 진화와 버전 관리를 통한 데이터 품질 향상</p>
+
+<h3 id="-고성능-쿼리">⚡ 고성능 쿼리</h3>
+
+<p>인덱싱과 파티셔닝을 통한 빠른 데이터 검색 및 분석</p>
+
+<h3 id="-비용-효율성">💰 비용 효율성</h3>
+
+<p>저비용 스토리지와 고성능 컴퓨팅의 분리로 비용 최적화</p>
+
+<h3 id="-실시간-처리">🔄 실시간 처리</h3>
+
+<p>스트리밍 데이터와 배치 데이터의 통합 처리</p>
+
+<h3 id="️-데이터-거버넌스">🛡️ 데이터 거버넌스</h3>
+
+<p>접근 제어, 감사, 데이터 계보 관리 기능 제공</p>
+
+<h2 id="-핵심-기술들">🔧 핵심 기술들</h2>
+
+<h3 id="1-테이블-포맷-table-format">1. 테이블 포맷 (Table Format)</h3>
+
+<p>레이크하우스의 핵심은 테이블 포맷입니다. 이를 통해 ACID 트랜잭션과 스키마 관리를 지원합니다.</p>
+
+<p><strong>주요 테이블 포맷:</strong></p>
+<ul>
+  <li><strong>Delta Lake</strong>: Databricks에서 개발한 ACID 트랜잭션 지원</li>
+  <li><strong>Apache Iceberg</strong>: Netflix에서 시작한 스키마 진화 특화</li>
+  <li><strong>Apache Hudi</strong>: Uber에서 개발한 실시간 처리 특화</li>
+</ul>
+
+<h3 id="2-메타데이터-관리">2. 메타데이터 관리</h3>
+
+<p>파일 레벨에서 메타데이터를 관리하여 중앙 집중식 메타스토어의 한계를 극복합니다.</p>
+
+<p><strong>메타데이터 계층:</strong></p>
+<ul>
+  <li><strong>파일 레벨</strong>: 각 데이터 파일의 스키마 및 통계 정보</li>
+  <li><strong>테이블 레벨</strong>: 테이블 전체의 스키마 및 파티션 정보</li>
+  <li><strong>카탈로그 레벨</strong>: 여러 테이블을 관리하는 카탈로그</li>
+</ul>
+
+<h3 id="3-쿼리-엔진">3. 쿼리 엔진</h3>
+
+<p>다양한 쿼리 엔진을 지원하여 다양한 분석 요구사항을 충족합니다.</p>
+
+<p><strong>지원 엔진:</strong></p>
+<ul>
+  <li><strong>Spark SQL</strong>: 대용량 데이터 처리</li>
+  <li><strong>Presto/Trino</strong>: 대화형 쿼리</li>
+  <li><strong>Flink</strong>: 스트리밍 데이터 처리</li>
+</ul>
+
+<h2 id="-활용-사례">🎯 활용 사례</h2>
+
+<h3 id="1-데이터-엔지니어링">1. 데이터 엔지니어링</h3>
+
+<ul>
+  <li><strong>ETL/ELT 파이프라인</strong>: 데이터 변환 및 적재</li>
+  <li><strong>데이터 품질 관리</strong>: 스키마 검증 및 데이터 검증</li>
+  <li><strong>실시간 데이터 처리</strong>: 스트리밍 데이터 통합</li>
+</ul>
+
+<h3 id="2-데이터-분석">2. 데이터 분석</h3>
+
+<ul>
+  <li><strong>비즈니스 인텔리전스</strong>: 대시보드 및 리포트</li>
+  <li><strong>데이터 과학</strong>: 머신러닝 모델 개발</li>
+  <li><strong>애드혹 분석</strong>: 임시 데이터 분석</li>
+</ul>
+
+<h3 id="3-데이터-거버넌스">3. 데이터 거버넌스</h3>
+
+<ul>
+  <li><strong>접근 제어</strong>: 역할 기반 접근 제어</li>
+  <li><strong>데이터 계보</strong>: 데이터 출처 및 변환 이력 추적</li>
+  <li><strong>감사</strong>: 데이터 접근 및 사용 이력 기록</li>
+</ul>
+
+<h2 id="-미래-전망">🔮 미래 전망</h2>
+
+<h3 id="1-기술-발전">1. 기술 발전</h3>
+
+<ul>
+  <li><strong>AI/ML 통합</strong>: 머신러닝 워크플로우 지원</li>
+  <li><strong>자동화</strong>: 데이터 품질 및 성능 최적화 자동화</li>
+  <li><strong>멀티 클라우드</strong>: 다양한 클라우드 환경 지원</li>
+</ul>
+
+<h3 id="2-생태계-확장">2. 생태계 확장</h3>
+
+<ul>
+  <li><strong>도구 통합</strong>: 다양한 BI 도구 및 분석 도구와의 통합</li>
+  <li><strong>표준화</strong>: 업계 표준 및 인터페이스 정의</li>
+  <li><strong>커뮤니티</strong>: 오픈소스 생태계 확장</li>
+</ul>
+
+<h2 id="-결론">🎉 결론</h2>
+
+<p>데이터 레이크하우스는 기존 데이터 아키텍처의 한계를 극복하고, 데이터 레이크의 유연성과 데이터 웨어하우스의 성능을 결합한 혁신적인 솔루션입니다.</p>
+
+<p><strong>주요 장점:</strong></p>
+<ul>
+  <li><strong>통합된 플랫폼</strong>: 하나의 시스템에서 모든 데이터 처리</li>
+  <li><strong>비용 효율성</strong>: 저비용 스토리지와 고성능 컴퓨팅 분리</li>
+  <li><strong>확장성</strong>: 대용량 데이터 처리 및 실시간 분석 지원</li>
+  <li><strong>데이터 품질</strong>: ACID 트랜잭션과 스키마 관리로 데이터 신뢰성 향상</li>
+</ul>
+
+<p>레이크하우스는 현대적인 데이터 엔지니어링에서 필수적인 아키텍처가 되었으며, 앞으로 더욱 발전하여 데이터 중심의 디지털 전환을 이끌어갈 것입니다.</p>
+
+<hr />
+
+<p><em>이 글은 데이터 엔지니어링 분야에서 레이크하우스 아키텍처를 이해하고자 하는 엔지니어들을 위해 작성되었습니다. 더 자세한 내용은 각 기술의 공식 문서와 실습을 통해 학습하시기 바랍니다.</em></p>
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

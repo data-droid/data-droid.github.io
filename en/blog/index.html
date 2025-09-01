@@ -5,315 +5,219 @@ title: Blog Archive
 description: Explore all technical posts by year, month, and category with search functionality
 ---
 
-<div class="blog-archive">
-  <header class="archive-header">
-    <div class="container">
-      <h1>📚 Blog Archive</h1>
-      <p>Explore all technical posts related to data engineering</p>
-      
-      <!-- Search functionality -->
-      <div class="search-section">
-        <div class="search-box">
-          <input type="text" id="searchInput" placeholder="Search posts by title or content..." class="search-input">
-          <button class="search-btn">🔍 Search</button>
-        </div>
-        <div class="search-tags">
-          <span class="tag-label">Popular tags:</span>
-          <a href="#" class="search-tag" data-tag="Lakehouse">Lakehouse</a>
-          <a href="#" class="search-tag" data-tag="Apache">Apache</a>
-          <a href="#" class="search-tag" data-tag="Data Pipeline">Data Pipeline</a>
-          <a href="#" class="search-tag" data-tag="ETL">ETL</a>
-          <a href="#" class="search-tag" data-tag="Cloud">Cloud</a>
-        </div>
-      </div>
+<div class="blog-archive" style="background: #f8f9fa; min-height: 100vh;">
+  <div class="archive-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4rem 0; text-align: center;">
+    <h1 style="font-size: 3rem; margin-bottom: 1rem; font-weight: 700;">📚 Blog Archive</h1>
+    <p style="font-size: 1.2rem; opacity: 0.9; margin-bottom: 2rem;">Explore all technical posts by category, date, and search functionality</p>
+  </div>
+
+  <div class="search-section" style="max-width: 600px; margin: 0 auto;">
+    <div class="search-box" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+      <input type="text" class="search-input" placeholder="Search posts..." id="searchInput" style="flex: 1; padding: 1rem 1.5rem; border: none; border-radius: 25px; font-size: 1rem; outline: none; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+      <button class="search-btn" onclick="searchPosts()" style="background: #3498db; color: white; border: none; padding: 1rem 2rem; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: background-color 0.3s ease; white-space: nowrap;">🔍</button>
     </div>
-  </header>
+    
+    <div class="search-tags" style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; align-items: center;">
+      {% assign all_tags = site.en_posts | map: "tags" | uniq | sort %}
+      {% for tag in all_tags %}
+        <span class="tag-label" onclick="filterByTag('{{ tag }}')" style="background: rgba(255,255,255,0.9); color: #2c3e50; padding: 0.3rem 0.8rem; border-radius: 15px; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.5); cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">{{ tag }}</span>
+      {% endfor %}
+    </div>
+  </div>
 
   <div class="archive-content">
-    <div class="container">
-      <div class="archive-layout">
-        <!-- Sidebar: Filters and Archive -->
-        <aside class="archive-sidebar">
-          <div class="sidebar-section">
-            <h3>📅 Archive by Year</h3>
-            <ul class="year-archive">
-              <li><a href="#2025" class="year-link active">2025</a></li>
-              <li><a href="#2024" class="year-link">2024</a></li>
-            </ul>
+    <div class="archive-layout">
+      <div class="archive-sidebar" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div class="sidebar-section" style="margin-bottom: 2rem;">
+          <h3 style="color: #2c3e50; font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 2px solid #3498db; padding-bottom: 0.5rem;">📅 Archive by Year</h3>
+          <div class="year-archive" id="yearArchive">
+            <!-- 연도별 아카이브는 JavaScript로 동적 생성됩니다 -->
           </div>
+        </div>
 
-          <div class="sidebar-section">
-            <h3>🗓️ Archive by Month</h3>
-            <ul class="month-archive">
-              <li><a href="#2025-08" class="month-link active">August (5)</a></li>
-              <li><a href="#2025-07" class="month-link">July (0)</a></li>
-              <li><a href="#2025-06" class="month-link">June (0)</a></li>
-            </ul>
+        <div class="sidebar-section" style="margin-bottom: 2rem;">
+          <h3 style="color: #2c3e50; font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 2px solid #3498db; padding-bottom: 0.5rem;">🏷️ By Category</h3>
+          <div class="category-filter">
+            {% assign categories = site.en_posts | map: "category" | uniq | sort %}
+            {% for category in categories %}
+              {% assign category_posts = site.en_posts | where: "category", category %}
+              <a href="#" onclick="filterByCategory('{{ category }}')" data-category="{{ category }}" style="color: #3498db; text-decoration: none; padding: 0.5rem; border-radius: 6px; transition: background-color 0.3s ease; display: block; margin-bottom: 0.5rem;">
+                {{ category | replace: '-', ' ' | capitalize }} ({{ category_posts.size }})
+              </a>
+            {% endfor %}
           </div>
+        </div>
 
-          <div class="sidebar-section">
-            <h3>🏷️ By Category</h3>
-            <ul class="category-filter">
-              <li><a href="#" class="category-link active" data-category="all">All</a></li>
-              <li><a href="#" class="category-link" data-category="data-engineering">Data Engineering</a></li>
-              <li><a href="#" class="category-link" data-category="bi-engineering">BI Engineering</a></li>
-              <li><a href="#" class="category-link" data-category="infrastructure-tools">Infrastructure & Tools</a></li>
-              <li><a href="#" class="category-link" data-category="data-quality">Data Quality</a></li>
-              <li><a href="#" class="category-link" data-category="data-ai">Data AI</a></li>
-            </ul>
-          </div>
-
-                      <div class="sidebar-section">
-              <h3>📊 Statistics</h3>
-              <div class="archive-stats">
-                <div class="stat-item">
-                  <span class="stat-number">7</span>
-                  <span class="stat-label">Total Posts</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-number">5</span>
-                  <span class="stat-label">Categories</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-number">1</span>
-                  <span class="stat-label">Tags</span>
-                </div>
-              </div>
+        <div class="sidebar-section">
+          <div class="archive-stats" style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+            <div class="stat-item" style="text-align: center; margin-bottom: 1rem;">
+              <span class="stat-number" style="display: block; font-size: 2rem; font-weight: bold; color: #3498db;">{{ site.en_posts.size }}</span>
+              <span class="stat-label" style="color: #666; font-size: 0.9rem;">Total Posts</span>
             </div>
-        </aside>
-
-        <!-- Main content: Post list -->
-        <main class="archive-main">
-          <div class="archive-toolbar">
-            <div class="toolbar-left">
-              <span class="post-count">Total 7 posts</span>
-            </div>
-            <div class="toolbar-right">
-              <select class="sort-select">
-                <option value="date-desc">Latest First</option>
-                <option value="date-asc">Oldest First</option>
-                <option value="title-asc">By Title</option>
-              </select>
+            <div class="stat-item" style="text-align: center;">
+              <span class="stat-number" style="display: block; font-size: 2rem; font-weight: bold; color: #3498db;">{{ categories.size }}</span>
+              <span class="stat-label" style="color: #666; font-size: 0.9rem;">Categories</span>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div class="posts-list">
-            <!-- Actual posts -->
-            <article class="post-item" data-category="data-ai" data-date="2025-08" data-tags="TimeSeriesForecasting,MachineLearning,AI">
-              <div class="post-meta">
-                <span class="post-category">Data AI</span>
-                <span class="post-date">August 31, 2025</span>
-              </div>
-              <div class="post-title">
-                <a href="{{ site.baseurl }}/en/categories/data-ai/time-series-evolution-overview/">Evolution of Time Series Forecasting: From Traditional Methods to Latest AI Models</a>
-              </div>
-              <p class="post-excerpt">
-                From ARIMA to TimeGPT, a perfect guide to systematically learn the evolution of time series forecasting technology and the latest trends.
-              </p>
-              <div class="post-tags">
-                <span class="tag">TimeSeriesForecasting</span>
-                <span class="tag">MachineLearning</span>
-                <span class="tag">AI</span>
-                <span class="tag">ARIMA</span>
-                <span class="tag">Prophet</span>
-                <span class="tag">TimeGPT</span>
-              </div>
-            </article>
-
-            <article class="post-item" data-category="data-ai" data-date="2025-08" data-tags="TimeSeriesForecasting,ARIMA,Prophet">
-              <div class="post-meta">
-                <span class="post-category">Data AI</span>
-                <span class="post-date">August 31, 2025</span>
-              </div>
-              <div class="post-title">
-                <a href="{{ site.baseurl }}/en/categories/data-ai/time-series-basics/">Part 1: Fundamentals of Time Series Forecasting - From ARIMA to Prophet</a>
-              </div>
-              <p class="post-excerpt">
-                Systematically learn the basic concepts of time series data and traditional statistical methods, up to the emergence of Prophet, and implement them with actual code.
-              </p>
-              <div class="post-tags">
-                <span class="tag">TimeSeriesForecasting</span>
-                <span class="tag">ARIMA</span>
-                <span class="tag">Prophet</span>
-                <span class="tag">Statistics</span>
-                <span class="tag">Python</span>
-                <span class="tag">TimeSeriesAnalysis</span>
-              </div>
-            </article>
-
-            <article class="post-item" data-category="infrastructure-tools" data-date="2025-08" data-tags="Kubernetes,Container,Orchestration">
-              <div class="post-meta">
-                <span class="post-category">Infrastructure & Tools</span>
-                <span class="post-date">August 26, 2025</span>
-              </div>
-              <div class="post-title">
-                <a href="{{ site.baseurl }}/en/categories/infrastructure-tools/kubernetes-overview/">What is Kubernetes? - The Core of Container Orchestration</a>
-              </div>
-              <p class="post-excerpt">
-                Learn about Kubernetes' background, core concepts, key features, and role in modern cloud-native applications in detail.
-              </p>
-              <div class="post-tags">
-                <span class="tag">Kubernetes</span>
-                <span class="tag">Container</span>
-                <span class="tag">Orchestration</span>
-                <span class="tag">Infrastructure</span>
-              </div>
-            </article>
-
-            <article class="post-item" data-category="infrastructure-tools" data-date="2025-08" data-tags="Kubernetes,Docker,Minikube">
-              <div class="post-meta">
-                <span class="post-date">August 26, 2025</span>
-              </div>
-              <div class="post-title">
-                <a href="{{ site.baseurl }}/en/categories/infrastructure-tools/kubernetes-local-setup/">Kubernetes Local Setup Guide for macOS - Using Docker Desktop and Minikube</a>
-              </div>
-              <p class="post-excerpt">
-                Step-by-step guide to install and configure Kubernetes cluster locally on macOS using Docker Desktop and Minikube.
-              </p>
-              <div class="post-tags">
-                <span class="tag">Kubernetes</span>
-                <span class="tag">Docker</span>
-                <span class="tag">Minikube</span>
-                <span class="tag">Dev Tools</span>
-              </div>
-            </article>
-
-            <article class="post-item" data-category="data-engineering" data-date="2025-08" data-tags="Lakehouse,Delta Lake,Apache Iceberg">
-              <div class="post-meta">
-                <span class="post-category">Data Engineering</span>
-                <span class="post-date">August 22, 2025</span>
-              </div>
-              <div class="post-title">
-                <a href="{{ site.baseurl }}/en/categories/data-engineering/lakehouse-formats/">Lakehouse Table Formats: Delta Lake, Apache Iceberg, Apache Hudi</a>
-              </div>
-              <p class="post-excerpt">
-                Detailed analysis and comparison of table formats that are the core of modern data lakehouse architecture.
-              </p>
-              <div class="post-tags">
-                <span class="tag">Lakehouse</span>
-                <span class="tag">Delta Lake</span>
-                <span class="tag">Apache Iceberg</span>
-              </div>
-            </article>
-
-            <article class="post-item" data-category="data-engineering" data-date="2025-08" data-tags="Hive,Metastore,Lakehouse">
-              <div class="post-meta">
-                <span class="post-category">Data Engineering</span>
-                <span class="post-date">August 19, 2025</span>
-              </div>
-              <div class="post-title">
-                <a href="{{ site.baseurl }}/en/categories/data-engineering/hive-metastore-limitations/">Limitations of Hive Metastore and the Emergence of Lakehouse</a>
-              </div>
-              <p class="post-excerpt">
-                Learn about the structural limitations of Hadoop Hive Metastore and the Lakehouse architecture that emerged as a result.
-              </p>
-              <div class="post-tags">
-                <span class="tag">Hive</span>
-                <span class="tag">Metastore</span>
-                <span class="tag">Lakehouse</span>
-              </div>
-            </article>
-
-            <article class="post-item" data-category="data-engineering" data-date="2025-08" data-tags="Lakehouse,Data Architecture">
-              <div class="post-meta">
-                <span class="post-category">Data Engineering</span>
-                <span class="post-date">August 19, 2025</span>
-              </div>
-              <div class="post-title">
-                <a href="{{ site.baseurl }}/en/categories/data-engineering/lakehouse/">What is Data Lakehouse?</a>
-              </div>
-              <p class="post-excerpt">
-                Comprehensive guide to the innovative architecture that combines the advantages of data lakes and data warehouses.
-              </p>
-              <div class="post-tags">
-                <span class="tag">Lakehouse</span>
-                <span class="tag">Data Architecture</span>
-              </div>
-            </article>
+      <div class="archive-main" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-left: 2rem;">
+        <div class="archive-toolbar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #f0f0f0;">
+          <div class="toolbar-left">
+            <span class="post-count" style="font-size: 1.1rem; color: #666;">Total {{ site.en_posts.size }} posts</span>
           </div>
-        </main>
+          <div class="toolbar-right">
+            <select class="sort-select" onchange="sortPosts(this.value)" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; outline: none;">
+              <option value="date-desc">Latest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="title-asc">By Title</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="posts-list" id="postsList" style="display: flex; flex-direction: column; gap: 1.5rem;">
+          {% for post in site.en_posts %}
+            <div class="post-item" data-category="{{ post.category }}" data-date="{{ post.date | date: '%Y-%m-%d' }}" data-title="{{ post.title | downcase }}" style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 1.5rem; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+              <div class="post-excerpt">
+                <div class="post-meta" style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                  <span class="post-category" style="background: #3498db; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 500;">{{ post.category | replace: '-', ' ' | capitalize }}</span>
+                  <span class="post-date" style="color: #6c757d; font-size: 0.9rem;">{{ post.date | date: "%B %d, %Y" }}</span>
+                  <span class="post-author" style="color: #6c757d; font-size: 0.9rem;">{{ post.author }}</span>
+                </div>
+                <h3 class="post-title" style="margin-bottom: 1rem;">
+                  <a href="{{ site.baseurl }}{{ post.url }}" style="color: #2c3e50; text-decoration: none; font-size: 1.4rem; font-weight: 600; line-height: 1.4;">{{ post.title }}</a>
+                </h3>
+                <p class="post-description" style="color: #666; line-height: 1.6; margin-bottom: 1rem;">{{ post.description }}</p>
+                <div class="post-tags" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                  {% for tag in post.tags %}
+                    <span class="tag" style="background: #f8f9fa; color: #495057; padding: 0.2rem 0.6rem; border-radius: 15px; font-size: 0.75rem; font-weight: 500; border: 1px solid #dee2e6;">{{ tag }}</span>
+                  {% endfor %}
+                </div>
+                {% if post.series %}
+                  <div class="post-series" style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span class="series-badge" style="background: #e74c3c; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 500;">📚 {{ post.series | replace: '-', ' ' | capitalize }} Series</span>
+                    {% if post.series_order > 0 %}
+                      <span class="series-order" style="background: #f39c12; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 500;">Part {{ post.series_order | plus: 1 }}</span>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// Search functionality
-document.addEventListener('DOMContentLoaded', function() {
-  const searchInput = document.getElementById('searchInput');
-  const searchBtn = document.querySelector('.search-btn');
-  const postItems = document.querySelectorAll('.post-item');
-  const searchTags = document.querySelectorAll('.search-tag');
-  const categoryLinks = document.querySelectorAll('.category-link');
-  const yearLinks = document.querySelectorAll('.year-link');
-  const monthLinks = document.querySelectorAll('.month-link');
-
-  // Search functionality
-  function performSearch() {
-    const searchTerm = searchInput.value.toLowerCase();
+function searchPosts() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const posts = document.querySelectorAll('.post-item');
+  
+  posts.forEach(post => {
+    const title = post.querySelector('.post-title').textContent.toLowerCase();
+    const description = post.querySelector('.post-description').textContent.toLowerCase();
+    const tags = Array.from(post.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase());
     
-    postItems.forEach(post => {
-      const title = post.querySelector('.post-title a').textContent.toLowerCase();
-      const excerpt = post.querySelector('.post-excerpt').textContent.toLowerCase();
-      const tags = Array.from(post.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase());
-      
-      const matches = title.includes(searchTerm) || 
-                     excerpt.includes(searchTerm) || 
-                     tags.some(tag => tag.includes(searchTerm));
-      
-      post.style.display = matches ? 'block' : 'none';
-    });
-  }
-
-  searchBtn.addEventListener('click', performSearch);
-  searchInput.addEventListener('input', performSearch);
-
-  // Tag search
-  searchTags.forEach(tag => {
-    tag.addEventListener('click', function(e) {
-      e.preventDefault();
-      const tagText = this.getAttribute('data-tag');
-      searchInput.value = tagText;
-      performSearch();
-    });
+    const matches = title.includes(searchTerm) || 
+                   description.includes(searchTerm) || 
+                   tags.some(tag => tag.includes(searchTerm));
+    
+    post.style.display = matches ? 'block' : 'none';
   });
+}
 
-  // Category filtering
-  categoryLinks.forEach(link => {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      
-      // Remove active class from all links
-      categoryLinks.forEach(l => l.classList.remove('active'));
-      this.classList.add('active');
-      
-      const category = this.getAttribute('data-category');
-      
-      postItems.forEach(post => {
-        if (category === 'all' || post.getAttribute('data-category') === category) {
-          post.style.display = 'block';
-        } else {
-          post.style.display = 'none';
-        }
-      });
-    });
+function filterByTag(tag) {
+  const posts = document.querySelectorAll('.post-item');
+  posts.forEach(post => {
+    const postTags = Array.from(post.querySelectorAll('.tag')).map(t => t.textContent);
+    post.style.display = postTags.includes(tag) ? 'block' : 'none';
   });
+}
 
-  // Year and month filtering (placeholder for future implementation)
-  yearLinks.forEach(link => {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      yearLinks.forEach(l => l.classList.remove('active'));
-      this.classList.add('active');
-    });
+function filterByCategory(category) {
+  const posts = document.querySelectorAll('.post-item');
+  posts.forEach(post => {
+    const postCategory = post.getAttribute('data-category');
+    post.style.display = postCategory === category ? 'block' : 'none';
   });
+}
 
-  monthLinks.forEach(link => {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      monthLinks.forEach(l => l.classList.remove('active'));
-      this.classList.add('active');
-    });
+function filterByYear(year) {
+  const posts = document.querySelectorAll('.post-item');
+  posts.forEach(post => {
+    const postDate = post.getAttribute('data-date');
+    post.style.display = postDate.startsWith(year) ? 'block' : 'none';
   });
+}
+
+function sortPosts(sortBy) {
+  const postsList = document.getElementById('postsList');
+  const posts = Array.from(postsList.children);
+  
+  posts.sort((a, b) => {
+    switch(sortBy) {
+      case 'date-desc':
+        // Latest First: Date descending (newest first)
+        const dateDescA = new Date(a.getAttribute('data-date'));
+        const dateDescB = new Date(b.getAttribute('data-date'));
+        return dateDescB - dateDescA;
+      case 'date-asc':
+        // Oldest First: Date ascending (oldest first)
+        const dateAscA = new Date(a.getAttribute('data-date'));
+        const dateAscB = new Date(b.getAttribute('data-date'));
+        return dateAscA - dateAscB;
+      case 'title-asc':
+        // By Title: Alphabetical ascending
+        const titleA = a.getAttribute('data-title').toLowerCase();
+        const titleB = b.getAttribute('data-title').toLowerCase();
+        return titleA.localeCompare(titleB);
+      default:
+        return 0;
+    }
+  });
+  
+  // Re-add sorted posts to DOM
+  posts.forEach(post => postsList.appendChild(post));
+  
+  // Log current sorting option
+  console.log(`Posts sorted by ${sortBy}.`);
+}
+
+// 연도별 아카이브 동적 생성
+function generateYearArchive() {
+  const yearArchive = document.getElementById('yearArchive');
+  const posts = document.querySelectorAll('.post-item');
+  
+  // 연도별 포스트 수 계산
+  const yearCounts = {};
+  posts.forEach(post => {
+    const postDate = post.getAttribute('data-date');
+    const year = postDate.split('-')[0];
+    yearCounts[year] = (yearCounts[year] || 0) + 1;
+  });
+  
+  // 연도별로 정렬하여 HTML 생성
+  const years = Object.keys(yearCounts).sort((a, b) => b - a);
+  let html = '';
+  
+  years.forEach(year => {
+    html += `
+      <div class="year-archive-item" style="margin-bottom: 0.5rem;">
+        <a href="#" onclick="filterByYear('${year}')" style="color: #3498db; text-decoration: none; padding: 0.5rem; border-radius: 6px; transition: background-color 0.3s ease; display: block;">
+          ${year} (${yearCounts[year]})
+        </a>
+      </div>
+    `;
+  });
+  
+  yearArchive.innerHTML = html;
+}
+
+// 페이지 로드 시 연도별 아카이브 생성
+document.addEventListener('DOMContentLoaded', function() {
+  generateYearArchive();
 });
 </script>

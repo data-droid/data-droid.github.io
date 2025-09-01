@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Explore advanced deep learning models for time series forecasting, including N-BEATS and DeepAR, with hands-on implementation using PyTorch.">
+
+
+
+<title>Part 2: Deep Learning-based Time Series Forecasting - N-BEATS and DeepAR - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 2: Deep Learning-based Time Series Forecasting - N-BEATS and DeepAR">
+<meta property="og:description" content="Explore advanced deep learning models for time series forecasting, including N-BEATS and DeepAR, with hands-on implementation using PyTorch.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2025-09-01-time-series-deep-learning.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 2: Deep Learning-based Time Series Forecasting - N-BEATS and DeepAR">
+<meta name="twitter:description" content="Explore advanced deep learning models for time series forecasting, including N-BEATS and DeepAR, with hands-on implementation using PyTorch.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      <a href="/en_posts/2025-09-01-time-series-deep-learning.html" class="lang-btn ">한국어</a>
+      <a href="/en/en_posts/2025-09-01-time-series-deep-learning.html" class="lang-btn active">English</a>
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data ai</span>
+      <span class="post-date">2025년 09월 01일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 2: Deep Learning-based Time Series Forecasting - N-BEATS and DeepAR</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">time-series</span>
+      
+        <span class="tag">deep-learning</span>
+      
+        <span class="tag">n-beats</span>
+      
+        <span class="tag">deepar</span>
+      
+        <span class="tag">pytorch</span>
+      
+        <span class="tag">forecasting</span>
+      
+        <span class="tag">lstm</span>
+      
+        <span class="tag">gru</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Evolution of time series forecasting 시리즈</span>
+      <span class="series-order">Part 3</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 25 minutes</span>
+      
+      
+        <span class="difficulty">📊 Advanced</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-2-deep-learning-based-time-series-forecasting---n-beats-and-deepar">Part 2: Deep Learning-based Time Series Forecasting - N-BEATS and DeepAR</h1>
+
+<p>Welcome to Part 2 of our time series forecasting series! In this post, we’ll explore advanced deep learning models that have revolutionized time series forecasting: <strong>N-BEATS</strong> and <strong>DeepAR</strong>. These models represent significant advances beyond traditional statistical methods and basic neural networks.</p>
+
+<h2 id="-table-of-contents">📖 Table of Contents</h2>
+
+<ol>
+  <li><a href="#introduction-to-deep-learning-in-time-series">Introduction to Deep Learning in Time Series</a></li>
+  <li><a href="#n-beats-neural-basis-expansion-analysis-for-time-series">N-BEATS: Neural Basis Expansion Analysis for Time Series</a></li>
+  <li><a href="#deepar-deep-autoregressive-models">DeepAR: Deep Autoregressive Models</a></li>
+  <li><a href="#hands-on-implementation">Hands-on Implementation</a></li>
+  <li><a href="#model-comparison-and-selection">Model Comparison and Selection</a></li>
+  <li><a href="#next-steps">Next Steps</a></li>
+</ol>
+
+<h2 id="1-introduction-to-deep-learning-in-time-series">1. Introduction to Deep Learning in Time Series</h2>
+
+<h3 id="why-deep-learning-for-time-series">Why Deep Learning for Time Series?</h3>
+
+<p>Traditional statistical methods like ARIMA and Prophet have limitations:</p>
+<ul>
+  <li><strong>Linear assumptions</strong>: Cannot capture complex non-linear patterns</li>
+  <li><strong>Fixed patterns</strong>: Struggle with evolving seasonality and trends</li>
+  <li><strong>Limited features</strong>: Cannot incorporate external variables effectively</li>
+</ul>
+
+<p>Deep learning models offer several advantages:</p>
+<ul>
+  <li><strong>Non-linear modeling</strong>: Can capture complex temporal relationships</li>
+  <li><strong>Feature learning</strong>: Automatically discovers relevant patterns</li>
+  <li><strong>Scalability</strong>: Handle large datasets and multiple variables</li>
+  <li><strong>Flexibility</strong>: Adapt to various time series characteristics</li>
+</ul>
+
+<h3 id="key-challenges-in-deep-learning-time-series">Key Challenges in Deep Learning Time Series</h3>
+
+<ol>
+  <li><strong>Temporal dependencies</strong>: Long-range relationships</li>
+  <li><strong>Seasonality</strong>: Multiple seasonal patterns</li>
+  <li><strong>Non-stationarity</strong>: Changing statistical properties</li>
+  <li><strong>Missing data</strong>: Irregular sampling and gaps</li>
+</ol>
+
+<h2 id="2-n-beats-neural-basis-expansion-analysis-for-time-series">2. N-BEATS: Neural Basis Expansion Analysis for Time Series</h2>
+
+<h3 id="what-is-n-beats">What is N-BEATS?</h3>
+
+<p>N-BEATS (Neural Basis Expansion Analysis for Time Series) is a deep neural architecture specifically designed for time series forecasting. It was introduced by Oreshkin et al. in 2019 and has shown remarkable performance on various forecasting tasks.</p>
+
+<h3 id="key-features-of-n-beats">Key Features of N-BEATS</h3>
+
+<p><strong>🏗️ Architecture Design</strong></p>
+<ul>
+  <li><strong>Deep neural network</strong>: Multiple fully connected layers</li>
+  <li><strong>Residual connections</strong>: Skip connections for better gradient flow</li>
+  <li><strong>Basis expansion</strong>: Decomposes time series into interpretable components</li>
+  <li><strong>No recurrent connections</strong>: Pure feedforward architecture</li>
+</ul>
+
+<p><strong>📊 Interpretability</strong></p>
+<ul>
+  <li><strong>Trend component</strong>: Long-term patterns</li>
+  <li><strong>Seasonality component</strong>: Repeating patterns</li>
+  <li><strong>Residual component</strong>: Remaining variations</li>
+</ul>
+
+<h3 id="n-beats-architecture">N-BEATS Architecture</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input → Block 1 → Block 2 → ... → Block N → Output
+         ↓         ↓                ↓
+    Trend + Seasonality + Residual
+</code></pre></div></div>
+
+<p>Each block consists of:</p>
+<ol>
+  <li><strong>Fully connected layers</strong> with ReLU activation</li>
+  <li><strong>Basis expansion</strong> for trend and seasonality</li>
+  <li><strong>Residual connections</strong> for gradient flow</li>
+</ol>
+
+<h3 id="advantages-of-n-beats">Advantages of N-BEATS</h3>
+
+<ul>
+  <li><strong>Interpretable</strong>: Clear trend and seasonality decomposition</li>
+  <li><strong>Fast training</strong>: No recurrent connections</li>
+  <li><strong>Scalable</strong>: Handles multiple time series</li>
+  <li><strong>Robust</strong>: Good performance across different domains</li>
+</ul>
+
+<h2 id="3-deepar-deep-autoregressive-models">3. DeepAR: Deep Autoregressive Models</h2>
+
+<h3 id="what-is-deepar">What is DeepAR?</h3>
+
+<p>DeepAR is a probabilistic forecasting model that combines deep learning with autoregressive processes. It was developed by Amazon and is particularly effective for forecasting multiple related time series.</p>
+
+<h3 id="key-features-of-deepar">Key Features of DeepAR</h3>
+
+<p><strong>🔄 Autoregressive Nature</strong></p>
+<ul>
+  <li><strong>Sequential prediction</strong>: Each prediction depends on previous values</li>
+  <li><strong>Probabilistic output</strong>: Provides uncertainty estimates</li>
+  <li><strong>Multiple time series</strong>: Can handle related series simultaneously</li>
+</ul>
+
+<p><strong>🧠 Neural Architecture</strong></p>
+<ul>
+  <li><strong>LSTM/GRU cells</strong>: Capture temporal dependencies</li>
+  <li><strong>Attention mechanism</strong>: Focus on relevant historical patterns</li>
+  <li><strong>Conditional generation</strong>: Generate forecasts step by step</li>
+</ul>
+
+<h3 id="deepar-architecture">DeepAR Architecture</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input → LSTM/GRU → Attention → Output Distribution
+         ↓           ↓           ↓
+    Hidden State → Weights → Parameters
+</code></pre></div></div>
+
+<h3 id="advantages-of-deepar">Advantages of DeepAR</h3>
+
+<ul>
+  <li><strong>Probabilistic</strong>: Provides uncertainty quantification</li>
+  <li><strong>Multi-series</strong>: Handles related time series</li>
+  <li><strong>Flexible</strong>: Incorporates external variables</li>
+  <li><strong>Scalable</strong>: Efficient for large datasets</li>
+</ul>
+
+<h2 id="4-hands-on-implementation">4. Hands-on Implementation</h2>
+
+<h3 id="setting-up-the-environment">Setting Up the Environment</h3>
+
+<p>First, let’s install the required packages:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install </span>torch torchvision torchaudio
+pip <span class="nb">install </span>numpy pandas matplotlib seaborn
+pip <span class="nb">install </span>scikit-learn
+</code></pre></div></div>
+
+<h3 id="implementing-n-beats">Implementing N-BEATS</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">torch</span>
+<span class="kn">import</span> <span class="n">torch.nn</span> <span class="k">as</span> <span class="n">nn</span>
+<span class="kn">import</span> <span class="n">torch.optim</span> <span class="k">as</span> <span class="n">optim</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="n">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="k">class</span> <span class="nc">NBEATSBlock</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">NBEATSBlock</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">fc3</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">relu</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">ReLU</span><span class="p">()</span>
+        
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">relu</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">relu</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">fc2</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">fc3</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span>
+
+<span class="k">class</span> <span class="nc">NBEATS</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">num_blocks</span><span class="p">,</span> <span class="n">forecast_horizon</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">NBEATS</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">num_blocks</span> <span class="o">=</span> <span class="n">num_blocks</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">forecast_horizon</span> <span class="o">=</span> <span class="n">forecast_horizon</span>
+        
+        <span class="c1"># Create blocks
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">blocks</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">ModuleList</span><span class="p">([</span>
+            <span class="nc">NBEATSBlock</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">forecast_horizon</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_blocks</span><span class="p">)</span>
+        <span class="p">])</span>
+        
+        <span class="c1"># Final projection
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">final_projection</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">num_blocks</span> <span class="o">*</span> <span class="n">forecast_horizon</span><span class="p">,</span> <span class="n">forecast_horizon</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">block_outputs</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">blocks</span><span class="p">:</span>
+            <span class="n">block_out</span> <span class="o">=</span> <span class="nf">block</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">block_outputs</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">block_out</span><span class="p">)</span>
+            
+        <span class="c1"># Concatenate all block outputs
+</span>        <span class="n">concatenated</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">cat</span><span class="p">(</span><span class="n">block_outputs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c1"># Final projection
+</span>        <span class="n">output</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">final_projection</span><span class="p">(</span><span class="n">concatenated</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span>
+
+<span class="c1"># Example usage
+</span><span class="n">input_size</span> <span class="o">=</span> <span class="mi">24</span>  <span class="c1"># Lookback window
+</span><span class="n">hidden_size</span> <span class="o">=</span> <span class="mi">64</span>
+<span class="n">num_blocks</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">forecast_horizon</span> <span class="o">=</span> <span class="mi">12</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="nc">NBEATS</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">num_blocks</span><span class="p">,</span> <span class="n">forecast_horizon</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Model parameters: </span><span class="si">{</span><span class="nf">sum</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="nf">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="p">.</span><span class="nf">parameters</span><span class="p">())</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="implementing-deepar">Implementing DeepAR</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DeepAR</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">,</span> <span class="n">output_size</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">DeepAR</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">hidden_size</span> <span class="o">=</span> <span class="n">hidden_size</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">num_layers</span> <span class="o">=</span> <span class="n">num_layers</span>
+        
+        <span class="c1"># LSTM layers
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">lstm</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">LSTM</span><span class="p">(</span>
+            <span class="n">input_size</span><span class="o">=</span><span class="n">input_size</span><span class="p">,</span>
+            <span class="n">hidden_size</span><span class="o">=</span><span class="n">hidden_size</span><span class="p">,</span>
+            <span class="n">num_layers</span><span class="o">=</span><span class="n">num_layers</span><span class="p">,</span>
+            <span class="n">batch_first</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+            <span class="n">dropout</span><span class="o">=</span><span class="mf">0.1</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Output projection
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">output_projection</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">)</span>
+        
+        <span class="c1"># Distribution parameters (for probabilistic forecasting)
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">mu_projection</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">sigma_projection</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">hidden</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c1"># LSTM forward pass
+</span>        <span class="n">lstm_out</span><span class="p">,</span> <span class="n">hidden</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">lstm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">hidden</span><span class="p">)</span>
+        
+        <span class="c1"># Get last output
+</span>        <span class="n">last_output</span> <span class="o">=</span> <span class="n">lstm_out</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        
+        <span class="c1"># Point forecast
+</span>        <span class="n">point_forecast</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">output_projection</span><span class="p">(</span><span class="n">last_output</span><span class="p">)</span>
+        
+        <span class="c1"># Distribution parameters
+</span>        <span class="n">mu</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">mu_projection</span><span class="p">(</span><span class="n">last_output</span><span class="p">)</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">sigma_projection</span><span class="p">(</span><span class="n">last_output</span><span class="p">))</span>  <span class="c1"># Ensure positive
+</span>        
+        <span class="k">return</span> <span class="n">point_forecast</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">hidden</span>
+    
+    <span class="k">def</span> <span class="nf">init_hidden</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+        <span class="nf">return </span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">num_layers</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">hidden_size</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span>
+                <span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">num_layers</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">hidden_size</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>
+
+<span class="c1"># Example usage
+</span><span class="n">input_size</span> <span class="o">=</span> <span class="mi">24</span>
+<span class="n">hidden_size</span> <span class="o">=</span> <span class="mi">64</span>
+<span class="n">num_layers</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">output_size</span> <span class="o">=</span> <span class="mi">12</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="nc">DeepAR</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">,</span> <span class="n">output_size</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">DeepAR parameters: </span><span class="si">{</span><span class="nf">sum</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="nf">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="p">.</span><span class="nf">parameters</span><span class="p">())</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="training-and-evaluation">Training and Evaluation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">val_loader</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">):</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">device</span><span class="p">(</span><span class="sh">'</span><span class="s">cuda</span><span class="sh">'</span> <span class="k">if</span> <span class="n">torch</span><span class="p">.</span><span class="n">cuda</span><span class="p">.</span><span class="nf">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="sh">'</span><span class="s">cpu</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    
+    <span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">MSELoss</span><span class="p">()</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="p">.</span><span class="nc">Adam</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="nf">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
+    
+    <span class="n">train_losses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">val_losses</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+        <span class="c1"># Training
+</span>        <span class="n">model</span><span class="p">.</span><span class="nf">train</span><span class="p">()</span>
+        <span class="n">train_loss</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_y</span> <span class="ow">in</span> <span class="n">train_loader</span><span class="p">:</span>
+            <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_y</span> <span class="o">=</span> <span class="n">batch_x</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">batch_y</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+            
+            <span class="n">optimizer</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">batch_x</span><span class="p">)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="nf">criterion</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">batch_y</span><span class="p">)</span>
+            <span class="n">loss</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+            <span class="n">optimizer</span><span class="p">.</span><span class="nf">step</span><span class="p">()</span>
+            
+            <span class="n">train_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="nf">item</span><span class="p">()</span>
+        
+        <span class="c1"># Validation
+</span>        <span class="n">model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+        <span class="n">val_loss</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_y</span> <span class="ow">in</span> <span class="n">val_loader</span><span class="p">:</span>
+                <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_y</span> <span class="o">=</span> <span class="n">batch_x</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">batch_y</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">batch_x</span><span class="p">)</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="nf">criterion</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">batch_y</span><span class="p">)</span>
+                <span class="n">val_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="nf">item</span><span class="p">()</span>
+        
+        <span class="n">train_losses</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">train_loss</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">train_loader</span><span class="p">))</span>
+        <span class="n">val_losses</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">val_loss</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">val_loader</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="n">epoch</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s">: Train Loss: </span><span class="si">{</span><span class="n">train_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="s">, Val Loss: </span><span class="si">{</span><span class="n">val_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">train_losses</span><span class="p">,</span> <span class="n">val_losses</span>
+
+<span class="c1"># Plot training curves
+</span><span class="k">def</span> <span class="nf">plot_training_curves</span><span class="p">(</span><span class="n">train_losses</span><span class="p">,</span> <span class="n">val_losses</span><span class="p">):</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">train_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Training Loss</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">val_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Validation Loss</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Epoch</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Loss</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Training and Validation Loss</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="data-preparation">Data Preparation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">prepare_time_series_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">lookback</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">forecast_horizon</span><span class="o">=</span><span class="mi">12</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Prepare time series data for deep learning models
+    
+    Args:
+        data: 1D numpy array of time series
+        lookback: Number of past observations to use
+        forecast_horizon: Number of future steps to predict
+    
+    Returns:
+        X: Input features (batch_size, lookback)
+        y: Target values (batch_size, forecast_horizon)
+    </span><span class="sh">"""</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">lookback</span> <span class="o">-</span> <span class="n">forecast_horizon</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">X</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">lookback</span><span class="p">])</span>
+        <span class="n">y</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">lookback</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">lookback</span><span class="o">+</span><span class="n">forecast_horizon</span><span class="p">])</span>
+    
+    <span class="k">return</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+<span class="c1"># Example with synthetic data
+</span><span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">trend</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">t</span>
+<span class="n">seasonal</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="mi">24</span><span class="p">)</span>  <span class="c1"># Daily seasonality
+</span><span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">trend</span> <span class="o">+</span> <span class="n">seasonal</span> <span class="o">+</span> <span class="n">noise</span>
+
+<span class="c1"># Prepare data
+</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nf">prepare_time_series_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">lookback</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">forecast_horizon</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+<span class="c1"># Split into train/validation
+</span><span class="n">split_idx</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="mf">0.8</span> <span class="o">*</span> <span class="nf">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:</span><span class="n">split_idx</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">split_idx</span><span class="p">:]</span>
+<span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:</span><span class="n">split_idx</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">split_idx</span><span class="p">:]</span>
+
+<span class="c1"># Convert to PyTorch tensors
+</span><span class="n">X_train</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nc">FloatTensor</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+<span class="n">y_train</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nc">FloatTensor</span><span class="p">(</span><span class="n">y_train</span><span class="p">)</span>
+<span class="n">X_val</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nc">FloatTensor</span><span class="p">(</span><span class="n">X_val</span><span class="p">)</span>
+<span class="n">y_val</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nc">FloatTensor</span><span class="p">(</span><span class="n">y_val</span><span class="p">)</span>
+
+<span class="c1"># Create data loaders
+</span><span class="kn">from</span> <span class="n">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">TensorDataset</span>
+
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="nc">TensorDataset</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">val_dataset</span> <span class="o">=</span> <span class="nc">TensorDataset</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+
+<span class="n">train_loader</span> <span class="o">=</span> <span class="nc">DataLoader</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">val_loader</span> <span class="o">=</span> <span class="nc">DataLoader</span><span class="p">(</span><span class="n">val_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="5-model-comparison-and-selection">5. Model Comparison and Selection</h2>
+
+<h3 id="when-to-use-n-beats">When to Use N-BEATS</h3>
+
+<p><strong>✅ Best for:</strong></p>
+<ul>
+  <li><strong>Interpretable forecasts</strong>: Need trend and seasonality decomposition</li>
+  <li><strong>Fast training</strong>: Quick model development and iteration</li>
+  <li><strong>Multiple time series</strong>: Handle many series efficiently</li>
+  <li><strong>Point forecasts</strong>: Single value predictions</li>
+</ul>
+
+<p><strong>❌ Not ideal for:</strong></p>
+<ul>
+  <li><strong>Probabilistic forecasts</strong>: Need uncertainty quantification</li>
+  <li><strong>Very long sequences</strong>: Limited by lookback window</li>
+  <li><strong>External variables</strong>: Cannot incorporate additional features</li>
+</ul>
+
+<h3 id="when-to-use-deepar">When to Use DeepAR</h3>
+
+<p><strong>✅ Best for:</strong></p>
+<ul>
+  <li><strong>Probabilistic forecasts</strong>: Need uncertainty estimates</li>
+  <li><strong>Multiple related series</strong>: Leverage relationships between series</li>
+  <li><strong>External variables</strong>: Incorporate additional features</li>
+  <li><strong>Long sequences</strong>: Handle very long time series</li>
+</ul>
+
+<p><strong>❌ Not ideal for:</strong></p>
+<ul>
+  <li><strong>Fast training</strong>: Slower due to sequential nature</li>
+  <li><strong>Interpretability</strong>: Less interpretable than N-BEATS</li>
+  <li><strong>Real-time inference</strong>: Sequential generation can be slow</li>
+</ul>
+
+<h3 id="performance-comparison">Performance Comparison</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>N-BEATS</th>
+      <th>DeepAR</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Training Speed</strong></td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Inference Speed</strong></td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Interpretability</strong></td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Uncertainty</strong></td>
+      <td>⭐⭐</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Multi-series</strong></td>
+      <td>⭐⭐⭐⭐</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>External Variables</strong></td>
+      <td>⭐⭐</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="6-next-steps">6. Next Steps</h2>
+
+<h3 id="advanced-topics-to-explore">Advanced Topics to Explore</h3>
+
+<ol>
+  <li><strong>Attention Mechanisms</strong>
+    <ul>
+      <li>Transformer-based models for time series</li>
+      <li>Self-attention for long-range dependencies</li>
+    </ul>
+  </li>
+  <li><strong>Multi-horizon Forecasting</strong>
+    <ul>
+      <li>Direct vs. recursive forecasting</li>
+      <li>Hierarchical forecasting</li>
+    </ul>
+  </li>
+  <li><strong>Ensemble Methods</strong>
+    <ul>
+      <li>Combining multiple models</li>
+      <li>Stacking and blending strategies</li>
+    </ul>
+  </li>
+  <li><strong>Real-world Applications</strong>
+    <ul>
+      <li>Financial time series</li>
+      <li>IoT sensor data</li>
+      <li>Energy consumption forecasting</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="practical-tips">Practical Tips</h3>
+
+<ol>
+  <li><strong>Data Preprocessing</strong>
+    <ul>
+      <li>Handle missing values appropriately</li>
+      <li>Normalize/standardize your data</li>
+      <li>Consider seasonal decomposition</li>
+    </ul>
+  </li>
+  <li><strong>Hyperparameter Tuning</strong>
+    <ul>
+      <li>Use cross-validation for time series</li>
+      <li>Grid search or Bayesian optimization</li>
+      <li>Monitor for overfitting</li>
+    </ul>
+  </li>
+  <li><strong>Model Evaluation</strong>
+    <ul>
+      <li>Use appropriate metrics (MSE, MAE, MAPE)</li>
+      <li>Consider business context</li>
+      <li>Validate on out-of-sample data</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="code-repository">Code Repository</h3>
+
+<p>All the code examples from this post are available in our GitHub repository. You can find:</p>
+<ul>
+  <li>Complete implementations of N-BEATS and DeepAR</li>
+  <li>Training and evaluation scripts</li>
+  <li>Example datasets and notebooks</li>
+  <li>Performance benchmarks</li>
+</ul>
+
+<hr />
+
+<h2 id="-series-navigation">🔗 Series Navigation</h2>
+
+<p><strong>← Previous</strong>: <a href="/en/categories/data-ai/2025-08-31-time-series-basics/">Part 1: Time Series Forecasting Basics - ARIMA to Prophet</a></p>
+
+<p><strong>Next →</strong>: Part 3: Advanced Deep Learning Models (Coming Soon)</p>
+
+<hr />
+
+<p><em>This post is part of our comprehensive series on the evolution of time series forecasting. In the next part, we’ll explore cutting-edge models like Informer, Autoformer, and PatchTST that are pushing the boundaries of what’s possible in time series forecasting.</em></p>
+
+<p><em>Happy forecasting! 🚀</em></p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+      
+      
+      
+      
+        
+        
+        <a href="" class="nav-link next">
+          다음:  →
+        </a>
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-ai/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

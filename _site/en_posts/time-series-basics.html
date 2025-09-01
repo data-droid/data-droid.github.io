@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Systematically learn the basic concepts of time series data and traditional statistical methods, up to the emergence of Prophet, and implement them with actual code.">
+
+
+
+<title>Part 1: Fundamentals of Time Series Forecasting - From ARIMA to Prophet - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 1: Fundamentals of Time Series Forecasting - From ARIMA to Prophet">
+<meta property="og:description" content="Systematically learn the basic concepts of time series data and traditional statistical methods, up to the emergence of Prophet, and implement them with actual code.">
+<meta property="og:url" content="http://localhost:4000/en_posts/time-series-basics.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 1: Fundamentals of Time Series Forecasting - From ARIMA to Prophet">
+<meta name="twitter:description" content="Systematically learn the basic concepts of time series data and traditional statistical methods, up to the emergence of Prophet, and implement them with actual code.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      <a href="/en_posts/time-series-basics.html" class="lang-btn ">한국어</a>
+      <a href="/en/en_posts/time-series-basics.html" class="lang-btn active">English</a>
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data ai</span>
+      <span class="post-date">2025년 08월 31일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 1: Fundamentals of Time Series Forecasting - From ARIMA to Prophet</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">TimeSeriesForecasting</span>
+      
+        <span class="tag">ARIMA</span>
+      
+        <span class="tag">Prophet</span>
+      
+        <span class="tag">Statistics</span>
+      
+        <span class="tag">Python</span>
+      
+        <span class="tag">TimeSeriesAnalysis</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Time series forecasting 시리즈</span>
+      <span class="series-order">Part 2</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 25 min</span>
+      
+      
+        <span class="difficulty">📊 Beginner</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-1-fundamentals-of-time-series-forecasting---from-arima-to-prophet">Part 1: Fundamentals of Time Series Forecasting - From ARIMA to Prophet</h1>
+
+<blockquote>
+  <p>Systematically learn the basic concepts of time series data and traditional statistical methods, up to the emergence of Prophet, and implement them with actual code.</p>
+</blockquote>
+
+<h2 id="-table-of-contents">📋 Table of Contents</h2>
+
+<ol>
+  <li><a href="#what-is-time-series-forecasting">What is Time Series Forecasting?</a></li>
+  <li><a href="#characteristics-of-time-series-data">Characteristics of Time Series Data</a></li>
+  <li><a href="#traditional-statistical-methods">Traditional Statistical Methods</a></li>
+  <li><a href="#arima-models">ARIMA Models</a></li>
+  <li><a href="#introduction-to-prophet">Introduction to Prophet</a></li>
+  <li><a href="#practical-implementation">Practical Implementation</a></li>
+  <li><a href="#methodology-comparison">Methodology Comparison</a></li>
+  <li><a href="#next-steps">Next Steps</a></li>
+</ol>
+
+<h2 id="-what-is-time-series-forecasting">🎯 What is Time Series Forecasting?</h2>
+
+<p>Time series forecasting is <strong>a technology that learns patterns in data arranged in chronological order to predict future values</strong>. It is used in various fields such as stock prices, sales volume, sensor data, and more.</p>
+
+<h3 id="-characteristics-of-time-series-data">🔍 Characteristics of Time Series Data</h3>
+
+<ul>
+  <li><strong>Trend</strong>: Long-term increase/decrease patterns</li>
+  <li><strong>Seasonality</strong>: Periodically repeating patterns</li>
+  <li><strong>Noise</strong>: Random variations that are difficult to predict</li>
+  <li><strong>Structural Changes</strong>: Pattern changes occurring at specific points in time</li>
+</ul>
+
+<h2 id="-characteristics-of-time-series-data-1">📊 Characteristics of Time Series Data</h2>
+
+<h3 id="1-stationarity">1. Stationarity</h3>
+<p>Stationarity means that the statistical properties of a time series do not change over time.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Stationarity test example
+</span><span class="kn">from</span> <span class="n">statsmodels.tsa.stattools</span> <span class="kn">import</span> <span class="n">adfuller</span>
+
+<span class="k">def</span> <span class="nf">check_stationarity</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nf">adfuller</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">ADF Statistic: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">p-value: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Critical Values: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Time series is stationary (H0 rejected)</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Time series is not stationary (H0 accepted)</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-autocorrelation">2. Autocorrelation</h3>
+<p>Autocorrelation refers to the correlation between values in a time series at different time intervals.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Autocorrelation Function (ACF) and Partial Autocorrelation Function (PACF)
+</span><span class="kn">from</span> <span class="n">statsmodels.graphics.tsaplots</span> <span class="kn">import</span> <span class="n">plot_acf</span><span class="p">,</span> <span class="n">plot_pacf</span>
+
+<span class="k">def</span> <span class="nf">plot_correlation_functions</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="mi">40</span><span class="p">):</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="nf">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    
+    <span class="nf">plot_acf</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="n">lags</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+    <span class="nf">plot_pacf</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="n">lags</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">)</span>
+    
+    <span class="n">plt</span><span class="p">.</span><span class="nf">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="-traditional-statistical-methods">📈 Traditional Statistical Methods</h2>
+
+<h3 id="1-moving-average">1. Moving Average</h3>
+<p>Moving average is a method of calculating the average over a certain period to reduce noise.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">simple_moving_average</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Calculate simple moving average</span><span class="sh">"""</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">.</span><span class="nf">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">).</span><span class="nf">mean</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">exponential_moving_average</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Calculate exponential moving average</span><span class="sh">"""</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">.</span><span class="nf">ewm</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">).</span><span class="nf">mean</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="2-differencing">2. Differencing</h3>
+<p>Differencing is a method used to achieve stationarity in time series.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">difference_series</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Calculate differencing</span><span class="sh">"""</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">.</span><span class="nf">diff</span><span class="p">(</span><span class="n">order</span><span class="p">).</span><span class="nf">dropna</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="️-arima-models">🏗️ ARIMA Models</h2>
+
+<p>ARIMA (AutoRegressive Integrated Moving Average) is the most basic model for time series forecasting.</p>
+
+<h3 id="components-of-arima-model">Components of ARIMA Model</h3>
+
+<ol>
+  <li><strong>AR (AutoRegressive)</strong>: Linear combination of past values</li>
+  <li><strong>I (Integrated)</strong>: Achieving stationarity through differencing</li>
+  <li><strong>MA (Moving Average)</strong>: Linear combination of past errors</li>
+</ol>
+
+<h3 id="arimap-d-q-parameters">ARIMA(p, d, q) Parameters</h3>
+
+<ul>
+  <li><strong>p</strong>: AR order (number of past values used)</li>
+  <li><strong>d</strong>: Differencing order (number of differencing operations for stationarity)</li>
+  <li><strong>q</strong>: MA order (number of past errors used)</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">statsmodels.tsa.arima.model</span> <span class="kn">import</span> <span class="n">ARIMA</span>
+<span class="kn">from</span> <span class="n">statsmodels.tsa.stattools</span> <span class="kn">import</span> <span class="n">adfuller</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="n">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="c1"># Generate sample time series data
+</span><span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">trend</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">seasonality</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">trend</span> <span class="o">+</span> <span class="n">seasonality</span> <span class="o">+</span> <span class="n">noise</span>
+
+<span class="c1"># Convert to pandas Series
+</span><span class="n">ts</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nc">Series</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="p">.</span><span class="nf">date_range</span><span class="p">(</span><span class="sh">'</span><span class="s">2020-01-01</span><span class="sh">'</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="sh">'</span><span class="s">D</span><span class="sh">'</span><span class="p">))</span>
+
+<span class="c1"># Stationarity test
+</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Original time series stationarity test:</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">check_stationarity</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+
+<span class="c1"># Achieve stationarity through differencing
+</span><span class="n">ts_diff</span> <span class="o">=</span> <span class="nf">difference_series</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">Stationarity test after 1st differencing:</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">check_stationarity</span><span class="p">(</span><span class="n">ts_diff</span><span class="p">)</span>
+
+<span class="c1"># ACF and PACF plots
+</span><span class="nf">plot_correlation_functions</span><span class="p">(</span><span class="n">ts_diff</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+
+<span class="c1"># Fit ARIMA model (p=2, d=1, q=2)
+</span><span class="n">model</span> <span class="o">=</span> <span class="nc">ARIMA</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">fitted_model</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">fit</span><span class="p">()</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">ARIMA model summary:</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">fitted_model</span><span class="p">.</span><span class="nf">summary</span><span class="p">())</span>
+
+<span class="c1"># Forecasting
+</span><span class="n">forecast_steps</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="n">forecast</span> <span class="o">=</span> <span class="n">fitted_model</span><span class="p">.</span><span class="nf">forecast</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="n">forecast_steps</span><span class="p">)</span>
+
+<span class="c1"># Result visualization
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">index</span><span class="p">,</span> <span class="n">ts</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Original Data</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">forecast</span><span class="p">.</span><span class="n">index</span><span class="p">,</span> <span class="n">forecast</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Forecast</span><span class="sh">'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">red</span><span class="sh">'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">ARIMA Model Forecast Results</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Date</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Value</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># Model performance evaluation
+</span><span class="kn">from</span> <span class="n">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span><span class="p">,</span> <span class="n">mean_absolute_error</span>
+
+<span class="c1"># Split data into training and validation
+</span><span class="n">train_size</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">)</span>
+<span class="n">train</span> <span class="o">=</span> <span class="n">ts</span><span class="p">[:</span><span class="n">train_size</span><span class="p">]</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">ts</span><span class="p">[</span><span class="n">train_size</span><span class="p">:]</span>
+
+<span class="c1"># Refit model with training data
+</span><span class="n">model_train</span> <span class="o">=</span> <span class="nc">ARIMA</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">fitted_model_train</span> <span class="o">=</span> <span class="n">model_train</span><span class="p">.</span><span class="nf">fit</span><span class="p">()</span>
+
+<span class="c1"># Forecast on validation data
+</span><span class="n">forecast_test</span> <span class="o">=</span> <span class="n">fitted_model_train</span><span class="p">.</span><span class="nf">forecast</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="nf">len</span><span class="p">(</span><span class="n">test</span><span class="p">))</span>
+
+<span class="c1"># Calculate performance metrics
+</span><span class="n">mse</span> <span class="o">=</span> <span class="nf">mean_squared_error</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">forecast_test</span><span class="p">)</span>
+<span class="n">mae</span> <span class="o">=</span> <span class="nf">mean_absolute_error</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">forecast_test</span><span class="p">)</span>
+<span class="n">rmse</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">Model performance evaluation:</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">MSE: </span><span class="si">{</span><span class="n">mse</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">MAE: </span><span class="si">{</span><span class="n">mae</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">RMSE: </span><span class="si">{</span><span class="n">rmse</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-introduction-to-prophet">🚀 Introduction to Prophet</h2>
+
+<p>Prophet is an automated time series forecasting tool developed by Facebook, specialized for business time series data.</p>
+
+<h3 id="advantages-of-prophet">Advantages of Prophet</h3>
+
+<ol>
+  <li><strong>Automated Modeling</strong>: Hyperparameter tuning is automated</li>
+  <li><strong>Seasonality Handling</strong>: Automatically detects various seasonal patterns</li>
+  <li><strong>Outlier Handling</strong>: Processes special dates like holidays and events</li>
+  <li><strong>Interpretability</strong>: Analyzes trend and seasonal components</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">fbprophet</span> <span class="kn">import</span> <span class="n">Prophet</span>
+<span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="n">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="c1"># Prepare data for Prophet (columns: ds, y)
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nc">DataFrame</span><span class="p">({</span>
+    <span class="sh">'</span><span class="s">ds</span><span class="sh">'</span><span class="p">:</span> <span class="n">pd</span><span class="p">.</span><span class="nf">date_range</span><span class="p">(</span><span class="sh">'</span><span class="s">2020-01-01</span><span class="sh">'</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="sh">'</span><span class="s">D</span><span class="sh">'</span><span class="p">),</span>
+    <span class="sh">'</span><span class="s">y</span><span class="sh">'</span><span class="p">:</span> <span class="n">ts</span><span class="p">.</span><span class="n">values</span>
+<span class="p">})</span>
+
+<span class="c1"># Create and fit Prophet model
+</span><span class="n">model_prophet</span> <span class="o">=</span> <span class="nc">Prophet</span><span class="p">(</span>
+    <span class="n">yearly_seasonality</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>    <span class="c1"># Yearly seasonality
+</span>    <span class="n">weekly_seasonality</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>    <span class="c1"># Weekly seasonality
+</span>    <span class="n">daily_seasonality</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>    <span class="c1"># Daily seasonality (False if insufficient data)
+</span>    <span class="n">seasonality_mode</span><span class="o">=</span><span class="sh">'</span><span class="s">additive</span><span class="sh">'</span> <span class="c1"># Additive seasonality
+</span><span class="p">)</span>
+
+<span class="n">model_prophet</span><span class="p">.</span><span class="nf">fit</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+<span class="c1"># Future prediction
+</span><span class="n">future</span> <span class="o">=</span> <span class="n">model_prophet</span><span class="p">.</span><span class="nf">make_future_dataframe</span><span class="p">(</span><span class="n">periods</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">forecast_prophet</span> <span class="o">=</span> <span class="n">model_prophet</span><span class="p">.</span><span class="nf">predict</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+
+<span class="c1"># Forecast result visualization
+</span><span class="n">fig1</span> <span class="o">=</span> <span class="n">model_prophet</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">forecast_prophet</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Prophet Model Forecast Results</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># Component analysis
+</span><span class="n">fig2</span> <span class="o">=</span> <span class="n">model_prophet</span><span class="p">.</span><span class="nf">plot_components</span><span class="p">(</span><span class="n">forecast_prophet</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># Prophet model performance evaluation
+# Split data into training and validation
+</span><span class="n">train_size</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">)</span>
+<span class="n">train_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[:</span><span class="n">train_size</span><span class="p">]</span>
+<span class="n">test_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">train_size</span><span class="p">:]</span>
+
+<span class="c1"># Refit model with training data
+</span><span class="n">model_prophet_train</span> <span class="o">=</span> <span class="nc">Prophet</span><span class="p">(</span>
+    <span class="n">yearly_seasonality</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">weekly_seasonality</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">daily_seasonality</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+    <span class="n">seasonality_mode</span><span class="o">=</span><span class="sh">'</span><span class="s">additive</span><span class="sh">'</span>
+<span class="p">)</span>
+<span class="n">model_prophet_train</span><span class="p">.</span><span class="nf">fit</span><span class="p">(</span><span class="n">train_df</span><span class="p">)</span>
+
+<span class="c1"># Forecast on validation data
+</span><span class="n">future_test</span> <span class="o">=</span> <span class="n">model_prophet_train</span><span class="p">.</span><span class="nf">make_future_dataframe</span><span class="p">(</span><span class="n">periods</span><span class="o">=</span><span class="nf">len</span><span class="p">(</span><span class="n">test_df</span><span class="p">))</span>
+<span class="n">forecast_prophet_test</span> <span class="o">=</span> <span class="n">model_prophet_train</span><span class="p">.</span><span class="nf">predict</span><span class="p">(</span><span class="n">future_test</span><span class="p">)</span>
+
+<span class="c1"># Calculate performance metrics
+</span><span class="n">y_true</span> <span class="o">=</span> <span class="n">test_df</span><span class="p">[</span><span class="sh">'</span><span class="s">y</span><span class="sh">'</span><span class="p">].</span><span class="n">values</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">forecast_prophet_test</span><span class="p">[</span><span class="sh">'</span><span class="s">yhat</span><span class="sh">'</span><span class="p">].</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="nf">len</span><span class="p">(</span><span class="n">test_df</span><span class="p">):]</span>
+
+<span class="n">mse_prophet</span> <span class="o">=</span> <span class="nf">mean_squared_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+<span class="n">mae_prophet</span> <span class="o">=</span> <span class="nf">mean_absolute_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+<span class="n">rmse_prophet</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">mse_prophet</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">Prophet model performance evaluation:</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">MSE: </span><span class="si">{</span><span class="n">mse_prophet</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">MAE: </span><span class="si">{</span><span class="n">mae_prophet</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">RMSE: </span><span class="si">{</span><span class="n">rmse_prophet</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="️-practical-implementation">🛠️ Practical Implementation</h2>
+
+<h3 id="1-environment-setup-and-data-preparation">1. Environment Setup and Data Preparation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Required library installation
+# pip install pandas numpy matplotlib seaborn statsmodels fbprophet scikit-learn
+</span>
+<span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="n">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">import</span> <span class="n">seaborn</span> <span class="k">as</span> <span class="n">sns</span>
+<span class="kn">from</span> <span class="n">statsmodels.tsa.arima.model</span> <span class="kn">import</span> <span class="n">ARIMA</span>
+<span class="kn">from</span> <span class="n">statsmodels.tsa.stattools</span> <span class="kn">import</span> <span class="n">adfuller</span>
+<span class="kn">from</span> <span class="n">statsmodels.graphics.tsaplots</span> <span class="kn">import</span> <span class="n">plot_acf</span><span class="p">,</span> <span class="n">plot_pacf</span>
+<span class="kn">from</span> <span class="n">fbprophet</span> <span class="kn">import</span> <span class="n">Prophet</span>
+<span class="kn">from</span> <span class="n">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span><span class="p">,</span> <span class="n">mean_absolute_error</span>
+<span class="kn">import</span> <span class="n">warnings</span>
+<span class="n">warnings</span><span class="p">.</span><span class="nf">filterwarnings</span><span class="p">(</span><span class="sh">'</span><span class="s">ignore</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># Visualization settings
+</span><span class="n">plt</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="sh">'</span><span class="s">seaborn-v0_8</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">sns</span><span class="p">.</span><span class="nf">set_palette</span><span class="p">(</span><span class="sh">"</span><span class="s">husl</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-generate-complex-time-series-data">2. Generate Complex Time Series Data</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">generate_complex_timeseries</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Generate complex time series data</span><span class="sh">"""</span>
+    <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    
+    <span class="c1"># Time index
+</span>    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    
+    <span class="c1"># Trend (non-linear)
+</span>    <span class="n">trend</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">t</span> <span class="o">+</span> <span class="mf">0.001</span> <span class="o">*</span> <span class="n">t</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">0.00001</span> <span class="o">*</span> <span class="n">t</span><span class="o">**</span><span class="mi">3</span>
+    
+    <span class="c1"># Seasonality (multiple periods)
+</span>    <span class="n">seasonality_1</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="mi">365</span><span class="p">)</span>  <span class="c1"># Yearly
+</span>    <span class="n">seasonality_2</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="mi">7</span><span class="p">)</span>     <span class="c1"># Weekly
+</span>    <span class="n">seasonality_3</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="mi">24</span><span class="p">)</span>    <span class="c1"># Daily
+</span>    
+    <span class="c1"># Structural change (pattern change in the middle)
+</span>    <span class="n">structural_change</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="n">t</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="mi">100</span><span class="p">))</span>
+    
+    <span class="c1"># Noise (increasing volatility over time)
+</span>    <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">t</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    
+    <span class="c1"># Add outliers
+</span>    <span class="n">outliers</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="o">//</span><span class="mi">50</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">noise</span><span class="p">[</span><span class="n">outliers</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">outliers</span><span class="p">))</span>
+    
+    <span class="c1"># Complete time series
+</span>    <span class="n">ts</span> <span class="o">=</span> <span class="n">trend</span> <span class="o">+</span> <span class="n">seasonality_1</span> <span class="o">+</span> <span class="n">seasonality_2</span> <span class="o">+</span> <span class="n">seasonality_3</span> <span class="o">+</span> <span class="n">structural_change</span> <span class="o">+</span> <span class="n">noise</span>
+    
+    <span class="k">return</span> <span class="n">pd</span><span class="p">.</span><span class="nc">Series</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="p">.</span><span class="nf">date_range</span><span class="p">(</span><span class="sh">'</span><span class="s">2020-01-01</span><span class="sh">'</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="sh">'</span><span class="s">D</span><span class="sh">'</span><span class="p">))</span>
+
+<span class="c1"># Generate complex time series
+</span><span class="n">complex_ts</span> <span class="o">=</span> <span class="nf">generate_complex_timeseries</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+
+<span class="c1"># Visualization
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">complex_ts</span><span class="p">.</span><span class="n">index</span><span class="p">,</span> <span class="n">complex_ts</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Complex Time Series Data</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Value</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">complex_ts</span><span class="p">.</span><span class="n">index</span><span class="p">[:</span><span class="mi">100</span><span class="p">],</span> <span class="n">complex_ts</span><span class="p">.</span><span class="n">values</span><span class="p">[:</span><span class="mi">100</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">First 100 Days Data (Zoomed)</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Value</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">complex_ts</span><span class="p">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">100</span><span class="p">:],</span> <span class="n">complex_ts</span><span class="p">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">100</span><span class="p">:],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Last 100 Days Data (Zoomed)</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Value</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="3-arima-model-practice">3. ARIMA Model Practice</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">arima_practice</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">ARIMA model practice</span><span class="sh">"""</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== ARIMA Model Practice ===</span><span class="se">\n</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 1. Stationarity test
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">1. Stationarity test</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">check_stationarity</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+    
+    <span class="c1"># 2. Achieve stationarity through differencing
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">2. Achieve stationarity through differencing</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">ts_diff</span> <span class="o">=</span> <span class="nf">difference_series</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+    <span class="nf">check_stationarity</span><span class="p">(</span><span class="n">ts_diff</span><span class="p">)</span>
+    
+    <span class="c1"># 3. ACF and PACF analysis
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">3. ACF and PACF analysis</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">plot_correlation_functions</span><span class="p">(</span><span class="n">ts_diff</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    
+    <span class="c1"># 4. ARIMA model fitting (try multiple parameters)
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">4. ARIMA model fitting</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">best_aic</span> <span class="o">=</span> <span class="nf">float</span><span class="p">(</span><span class="sh">'</span><span class="s">inf</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">best_order</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">best_model</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="c1"># Parameter grid search
+</span>    <span class="n">p_values</span> <span class="o">=</span> <span class="nf">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">d_values</span> <span class="o">=</span> <span class="nf">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">q_values</span> <span class="o">=</span> <span class="nf">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">p_values</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">d_values</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">q_values</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">model</span> <span class="o">=</span> <span class="nc">ARIMA</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">q</span><span class="p">))</span>
+                    <span class="n">fitted_model</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">fit</span><span class="p">()</span>
+                    <span class="n">aic</span> <span class="o">=</span> <span class="n">fitted_model</span><span class="p">.</span><span class="n">aic</span>
+                    
+                    <span class="k">if</span> <span class="n">aic</span> <span class="o">&lt;</span> <span class="n">best_aic</span><span class="p">:</span>
+                        <span class="n">best_aic</span> <span class="o">=</span> <span class="n">aic</span>
+                        <span class="n">best_order</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+                        <span class="n">best_model</span> <span class="o">=</span> <span class="n">fitted_model</span>
+                        
+                    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">ARIMA(</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s">,</span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s">,</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s">) - AIC: </span><span class="si">{</span><span class="n">aic</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                    
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">continue</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">Best model: ARIMA</span><span class="si">{</span><span class="n">best_order</span><span class="si">}</span><span class="s"> (AIC: </span><span class="si">{</span><span class="n">best_aic</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">)</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 5. Forecast with optimal model
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">5. Forecast with optimal model</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">forecast_steps</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">forecast</span> <span class="o">=</span> <span class="n">best_model</span><span class="p">.</span><span class="nf">forecast</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="n">forecast_steps</span><span class="p">)</span>
+    
+    <span class="c1"># 6. Result visualization
+</span>    <span class="n">plt</span><span class="p">.</span><span class="nf">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">timeseries</span><span class="p">.</span><span class="n">index</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Original Data</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">forecast</span><span class="p">.</span><span class="n">index</span><span class="p">,</span> <span class="n">forecast</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Forecast</span><span class="sh">'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">red</span><span class="sh">'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">ARIMA</span><span class="si">{</span><span class="n">best_order</span><span class="si">}</span><span class="s"> Model Forecast Results</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Date</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Value</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">best_model</span><span class="p">,</span> <span class="n">forecast</span>
+
+<span class="c1"># Execute ARIMA practice
+</span><span class="n">arima_model</span><span class="p">,</span> <span class="n">arima_forecast</span> <span class="o">=</span> <span class="nf">arima_practice</span><span class="p">(</span><span class="n">complex_ts</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="4-prophet-model-practice">4. Prophet Model Practice</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">prophet_practice</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Prophet model practice</span><span class="sh">"""</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== Prophet Model Practice ===</span><span class="se">\n</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 1. Prepare data for Prophet
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">1. Prepare data for Prophet</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nc">DataFrame</span><span class="p">({</span>
+        <span class="sh">'</span><span class="s">ds</span><span class="sh">'</span><span class="p">:</span> <span class="n">timeseries</span><span class="p">.</span><span class="n">index</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">y</span><span class="sh">'</span><span class="p">:</span> <span class="n">timeseries</span><span class="p">.</span><span class="n">values</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># 2. Create and fit model
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">2. Prophet model fitting</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="nc">Prophet</span><span class="p">(</span>
+        <span class="n">yearly_seasonality</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">weekly_seasonality</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">daily_seasonality</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="n">seasonality_mode</span><span class="o">=</span><span class="sh">'</span><span class="s">additive</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">changepoint_prior_scale</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>  <span class="c1"># Trend change point sensitivity
+</span>        <span class="n">seasonality_prior_scale</span><span class="o">=</span><span class="mf">10.0</span>   <span class="c1"># Seasonality strength
+</span>    <span class="p">)</span>
+    
+    <span class="c1"># Add holiday information (example)
+</span>    <span class="n">holidays</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nc">DataFrame</span><span class="p">({</span>
+        <span class="sh">'</span><span class="s">holiday</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">new_year</span><span class="sh">'</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">ds</span><span class="sh">'</span><span class="p">:</span> <span class="n">pd</span><span class="p">.</span><span class="nf">to_datetime</span><span class="p">([</span><span class="sh">'</span><span class="s">2020-01-01</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">2021-01-01</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">2022-01-01</span><span class="sh">'</span><span class="p">]),</span>
+        <span class="sh">'</span><span class="s">lower_window</span><span class="sh">'</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">upper_window</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="n">model</span><span class="p">.</span><span class="nf">add_country_holidays</span><span class="p">(</span><span class="n">country_name</span><span class="o">=</span><span class="sh">'</span><span class="s">US</span><span class="sh">'</span><span class="p">)</span>  <span class="c1"># Add US holidays
+</span>    
+    <span class="n">model</span><span class="p">.</span><span class="nf">fit</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    
+    <span class="c1"># 3. Future prediction
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">3. Future prediction</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">future</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">make_future_dataframe</span><span class="p">(</span><span class="n">periods</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">forecast</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">predict</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+    
+    <span class="c1"># 4. Forecast result visualization
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">4. Forecast result visualization</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">fig1</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">forecast</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Prophet Model Forecast Results</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+    
+    <span class="c1"># 5. Component analysis
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">5. Component analysis</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">fig2</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">plot_components</span><span class="p">(</span><span class="n">forecast</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+    
+    <span class="c1"># 6. Trend change point analysis
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">6. Trend change point analysis</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">changepoints</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">changepoints</span>
+    <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">changepoints</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">ds</span><span class="sh">'</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">y</span><span class="sh">'</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Original Data</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">forecast</span><span class="p">[</span><span class="sh">'</span><span class="s">ds</span><span class="sh">'</span><span class="p">],</span> <span class="n">forecast</span><span class="p">[</span><span class="sh">'</span><span class="s">yhat</span><span class="sh">'</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Forecast</span><span class="sh">'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">red</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">vlines</span><span class="p">(</span><span class="n">changepoints</span><span class="p">,</span> <span class="n">ymin</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">y</span><span class="sh">'</span><span class="p">].</span><span class="nf">min</span><span class="p">(),</span> <span class="n">ymax</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">y</span><span class="sh">'</span><span class="p">].</span><span class="nf">max</span><span class="p">(),</span> 
+                  <span class="n">colors</span><span class="o">=</span><span class="sh">'</span><span class="s">green</span><span class="sh">'</span><span class="p">,</span> <span class="n">linestyles</span><span class="o">=</span><span class="sh">'</span><span class="s">--</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Change Points</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Prophet Model - Trend Change Points</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Date</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Value</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">forecast</span>
+
+<span class="c1"># Execute Prophet practice
+</span><span class="n">prophet_model</span><span class="p">,</span> <span class="n">prophet_forecast</span> <span class="o">=</span> <span class="nf">prophet_practice</span><span class="p">(</span><span class="n">complex_ts</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="5-model-performance-comparison-and-analysis">5. Model Performance Comparison and Analysis</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">compare_models</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">arima_forecast</span><span class="p">,</span> <span class="n">prophet_forecast</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Compare ARIMA and Prophet model performance</span><span class="sh">"""</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== Model Performance Comparison ===</span><span class="se">\n</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># Data splitting (training:validation = 8:2)
+</span>    <span class="n">train_size</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">)</span>
+    <span class="n">train</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[:</span><span class="n">train_size</span><span class="p">]</span>
+    <span class="n">test</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="n">train_size</span><span class="p">:]</span>
+    
+    <span class="c1"># ARIMA model refitting and validation
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">1. ARIMA model validation</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">model_arima</span> <span class="o">=</span> <span class="nc">ARIMA</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># Use simple model
+</span>    <span class="n">fitted_arima</span> <span class="o">=</span> <span class="n">model_arima</span><span class="p">.</span><span class="nf">fit</span><span class="p">()</span>
+    <span class="n">forecast_arima_test</span> <span class="o">=</span> <span class="n">fitted_arima</span><span class="p">.</span><span class="nf">forecast</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="nf">len</span><span class="p">(</span><span class="n">test</span><span class="p">))</span>
+    
+    <span class="c1"># Prophet model refitting and validation
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">2. Prophet model validation</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">train_df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nc">DataFrame</span><span class="p">({</span>
+        <span class="sh">'</span><span class="s">ds</span><span class="sh">'</span><span class="p">:</span> <span class="n">train</span><span class="p">.</span><span class="n">index</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">y</span><span class="sh">'</span><span class="p">:</span> <span class="n">train</span><span class="p">.</span><span class="n">values</span>
+    <span class="p">})</span>
+    
+    <span class="n">model_prophet</span> <span class="o">=</span> <span class="nc">Prophet</span><span class="p">(</span>
+        <span class="n">yearly_seasonality</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">weekly_seasonality</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">daily_seasonality</span><span class="o">=</span><span class="bp">False</span>
+    <span class="p">)</span>
+    <span class="n">model_prophet</span><span class="p">.</span><span class="nf">fit</span><span class="p">(</span><span class="n">train_df</span><span class="p">)</span>
+    
+    <span class="n">future_test</span> <span class="o">=</span> <span class="n">model_prophet</span><span class="p">.</span><span class="nf">make_future_dataframe</span><span class="p">(</span><span class="n">periods</span><span class="o">=</span><span class="nf">len</span><span class="p">(</span><span class="n">test</span><span class="p">))</span>
+    <span class="n">forecast_prophet_test</span> <span class="o">=</span> <span class="n">model_prophet</span><span class="p">.</span><span class="nf">predict</span><span class="p">(</span><span class="n">future_test</span><span class="p">)</span>
+    <span class="n">yhat_prophet</span> <span class="o">=</span> <span class="n">forecast_prophet_test</span><span class="p">[</span><span class="sh">'</span><span class="s">yhat</span><span class="sh">'</span><span class="p">].</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="nf">len</span><span class="p">(</span><span class="n">test</span><span class="p">):]</span>
+    
+    <span class="c1"># Calculate performance metrics
+</span>    <span class="k">def</span> <span class="nf">calculate_metrics</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">model_name</span><span class="p">):</span>
+        <span class="n">mse</span> <span class="o">=</span> <span class="nf">mean_squared_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+        <span class="n">mae</span> <span class="o">=</span> <span class="nf">mean_absolute_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+        <span class="n">rmse</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="p">)</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s"> Performance:</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">  MSE: </span><span class="si">{</span><span class="n">mse</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">  MAE: </span><span class="si">{</span><span class="n">mae</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">  RMSE: </span><span class="si">{</span><span class="n">rmse</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">mse</span><span class="p">,</span> <span class="n">mae</span><span class="p">,</span> <span class="n">rmse</span>
+    
+    <span class="c1"># ARIMA performance
+</span>    <span class="n">arima_metrics</span> <span class="o">=</span> <span class="nf">calculate_metrics</span><span class="p">(</span><span class="n">test</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">forecast_arima_test</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="sh">"</span><span class="s">ARIMA</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># Prophet performance
+</span>    <span class="n">prophet_metrics</span> <span class="o">=</span> <span class="nf">calculate_metrics</span><span class="p">(</span><span class="n">test</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">yhat_prophet</span><span class="p">,</span> <span class="sh">"</span><span class="s">Prophet</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># Performance comparison visualization
+</span>    <span class="n">plt</span><span class="p">.</span><span class="nf">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+    
+    <span class="c1"># Complete time series
+</span>    <span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">timeseries</span><span class="p">.</span><span class="n">index</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Original Data</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">arima_forecast</span><span class="p">.</span><span class="n">index</span><span class="p">,</span> <span class="n">arima_forecast</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">ARIMA Forecast</span><span class="sh">'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">red</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">prophet_forecast</span><span class="p">[</span><span class="sh">'</span><span class="s">ds</span><span class="sh">'</span><span class="p">],</span> <span class="n">prophet_forecast</span><span class="p">[</span><span class="sh">'</span><span class="s">yhat</span><span class="sh">'</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Prophet Forecast</span><span class="sh">'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">green</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">test</span><span class="p">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">black</span><span class="sh">'</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="sh">'</span><span class="s">--</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Validation Start</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Complete Time Series and Forecast Comparison</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Date</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Value</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    
+    <span class="c1"># Validation period zoom
+</span>    <span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">test</span><span class="p">.</span><span class="n">index</span><span class="p">,</span> <span class="n">test</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Actual Values</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">test</span><span class="p">.</span><span class="n">index</span><span class="p">,</span> <span class="n">forecast_arima_test</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">ARIMA Forecast</span><span class="sh">'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">red</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">test</span><span class="p">.</span><span class="n">index</span><span class="p">,</span> <span class="n">yhat_prophet</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Prophet Forecast</span><span class="sh">'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">green</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Validation Period Forecast Comparison</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Date</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Value</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    
+    <span class="n">plt</span><span class="p">.</span><span class="nf">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+    
+    <span class="c1"># Performance summary table
+</span>    <span class="n">results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nc">DataFrame</span><span class="p">({</span>
+        <span class="sh">'</span><span class="s">Model</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">ARIMA</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Prophet</span><span class="sh">'</span><span class="p">],</span>
+        <span class="sh">'</span><span class="s">MSE</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="n">arima_metrics</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">prophet_metrics</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+        <span class="sh">'</span><span class="s">MAE</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="n">arima_metrics</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">prophet_metrics</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+        <span class="sh">'</span><span class="s">RMSE</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="n">arima_metrics</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">prophet_metrics</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+    <span class="p">})</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">=== Performance Comparison Summary ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">results_df</span><span class="p">.</span><span class="nf">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+    
+    <span class="c1"># Determine winner
+</span>    <span class="k">if</span> <span class="n">arima_metrics</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">prophet_metrics</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>  <span class="c1"># Based on RMSE
+</span>        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">🏆 ARIMA model shows better performance! (RMSE: </span><span class="si">{</span><span class="n">arima_metrics</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="s">)</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">🏆 Prophet model shows better performance! (RMSE: </span><span class="si">{</span><span class="n">prophet_metrics</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="s">)</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Execute model comparison
+</span><span class="nf">compare_models</span><span class="p">(</span><span class="n">complex_ts</span><span class="p">,</span> <span class="n">arima_forecast</span><span class="p">,</span> <span class="n">prophet_forecast</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-methodology-comparison">📊 Methodology Comparison</h2>
+
+<h3 id="arima-vs-prophet">ARIMA vs Prophet</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Characteristic</th>
+      <th>ARIMA</th>
+      <th>Prophet</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Application Range</strong></td>
+      <td>Linear time series</td>
+      <td>Non-linear time series</td>
+    </tr>
+    <tr>
+      <td><strong>Seasonality Handling</strong></td>
+      <td>Manual setting</td>
+      <td>Automatic detection</td>
+    </tr>
+    <tr>
+      <td><strong>Outlier Handling</strong></td>
+      <td>Sensitive</td>
+      <td>Robust</td>
+    </tr>
+    <tr>
+      <td><strong>Interpretability</strong></td>
+      <td>High</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td><strong>Automation Level</strong></td>
+      <td>Low</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td><strong>Computational Efficiency</strong></td>
+      <td>High</td>
+      <td>Medium</td>
+    </tr>
+    <tr>
+      <td><strong>Hyperparameters</strong></td>
+      <td>Manual tuning</td>
+      <td>Automatic optimization</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="when-to-use-which-model">When to Use Which Model?</h3>
+
+<h4 id="use-arima-when"><strong>Use ARIMA when:</strong></h4>
+<ul>
+  <li>Time series with linear trends</li>
+  <li>Clear seasonal patterns</li>
+  <li>Fast prediction is needed</li>
+  <li>Model interpretation is important</li>
+</ul>
+
+<h4 id="use-prophet-when"><strong>Use Prophet when:</strong></h4>
+<ul>
+  <li>Complex seasonal patterns</li>
+  <li>Special dates like holidays and events</li>
+  <li>Automated modeling is needed</li>
+  <li>Business time series data</li>
+</ul>
+
+<h2 id="-next-steps">🚀 Next Steps</h2>
+
+<p>Now let’s move to <strong>Part 2: Deep Learning-Based Time Series Forecasting</strong> to learn more powerful time series forecasting models through N-BEATS and DeepAR!</p>
+
+<h3 id="what-well-cover-in-the-next-part">What We’ll Cover in the Next Part</h3>
+
+<ol>
+  <li><strong>Background of Deep Learning-Based Models</strong></li>
+  <li><strong>N-BEATS’ Interpretable Block-Based Architecture</strong></li>
+  <li><strong>DeepAR’s Probabilistic Forecasting and Uncertainty Quantification</strong></li>
+  <li><strong>Actual Model Implementation Using PyTorch</strong></li>
+  <li><strong>Performance Comparison with Traditional Methods</strong></li>
+</ol>
+
+<hr />
+
+<p><em>In this part, we covered the core of traditional statistical methods through ARIMA and Prophet. In the next part, experience more sophisticated time series forecasting utilizing the power of deep learning!</em> 🎯</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+      
+        
+      
+      
+      
+      
+      
+        
+        
+        <a href="/data-ai/2025/09/01/time-series-deep-learning.html" class="nav-link next">
+          다음: Part 2: 딥러닝 기반 시계열 예측 - N-BEATS와 DeepAR →
+        </a>
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-ai/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+---
+layout: default
+---
+
+<article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">{{ page.category | replace: '-', ' ' | capitalize }}</span>
+      <span class="post-date">{{ page.date | date: "%Y년 %m월 %d일" }}</span>
+      <span class="post-author">{{ page.author }}</span>
+    </div>
+    
+    <h1 class="post-title">{{ page.title }}</h1>
+    
+    {% if page.tags %}
+    <div class="post-tags">
+      {% for tag in page.tags %}
+        <span class="tag">{{ tag }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+    
+    {% if page.series %}
+    <div class="post-series">
+      <span class="series-badge">📚 {{ page.series | replace: '-', ' ' | capitalize }} 시리즈</span>
+      <span class="series-order">Part {{ page.series_order | plus: 1 }}</span>
+    </div>
+    {% endif %}
+    
+    {% if page.reading_time or page.difficulty %}
+    <div class="post-info">
+      {% if page.reading_time %}
+        <span class="reading-time">⏱️ {{ page.reading_time }}</span>
+      {% endif %}
+      {% if page.difficulty %}
+        <span class="difficulty">📊 {{ page.difficulty }}</span>
+      {% endif %}
+    </div>
+    {% endif %}
+  </header>
+
+  <div class="post-content">
+    {{ content }}
+  </div>
+
+  {% if page.series %}
+  <div class="post-navigation">
+    <div class="nav-links">
+      {% assign series_posts = site.posts | where: "series", page.series | sort: "series_order" %}
+      {% assign current_index = -1 %}
+      {% for post in series_posts %}
+        {% if post.title == page.title %}
+          {% assign current_index = forloop.index %}
+          {% break %}
+        {% endif %}
+      {% endfor %}
+      
+      {% if current_index > 1 %}
+        {% assign prev_index = current_index | minus: 2 %}
+        {% assign prev_post = series_posts[prev_index] %}
+        <a href="{{ site.baseurl }}{{ prev_post.url }}" class="nav-link prev">
+          ← 이전: {{ prev_post.title }}
+        </a>
+      {% endif %}
+      
+      {% if current_index < series_posts.size %}
+        {% assign next_index = current_index %}
+        {% assign next_post = series_posts[next_index] %}
+        <a href="{{ site.baseurl }}{{ next_post.url }}" class="nav-link next">
+          다음: {{ next_post.title }} →
+        </a>
+      {% endif %}
+    </div>
+    
+    <div class="series-overview">
+      <a href="{{ site.baseurl }}/categories/{{ page.category }}/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  {% endif %}
+</article>

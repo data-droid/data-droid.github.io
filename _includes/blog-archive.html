@@ -1,0 +1,221 @@
+{% comment %}
+  자동화된 블로그 아카이브
+  사용법: {% include blog-archive.html %}
+{% endcomment %}
+
+<div class="blog-archive" style="background: #f8f9fa; min-height: 100vh;">
+  <div class="archive-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4rem 0; text-align: center;">
+    <h1 style="font-size: 3rem; margin-bottom: 1rem; font-weight: 700;">📚 블로그 아카이브</h1>
+    <p style="font-size: 1.2rem; opacity: 0.9; margin-bottom: 2rem;">모든 기술 포스트를 카테고리별, 날짜별로 확인할 수 있습니다</p>
+  </div>
+
+  <div class="search-section" style="max-width: 600px; margin: 0 auto;">
+    <div class="search-box" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+      <input type="text" class="search-input" placeholder="포스트 검색..." id="searchInput" style="flex: 1; padding: 1rem 1.5rem; border: none; border-radius: 25px; font-size: 1rem; outline: none; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+      <button class="search-btn" onclick="searchPosts()" style="background: #3498db; color: white; border: none; padding: 1rem 2rem; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: background-color 0.3s ease; white-space: nowrap;">🔍</button>
+    </div>
+    
+    <div class="search-tags" style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; align-items: center;">
+      {% assign all_tags = site.posts | map: "tags" | uniq | sort %}
+      {% for tag in all_tags %}
+        <span class="tag-label" onclick="filterByTag('{{ tag }}')" style="background: rgba(255,255,255,0.9); color: #2c3e50; padding: 0.3rem 0.8rem; border-radius: 15px; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.5); cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">{{ tag }}</span>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="archive-content">
+    <div class="archive-layout">
+      <div class="archive-sidebar" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div class="sidebar-section" style="margin-bottom: 2rem;">
+          <h3 style="color: #2c3e50; font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 2px solid #3498db; padding-bottom: 0.5rem;">📅 연도별 아카이브</h3>
+          <div class="year-archive" id="yearArchive">
+            <!-- 연도별 아카이브는 JavaScript로 동적 생성됩니다 -->
+          </div>
+        </div>
+
+        <div class="sidebar-section" style="margin-bottom: 2rem;">
+          <h3 style="color: #2c3e50; font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 2px solid #3498db; padding-bottom: 0.5rem;">🏷️ 카테고리별</h3>
+          <div class="category-filter">
+            {% assign categories = site.posts | map: "category" | uniq | sort %}
+            {% for category in categories %}
+              {% assign category_posts = site.posts | where: "category", category %}
+              <a href="#" onclick="filterByCategory('{{ category }}')" data-category="{{ category }}" style="color: #3498db; text-decoration: none; padding: 0.5rem; border-radius: 6px; transition: background-color 0.3s ease; display: block; margin-bottom: 0.5rem;">
+                {{ category | replace: '-', ' ' | capitalize }} ({{ category_posts.size }})
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="archive-stats" style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+            <div class="stat-item" style="text-align: center; margin-bottom: 1rem;">
+              <span class="stat-number" style="display: block; font-size: 2rem; font-weight: bold; color: #3498db;">{{ site.posts.size }}</span>
+              <span class="stat-label" style="color: #666; font-size: 0.9rem;">총 포스트</span>
+            </div>
+            <div class="stat-item" style="text-align: center;">
+              <span class="stat-number" style="display: block; font-size: 2rem; font-weight: bold; color: #3498db;">{{ categories.size }}</span>
+              <span class="stat-label" style="color: #666; font-size: 0.9rem;">카테고리</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="archive-main" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-left: 2rem;">
+        <div class="archive-toolbar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #f0f0f0;">
+          <div class="toolbar-left">
+            <span class="post-count" style="font-size: 1.1rem; color: #666;">총 {{ site.posts.size }}개의 포스트</span>
+          </div>
+          <div class="toolbar-right">
+            <select class="sort-select" onchange="sortPosts(this.value)" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; outline: none;">
+              <option value="date-desc">최신순</option>
+              <option value="date-asc">오래된순</option>
+              <option value="title-asc">제목순</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="posts-list" id="postsList" style="display: flex; flex-direction: column; gap: 1.5rem;">
+          {% for post in site.posts %}
+            <div class="post-item" data-category="{{ post.category }}" data-date="{{ post.date | date: '%Y-%m-%d' }}" data-title="{{ post.title | downcase }}" style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 1.5rem; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+              <div class="post-excerpt">
+                <div class="post-meta" style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                  <span class="post-category" style="background: #3498db; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 500;">{{ post.category | replace: '-', ' ' | capitalize }}</span>
+                  <span class="post-date" style="color: #6c757d; font-size: 0.9rem;">{{ post.date | date: "%Y년 %m월 %d일" }}</span>
+                  <span class="post-author" style="color: #6c757d; font-size: 0.9rem;">{{ post.author }}</span>
+                </div>
+                <h3 class="post-title" style="margin-bottom: 1rem;">
+                  <a href="{{ site.baseurl }}{{ post.url }}" style="color: #2c3e50; text-decoration: none; font-size: 1.4rem; font-weight: 600; line-height: 1.4;">{{ post.title }}</a>
+                </h3>
+                <p class="post-description" style="color: #666; line-height: 1.6; margin-bottom: 1rem;">{{ post.description }}</p>
+                <div class="post-tags" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                  {% for tag in post.tags %}
+                    <span class="tag" style="background: #f8f9fa; color: #495057; padding: 0.2rem 0.6rem; border-radius: 15px; font-size: 0.75rem; font-weight: 500; border: 1px solid #dee2e6;">{{ tag }}</span>
+                  {% endfor %}
+                </div>
+                {% if post.series %}
+                  <div class="post-series" style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span class="series-badge" style="background: #e74c3c; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 500;">📚 {{ post.series | replace: '-', ' ' | capitalize }} 시리즈</span>
+                    {% if post.series_order > 0 %}
+                      <span class="series-order" style="background: #f39c12; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 500;">Part {{ post.series_order | plus: 1 }}</span>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function searchPosts() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const posts = document.querySelectorAll('.post-item');
+  
+  posts.forEach(post => {
+    const title = post.querySelector('.post-title').textContent.toLowerCase();
+    const description = post.querySelector('.post-description').textContent.toLowerCase();
+    const tags = Array.from(post.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase());
+    
+    const matches = title.includes(searchTerm) || 
+                   description.includes(searchTerm) || 
+                   tags.some(tag => tag.includes(searchTerm));
+    
+    post.style.display = matches ? 'block' : 'none';
+  });
+}
+
+function filterByTag(tag) {
+  const posts = document.querySelectorAll('.post-item');
+  posts.forEach(post => {
+    const postTags = Array.from(post.querySelectorAll('.tag')).map(t => t.textContent);
+    post.style.display = postTags.includes(tag) ? 'block' : 'none';
+  });
+}
+
+function filterByCategory(category) {
+  const posts = document.querySelectorAll('.post-item');
+  posts.forEach(post => {
+    const postCategory = post.getAttribute('data-category');
+    post.style.display = postCategory === category ? 'block' : 'none';
+  });
+}
+
+function filterByYear(year) {
+  const posts = document.querySelectorAll('.post-item');
+  posts.forEach(post => {
+    const postDate = post.getAttribute('data-date');
+    post.style.display = postDate.startsWith(year) ? 'block' : 'none';
+  });
+}
+
+function sortPosts(sortBy) {
+  const postsList = document.getElementById('postsList');
+  const posts = Array.from(postsList.children);
+  
+  posts.sort((a, b) => {
+    switch(sortBy) {
+      case 'date-desc':
+        // 최신순: 날짜 내림차순 (최신 날짜가 먼저)
+        const dateDescA = new Date(a.getAttribute('data-date'));
+        const dateDescB = new Date(b.getAttribute('data-date'));
+        return dateDescB - dateDescA;
+      case 'date-asc':
+        // 오래된순: 날짜 오름차순 (오래된 날짜가 먼저)
+        const dateAscA = new Date(a.getAttribute('data-date'));
+        const dateAscB = new Date(b.getAttribute('data-date'));
+        return dateAscA - dateAscB;
+      case 'title-asc':
+        // 제목순: 알파벳/한글 오름차순
+        const titleA = a.getAttribute('data-title').toLowerCase();
+        const titleB = b.getAttribute('data-title').toLowerCase();
+        return titleA.localeCompare(titleB);
+      default:
+        return 0;
+    }
+  });
+  
+  // 정렬된 포스트를 DOM에 다시 추가
+  posts.forEach(post => postsList.appendChild(post));
+  
+  // 정렬 후 현재 선택된 옵션 표시
+  console.log(`포스트를 ${sortBy} 기준으로 정렬했습니다.`);
+}
+
+// 연도별 아카이브 동적 생성
+function generateYearArchive() {
+  const yearArchive = document.getElementById('yearArchive');
+  const posts = document.querySelectorAll('.post-item');
+  
+  // 연도별 포스트 수 계산
+  const yearCounts = {};
+  posts.forEach(post => {
+    const postDate = post.getAttribute('data-date');
+    const year = postDate.split('-')[0];
+    yearCounts[year] = (yearCounts[year] || 0) + 1;
+  });
+  
+  // 연도별로 정렬하여 HTML 생성
+  const years = Object.keys(yearCounts).sort((a, b) => b - a);
+  let html = '';
+  
+  years.forEach(year => {
+    html += `
+      <div class="year-archive-item" style="margin-bottom: 0.5rem;">
+        <a href="#" onclick="filterByYear('${year}')" style="color: #3498db; text-decoration: none; padding: 0.5rem; border-radius: 6px; transition: background-color 0.3s ease; display: block;">
+          ${year}년 (${yearCounts[year]})
+        </a>
+      </div>
+    `;
+  });
+  
+  yearArchive.innerHTML = html;
+}
+
+// 페이지 로드 시 연도별 아카이브 생성
+document.addEventListener('DOMContentLoaded', function() {
+  generateYearArchive();
+});
+</script>

@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="딥러닝 기반 시계열 예측 모델의 핵심을 배우고 N-BEATS와 DeepAR을 실제 코드로 구현해보세요.">
+
+
+
+<title>Part 2: 딥러닝 기반 시계열 예측 - N-BEATS와 DeepAR - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 2: 딥러닝 기반 시계열 예측 - N-BEATS와 DeepAR">
+<meta property="og:description" content="딥러닝 기반 시계열 예측 모델의 핵심을 배우고 N-BEATS와 DeepAR을 실제 코드로 구현해보세요.">
+<meta property="og:url" content="http://localhost:4000/data-ai/2025/09/01/time-series-deep-learning.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 2: 딥러닝 기반 시계열 예측 - N-BEATS와 DeepAR">
+<meta name="twitter:description" content="딥러닝 기반 시계열 예측 모델의 핵심을 배우고 N-BEATS와 DeepAR을 실제 코드로 구현해보세요.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      <a href="/data-ai/2025/09/01/time-series-deep-learning.html" class="lang-btn active">한국어</a>
+      <a href="/en/data-ai/2025/09/01/time-series-deep-learning.html" class="lang-btn ">English</a>
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data ai</span>
+      <span class="post-date">2025년 09월 01일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 2: 딥러닝 기반 시계열 예측 - N-BEATS와 DeepAR</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">시계열예측</span>
+      
+        <span class="tag">딥러닝</span>
+      
+        <span class="tag">N-BEATS</span>
+      
+        <span class="tag">DeepAR</span>
+      
+        <span class="tag">PyTorch</span>
+      
+        <span class="tag">머신러닝</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Time series forecasting 시리즈</span>
+      <span class="series-order">Part 3</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 30분</span>
+      
+      
+        <span class="difficulty">📊 중급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-2-딥러닝-기반-시계열-예측---n-beats와-deepar">Part 2: 딥러닝 기반 시계열 예측 - N-BEATS와 DeepAR</h1>
+
+<blockquote>
+  <p>딥러닝 기반 시계열 예측 모델의 핵심을 배우고 N-BEATS와 DeepAR을 실제 코드로 구현해보세요.</p>
+</blockquote>
+
+<h2 id="-목차">📋 목차</h2>
+
+<ol>
+  <li><a href="#딥러닝-기반-시계열-예측의-등장">딥러닝 기반 시계열 예측의 등장</a></li>
+  <li><a href="#n-beats-해석-가능한-딥러닝-시계열-모델">N-BEATS: 해석 가능한 딥러닝 시계열 모델</a></li>
+  <li><a href="#deepar-확률적-시계열-예측">DeepAR: 확률적 시계열 예측</a></li>
+  <li><a href="#실습-n-beats와-deepar-구현">실습: N-BEATS와 DeepAR 구현</a></li>
+  <li><a href="#모델-성능-비교-및-분석">모델 성능 비교 및 분석</a></li>
+  <li><a href="#다음-단계-및-확장">다음 단계 및 확장</a></li>
+  <li><a href="#학습-요약">학습 요약</a></li>
+</ol>
+
+<h2 id="-딥러닝-기반-시계열-예측의-등장">🚀 딥러닝 기반 시계열 예측의 등장</h2>
+
+<h3 id="전통적-방법의-한계">전통적 방법의 한계</h3>
+
+<p>Part 1에서 학습한 ARIMA와 Prophet은 훌륭한 모델이지만, 다음과 같은 한계가 있습니다:</p>
+
+<ol>
+  <li><strong>선형성 가정</strong>: 복잡한 비선형 패턴을 학습하기 어려움</li>
+  <li><strong>수동 특성 엔지니어링</strong>: 도메인 지식에 의존적</li>
+  <li><strong>장기 의존성</strong>: 먼 과거의 정보를 효과적으로 활용하지 못함</li>
+  <li><strong>불확실성 정량화</strong>: 예측의 신뢰 구간을 정확히 추정하기 어려움</li>
+</ol>
+
+<h3 id="딥러닝의-혁신">딥러닝의 혁신</h3>
+
+<p>딥러닝은 이러한 한계를 극복하고 시계열 예측에 새로운 가능성을 열었습니다:</p>
+
+<ul>
+  <li><strong>비선형 패턴 학습</strong>: 복잡한 관계를 자동으로 발견</li>
+  <li><strong>자동 특성 추출</strong>: 도메인 지식 없이도 패턴 학습</li>
+  <li><strong>장기 의존성 모델링</strong>: LSTM, Transformer 등을 통한 시퀀스 학습</li>
+  <li><strong>확률적 예측</strong>: 불확실성을 정량화하여 신뢰 구간 제공</li>
+</ul>
+
+<h2 id="️-n-beats-해석-가능한-딥러닝-시계열-모델">🏗️ N-BEATS: 해석 가능한 딥러닝 시계열 모델</h2>
+
+<h3 id="n-beats의-핵심-아이디어">N-BEATS의 핵심 아이디어</h3>
+
+<p>N-BEATS (Neural Basis Expansion Analysis for Time Series)는 2019년 Element AI에서 개발한 딥러닝 시계열 예측 모델입니다.</p>
+
+<h4 id="1-블록-기반-아키텍처"><strong>1. 블록 기반 아키텍처</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>입력 시계열 → Backcast 블록 → Forecast 블록 → 최종 예측
+     ↓              ↓              ↓
+  Lookback      과거 재구성     미래 예측
+</code></pre></div></div>
+
+<h4 id="2-해석-가능한-블록-구조"><strong>2. 해석 가능한 블록 구조</strong></h4>
+
+<p>각 블록은 다음과 같은 구성 요소를 가집니다:</p>
+
+<ul>
+  <li><strong>Linear Layer</strong>: 입력을 고차원으로 변환</li>
+  <li><strong>ReLU Activation</strong>: 비선형성 추가</li>
+  <li><strong>Linear Layer</strong>: 원래 차원으로 복원</li>
+  <li><strong>Residual Connection</strong>: 그래디언트 흐름 개선</li>
+</ul>
+
+<h4 id="3-이중-출력-구조"><strong>3. 이중 출력 구조</strong></h4>
+
+<ul>
+  <li><strong>Backcast</strong>: 입력 시계열을 재구성하여 패턴 학습</li>
+  <li><strong>Forecast</strong>: 미래 값을 예측</li>
+</ul>
+
+<h3 id="n-beats의-장점">N-BEATS의 장점</h3>
+
+<ol>
+  <li><strong>해석 가능성</strong>: 각 블록이 학습하는 패턴을 분석 가능</li>
+  <li><strong>확장성</strong>: 다양한 시계열 길이에 적용 가능</li>
+  <li><strong>효율성</strong>: 빠른 학습과 예측</li>
+  <li><strong>안정성</strong>: 그래디언트 소실 문제 해결</li>
+</ol>
+
+<h2 id="-deepar-확률적-시계열-예측">🔮 DeepAR: 확률적 시계열 예측</h2>
+
+<h3 id="deepar의-핵심-개념">DeepAR의 핵심 개념</h3>
+
+<p>DeepAR은 Amazon에서 개발한 확률적 시계열 예측 모델로, <strong>확률 분포를 직접 모델링</strong>합니다.</p>
+
+<h4 id="1-확률적-접근법"><strong>1. 확률적 접근법</strong></h4>
+
+<p>전통적 모델들이 점 예측을 하는 반면, DeepAR은:</p>
+<ul>
+  <li><strong>확률 분포 학습</strong>: 정규분포, 음이항분포 등</li>
+  <li><strong>불확실성 정량화</strong>: 예측의 신뢰 구간 제공</li>
+  <li><strong>앙상블 효과</strong>: 여러 샘플을 통한 안정적 예측</li>
+</ul>
+
+<h4 id="2-lstm-기반-아키텍처"><strong>2. LSTM 기반 아키텍처</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>시계열 입력 → LSTM 셀 → 확률 분포 파라미터 → 샘플링 → 예측
+     ↓           ↓              ↓              ↓
+  Lookback    상태 업데이트    μ, σ 학습     확률적 예측
+</code></pre></div></div>
+
+<h4 id="3-조건부-확률-모델링"><strong>3. 조건부 확률 모델링</strong></h4>
+
+<p>DeepAR은 다음 확률을 모델링합니다:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>P(y_{t+1} | y_1, y_2, ..., y_t, x_1, x_2, ..., x_t)
+</code></pre></div></div>
+
+<p>여기서 <code class="language-plaintext highlighter-rouge">x_t</code>는 외부 변수(휴일, 계절 등)를 의미합니다.</p>
+
+<h3 id="deepar의-장점">DeepAR의 장점</h3>
+
+<ol>
+  <li><strong>불확실성 정량화</strong>: 예측의 신뢰도를 정확히 측정</li>
+  <li><strong>외부 변수 활용</strong>: 계절성, 휴일 등 추가 정보 반영</li>
+  <li><strong>다변량 시계열</strong>: 여러 시계열을 동시에 모델링</li>
+  <li><strong>실시간 학습</strong>: 새로운 데이터로 지속적 업데이트</li>
+</ol>
+
+<h2 id="️-실습-n-beats와-deepar-구현">🛠️ 실습: N-BEATS와 DeepAR 구현</h2>
+
+<h3 id="1-환경-설정-및-라이브러리-설치">1. 환경 설정 및 라이브러리 설치</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 필요한 라이브러리 설치
+# pip install torch torchvision torchaudio
+# pip install pandas numpy matplotlib seaborn scikit-learn
+</span>
+<span class="kn">import</span> <span class="n">torch</span>
+<span class="kn">import</span> <span class="n">torch.nn</span> <span class="k">as</span> <span class="n">nn</span>
+<span class="kn">import</span> <span class="n">torch.optim</span> <span class="k">as</span> <span class="n">optim</span>
+<span class="kn">from</span> <span class="n">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">TensorDataset</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="n">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">import</span> <span class="n">seaborn</span> <span class="k">as</span> <span class="n">sns</span>
+<span class="kn">from</span> <span class="n">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span><span class="p">,</span> <span class="n">mean_absolute_error</span>
+<span class="kn">import</span> <span class="n">warnings</span>
+<span class="n">warnings</span><span class="p">.</span><span class="nf">filterwarnings</span><span class="p">(</span><span class="sh">'</span><span class="s">ignore</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># PyTorch 설정
+</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">device</span><span class="p">(</span><span class="sh">'</span><span class="s">cuda</span><span class="sh">'</span> <span class="k">if</span> <span class="n">torch</span><span class="p">.</span><span class="n">cuda</span><span class="p">.</span><span class="nf">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="sh">'</span><span class="s">cpu</span><span class="sh">'</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Using device: </span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 시각화 설정
+</span><span class="n">plt</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="sh">'</span><span class="s">seaborn-v0_8</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">sns</span><span class="p">.</span><span class="nf">set_palette</span><span class="p">(</span><span class="sh">"</span><span class="s">husl</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-복잡한-시계열-데이터-생성">2. 복잡한 시계열 데이터 생성</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">generate_complex_timeseries</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">복잡한 시계열 데이터 생성 (딥러닝 모델용)</span><span class="sh">"""</span>
+    <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    
+    <span class="c1"># 시간 인덱스
+</span>    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    
+    <span class="c1"># 비선형 트렌드
+</span>    <span class="n">trend</span> <span class="o">=</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="n">t</span> <span class="o">+</span> <span class="mf">0.0001</span> <span class="o">*</span> <span class="n">t</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">0.0000001</span> <span class="o">*</span> <span class="n">t</span><span class="o">**</span><span class="mi">3</span>
+    
+    <span class="c1"># 다중 주기 계절성
+</span>    <span class="n">seasonality_1</span> <span class="o">=</span> <span class="mi">15</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="mi">365</span><span class="p">)</span>  <span class="c1"># 연간
+</span>    <span class="n">seasonality_2</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="mi">7</span><span class="p">)</span>     <span class="c1"># 주간
+</span>    <span class="n">seasonality_3</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="mi">24</span><span class="p">)</span>    <span class="c1"># 일간
+</span>    <span class="n">seasonality_4</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="mi">12</span><span class="p">)</span>    <span class="c1"># 월간
+</span>    
+    <span class="c1"># 구조적 변화 (여러 번 발생)
+</span>    <span class="n">structural_changes</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">change_points</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span><span class="o">//</span><span class="mi">4</span><span class="p">,</span> <span class="n">n</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">n</span><span class="o">//</span><span class="mi">4</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cp</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">change_points</span><span class="p">):</span>
+        <span class="n">structural_changes</span><span class="p">[</span><span class="n">cp</span><span class="p">:]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span><span class="p">[</span><span class="n">cp</span><span class="p">:]</span> <span class="o">/</span> <span class="mi">200</span><span class="p">)</span>
+    
+    <span class="c1"># 비선형 상호작용
+</span>    <span class="n">interaction</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="mi">50</span><span class="p">)</span>
+    
+    <span class="c1"># 시간에 따라 변하는 노이즈
+</span>    <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="mf">0.02</span> <span class="o">*</span> <span class="n">t</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    
+    <span class="c1"># 이상치 추가
+</span>    <span class="n">outliers</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="o">//</span><span class="mi">40</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">noise</span><span class="p">[</span><span class="n">outliers</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">outliers</span><span class="p">))</span>
+    
+    <span class="c1"># 전체 시계열
+</span>    <span class="n">ts</span> <span class="o">=</span> <span class="n">trend</span> <span class="o">+</span> <span class="n">seasonality_1</span> <span class="o">+</span> <span class="n">seasonality_2</span> <span class="o">+</span> <span class="n">seasonality_3</span> <span class="o">+</span> <span class="n">seasonality_4</span> <span class="o">+</span> <span class="n">structural_changes</span> <span class="o">+</span> <span class="n">interaction</span> <span class="o">+</span> <span class="n">noise</span>
+    
+    <span class="k">return</span> <span class="n">pd</span><span class="p">.</span><span class="nc">Series</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="p">.</span><span class="nf">date_range</span><span class="p">(</span><span class="sh">'</span><span class="s">2020-01-01</span><span class="sh">'</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="sh">'</span><span class="s">D</span><span class="sh">'</span><span class="p">))</span>
+
+<span class="c1"># 복잡한 시계열 생성
+</span><span class="n">complex_ts</span> <span class="o">=</span> <span class="nf">generate_complex_timeseries</span><span class="p">(</span><span class="mi">2000</span><span class="p">)</span>
+
+<span class="c1"># 시각화
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">complex_ts</span><span class="p">.</span><span class="n">index</span><span class="p">,</span> <span class="n">complex_ts</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">복잡한 시계열 데이터 (전체)</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">값</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">complex_ts</span><span class="p">.</span><span class="n">index</span><span class="p">[:</span><span class="mi">200</span><span class="p">],</span> <span class="n">complex_ts</span><span class="p">.</span><span class="n">values</span><span class="p">[:</span><span class="mi">200</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">첫 200일 데이터 (확대)</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">값</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">complex_ts</span><span class="p">.</span><span class="n">index</span><span class="p">[</span><span class="mi">800</span><span class="p">:</span><span class="mi">1000</span><span class="p">],</span> <span class="n">complex_ts</span><span class="p">.</span><span class="n">values</span><span class="p">[</span><span class="mi">800</span><span class="p">:</span><span class="mi">1000</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">800-1000일 데이터 (확대)</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">값</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">complex_ts</span><span class="p">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">200</span><span class="p">:],</span> <span class="n">complex_ts</span><span class="p">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">200</span><span class="p">:],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">마지막 200일 데이터 (확대)</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">값</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">시계열 길이: </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">complex_ts</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">값 범위: </span><span class="si">{</span><span class="n">complex_ts</span><span class="p">.</span><span class="nf">min</span><span class="p">()</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s"> ~ </span><span class="si">{</span><span class="n">complex_ts</span><span class="p">.</span><span class="nf">max</span><span class="p">()</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">평균: </span><span class="si">{</span><span class="n">complex_ts</span><span class="p">.</span><span class="nf">mean</span><span class="p">()</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">표준편차: </span><span class="si">{</span><span class="n">complex_ts</span><span class="p">.</span><span class="nf">std</span><span class="p">()</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-데이터-전처리-및-시퀀스-생성">3. 데이터 전처리 및 시퀀스 생성</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">create_sequences</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">lookback</span><span class="p">,</span> <span class="n">forecast_horizon</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">시계열 데이터를 시퀀스로 변환</span><span class="sh">"""</span>
+    <span class="n">sequences</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">lookback</span> <span class="o">-</span> <span class="n">forecast_horizon</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">seq</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">lookback</span><span class="p">]</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">lookback</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">lookback</span> <span class="o">+</span> <span class="n">forecast_horizon</span><span class="p">]</span>
+        <span class="n">sequences</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+        <span class="n">targets</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">sequences</span><span class="p">),</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">normalize_data</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">데이터 정규화</span><span class="sh">"""</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">std</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">normalized</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">std</span>
+    <span class="k">return</span> <span class="n">normalized</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span>
+
+<span class="k">def</span> <span class="nf">denormalize_data</span><span class="p">(</span><span class="n">normalized_data</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">정규화된 데이터를 원래 스케일로 복원</span><span class="sh">"""</span>
+    <span class="k">return</span> <span class="n">normalized_data</span> <span class="o">*</span> <span class="n">std</span> <span class="o">+</span> <span class="n">mean</span>
+
+<span class="c1"># 데이터 정규화
+</span><span class="n">ts_normalized</span><span class="p">,</span> <span class="n">mean_val</span><span class="p">,</span> <span class="n">std_val</span> <span class="o">=</span> <span class="nf">normalize_data</span><span class="p">(</span><span class="n">complex_ts</span><span class="p">.</span><span class="n">values</span><span class="p">)</span>
+
+<span class="c1"># 시퀀스 생성
+</span><span class="n">lookback</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1"># 과거 100일 데이터 사용
+</span><span class="n">forecast_horizon</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># 30일 예측
+</span><span class="n">sequences</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="nf">create_sequences</span><span class="p">(</span><span class="n">ts_normalized</span><span class="p">,</span> <span class="n">lookback</span><span class="p">,</span> <span class="n">forecast_horizon</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">시퀀스 개수: </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">입력 형태: </span><span class="si">{</span><span class="n">sequences</span><span class="p">.</span><span class="n">shape</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">타겟 형태: </span><span class="si">{</span><span class="n">targets</span><span class="p">.</span><span class="n">shape</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># PyTorch 텐서로 변환
+</span><span class="n">sequences_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nc">FloatTensor</span><span class="p">(</span><span class="n">sequences</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+<span class="n">targets_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nc">FloatTensor</span><span class="p">(</span><span class="n">targets</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="c1"># 데이터셋 분할 (학습:검증:테스트 = 7:2:1)
+</span><span class="n">total_samples</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span>
+<span class="n">train_size</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">total_samples</span> <span class="o">*</span> <span class="mf">0.7</span><span class="p">)</span>
+<span class="n">val_size</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">total_samples</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">)</span>
+<span class="n">test_size</span> <span class="o">=</span> <span class="n">total_samples</span> <span class="o">-</span> <span class="n">train_size</span> <span class="o">-</span> <span class="n">val_size</span>
+
+<span class="n">train_sequences</span> <span class="o">=</span> <span class="n">sequences_tensor</span><span class="p">[:</span><span class="n">train_size</span><span class="p">]</span>
+<span class="n">train_targets</span> <span class="o">=</span> <span class="n">targets_tensor</span><span class="p">[:</span><span class="n">train_size</span><span class="p">]</span>
+<span class="n">val_sequences</span> <span class="o">=</span> <span class="n">sequences_tensor</span><span class="p">[</span><span class="n">train_size</span><span class="p">:</span><span class="n">train_size</span> <span class="o">+</span> <span class="n">val_size</span><span class="p">]</span>
+<span class="n">val_targets</span> <span class="o">=</span> <span class="n">targets_tensor</span><span class="p">[</span><span class="n">train_size</span><span class="p">:</span><span class="n">train_size</span> <span class="o">+</span> <span class="n">val_size</span><span class="p">]</span>
+<span class="n">test_sequences</span> <span class="o">=</span> <span class="n">sequences_tensor</span><span class="p">[</span><span class="n">train_size</span> <span class="o">+</span> <span class="n">val_size</span><span class="p">:]</span>
+<span class="n">test_targets</span> <span class="o">=</span> <span class="n">targets_tensor</span><span class="p">[</span><span class="n">train_size</span> <span class="o">+</span> <span class="n">val_size</span><span class="p">:]</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">학습 데이터: </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">train_sequences</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">검증 데이터: </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">val_sequences</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">테스트 데이터: </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">test_sequences</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># DataLoader 생성
+</span><span class="n">batch_size</span> <span class="o">=</span> <span class="mi">32</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="nc">TensorDataset</span><span class="p">(</span><span class="n">train_sequences</span><span class="p">,</span> <span class="n">train_targets</span><span class="p">)</span>
+<span class="n">train_loader</span> <span class="o">=</span> <span class="nc">DataLoader</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">val_dataset</span> <span class="o">=</span> <span class="nc">TensorDataset</span><span class="p">(</span><span class="n">val_sequences</span><span class="p">,</span> <span class="n">val_targets</span><span class="p">)</span>
+<span class="n">val_loader</span> <span class="o">=</span> <span class="nc">DataLoader</span><span class="p">(</span><span class="n">val_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="nc">TensorDataset</span><span class="p">(</span><span class="n">test_sequences</span><span class="p">,</span> <span class="n">test_targets</span><span class="p">)</span>
+<span class="n">test_loader</span> <span class="o">=</span> <span class="nc">DataLoader</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="4-n-beats-모델-구현">4. N-BEATS 모델 구현</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">NBEATSBlock</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">N-BEATS 블록 구현</span><span class="sh">"""</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">NBEATSBlock</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">fc3</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">fc4</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">relu</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">ReLU</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Dropout</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># 입력을 고차원으로 변환
+</span>        <span class="n">h1</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">relu</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">h1</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">dropout</span><span class="p">(</span><span class="n">h1</span><span class="p">)</span>
+        
+        <span class="n">h2</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">relu</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">fc2</span><span class="p">(</span><span class="n">h1</span><span class="p">))</span>
+        <span class="n">h2</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">dropout</span><span class="p">(</span><span class="n">h2</span><span class="p">)</span>
+        
+        <span class="n">h3</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">relu</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">fc3</span><span class="p">(</span><span class="n">h2</span><span class="p">))</span>
+        <span class="n">h3</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">dropout</span><span class="p">(</span><span class="n">h3</span><span class="p">)</span>
+        
+        <span class="c1"># 출력 생성
+</span>        <span class="n">output</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">fc4</span><span class="p">(</span><span class="n">h3</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">output</span>
+
+<span class="k">class</span> <span class="nc">NBEATS</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">N-BEATS 모델 구현</span><span class="sh">"""</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">lookback</span><span class="p">,</span> <span class="n">forecast_horizon</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">num_blocks</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">NBEATS</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">lookback</span> <span class="o">=</span> <span class="n">lookback</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">forecast_horizon</span> <span class="o">=</span> <span class="n">forecast_horizon</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">num_blocks</span> <span class="o">=</span> <span class="n">num_blocks</span>
+        
+        <span class="c1"># N-BEATS 블록들
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">blocks</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">ModuleList</span><span class="p">([</span>
+            <span class="nc">NBEATSBlock</span><span class="p">(</span><span class="n">lookback</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">,</span> <span class="n">lookback</span> <span class="o">+</span> <span class="n">forecast_horizon</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_blocks</span><span class="p">)</span>
+        <span class="p">])</span>
+        
+        <span class="c1"># 최종 예측을 위한 선형 레이어
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">final_layer</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">lookback</span><span class="p">,</span> <span class="n">forecast_horizon</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># 입력: (batch_size, lookback)
+</span>        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="c1"># 각 블록을 통과하며 residual connection
+</span>        <span class="n">residual</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">block</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">blocks</span><span class="p">):</span>
+            <span class="c1"># 블록 출력
+</span>            <span class="n">block_output</span> <span class="o">=</span> <span class="nf">block</span><span class="p">(</span><span class="n">residual</span><span class="p">)</span>
+            
+            <span class="c1"># Backcast와 Forecast 분리
+</span>            <span class="n">backcast</span> <span class="o">=</span> <span class="n">block_output</span><span class="p">[:,</span> <span class="p">:</span><span class="n">self</span><span class="p">.</span><span class="n">lookback</span><span class="p">]</span>
+            <span class="n">forecast</span> <span class="o">=</span> <span class="n">block_output</span><span class="p">[:,</span> <span class="n">self</span><span class="p">.</span><span class="n">lookback</span><span class="p">:]</span>
+            
+            <span class="c1"># Residual connection
+</span>            <span class="n">residual</span> <span class="o">=</span> <span class="n">residual</span> <span class="o">-</span> <span class="n">backcast</span>
+            
+            <span class="c1"># 첫 번째 블록이 아닌 경우에만 forecast 누적
+</span>            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">total_forecast</span> <span class="o">=</span> <span class="n">forecast</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">total_forecast</span> <span class="o">=</span> <span class="n">total_forecast</span> <span class="o">+</span> <span class="n">forecast</span>
+        
+        <span class="c1"># 최종 예측
+</span>        <span class="n">final_forecast</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">final_layer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">total_forecast</span>
+        
+        <span class="k">return</span> <span class="n">final_forecast</span>
+
+<span class="c1"># N-BEATS 모델 생성
+</span><span class="n">nbeats_model</span> <span class="o">=</span> <span class="nc">NBEATS</span><span class="p">(</span>
+    <span class="n">lookback</span><span class="o">=</span><span class="n">lookback</span><span class="p">,</span>
+    <span class="n">forecast_horizon</span><span class="o">=</span><span class="n">forecast_horizon</span><span class="p">,</span>
+    <span class="n">hidden_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+    <span class="n">num_blocks</span><span class="o">=</span><span class="mi">3</span>
+<span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">N-BEATS 모델 파라미터 수: </span><span class="si">{</span><span class="nf">sum</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="nf">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">nbeats_model</span><span class="p">.</span><span class="nf">parameters</span><span class="p">())</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 손실 함수와 옵티마이저
+</span><span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">MSELoss</span><span class="p">()</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="p">.</span><span class="nc">Adam</span><span class="p">(</span><span class="n">nbeats_model</span><span class="p">.</span><span class="nf">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+<span class="n">scheduler</span> <span class="o">=</span> <span class="n">optim</span><span class="p">.</span><span class="n">lr_scheduler</span><span class="p">.</span><span class="nc">ReduceLROnPlateau</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">'</span><span class="s">min</span><span class="sh">'</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="c1"># 학습 함수
+</span><span class="k">def</span> <span class="nf">train_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">.</span><span class="nf">train</span><span class="p">()</span>
+    <span class="n">total_loss</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">for</span> <span class="n">sequences</span><span class="p">,</span> <span class="n">targets</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+        <span class="n">optimizer</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+        
+        <span class="c1"># Forward pass
+</span>        <span class="n">outputs</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="nf">criterion</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+        
+        <span class="c1"># Backward pass
+</span>        <span class="n">loss</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="p">.</span><span class="nf">step</span><span class="p">()</span>
+        
+        <span class="n">total_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="nf">item</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">total_loss</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">dataloader</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">validate_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">,</span> <span class="n">criterion</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+    <span class="n">total_loss</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">sequences</span><span class="p">,</span> <span class="n">targets</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="nf">criterion</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+            <span class="n">total_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="nf">item</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">total_loss</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">dataloader</span><span class="p">)</span>
+
+<span class="c1"># N-BEATS 모델 학습
+</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== N-BEATS 모델 학습 시작 ===</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">num_epochs</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">train_losses</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">val_losses</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">):</span>
+    <span class="n">train_loss</span> <span class="o">=</span> <span class="nf">train_epoch</span><span class="p">(</span><span class="n">nbeats_model</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">)</span>
+    <span class="n">val_loss</span> <span class="o">=</span> <span class="nf">validate_epoch</span><span class="p">(</span><span class="n">nbeats_model</span><span class="p">,</span> <span class="n">val_loader</span><span class="p">,</span> <span class="n">criterion</span><span class="p">)</span>
+    
+    <span class="n">train_losses</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">train_loss</span><span class="p">)</span>
+    <span class="n">val_losses</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">val_loss</span><span class="p">)</span>
+    
+    <span class="c1"># Learning rate 스케줄링
+</span>    <span class="n">scheduler</span><span class="p">.</span><span class="nf">step</span><span class="p">(</span><span class="n">val_loss</span><span class="p">)</span>
+    
+    <span class="nf">if </span><span class="p">(</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Epoch [</span><span class="si">{</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">num_epochs</span><span class="si">}</span><span class="s">] - Train Loss: </span><span class="si">{</span><span class="n">train_loss</span><span class="si">:</span><span class="p">.</span><span class="mi">6</span><span class="n">f</span><span class="si">}</span><span class="s">, Val Loss: </span><span class="si">{</span><span class="n">val_loss</span><span class="si">:</span><span class="p">.</span><span class="mi">6</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># Early stopping
+</span>    <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">val_losses</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">20</span> <span class="ow">and</span> <span class="n">val_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">val_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">20</span><span class="p">]:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Early stopping at epoch </span><span class="si">{</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">break</span>
+
+<span class="c1"># 학습 과정 시각화
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">train_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Training Loss</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">val_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Validation Loss</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">N-BEATS 모델 학습 과정</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Epoch</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Loss (MSE)</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">최종 검증 손실: </span><span class="si">{</span><span class="n">val_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">6</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="5-deepar-모델-구현">5. DeepAR 모델 구현</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DeepAR</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">DeepAR 모델 구현</span><span class="sh">"""</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">DeepAR</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">hidden_dim</span> <span class="o">=</span> <span class="n">hidden_dim</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">num_layers</span> <span class="o">=</span> <span class="n">num_layers</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">output_dim</span> <span class="o">=</span> <span class="n">output_dim</span>
+        
+        <span class="c1"># LSTM 레이어
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">lstm</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">LSTM</span><span class="p">(</span>
+            <span class="n">input_size</span><span class="o">=</span><span class="n">input_dim</span><span class="p">,</span>
+            <span class="n">hidden_size</span><span class="o">=</span><span class="n">hidden_dim</span><span class="p">,</span>
+            <span class="n">num_layers</span><span class="o">=</span><span class="n">num_layers</span><span class="p">,</span>
+            <span class="n">batch_first</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+            <span class="n">dropout</span><span class="o">=</span><span class="mf">0.1</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># 확률 분포 파라미터를 위한 출력 레이어
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">fc_mu</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">fc_sigma</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">)</span>
+        
+        <span class="c1"># 활성화 함수
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">softplus</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Softplus</span><span class="p">()</span>
+        
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">hidden</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c1"># LSTM 순전파
+</span>        <span class="n">lstm_out</span><span class="p">,</span> <span class="n">hidden</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">lstm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">hidden</span><span class="p">)</span>
+        
+        <span class="c1"># 마지막 시점의 출력 사용
+</span>        <span class="n">last_output</span> <span class="o">=</span> <span class="n">lstm_out</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        
+        <span class="c1"># 확률 분포 파라미터 계산
+</span>        <span class="n">mu</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">fc_mu</span><span class="p">(</span><span class="n">last_output</span><span class="p">)</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">softplus</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">fc_sigma</span><span class="p">(</span><span class="n">last_output</span><span class="p">))</span> <span class="o">+</span> <span class="mf">1e-6</span>  <span class="c1"># 안정성을 위한 작은 값 추가
+</span>        
+        <span class="k">return</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">hidden</span>
+    
+    <span class="k">def</span> <span class="nf">init_hidden</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">은닉 상태 초기화</span><span class="sh">"""</span>
+        <span class="nf">return </span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">num_layers</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">hidden_dim</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span>
+                <span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">num_layers</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">hidden_dim</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>
+
+<span class="c1"># DeepAR 모델 생성
+</span><span class="n">deepar_model</span> <span class="o">=</span> <span class="nc">DeepAR</span><span class="p">(</span>
+    <span class="n">input_dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">hidden_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+    <span class="n">num_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">output_dim</span><span class="o">=</span><span class="n">forecast_horizon</span>
+<span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">DeepAR 모델 파라미터 수: </span><span class="si">{</span><span class="nf">sum</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="nf">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">deepar_model</span><span class="p">.</span><span class="nf">parameters</span><span class="p">())</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># DeepAR용 손실 함수 (Negative Log Likelihood)
+</span><span class="k">def</span> <span class="nf">nll_loss</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">정규분포 가정 하의 Negative Log Likelihood 손실</span><span class="sh">"""</span>
+    <span class="c1"># 정규분포의 NLL 계산
+</span>    <span class="n">nll</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">((</span><span class="n">targets</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="n">nll</span><span class="p">)</span>
+
+<span class="c1"># DeepAR 모델 학습
+</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== DeepAR 모델 학습 시작 ===</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">deepar_optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="p">.</span><span class="nc">Adam</span><span class="p">(</span><span class="n">deepar_model</span><span class="p">.</span><span class="nf">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+<span class="n">deepar_scheduler</span> <span class="o">=</span> <span class="n">optim</span><span class="p">.</span><span class="n">lr_scheduler</span><span class="p">.</span><span class="nc">ReduceLROnPlateau</span><span class="p">(</span><span class="n">deepar_optimizer</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">'</span><span class="s">min</span><span class="sh">'</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="n">deepar_train_losses</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">deepar_val_losses</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">):</span>
+    <span class="c1"># 학습
+</span>    <span class="n">deepar_model</span><span class="p">.</span><span class="nf">train</span><span class="p">()</span>
+    <span class="n">train_loss</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">for</span> <span class="n">sequences</span><span class="p">,</span> <span class="n">targets</span> <span class="ow">in</span> <span class="n">train_loader</span><span class="p">:</span>
+        <span class="n">deepar_optimizer</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+        
+        <span class="c1"># 입력 형태 조정 (batch_size, lookback, 1)
+</span>        <span class="n">sequences_reshaped</span> <span class="o">=</span> <span class="n">sequences</span><span class="p">.</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nf">deepar_model</span><span class="p">(</span><span class="n">sequences_reshaped</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="nf">nll_loss</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+        
+        <span class="n">loss</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+        <span class="n">deepar_optimizer</span><span class="p">.</span><span class="nf">step</span><span class="p">()</span>
+        
+        <span class="n">train_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="nf">item</span><span class="p">()</span>
+    
+    <span class="n">train_loss</span> <span class="o">=</span> <span class="n">train_loss</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
+    
+    <span class="c1"># 검증
+</span>    <span class="n">deepar_model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+    <span class="n">val_loss</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">sequences</span><span class="p">,</span> <span class="n">targets</span> <span class="ow">in</span> <span class="n">val_loader</span><span class="p">:</span>
+            <span class="n">sequences_reshaped</span> <span class="o">=</span> <span class="n">sequences</span><span class="p">.</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nf">deepar_model</span><span class="p">(</span><span class="n">sequences_reshaped</span><span class="p">)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="nf">nll_loss</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+            <span class="n">val_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="nf">item</span><span class="p">()</span>
+    
+    <span class="n">val_loss</span> <span class="o">=</span> <span class="n">val_loss</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">val_loader</span><span class="p">)</span>
+    
+    <span class="n">deepar_train_losses</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">train_loss</span><span class="p">)</span>
+    <span class="n">deepar_val_losses</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">val_loss</span><span class="p">)</span>
+    
+    <span class="c1"># Learning rate 스케줄링
+</span>    <span class="n">deepar_scheduler</span><span class="p">.</span><span class="nf">step</span><span class="p">(</span><span class="n">val_loss</span><span class="p">)</span>
+    
+    <span class="nf">if </span><span class="p">(</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Epoch [</span><span class="si">{</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">num_epochs</span><span class="si">}</span><span class="s">] - Train Loss: </span><span class="si">{</span><span class="n">train_loss</span><span class="si">:</span><span class="p">.</span><span class="mi">6</span><span class="n">f</span><span class="si">}</span><span class="s">, Val Loss: </span><span class="si">{</span><span class="n">val_loss</span><span class="si">:</span><span class="p">.</span><span class="mi">6</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># Early stopping
+</span>    <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">deepar_val_losses</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">20</span> <span class="ow">and</span> <span class="n">deepar_val_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">deepar_val_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">20</span><span class="p">]:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Early stopping at epoch </span><span class="si">{</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">break</span>
+
+<span class="c1"># DeepAR 학습 과정 시각화
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">deepar_train_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Training Loss</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">deepar_val_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Validation Loss</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">DeepAR 모델 학습 과정</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Epoch</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Loss (NLL)</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">DeepAR 최종 검증 손실: </span><span class="si">{</span><span class="n">deepar_val_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">6</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="6-모델-성능-비교-및-분석">6. 모델 성능 비교 및 분석</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">evaluate_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">is_deepar</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">모델 성능 평가</span><span class="sh">"""</span>
+    <span class="n">model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+    <span class="n">all_predictions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_targets</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">sequences</span><span class="p">,</span> <span class="n">targets</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_deepar</span><span class="p">:</span>
+                <span class="c1"># DeepAR 모델
+</span>                <span class="n">sequences_reshaped</span> <span class="o">=</span> <span class="n">sequences</span><span class="p">.</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">sequences_reshaped</span><span class="p">)</span>
+                <span class="n">predictions</span> <span class="o">=</span> <span class="n">mu</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># N-BEATS 모델
+</span>                <span class="n">predictions</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span>
+            
+            <span class="n">all_predictions</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">predictions</span><span class="p">.</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">())</span>
+            <span class="n">all_targets</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">targets</span><span class="p">.</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">())</span>
+    
+    <span class="c1"># 예측값과 타겟을 하나로 합치기
+</span>    <span class="n">all_predictions</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">concatenate</span><span class="p">(</span><span class="n">all_predictions</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">all_targets</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">concatenate</span><span class="p">(</span><span class="n">all_targets</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="c1"># 성능 지표 계산
+</span>    <span class="n">mse</span> <span class="o">=</span> <span class="nf">mean_squared_error</span><span class="p">(</span><span class="n">all_targets</span><span class="p">.</span><span class="nf">flatten</span><span class="p">(),</span> <span class="n">all_predictions</span><span class="p">.</span><span class="nf">flatten</span><span class="p">())</span>
+    <span class="n">mae</span> <span class="o">=</span> <span class="nf">mean_absolute_error</span><span class="p">(</span><span class="n">all_targets</span><span class="p">.</span><span class="nf">flatten</span><span class="p">(),</span> <span class="n">all_predictions</span><span class="p">.</span><span class="nf">flatten</span><span class="p">())</span>
+    <span class="n">rmse</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="p">)</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s"> 성능:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">  MSE: </span><span class="si">{</span><span class="n">mse</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">  MAE: </span><span class="si">{</span><span class="n">mae</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">  RMSE: </span><span class="si">{</span><span class="n">rmse</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">all_predictions</span><span class="p">,</span> <span class="n">all_targets</span><span class="p">,</span> <span class="p">(</span><span class="n">mse</span><span class="p">,</span> <span class="n">mae</span><span class="p">,</span> <span class="n">rmse</span><span class="p">)</span>
+
+<span class="c1"># 모델 성능 평가
+</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== 모델 성능 평가 ===</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># N-BEATS 성능
+</span><span class="n">nbeats_pred</span><span class="p">,</span> <span class="n">nbeats_target</span><span class="p">,</span> <span class="n">nbeats_metrics</span> <span class="o">=</span> <span class="nf">evaluate_model</span><span class="p">(</span>
+    <span class="n">nbeats_model</span><span class="p">,</span> <span class="n">test_loader</span><span class="p">,</span> <span class="sh">"</span><span class="s">N-BEATS</span><span class="sh">"</span><span class="p">,</span> <span class="n">is_deepar</span><span class="o">=</span><span class="bp">False</span>
+<span class="p">)</span>
+
+<span class="c1"># DeepAR 성능
+</span><span class="n">deepar_pred</span><span class="p">,</span> <span class="n">deepar_target</span><span class="p">,</span> <span class="n">deepar_metrics</span> <span class="o">=</span> <span class="nf">evaluate_model</span><span class="p">(</span>
+    <span class="n">deepar_model</span><span class="p">,</span> <span class="n">test_loader</span><span class="p">,</span> <span class="sh">"</span><span class="s">DeepAR</span><span class="sh">"</span><span class="p">,</span> <span class="n">is_deepar</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span>
+
+<span class="c1"># 성능 비교 시각화
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+
+<span class="c1"># 1. 예측 vs 실제값 비교 (첫 번째 샘플)
+</span><span class="n">sample_idx</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">nbeats_target</span><span class="p">[</span><span class="n">sample_idx</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">실제값</span><span class="sh">'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">nbeats_pred</span><span class="p">[</span><span class="n">sample_idx</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">N-BEATS 예측</span><span class="sh">'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">red</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">N-BEATS: 예측 vs 실제값 (첫 번째 샘플)</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">예측 기간</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">값</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">deepar_target</span><span class="p">[</span><span class="n">sample_idx</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">실제값</span><span class="sh">'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">deepar_pred</span><span class="p">[</span><span class="n">sample_idx</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">DeepAR 예측</span><span class="sh">'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">green</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">DeepAR: 예측 vs 실제값 (첫 번째 샘플)</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">예측 기간</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">값</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="c1"># 2. 전체 성능 비교
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s">N-BEATS</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">DeepAR</span><span class="sh">'</span><span class="p">]</span>
+<span class="n">rmse_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">nbeats_metrics</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">deepar_metrics</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+<span class="n">mae_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">nbeats_metrics</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">deepar_metrics</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">models</span><span class="p">))</span>
+<span class="n">width</span> <span class="o">=</span> <span class="mf">0.35</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">bar</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">rmse_values</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">RMSE</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">bar</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">mae_values</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">MAE</span><span class="sh">'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">모델</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">오차</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">모델 성능 비교</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xticks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">models</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># 성능 요약 테이블
+</span><span class="n">results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nc">DataFrame</span><span class="p">({</span>
+    <span class="sh">'</span><span class="s">모델</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">N-BEATS</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">DeepAR</span><span class="sh">'</span><span class="p">],</span>
+    <span class="sh">'</span><span class="s">MSE</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="n">nbeats_metrics</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">deepar_metrics</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+    <span class="sh">'</span><span class="s">MAE</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="n">nbeats_metrics</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">deepar_metrics</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+    <span class="sh">'</span><span class="s">RMSE</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="n">nbeats_metrics</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">deepar_metrics</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+<span class="p">})</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">=== 성능 비교 요약 ===</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">results_df</span><span class="p">.</span><span class="nf">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+
+<span class="c1"># 승자 결정
+</span><span class="k">if</span> <span class="n">nbeats_metrics</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">deepar_metrics</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>  <span class="c1"># RMSE 기준
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">🏆 N-BEATS 모델이 더 나은 성능을 보입니다! (RMSE: </span><span class="si">{</span><span class="n">nbeats_metrics</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="s">)</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">🏆 DeepAR 모델이 더 나은 성능을 보입니다! (RMSE: </span><span class="si">{</span><span class="n">deepar_metrics</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="s">)</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 3. 확률적 예측 시각화 (DeepAR)
+</span><span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="c1"># 테스트 데이터에서 샘플 추출
+</span>    <span class="n">test_batch</span> <span class="o">=</span> <span class="nf">next</span><span class="p">(</span><span class="nf">iter</span><span class="p">(</span><span class="n">test_loader</span><span class="p">))</span>
+    <span class="n">test_sequences</span><span class="p">,</span> <span class="n">test_targets</span> <span class="o">=</span> <span class="n">test_batch</span>
+    
+    <span class="n">deepar_model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+        <span class="n">sequences_reshaped</span> <span class="o">=</span> <span class="n">test_sequences</span><span class="p">.</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nf">deepar_model</span><span class="p">(</span><span class="n">sequences_reshaped</span><span class="p">)</span>
+        
+        <span class="c1"># 여러 샘플 생성 (Monte Carlo 시뮬레이션)
+</span>        <span class="n">num_samples</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_samples</span><span class="p">):</span>
+            <span class="c1"># 정규분포에서 샘플링
+</span>            <span class="n">noise</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+            <span class="n">sample</span> <span class="o">=</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">noise</span>
+            <span class="n">samples</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">sample</span><span class="p">.</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">())</span>
+        
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>  <span class="c1"># (num_samples, batch_size, forecast_horizon)
+</span>        
+        <span class="c1"># 첫 번째 샘플의 예측 구간 시각화
+</span>        <span class="n">sample_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">forecast_horizons</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="n">forecast_horizon</span><span class="p">)</span>
+        
+        <span class="n">plt</span><span class="p">.</span><span class="nf">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+        
+        <span class="c1"># 실제값
+</span>        <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">forecast_horizons</span><span class="p">,</span> <span class="n">test_targets</span><span class="p">[</span><span class="n">sample_idx</span><span class="p">],</span> 
+                <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">실제값</span><span class="sh">'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">black</span><span class="sh">'</span><span class="p">)</span>
+        
+        <span class="c1"># 예측값 (평균)
+</span>        <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">forecast_horizons</span><span class="p">,</span> <span class="n">mu</span><span class="p">[</span><span class="n">sample_idx</span><span class="p">].</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">(),</span> 
+                <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">DeepAR 예측 (평균)</span><span class="sh">'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">red</span><span class="sh">'</span><span class="p">)</span>
+        
+        <span class="c1"># 신뢰 구간
+</span>        <span class="n">percentiles</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">95</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">percentiles</span><span class="p">):</span>
+            <span class="n">percentile_values</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">percentile</span><span class="p">(</span><span class="n">samples</span><span class="p">[:,</span> <span class="n">sample_idx</span><span class="p">,</span> <span class="p">:],</span> <span class="n">p</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># 하위 구간
+</span>                <span class="n">plt</span><span class="p">.</span><span class="nf">fill_between</span><span class="p">(</span><span class="n">forecast_horizons</span><span class="p">,</span> <span class="n">percentile_values</span><span class="p">,</span> 
+                               <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">blue</span><span class="sh">'</span><span class="p">,</span> 
+                               <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="sh">'</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s">% 신뢰 구간</span><span class="sh">'</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="sh">''</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># 상위 구간
+</span>                <span class="n">plt</span><span class="p">.</span><span class="nf">fill_between</span><span class="p">(</span><span class="n">forecast_horizons</span><span class="p">,</span> <span class="n">percentile_values</span><span class="p">,</span> 
+                               <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">blue</span><span class="sh">'</span><span class="p">)</span>
+        
+        <span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">DeepAR 확률적 예측 및 신뢰 구간</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">예측 기간</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">값</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">DeepAR 예측의 불확실성:</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">  평균 표준편차: </span><span class="si">{</span><span class="n">sigma</span><span class="p">.</span><span class="nf">mean</span><span class="p">().</span><span class="nf">item</span><span class="p">()</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">  최대 표준편차: </span><span class="si">{</span><span class="n">sigma</span><span class="p">.</span><span class="nf">max</span><span class="p">().</span><span class="nf">item</span><span class="p">()</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">  최소 표준편차: </span><span class="si">{</span><span class="n">sigma</span><span class="p">.</span><span class="nf">min</span><span class="p">().</span><span class="nf">item</span><span class="p">()</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-다음-단계-및-확장">🚀 다음 단계 및 확장</h2>
+
+<h3 id="part-3에서-다룰-내용">Part 3에서 다룰 내용</h3>
+
+<ol>
+  <li><strong>Transformer 기반 시계열 예측</strong>
+    <ul>
+      <li>Informer: 효율적인 Attention 메커니즘</li>
+      <li>Autoformer: 자동화된 시계열 분해</li>
+      <li>FEDformer: 주파수 도메인 기반 예측</li>
+    </ul>
+  </li>
+  <li><strong>최신 LLM 기반 시계열 예측</strong>
+    <ul>
+      <li>TimeGPT: 대규모 언어 모델 기반 예측</li>
+      <li>Lag-Llama: 오픈소스 대안</li>
+    </ul>
+  </li>
+  <li><strong>실무 적용 및 최적화</strong>
+    <ul>
+      <li>하이퍼파라미터 튜닝</li>
+      <li>앙상블 방법</li>
+      <li>도메인별 최적화</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="추가-개선-방향">추가 개선 방향</h3>
+
+<ol>
+  <li><strong>모델 아키텍처 개선</strong>
+    <ul>
+      <li>더 깊은 네트워크 구조</li>
+      <li>Attention 메커니즘 도입</li>
+      <li>Residual connection 최적화</li>
+    </ul>
+  </li>
+  <li><strong>데이터 증강</strong>
+    <ul>
+      <li>노이즈 추가</li>
+      <li>시계열 변형</li>
+      <li>적대적 학습</li>
+    </ul>
+  </li>
+  <li><strong>앙상블 방법</strong>
+    <ul>
+      <li>여러 모델의 예측 결합</li>
+      <li>가중 평균</li>
+      <li>Stacking</li>
+    </ul>
+  </li>
+</ol>
+
+<h2 id="-학습-요약">📚 학습 요약</h2>
+
+<h3 id="이번-파트에서-학습한-내용">이번 파트에서 학습한 내용</h3>
+
+<ol>
+  <li><strong>딥러닝 기반 시계열 예측의 등장 배경</strong>
+    <ul>
+      <li>전통적 방법의 한계</li>
+      <li>딥러닝의 혁신적 특징</li>
+    </ul>
+  </li>
+  <li><strong>N-BEATS 모델</strong>
+    <ul>
+      <li>블록 기반 아키텍처</li>
+      <li>해석 가능한 구조</li>
+      <li>이중 출력 (Backcast + Forecast)</li>
+    </ul>
+  </li>
+  <li><strong>DeepAR 모델</strong>
+    <ul>
+      <li>확률적 예측</li>
+      <li>LSTM 기반 아키텍처</li>
+      <li>불확실성 정량화</li>
+    </ul>
+  </li>
+  <li><strong>실제 구현</strong>
+    <ul>
+      <li>PyTorch를 사용한 모델 구현</li>
+      <li>데이터 전처리 및 시퀀스 생성</li>
+      <li>모델 학습 및 성능 평가</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="핵심-개념-정리">핵심 개념 정리</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>모델</th>
+      <th>특징</th>
+      <th>장점</th>
+      <th>단점</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>N-BEATS</strong></td>
+      <td>블록 기반, 해석 가능</td>
+      <td>빠른 학습, 확장성</td>
+      <td>복잡한 패턴 학습 한계</td>
+    </tr>
+    <tr>
+      <td><strong>DeepAR</strong></td>
+      <td>확률적 예측, LSTM 기반</td>
+      <td>불확실성 정량화, 외부 변수 활용</td>
+      <td>학습 시간, 계산 복잡도</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="실무-적용-시-고려사항">실무 적용 시 고려사항</h3>
+
+<ol>
+  <li><strong>데이터 특성에 따른 모델 선택</strong>
+    <ul>
+      <li>단순한 패턴: N-BEATS</li>
+      <li>복잡한 패턴 + 불확실성: DeepAR</li>
+    </ul>
+  </li>
+  <li><strong>계산 자원 고려</strong>
+    <ul>
+      <li>제한된 자원: N-BEATS</li>
+      <li>충분한 자원: DeepAR</li>
+    </ul>
+  </li>
+  <li><strong>해석 가능성 요구사항</strong>
+    <ul>
+      <li>높은 요구사항: N-BEATS</li>
+      <li>중간 요구사항: DeepAR</li>
+    </ul>
+  </li>
+</ol>
+
+<hr />
+
+<p><em>이번 파트에서는 딥러닝의 힘을 활용한 시계열 예측을 경험했습니다. N-BEATS의 해석 가능한 구조와 DeepAR의 확률적 예측을 통해 더욱 정교한 시계열 분석이 가능해졌습니다!</em> 🎯</p>
+
+<p><em>다음 파트에서는 Transformer 기반 모델들을 통해 장기 의존성 문제를 해결하고, 최신 시계열 예측 기술의 최전선을 경험해보세요!</em> 🚀</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+      
+        
+          
+          
+      
+      
+        
+        
+        <a href="/data-ai/2025/08/31/time-series-basics.html" class="nav-link prev">
+          ← 이전: Part 1: 시계열 예측의 기초 - ARIMA부터 Prophet까지
+        </a>
+      
+      
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-ai/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

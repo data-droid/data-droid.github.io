@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="현대적인 데이터 레이크하우스의 핵심인 테이블 포맷들에 대한 상세한 분석과 비교">
+
+
+
+<title>레이크하우스 테이블 포맷: Delta Lake, Apache Iceberg, Apache Hudi - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="레이크하우스 테이블 포맷: Delta Lake, Apache Iceberg, Apache Hudi">
+<meta property="og:description" content="현대적인 데이터 레이크하우스의 핵심인 테이블 포맷들에 대한 상세한 분석과 비교">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2025/08/22/lakehouse-table-formats.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="레이크하우스 테이블 포맷: Delta Lake, Apache Iceberg, Apache Hudi">
+<meta name="twitter:description" content="현대적인 데이터 레이크하우스의 핵심인 테이블 포맷들에 대한 상세한 분석과 비교">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      <a href="/data-engineering/2025/08/22/lakehouse-table-formats.html" class="lang-btn active">한국어</a>
+      <a href="/en/data-engineering/2025/08/22/lakehouse-table-formats.html" class="lang-btn ">English</a>
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 08월 22일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">레이크하우스 테이블 포맷: Delta Lake, Apache Iceberg, Apache Hudi</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">lakehouse</span>
+      
+        <span class="tag">delta-lake</span>
+      
+        <span class="tag">apache-iceberg</span>
+      
+        <span class="tag">apache-hudi</span>
+      
+        <span class="tag">table-format</span>
+      
+        <span class="tag">data-lake</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 20분</span>
+      
+      
+        <span class="difficulty">📊 고급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="레이크하우스-테이블-포맷-delta-lake-apache-iceberg-apache-hudi">레이크하우스 테이블 포맷: Delta Lake, Apache Iceberg, Apache Hudi</h1>
+
+<p>데이터 레이크하우스의 핵심은 기존 데이터 레이크의 유연성과 데이터 웨어하우스의 ACID 트랜잭션, 스키마 진화, 데이터 품질 보장 등의 기능을 결합하는 것입니다. 이를 가능하게 하는 것이 바로 <strong>테이블 포맷(Table Format)</strong>입니다.</p>
+
+<p>현재 가장 널리 사용되는 세 가지 테이블 포맷은:</p>
+
+<ul>
+  <li><strong>Delta Lake</strong> - Databricks에서 개발한 오픈소스 프로젝트</li>
+  <li><strong>Apache Iceberg</strong> - Netflix에서 시작하여 Apache 재단으로 이전</li>
+  <li><strong>Apache Hudi</strong> - Uber에서 개발하여 Apache 재단으로 이전</li>
+</ul>
+
+<h2 id="-목차">📋 목차</h2>
+
+<ol>
+  <li><a href="#소개">소개</a></li>
+  <li><a href="#delta-lake">Delta Lake</a></li>
+  <li><a href="#apache-iceberg">Apache Iceberg</a></li>
+  <li><a href="#apache-hudi">Apache Hudi</a></li>
+  <li><a href="#세-플랫폼-비교">세 플랫폼 비교</a></li>
+  <li><a href="#사용-사례-및-선택-가이드">사용 사례 및 선택 가이드</a></li>
+  <li><a href="#결론">결론</a></li>
+</ol>
+
+<h2 id="1-소개">1. 소개</h2>
+
+<p><strong>💡 테이블 포맷이란?</strong></p>
+
+<p>테이블 포맷은 데이터 레이크에 저장된 데이터의 메타데이터를 관리하고, ACID 트랜잭션, 스키마 진화, 파티셔닝, 인덱싱 등의 기능을 제공하는 표준화된 방식입니다. 이를 통해 데이터 레이크를 데이터 웨어하우스처럼 사용할 수 있게 됩니다.</p>
+
+<h2 id="2-delta-lake">2. Delta Lake</h2>
+
+<h3 id="21-개요">2.1 개요</h3>
+
+<p><strong>Delta Lake</strong>는 Databricks에서 2019년에 오픈소스로 공개한 테이블 포맷으로, Apache Spark와의 긴밀한 통합을 통해 데이터 레이크에 ACID 트랜잭션을 제공합니다.</p>
+
+<p><strong>🔗 공식 링크</strong></p>
+<ul>
+  <li><a href="https://delta.io/">공식 웹사이트</a></li>
+  <li><a href="https://github.com/delta-io/delta">GitHub 저장소</a></li>
+  <li><a href="https://docs.delta.io/">공식 문서</a></li>
+  <li><a href="https://delta.io/blog/">블로그</a></li>
+</ul>
+
+<h3 id="22-핵심-특징">2.2 핵심 특징</h3>
+
+<ul>
+  <li><strong>ACID 트랜잭션</strong>: 원자성, 일관성, 격리성, 지속성 보장</li>
+  <li><strong>스키마 강제</strong>: 데이터 품질과 무결성 보장</li>
+  <li><strong>스키마 진화</strong>: 안전한 스키마 변경 지원</li>
+  <li><strong>시간 여행(Time Travel)</strong>: 과거 데이터 버전 접근</li>
+  <li><strong>업서트/머지</strong>: 효율적인 데이터 업데이트</li>
+  <li><strong>오픈 포맷</strong>: Parquet 기반으로 모든 도구와 호환</li>
+</ul>
+
+<h3 id="23-아키텍처">2.3 아키텍처</h3>
+
+<p>Delta Lake는 다음과 같은 계층 구조를 가집니다:</p>
+
+<p><strong>Application Layer</strong></p>
+<ul>
+  <li>Spark SQL</li>
+  <li>Spark Streaming</li>
+  <li>BI Tools</li>
+</ul>
+
+<p><strong>Delta Lake Layer</strong></p>
+<ul>
+  <li>ACID 트랜잭션</li>
+  <li>스키마 관리</li>
+  <li>메타데이터 처리</li>
+</ul>
+
+<p><strong>Storage Layer</strong></p>
+<ul>
+  <li>Parquet 파일</li>
+  <li>트랜잭션 로그</li>
+  <li>체크포인트</li>
+</ul>
+
+<h2 id="3-apache-iceberg">3. Apache Iceberg</h2>
+
+<h3 id="31-개요">3.1 개요</h3>
+
+<p><strong>Apache Iceberg</strong>는 Netflix에서 시작하여 Apache 재단으로 이전한 테이블 포맷으로, 대규모 데이터셋에 대한 효율적인 스키마 진화와 파티셔닝을 지원합니다.</p>
+
+<h3 id="32-핵심-특징">3.2 핵심 특징</h3>
+
+<ul>
+  <li><strong>스키마 진화</strong>: 안전하고 효율적인 스키마 변경</li>
+  <li><strong>파티션 진화</strong>: 파티션 레이아웃 변경 지원</li>
+  <li><strong>시간 여행</strong>: 과거 스냅샷 접근</li>
+  <li><strong>ACID 트랜잭션</strong>: 원자적 쓰기 보장</li>
+  <li><strong>메타데이터 계층</strong>: 효율적인 메타데이터 관리</li>
+</ul>
+
+<h3 id="33-아키텍처">3.3 아키텍처</h3>
+
+<p>Iceberg는 다음과 같은 메타데이터 계층을 가집니다:</p>
+
+<p><strong>Catalog Layer</strong>: 테이블 메타데이터 관리
+<strong>Metadata Layer</strong>: 스냅샷, 매니페스트, 스키마 정보
+<strong>Data Layer</strong>: 실제 데이터 파일 (Parquet, ORC, Avro)</p>
+
+<h2 id="4-apache-hudi">4. Apache Hudi</h2>
+
+<h3 id="41-개요">4.1 개요</h3>
+
+<p><strong>Apache Hudi</strong>는 Uber에서 개발하여 Apache 재단으로 이전한 테이블 포맷으로, 실시간 데이터 처리와 증분 처리에 특화되어 있습니다.</p>
+
+<h3 id="42-핵심-특징">4.2 핵심 특징</h3>
+
+<ul>
+  <li><strong>실시간 처리</strong>: 스트리밍 데이터 처리 지원</li>
+  <li><strong>증분 처리</strong>: 변경된 데이터만 처리</li>
+  <li><strong>ACID 트랜잭션</strong>: 원자적 쓰기 보장</li>
+  <li><strong>시간 여행</strong>: 과거 데이터 버전 접근</li>
+  <li><strong>CDC 지원</strong>: Change Data Capture 지원</li>
+</ul>
+
+<h3 id="43-아키텍처">4.3 아키텍처</h3>
+
+<p>Hudi는 두 가지 테이블 타입을 지원합니다:</p>
+
+<p><strong>Copy-on-Write (CoW)</strong>: 쓰기 시 새로운 파일 생성
+<strong>Merge-on-Read (MoR)</strong>: 읽기 시 데이터 병합</p>
+
+<h2 id="5-세-플랫폼-비교">5. 세 플랫폼 비교</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>특징</th>
+      <th>Delta Lake</th>
+      <th>Apache Iceberg</th>
+      <th>Apache Hudi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>개발사</strong></td>
+      <td>Databricks</td>
+      <td>Netflix/Apache</td>
+      <td>Uber/Apache</td>
+    </tr>
+    <tr>
+      <td><strong>Spark 통합</strong></td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>⭐⭐⭐⭐</td>
+      <td>⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>실시간 처리</strong></td>
+      <td>⭐⭐⭐</td>
+      <td>⭐⭐⭐</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>스키마 진화</strong></td>
+      <td>⭐⭐⭐⭐</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>파티션 진화</strong></td>
+      <td>⭐⭐⭐</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>커뮤니티</strong></td>
+      <td>⭐⭐⭐⭐</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="6-사용-사례-및-선택-가이드">6. 사용 사례 및 선택 가이드</h2>
+
+<h3 id="delta-lake-선택-시기">Delta Lake 선택 시기</h3>
+<ul>
+  <li><strong>Spark 기반 환경</strong>에서 작업하는 경우</li>
+  <li><strong>ACID 트랜잭션</strong>이 중요한 경우</li>
+  <li><strong>Databricks 환경</strong>을 사용하는 경우</li>
+</ul>
+
+<h3 id="apache-iceberg-선택-시기">Apache Iceberg 선택 시기</h3>
+<ul>
+  <li><strong>대규모 데이터셋</strong>을 다루는 경우</li>
+  <li><strong>스키마 진화</strong>가 자주 발생하는 경우</li>
+  <li><strong>파티션 레이아웃 변경</strong>이 필요한 경우</li>
+</ul>
+
+<h3 id="apache-hudi-선택-시기">Apache Hudi 선택 시기</h3>
+<ul>
+  <li><strong>실시간 데이터 처리</strong>가 필요한 경우</li>
+  <li><strong>증분 처리</strong>가 중요한 경우</li>
+  <li><strong>CDC(Change Data Capture)</strong>를 구현하는 경우</li>
+</ul>
+
+<h2 id="7-결론">7. 결론</h2>
+
+<p>세 가지 테이블 포맷은 각각의 장점과 특화 영역을 가지고 있습니다. 프로젝트의 요구사항과 기술 스택을 고려하여 적절한 포맷을 선택하는 것이 중요합니다.</p>
+
+<p><strong>Delta Lake</strong>: Spark 중심의 환경에서 안정적인 ACID 트랜잭션
+<strong>Apache Iceberg</strong>: 대규모 데이터와 복잡한 스키마 진화가 필요한 경우
+<strong>Apache Hudi</strong>: 실시간 처리와 증분 처리가 중요한 경우</p>
+
+<hr />
+
+<p><em>이 글은 데이터 엔지니어링 분야에서 레이크하우스 테이블 포맷을 이해하고자 하는 엔지니어들을 위해 작성되었습니다. 각 포맷의 공식 문서와 실습을 통해 더 깊이 있는 학습을 권장합니다.</em></p>
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{% comment %}
+  자동화된 카테고리별 포스트 목록
+  사용법: {% include category-posts.html category="data-ai" %}
+{% endcomment %}
+
+{% assign category_posts = site.posts | where: "category", include.category | sort: 'date' | reverse %}
+
+{% if category_posts.size > 0 %}
+  <div class="category-posts">
+    <h3 class="category-posts-title">📚 {{ include.category | replace: '-', ' ' | capitalize }} 포스트</h3>
+    <div class="posts-list-simple">
+      {% for post in category_posts %}
+        <div class="post-item-simple">
+          <div class="post-meta-simple">
+            <span class="post-category">{{ post.category | replace: '-', ' ' | capitalize }}</span>
+            <span class="post-date">{{ post.date | date: "%Y년 %m월 %d일" }}</span>
+          </div>
+          <h4 class="post-title-simple">
+            <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
+          </h4>
+          <div class="post-tags-simple">
+            {% for tag in post.tags limit: 3 %}
+              <span class="tag">{{ tag }}</span>
+            {% endfor %}
+          </div>
+          {% if post.series %}
+            <div class="post-series-info">
+              <span class="series-badge">📚 {{ post.series | replace: '-', ' ' | capitalize }}</span>
+              {% if post.series_order > 0 %}
+                <span class="series-order">Part {{ post.series_order | plus: 1 }}</span>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% else %}
+  <div class="posts-placeholder">
+    <div class="placeholder-card">
+      <div class="placeholder-icon">📝</div>
+      <h3>포스트 준비 중</h3>
+      <p>곧 {{ include.category | replace: '-', ' ' | capitalize }} 관련 포스트가 추가될 예정입니다.</p>
+    </div>
+  </div>
+{% endif %}
