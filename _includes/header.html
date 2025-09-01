@@ -31,14 +31,26 @@
     </nav>
     
     <div class="language-switcher">
-      {% if page.lang == 'ko' %}
-        <a href="{{ page.url }}" class="lang-btn active">한국어</a>
-        {% assign slug = page.url | split: '/' | last | remove: '.html' %}
-        <a href="/en_posts/{{ page.date | date: '%Y-%m-%d' }}-{{ slug }}.html" class="lang-btn">English</a>
+      {% if page.layout == 'post' %}
+        <!-- 포스트용 언어 전환 -->
+        {% if page.lang == 'ko' %}
+          <a href="{{ page.url }}" class="lang-btn active">한국어</a>
+          {% assign slug = page.url | split: '/' | last | remove: '.html' %}
+          <a href="/en_posts/{{ page.date | date: '%Y-%m-%d' }}-{{ slug }}.html" class="lang-btn">English</a>
+        {% else %}
+          {% assign slug = page.url | split: '/' | last | remove: '.html' | split: '-' | slice: 3, 10 | join: '-' %}
+          <a href="/{{ page.category }}/{{ page.date | date: '%Y/%m/%d' }}/{{ slug }}.html" class="lang-btn">한국어</a>
+          <a href="{{ page.url }}" class="lang-btn active">English</a>
+        {% endif %}
       {% else %}
-        {% assign slug = page.url | split: '/' | last | remove: '.html' | split: '-' | slice: 3, 10 | join: '-' %}
-        <a href="/{{ page.category }}/{{ page.date | date: '%Y/%m/%d' }}/{{ slug }}.html" class="lang-btn">한국어</a>
-        <a href="{{ page.url }}" class="lang-btn active">English</a>
+        <!-- 일반 페이지용 언어 전환 (원래 방식) -->
+        {% if page.lang == 'ko' %}
+          <a href="{{ page.url }}" class="lang-btn active">한국어</a>
+          <a href="/en{{ page.url }}" class="lang-btn">English</a>
+        {% else %}
+          <a href="{{ page.url | remove: '/en' }}" class="lang-btn">한국어</a>
+          <a href="{{ page.url }}" class="lang-btn active">English</a>
+        {% endif %}
       {% endif %}
     </div>
   </div>
