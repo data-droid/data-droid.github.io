@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Informer, Autoformer, FEDformer, PatchTST 등 최신 트랜스포머 기반 시계열 예측 모델들을 살펴보고 실습해봅니다.">
+
+
+
+<title>Part 3: 트랜스포머 기반 시계열 예측 모델들 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 3: 트랜스포머 기반 시계열 예측 모델들">
+<meta property="og:description" content="Informer, Autoformer, FEDformer, PatchTST 등 최신 트랜스포머 기반 시계열 예측 모델들을 살펴보고 실습해봅니다.">
+<meta property="og:url" content="http://localhost:4000/data-ai/2025/09/06/time-series-transformers.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 3: 트랜스포머 기반 시계열 예측 모델들">
+<meta name="twitter:description" content="Informer, Autoformer, FEDformer, PatchTST 등 최신 트랜스포머 기반 시계열 예측 모델들을 살펴보고 실습해봅니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-ai/2025/09/06/time-series-transformers.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2025-09-06-time-series-transformers.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data ai</span>
+      <span class="post-date">2025년 09월 06일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 3: 트랜스포머 기반 시계열 예측 모델들</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">시계열예측</span>
+      
+        <span class="tag">트랜스포머</span>
+      
+        <span class="tag">Informer</span>
+      
+        <span class="tag">Autoformer</span>
+      
+        <span class="tag">FEDformer</span>
+      
+        <span class="tag">PatchTST</span>
+      
+        <span class="tag">딥러닝</span>
+      
+        <span class="tag">AI</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Time series forecasting 시리즈</span>
+      <span class="series-order">Part 4</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 15</span>
+      
+      
+        <span class="difficulty">📊 중급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-3-트랜스포머-기반-시계열-예측-모델들">Part 3: 트랜스포머 기반 시계열 예측 모델들</h1>
+
+<p>안녕하세요! 시계열 예측 시리즈의 세 번째 파트입니다. 이번에는 자연어 처리에서 혁명을 일으킨 트랜스포머(Transformer) 아키텍처가 시계열 예측에 어떻게 적용되었는지 살펴보겠습니다.</p>
+
+<h2 id="-학습-목표">📚 학습 목표</h2>
+
+<p>이 파트를 통해 다음을 학습할 수 있습니다:</p>
+
+<ul>
+  <li>트랜스포머가 시계열 예측에 적용된 배경과 필요성</li>
+  <li>Informer, Autoformer, FEDformer, PatchTST 등 주요 모델들의 특징</li>
+  <li>각 모델의 장단점과 적용 분야</li>
+  <li>실제 데이터를 활용한 트랜스포머 기반 시계열 예측 실습</li>
+</ul>
+
+<h2 id="-트랜스포머가-시계열에-적용된-배경">🔍 트랜스포머가 시계열에 적용된 배경</h2>
+
+<h3 id="기존-방법들의-한계">기존 방법들의 한계</h3>
+
+<p><strong>RNN/LSTM의 문제점:</strong></p>
+<ul>
+  <li>순차적 처리로 인한 긴 학습 시간</li>
+  <li>장기 의존성 학습의 어려움</li>
+  <li>병렬 처리 불가능</li>
+</ul>
+
+<p><strong>CNN의 한계:</strong></p>
+<ul>
+  <li>지역적 패턴에만 집중</li>
+  <li>장거리 의존성 포착 어려움</li>
+</ul>
+
+<h3 id="트랜스포머의-장점">트랜스포머의 장점</h3>
+
+<ol>
+  <li><strong>병렬 처리</strong>: 모든 시점을 동시에 처리</li>
+  <li><strong>장거리 의존성</strong>: Self-attention으로 긴 시퀀스의 관계 학습</li>
+  <li><strong>확장성</strong>: 더 큰 모델과 데이터셋으로 성능 향상 가능</li>
+</ol>
+
+<h2 id="-주요-트랜스포머-기반-시계열-모델들">🚀 주요 트랜스포머 기반 시계열 모델들</h2>
+
+<h3 id="1-informer-2021">1. Informer (2021)</h3>
+
+<p><strong>핵심 아이디어:</strong></p>
+<ul>
+  <li>ProbSparse Self-attention으로 계산 복잡도 O(L²) → O(L log L)로 감소</li>
+  <li>Self-attention Distilling으로 계층별 정보 압축</li>
+  <li>Generative Decoder로 한 번에 긴 시퀀스 예측</li>
+</ul>
+
+<p><strong>주요 특징:</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Informer의 핵심 구조
+</span><span class="k">class</span> <span class="nc">Informer</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">enc_in</span><span class="p">,</span> <span class="n">dec_in</span><span class="p">,</span> <span class="n">c_out</span><span class="p">,</span> <span class="n">seq_len</span><span class="p">,</span> <span class="n">label_len</span><span class="p">,</span> <span class="n">out_len</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">Informer</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">enc_in</span> <span class="o">=</span> <span class="n">enc_in</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">dec_in</span> <span class="o">=</span> <span class="n">dec_in</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">c_out</span> <span class="o">=</span> <span class="n">c_out</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">seq_len</span> <span class="o">=</span> <span class="n">seq_len</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">label_len</span> <span class="o">=</span> <span class="n">label_len</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">out_len</span> <span class="o">=</span> <span class="n">out_len</span>
+        
+        <span class="c1"># ProbSparse Attention 사용
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">attn</span> <span class="o">=</span> <span class="nc">ProbAttention</span><span class="p">(</span><span class="n">attention_dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+        
+        <span class="c1"># Encoder와 Decoder
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="nc">Encoder</span><span class="p">(...)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="nc">Decoder</span><span class="p">(...)</span>
+</code></pre></div></div>
+
+<p><strong>장점:</strong></p>
+<ul>
+  <li>긴 시퀀스에서도 효율적</li>
+  <li>다양한 데이터셋에서 우수한 성능</li>
+</ul>
+
+<p><strong>단점:</strong></p>
+<ul>
+  <li>복잡한 구조로 인한 긴 학습 시간</li>
+  <li>하이퍼파라미터 튜닝이 어려움</li>
+</ul>
+
+<h3 id="2-autoformer-2021">2. Autoformer (2021)</h3>
+
+<p><strong>핵심 아이디어:</strong></p>
+<ul>
+  <li>Auto-Correlation 메커니즘으로 시계열의 주기성 자동 학습</li>
+  <li>Decomposition Block으로 트렌드와 계절성 분리</li>
+  <li>Series-wise Connection으로 정보 손실 최소화</li>
+</ul>
+
+<p><strong>주요 특징:</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Autoformer의 Auto-Correlation
+</span><span class="k">class</span> <span class="nc">AutoCorrelation</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">queries</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="c1"># 시계열의 주기성을 찾는 상관관계 계산
+</span>        <span class="n">autocorr</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">autocorrelation</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">keys</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">value_projection</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">*</span> <span class="n">autocorr</span>
+</code></pre></div></div>
+
+<p><strong>장점:</strong></p>
+<ul>
+  <li>시계열의 주기성 자동 학습</li>
+  <li>트렌드와 계절성 분해로 해석 가능성 향상</li>
+</ul>
+
+<p><strong>단점:</strong></p>
+<ul>
+  <li>주기성이 없는 데이터에서는 성능 제한</li>
+  <li>복잡한 패턴 학습에 어려움</li>
+</ul>
+
+<h3 id="3-fedformer-2022">3. FEDformer (2022)</h3>
+
+<p><strong>핵심 아이디어:</strong></p>
+<ul>
+  <li>Fourier Enhanced Decomposed Transformer</li>
+  <li>FFT를 활용한 주파수 도메인에서의 attention</li>
+  <li>모델 앙상블로 성능 향상</li>
+</ul>
+
+<p><strong>주요 특징:</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># FEDformer의 Fourier Attention
+</span><span class="k">class</span> <span class="nc">FourierAttention</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># FFT로 주파수 도메인 변환
+</span>        <span class="n">x_freq</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">fft</span><span class="p">.</span><span class="nf">rfft</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># 주파수 도메인에서 attention 계산
+</span>        <span class="n">attn_freq</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">frequency_attention</span><span class="p">(</span><span class="n">x_freq</span><span class="p">)</span>
+        <span class="c1"># 역변환으로 시간 도메인 복원
+</span>        <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="n">fft</span><span class="p">.</span><span class="nf">irfft</span><span class="p">(</span><span class="n">attn_freq</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>장점:</strong></p>
+<ul>
+  <li>주파수 도메인에서의 효율적 처리</li>
+  <li>다양한 주기성 패턴 학습 가능</li>
+</ul>
+
+<p><strong>단점:</strong></p>
+<ul>
+  <li>FFT 계산 비용</li>
+  <li>실시간 예측에 부적합할 수 있음</li>
+</ul>
+
+<h3 id="4-patchtst-2023">4. PatchTST (2023)</h3>
+
+<p><strong>핵심 아이디어:</strong></p>
+<ul>
+  <li>시계열을 패치 단위로 나누어 처리</li>
+  <li>Channel Independence로 다변량 시계열 처리</li>
+  <li>단순한 구조로도 우수한 성능</li>
+</ul>
+
+<p><strong>주요 특징:</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># PatchTST의 패치 분할
+</span><span class="k">def</span> <span class="nf">create_patch</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">patch_len</span><span class="p">,</span> <span class="n">stride</span><span class="p">):</span>
+    <span class="c1"># 시계열을 패치로 분할
+</span>    <span class="n">patches</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">unfold</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">patch_len</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">stride</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">patches</span><span class="p">.</span><span class="nf">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>장점:</strong></p>
+<ul>
+  <li>단순하고 효율적인 구조</li>
+  <li>다변량 시계열에서 우수한 성능</li>
+  <li>빠른 학습과 추론</li>
+</ul>
+
+<p><strong>단점:</strong></p>
+<ul>
+  <li>패치 크기에 민감</li>
+  <li>매우 긴 시퀀스에서는 제한적</li>
+</ul>
+
+<h2 id="️-실습-patchtst로-주식-가격-예측">🛠️ 실습: PatchTST로 주식 가격 예측</h2>
+
+<p>이제 실제 데이터를 사용해서 PatchTST 모델을 구현해보겠습니다.</p>
+
+<h3 id="1-데이터-준비">1. 데이터 준비</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">torch</span>
+<span class="kn">import</span> <span class="n">torch.nn</span> <span class="k">as</span> <span class="n">nn</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="n">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="n">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="n">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">TensorDataset</span>
+
+<span class="c1"># 주식 데이터 생성 (실제로는 yfinance 등 사용)
+</span><span class="k">def</span> <span class="nf">generate_stock_data</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">가상의 주식 데이터 생성</span><span class="sh">"""</span>
+    <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+    
+    <span class="c1"># 트렌드와 계절성을 가진 데이터 생성
+</span>    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="p">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
+    <span class="n">trend</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">t</span>
+    <span class="n">seasonal</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.3</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">randn</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span>
+    
+    <span class="c1"># 다변량 시계열 생성
+</span>    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">((</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">n_features</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_features</span><span class="p">):</span>
+        <span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">trend</span> <span class="o">+</span> <span class="n">seasonal</span> <span class="o">+</span> <span class="n">noise</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="mf">0.1</span>
+    
+    <span class="k">return</span> <span class="n">pd</span><span class="p">.</span><span class="nc">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="sh">'</span><span class="s">stock_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="sh">'</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_features</span><span class="p">)])</span>
+
+<span class="c1"># 데이터 생성
+</span><span class="n">data</span> <span class="o">=</span> <span class="nf">generate_stock_data</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">데이터 형태: </span><span class="si">{</span><span class="n">data</span><span class="p">.</span><span class="n">shape</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="nf">head</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h3 id="2-patchtst-모델-구현">2. PatchTST 모델 구현</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">PatchTST</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">seq_len</span><span class="p">,</span> <span class="n">pred_len</span><span class="p">,</span> <span class="n">patch_len</span><span class="p">,</span> <span class="n">stride</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">d_model</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">n_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n_layers</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">PatchTST</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">seq_len</span> <span class="o">=</span> <span class="n">seq_len</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">pred_len</span> <span class="o">=</span> <span class="n">pred_len</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">patch_len</span> <span class="o">=</span> <span class="n">patch_len</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">stride</span> <span class="o">=</span> <span class="n">stride</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">n_features</span> <span class="o">=</span> <span class="n">n_features</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">d_model</span> <span class="o">=</span> <span class="n">d_model</span>
+        
+        <span class="c1"># 패치 개수 계산
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">num_patches</span> <span class="o">=</span> <span class="p">(</span><span class="n">seq_len</span> <span class="o">-</span> <span class="n">patch_len</span><span class="p">)</span> <span class="o">//</span> <span class="n">stride</span> <span class="o">+</span> <span class="mi">1</span>
+        
+        <span class="c1"># 입력 프로젝션
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">input_projection</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">patch_len</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
+        
+        <span class="c1"># 위치 인코딩
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">pos_encoding</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">num_patches</span><span class="p">,</span> <span class="n">d_model</span><span class="p">))</span>
+        
+        <span class="c1"># 트랜스포머 인코더
+</span>        <span class="n">encoder_layer</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">TransformerEncoderLayer</span><span class="p">(</span>
+            <span class="n">d_model</span><span class="o">=</span><span class="n">d_model</span><span class="p">,</span> 
+            <span class="n">nhead</span><span class="o">=</span><span class="n">n_heads</span><span class="p">,</span> 
+            <span class="n">dim_feedforward</span><span class="o">=</span><span class="n">d_model</span><span class="o">*</span><span class="mi">4</span><span class="p">,</span>
+            <span class="n">dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+            <span class="n">batch_first</span><span class="o">=</span><span class="bp">True</span>
+        <span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">transformer</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">TransformerEncoder</span><span class="p">(</span><span class="n">encoder_layer</span><span class="p">,</span> <span class="n">num_layers</span><span class="o">=</span><span class="n">n_layers</span><span class="p">)</span>
+        
+        <span class="c1"># 출력 프로젝션
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">output_projection</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">d_model</span><span class="p">,</span> <span class="n">pred_len</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">create_patches</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">시계열을 패치로 분할</span><span class="sh">"""</span>
+        <span class="c1"># x: (batch_size, n_features, seq_len)
+</span>        <span class="n">batch_size</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">seq_len</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">shape</span>
+        
+        <span class="c1"># 각 피처별로 패치 생성
+</span>        <span class="n">patches</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_features</span><span class="p">):</span>
+            <span class="n">feature_patches</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:].</span><span class="nf">unfold</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">patch_len</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">stride</span><span class="p">)</span>
+            <span class="n">patches</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">feature_patches</span><span class="p">)</span>
+        
+        <span class="c1"># (batch_size, n_features, num_patches, patch_len)
+</span>        <span class="n">patches</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">stack</span><span class="p">(</span><span class="n">patches</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">patches</span>
+    
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># x: (batch_size, n_features, seq_len)
+</span>        <span class="n">batch_size</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">seq_len</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">shape</span>
+        
+        <span class="c1"># 패치 생성
+</span>        <span class="n">patches</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">create_patches</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  <span class="c1"># (batch_size, n_features, num_patches, patch_len)
+</span>        
+        <span class="c1"># 각 피처별로 독립적으로 처리 (Channel Independence)
+</span>        <span class="n">outputs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n_features</span><span class="p">):</span>
+            <span class="n">feature_patches</span> <span class="o">=</span> <span class="n">patches</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>  <span class="c1"># (batch_size, num_patches, patch_len)
+</span>            
+            <span class="c1"># 입력 프로젝션
+</span>            <span class="n">projected</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">input_projection</span><span class="p">(</span><span class="n">feature_patches</span><span class="p">)</span>  <span class="c1"># (batch_size, num_patches, d_model)
+</span>            
+            <span class="c1"># 위치 인코딩 추가
+</span>            <span class="n">projected</span> <span class="o">=</span> <span class="n">projected</span> <span class="o">+</span> <span class="n">self</span><span class="p">.</span><span class="n">pos_encoding</span>
+            
+            <span class="c1"># 트랜스포머 인코더
+</span>            <span class="n">encoded</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">transformer</span><span class="p">(</span><span class="n">projected</span><span class="p">)</span>  <span class="c1"># (batch_size, num_patches, d_model)
+</span>            
+            <span class="c1"># 글로벌 평균 풀링
+</span>            <span class="n">pooled</span> <span class="o">=</span> <span class="n">encoded</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (batch_size, d_model)
+</span>            
+            <span class="c1"># 출력 프로젝션
+</span>            <span class="n">output</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">output_projection</span><span class="p">(</span><span class="n">pooled</span><span class="p">)</span>  <span class="c1"># (batch_size, pred_len)
+</span>            <span class="n">outputs</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+        
+        <span class="c1"># 모든 피처의 출력을 결합
+</span>        <span class="n">final_output</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">stack</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (batch_size, n_features, pred_len)
+</span>        <span class="k">return</span> <span class="n">final_output</span>
+
+<span class="c1"># 모델 파라미터 설정
+</span><span class="n">seq_len</span> <span class="o">=</span> <span class="mi">96</span>      <span class="c1"># 입력 시퀀스 길이
+</span><span class="n">pred_len</span> <span class="o">=</span> <span class="mi">24</span>     <span class="c1"># 예측 길이
+</span><span class="n">patch_len</span> <span class="o">=</span> <span class="mi">16</span>    <span class="c1"># 패치 길이
+</span><span class="n">stride</span> <span class="o">=</span> <span class="mi">8</span>        <span class="c1"># 스트라이드
+</span><span class="n">n_features</span> <span class="o">=</span> <span class="mi">5</span>    <span class="c1"># 피처 수
+</span>
+<span class="n">model</span> <span class="o">=</span> <span class="nc">PatchTST</span><span class="p">(</span>
+    <span class="n">seq_len</span><span class="o">=</span><span class="n">seq_len</span><span class="p">,</span>
+    <span class="n">pred_len</span><span class="o">=</span><span class="n">pred_len</span><span class="p">,</span>
+    <span class="n">patch_len</span><span class="o">=</span><span class="n">patch_len</span><span class="p">,</span>
+    <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span>
+    <span class="n">n_features</span><span class="o">=</span><span class="n">n_features</span>
+<span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">모델 파라미터 수: </span><span class="si">{</span><span class="nf">sum</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="nf">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="p">.</span><span class="nf">parameters</span><span class="p">())</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-데이터-전처리-및-학습">3. 데이터 전처리 및 학습</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">prepare_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">seq_len</span><span class="p">,</span> <span class="n">pred_len</span><span class="p">,</span> <span class="n">train_ratio</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">val_ratio</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">데이터를 학습용으로 준비</span><span class="sh">"""</span>
+    <span class="c1"># 정규화
+</span>    <span class="n">scaler</span> <span class="o">=</span> <span class="nc">StandardScaler</span><span class="p">()</span>
+    <span class="n">scaled_data</span> <span class="o">=</span> <span class="n">scaler</span><span class="p">.</span><span class="nf">fit_transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    
+    <span class="c1"># 시퀀스 생성
+</span>    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">scaled_data</span><span class="p">)</span> <span class="o">-</span> <span class="n">seq_len</span> <span class="o">-</span> <span class="n">pred_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">X</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">scaled_data</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">seq_len</span><span class="p">])</span>
+        <span class="n">y</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">scaled_data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">seq_len</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">seq_len</span><span class="o">+</span><span class="n">pred_len</span><span class="p">])</span>
+    
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    
+    <span class="c1"># 학습/검증/테스트 분할
+</span>    <span class="n">n_train</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">*</span> <span class="n">train_ratio</span><span class="p">)</span>
+    <span class="n">n_val</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">*</span> <span class="n">val_ratio</span><span class="p">)</span>
+    
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:</span><span class="n">n_train</span><span class="p">],</span> <span class="n">y</span><span class="p">[:</span><span class="n">n_train</span><span class="p">]</span>
+    <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">n_train</span><span class="p">:</span><span class="n">n_train</span><span class="o">+</span><span class="n">n_val</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">n_train</span><span class="p">:</span><span class="n">n_train</span><span class="o">+</span><span class="n">n_val</span><span class="p">]</span>
+    <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">n_train</span><span class="o">+</span><span class="n">n_val</span><span class="p">:],</span> <span class="n">y</span><span class="p">[</span><span class="n">n_train</span><span class="o">+</span><span class="n">n_val</span><span class="p">:]</span>
+    
+    <span class="nf">return </span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">),</span> <span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">),</span> <span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">),</span> <span class="n">scaler</span>
+
+<span class="c1"># 데이터 준비
+</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">),</span> <span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">),</span> <span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">),</span> <span class="n">scaler</span> <span class="o">=</span> <span class="nf">prepare_data</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">seq_len</span><span class="p">,</span> <span class="n">pred_len</span>
+<span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">학습 데이터: </span><span class="si">{</span><span class="n">X_train</span><span class="p">.</span><span class="n">shape</span><span class="si">}</span><span class="s">, </span><span class="si">{</span><span class="n">y_train</span><span class="p">.</span><span class="n">shape</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">검증 데이터: </span><span class="si">{</span><span class="n">X_val</span><span class="p">.</span><span class="n">shape</span><span class="si">}</span><span class="s">, </span><span class="si">{</span><span class="n">y_val</span><span class="p">.</span><span class="n">shape</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">테스트 데이터: </span><span class="si">{</span><span class="n">X_test</span><span class="p">.</span><span class="n">shape</span><span class="si">}</span><span class="s">, </span><span class="si">{</span><span class="n">y_test</span><span class="p">.</span><span class="n">shape</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># DataLoader 생성
+</span><span class="k">def</span> <span class="nf">create_dataloader</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">X_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nc">FloatTensor</span><span class="p">(</span><span class="n">X</span><span class="p">).</span><span class="nf">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># (batch, features, seq_len)
+</span>    <span class="n">y_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nc">FloatTensor</span><span class="p">(</span><span class="n">y</span><span class="p">).</span><span class="nf">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># (batch, features, pred_len)
+</span>    <span class="n">dataset</span> <span class="o">=</span> <span class="nc">TensorDataset</span><span class="p">(</span><span class="n">X_tensor</span><span class="p">,</span> <span class="n">y_tensor</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nc">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">)</span>
+
+<span class="n">train_loader</span> <span class="o">=</span> <span class="nf">create_dataloader</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+<span class="n">val_loader</span> <span class="o">=</span> <span class="nf">create_dataloader</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="4-모델-학습">4. 모델 학습</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">val_loader</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">모델 학습</span><span class="sh">"""</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">device</span><span class="p">(</span><span class="sh">'</span><span class="s">cuda</span><span class="sh">'</span> <span class="k">if</span> <span class="n">torch</span><span class="p">.</span><span class="n">cuda</span><span class="p">.</span><span class="nf">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="sh">'</span><span class="s">cpu</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    
+    <span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">MSELoss</span><span class="p">()</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="nc">Adam</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="nf">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
+    <span class="n">scheduler</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">lr_scheduler</span><span class="p">.</span><span class="nc">ReduceLROnPlateau</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    
+    <span class="n">train_losses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">val_losses</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+        <span class="c1"># 학습
+</span>        <span class="n">model</span><span class="p">.</span><span class="nf">train</span><span class="p">()</span>
+        <span class="n">train_loss</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">batch_X</span><span class="p">,</span> <span class="n">batch_y</span> <span class="ow">in</span> <span class="n">train_loader</span><span class="p">:</span>
+            <span class="n">batch_X</span><span class="p">,</span> <span class="n">batch_y</span> <span class="o">=</span> <span class="n">batch_X</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">batch_y</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+            
+            <span class="n">optimizer</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">batch_X</span><span class="p">)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="nf">criterion</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">batch_y</span><span class="p">)</span>
+            <span class="n">loss</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+            <span class="n">optimizer</span><span class="p">.</span><span class="nf">step</span><span class="p">()</span>
+            
+            <span class="n">train_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="nf">item</span><span class="p">()</span>
+        
+        <span class="c1"># 검증
+</span>        <span class="n">model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+        <span class="n">val_loss</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">batch_X</span><span class="p">,</span> <span class="n">batch_y</span> <span class="ow">in</span> <span class="n">val_loader</span><span class="p">:</span>
+                <span class="n">batch_X</span><span class="p">,</span> <span class="n">batch_y</span> <span class="o">=</span> <span class="n">batch_X</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">batch_y</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">outputs</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">batch_X</span><span class="p">)</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="nf">criterion</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">batch_y</span><span class="p">)</span>
+                <span class="n">val_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="nf">item</span><span class="p">()</span>
+        
+        <span class="n">train_loss</span> <span class="o">/=</span> <span class="nf">len</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
+        <span class="n">val_loss</span> <span class="o">/=</span> <span class="nf">len</span><span class="p">(</span><span class="n">val_loader</span><span class="p">)</span>
+        
+        <span class="n">train_losses</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">train_loss</span><span class="p">)</span>
+        <span class="n">val_losses</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">val_loss</span><span class="p">)</span>
+        
+        <span class="n">scheduler</span><span class="p">.</span><span class="nf">step</span><span class="p">(</span><span class="n">val_loss</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">epoch</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">:</span><span class="mi">3</span><span class="n">d</span><span class="si">}</span><span class="s">: Train Loss = </span><span class="si">{</span><span class="n">train_loss</span><span class="si">:</span><span class="p">.</span><span class="mi">6</span><span class="n">f</span><span class="si">}</span><span class="s">, Val Loss = </span><span class="si">{</span><span class="n">val_loss</span><span class="si">:</span><span class="p">.</span><span class="mi">6</span><span class="n">f</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">train_losses</span><span class="p">,</span> <span class="n">val_losses</span>
+
+<span class="c1"># 모델 학습
+</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">모델 학습 시작...</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">train_losses</span><span class="p">,</span> <span class="n">val_losses</span> <span class="o">=</span> <span class="nf">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">val_loader</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">학습 완료!</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="5-결과-시각화">5. 결과 시각화</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">plot_results</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">test_loader</span><span class="p">,</span> <span class="n">scaler</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">결과 시각화</span><span class="sh">"""</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">device</span><span class="p">(</span><span class="sh">'</span><span class="s">cuda</span><span class="sh">'</span> <span class="k">if</span> <span class="n">torch</span><span class="p">.</span><span class="n">cuda</span><span class="p">.</span><span class="nf">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="sh">'</span><span class="s">cpu</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+    
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">batch_X</span><span class="p">,</span> <span class="n">batch_y</span><span class="p">)</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">test_loader</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">n_samples</span><span class="p">:</span>
+                <span class="k">break</span>
+                
+            <span class="n">batch_X</span><span class="p">,</span> <span class="n">batch_y</span> <span class="o">=</span> <span class="n">batch_X</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">batch_y</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">batch_X</span><span class="p">)</span>
+            
+            <span class="c1"># 첫 번째 샘플만 시각화
+</span>            <span class="n">X_sample</span> <span class="o">=</span> <span class="n">batch_X</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">().</span><span class="n">T</span>  <span class="c1"># (seq_len, n_features)
+</span>            <span class="n">y_true</span> <span class="o">=</span> <span class="n">batch_y</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">().</span><span class="n">T</span>    <span class="c1"># (pred_len, n_features)
+</span>            <span class="n">y_pred</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">().</span><span class="n">T</span> <span class="c1"># (pred_len, n_features)
+</span>            
+            <span class="c1"># 역정규화
+</span>            <span class="n">X_sample</span> <span class="o">=</span> <span class="n">scaler</span><span class="p">.</span><span class="nf">inverse_transform</span><span class="p">(</span><span class="n">X_sample</span><span class="p">)</span>
+            <span class="n">y_true</span> <span class="o">=</span> <span class="n">scaler</span><span class="p">.</span><span class="nf">inverse_transform</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="n">scaler</span><span class="p">.</span><span class="nf">inverse_transform</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
+            
+            <span class="c1"># 시각화
+</span>            <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="nf">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+            <span class="n">axes</span> <span class="o">=</span> <span class="n">axes</span><span class="p">.</span><span class="nf">flatten</span><span class="p">()</span>
+            
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">min</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_features</span><span class="p">)):</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                
+                <span class="c1"># 과거 데이터
+</span>                <span class="n">ax</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="nf">range</span><span class="p">(</span><span class="n">seq_len</span><span class="p">),</span> <span class="n">X_sample</span><span class="p">[:,</span> <span class="n">j</span><span class="p">],</span> <span class="sh">'</span><span class="s">b-</span><span class="sh">'</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">과거</span><span class="sh">'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                
+                <span class="c1"># 실제 미래
+</span>                <span class="n">future_x</span> <span class="o">=</span> <span class="nf">range</span><span class="p">(</span><span class="n">seq_len</span><span class="p">,</span> <span class="n">seq_len</span> <span class="o">+</span> <span class="n">pred_len</span><span class="p">)</span>
+                <span class="n">ax</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">future_x</span><span class="p">,</span> <span class="n">y_true</span><span class="p">[:,</span> <span class="n">j</span><span class="p">],</span> <span class="sh">'</span><span class="s">g-</span><span class="sh">'</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">실제</span><span class="sh">'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                
+                <span class="c1"># 예측
+</span>                <span class="n">ax</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">future_x</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">[:,</span> <span class="n">j</span><span class="p">],</span> <span class="sh">'</span><span class="s">r--</span><span class="sh">'</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">예측</span><span class="sh">'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                
+                <span class="n">ax</span><span class="p">.</span><span class="nf">set_title</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Stock </span><span class="si">{</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+                <span class="n">ax</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+                <span class="n">ax</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+            
+            <span class="c1"># 마지막 subplot 숨기기
+</span>            <span class="k">if</span> <span class="n">n_features</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="p">:</span>
+                <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nf">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            
+            <span class="n">plt</span><span class="p">.</span><span class="nf">tight_layout</span><span class="p">()</span>
+            <span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># 결과 시각화
+</span><span class="n">test_loader</span> <span class="o">=</span> <span class="nf">create_dataloader</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="nf">plot_results</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">test_loader</span><span class="p">,</span> <span class="n">scaler</span><span class="p">)</span>
+
+<span class="c1"># 학습 곡선 시각화
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">train_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Train Loss</span><span class="sh">'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">blue</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">val_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Validation Loss</span><span class="sh">'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">red</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">학습 곡선</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Epoch</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Loss</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">train_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">20</span><span class="p">:],</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Train Loss (Last 20)</span><span class="sh">'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">blue</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">val_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">20</span><span class="p">:],</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">Validation Loss (Last 20)</span><span class="sh">'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">red</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">최근 학습 곡선</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Epoch</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Loss</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="nf">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="6-성능-평가">6. 성능 평가</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">evaluate_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">test_loader</span><span class="p">,</span> <span class="n">scaler</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">모델 성능 평가</span><span class="sh">"""</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">device</span><span class="p">(</span><span class="sh">'</span><span class="s">cuda</span><span class="sh">'</span> <span class="k">if</span> <span class="n">torch</span><span class="p">.</span><span class="n">cuda</span><span class="p">.</span><span class="nf">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="sh">'</span><span class="s">cpu</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+    
+    <span class="n">all_predictions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_targets</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">batch_X</span><span class="p">,</span> <span class="n">batch_y</span> <span class="ow">in</span> <span class="n">test_loader</span><span class="p">:</span>
+            <span class="n">batch_X</span><span class="p">,</span> <span class="n">batch_y</span> <span class="o">=</span> <span class="n">batch_X</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">batch_y</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">batch_X</span><span class="p">)</span>
+            
+            <span class="n">all_predictions</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">predictions</span><span class="p">.</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">())</span>
+            <span class="n">all_targets</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">batch_y</span><span class="p">.</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">())</span>
+    
+    <span class="c1"># 예측과 타겟 결합
+</span>    <span class="n">predictions</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">concatenate</span><span class="p">(</span><span class="n">all_predictions</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">concatenate</span><span class="p">(</span><span class="n">all_targets</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="c1"># 역정규화
+</span>    <span class="n">predictions</span> <span class="o">=</span> <span class="n">scaler</span><span class="p">.</span><span class="nf">inverse_transform</span><span class="p">(</span><span class="n">predictions</span><span class="p">.</span><span class="nf">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">).</span><span class="nf">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_features</span><span class="p">))</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="n">scaler</span><span class="p">.</span><span class="nf">inverse_transform</span><span class="p">(</span><span class="n">targets</span><span class="p">.</span><span class="nf">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">).</span><span class="nf">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_features</span><span class="p">))</span>
+    
+    <span class="c1"># MSE, MAE 계산
+</span>    <span class="n">mse</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">mean</span><span class="p">((</span><span class="n">predictions</span> <span class="o">-</span> <span class="n">targets</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">mae</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">abs</span><span class="p">(</span><span class="n">predictions</span> <span class="o">-</span> <span class="n">targets</span><span class="p">))</span>
+    <span class="n">rmse</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="p">)</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">테스트 성능:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">MSE: </span><span class="si">{</span><span class="n">mse</span><span class="si">:</span><span class="p">.</span><span class="mi">6</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">MAE: </span><span class="si">{</span><span class="n">mae</span><span class="si">:</span><span class="p">.</span><span class="mi">6</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">RMSE: </span><span class="si">{</span><span class="n">rmse</span><span class="si">:</span><span class="p">.</span><span class="mi">6</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">mse</span><span class="p">,</span> <span class="n">mae</span><span class="p">,</span> <span class="n">rmse</span>
+
+<span class="c1"># 성능 평가
+</span><span class="n">mse</span><span class="p">,</span> <span class="n">mae</span><span class="p">,</span> <span class="n">rmse</span> <span class="o">=</span> <span class="nf">evaluate_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">test_loader</span><span class="p">,</span> <span class="n">scaler</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-모델-비교-및-선택-가이드">📊 모델 비교 및 선택 가이드</h2>
+
+<h3 id="성능-비교">성능 비교</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>모델</th>
+      <th>장점</th>
+      <th>단점</th>
+      <th>적용 분야</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Informer</strong></td>
+      <td>긴 시퀀스 효율적, 강력한 성능</td>
+      <td>복잡한 구조, 긴 학습 시간</td>
+      <td>장기 예측, 대용량 데이터</td>
+    </tr>
+    <tr>
+      <td><strong>Autoformer</strong></td>
+      <td>주기성 자동 학습, 해석 가능</td>
+      <td>주기성 없는 데이터 제한</td>
+      <td>계절성 데이터, 비즈니스 분석</td>
+    </tr>
+    <tr>
+      <td><strong>FEDformer</strong></td>
+      <td>주파수 도메인 처리, 앙상블</td>
+      <td>FFT 계산 비용</td>
+      <td>신호 처리, 주기성 데이터</td>
+    </tr>
+    <tr>
+      <td><strong>PatchTST</strong></td>
+      <td>단순하고 효율적, 빠른 학습</td>
+      <td>패치 크기 민감</td>
+      <td>실시간 예측, 다변량 시계열</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="모델-선택-가이드">모델 선택 가이드</h3>
+
+<p><strong>1. 데이터 특성에 따른 선택:</strong></p>
+<ul>
+  <li><strong>주기성이 강한 데이터</strong>: Autoformer, FEDformer</li>
+  <li><strong>긴 시퀀스 데이터</strong>: Informer, PatchTST</li>
+  <li><strong>다변량 시계열</strong>: PatchTST, Informer</li>
+  <li><strong>실시간 예측</strong>: PatchTST</li>
+</ul>
+
+<p><strong>2. 리소스 제약에 따른 선택:</strong></p>
+<ul>
+  <li><strong>제한된 계산 자원</strong>: PatchTST</li>
+  <li><strong>충분한 자원</strong>: Informer, FEDformer</li>
+  <li><strong>빠른 프로토타이핑</strong>: PatchTST</li>
+</ul>
+
+<h2 id="-다음-단계">🎯 다음 단계</h2>
+
+<p>이번 파트에서는 트랜스포머 기반 시계열 예측 모델들을 살펴보았습니다. 다음 파트에서는:</p>
+
+<ul>
+  <li><strong>Part 4</strong>: 최신 생성형 AI 모델들 (TimeGPT, Lag-Llama, Moirai, Chronos)</li>
+  <li><strong>Part 5</strong>: 실무 적용과 MLOps (모델 배포, 모니터링, A/B 테스트)</li>
+</ul>
+
+<h2 id="-핵심-포인트">💡 핵심 포인트</h2>
+
+<ol>
+  <li><strong>트랜스포머의 장점</strong>: 병렬 처리, 장거리 의존성 학습, 확장성</li>
+  <li><strong>모델별 특성</strong>: 각 모델마다 고유한 강점과 적용 분야가 있음</li>
+  <li><strong>실무 고려사항</strong>: 데이터 특성, 리소스 제약, 성능 요구사항을 종합적으로 고려</li>
+  <li><strong>실습의 중요성</strong>: 이론과 코드를 함께 학습하여 실제 적용 능력 향상</li>
+</ol>
+
+<p>트랜스포머 기반 모델들은 시계열 예측의 새로운 패러다임을 제시하고 있습니다. 다음 파트에서 더욱 흥미로운 최신 모델들을 만나보세요!</p>
+
+<hr />
+
+<h2 id="-시리즈-네비게이션">🔗 시리즈 네비게이션</h2>
+
+<p><strong>← 이전</strong>: <a href="/data-ai/2025/09/01/time-series-deep-learning.html">Part 2: 딥러닝 기반 시계열 예측 - N-BEATS와 DeepAR</a></p>
+
+<p><strong>다음 →</strong>: Part 4: 최신 생성형 AI 모델들 (Coming Soon)</p>
+
+<hr />
+
+<p><strong>다음 파트 미리보기</strong>: Part 4에서는 TimeGPT, Lag-Llama 등 최신 생성형 AI 모델들이 시계열 예측에 어떻게 활용되는지 살펴보겠습니다. 🚀</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+      
+        
+      
+        
+          
+          
+      
+      
+        
+        
+        <a href="/data-ai/2025/09/01/time-series-deep-learning.html" class="nav-link prev">
+          ← 이전: Part 2: 딥러닝 기반 시계열 예측 - N-BEATS와 DeepAR
+        </a>
+      
+      
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-ai/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

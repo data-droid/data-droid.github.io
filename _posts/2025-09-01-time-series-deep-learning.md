@@ -854,3 +854,12 @@ if len(test_loader) > 0:
 *이번 파트에서는 딥러닝의 힘을 활용한 시계열 예측을 경험했습니다. N-BEATS의 해석 가능한 구조와 DeepAR의 확률적 예측을 통해 더욱 정교한 시계열 분석이 가능해졌습니다!* 🎯
 
 *다음 파트에서는 Transformer 기반 모델들을 통해 장기 의존성 문제를 해결하고, 최신 시계열 예측 기술의 최전선을 경험해보세요!* 🚀
+
+---
+
+## 🔗 다음 파트로 이동
+
+**Part 3: 트랜스포머 기반 시계열 예측 모델들**  
+Informer, Autoformer, FEDformer, PatchTST 등 최신 트랜스포머 기반 시계열 예측 모델들을 살펴보고 실습해봅니다.
+
+[**Part 3 읽기 →**](/data-ai/2025/09/06/time-series-transformers.html)

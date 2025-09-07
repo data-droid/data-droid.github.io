@@ -3,17 +3,29 @@
   사용법: {% include category-posts.html category="data-ai" %}
 {% endcomment %}
 
-{% assign category_posts = site.posts | where: "category", include.category | sort: 'date' | reverse %}
+{% if page.lang == 'en' %}
+  {% assign category_posts = site.en_posts | where: "category", include.category | sort: 'date' | reverse %}
+{% else %}
+  {% assign category_posts = site.posts | where: "category", include.category | sort: 'date' | reverse %}
+{% endif %}
 
 {% if category_posts.size > 0 %}
   <div class="category-posts">
-    <h3 class="category-posts-title">📚 {{ include.category | replace: '-', ' ' | capitalize }} 포스트</h3>
+    {% if page.lang == 'en' %}
+      <h3 class="category-posts-title">📚 {{ include.category | replace: '-', ' ' | capitalize }} Posts</h3>
+    {% else %}
+      <h3 class="category-posts-title">📚 {{ include.category | replace: '-', ' ' | capitalize }} 포스트</h3>
+    {% endif %}
     <div class="posts-list-simple">
       {% for post in category_posts %}
         <div class="post-item-simple">
           <div class="post-meta-simple">
             <span class="post-category">{{ post.category | replace: '-', ' ' | capitalize }}</span>
-            <span class="post-date">{{ post.date | date: "%Y년 %m월 %d일" }}</span>
+            {% if page.lang == 'en' %}
+              <span class="post-date">{{ post.date | date: "%B %d, %Y" }}</span>
+            {% else %}
+              <span class="post-date">{{ post.date | date: "%Y년 %m월 %d일" }}</span>
+            {% endif %}
           </div>
           <h4 class="post-title-simple">
             <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
@@ -39,8 +51,13 @@
   <div class="posts-placeholder">
     <div class="placeholder-card">
       <div class="placeholder-icon">📝</div>
-      <h3>포스트 준비 중</h3>
-      <p>곧 {{ include.category | replace: '-', ' ' | capitalize }} 관련 포스트가 추가될 예정입니다.</p>
+      {% if page.lang == 'en' %}
+        <h3>Posts Coming Soon</h3>
+        <p>Additional {{ include.category | replace: '-', ' ' | capitalize }} posts will be added soon.</p>
+      {% else %}
+        <h3>포스트 준비 중</h3>
+        <p>곧 {{ include.category | replace: '-', ' ' | capitalize }} 관련 포스트가 추가될 예정입니다.</p>
+      {% endif %}
     </div>
   </div>
 {% endif %}

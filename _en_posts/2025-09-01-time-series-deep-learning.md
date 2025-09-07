@@ -455,7 +455,7 @@ All the code examples from this post are available in our GitHub repository. You
 
 **← Previous**: [Part 1: Time Series Forecasting Basics - ARIMA to Prophet]({{ site.baseurl }}/en/categories/data-ai/2025-08-31-time-series-basics/)
 
-**Next →**: Part 3: Advanced Deep Learning Models (Coming Soon)
+**Next →**: [Part 3: Transformer-Based Time Series Forecasting Models](/en_posts/2025-09-06-time-series-transformers.html)
 
 ---
 
