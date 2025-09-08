@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="실무에서 자주 사용되는 Apache Airflow의 고급 기능과 모범 사례를 학습하고 실제 프로젝트에 적용해봅니다.">
+
+
+
+<title>Apache Airflow 심화 가이드: DAG 최적화부터 모니터링까지 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Apache Airflow 심화 가이드: DAG 최적화부터 모니터링까지">
+<meta property="og:description" content="실무에서 자주 사용되는 Apache Airflow의 고급 기능과 모범 사례를 학습하고 실제 프로젝트에 적용해봅니다.">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2025/09/08/apache-airflow-advanced-guide.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Apache Airflow 심화 가이드: DAG 최적화부터 모니터링까지">
+<meta name="twitter:description" content="실무에서 자주 사용되는 Apache Airflow의 고급 기능과 모범 사례를 학습하고 실제 프로젝트에 적용해봅니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2025/09/08/apache-airflow-advanced-guide.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2025-09-08-apache-airflow-advanced-guide.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 08일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Apache Airflow 심화 가이드: DAG 최적화부터 모니터링까지</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Airflow</span>
+      
+        <span class="tag">데이터파이프라인</span>
+      
+        <span class="tag">워크플로우</span>
+      
+        <span class="tag">DAG</span>
+      
+        <span class="tag">스케줄링</span>
+      
+        <span class="tag">모니터링</span>
+      
+        <span class="tag">데이터엔지니어링</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 25분</span>
+      
+      
+        <span class="difficulty">📊 고급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="apache-airflow-심화-가이드-dag-최적화부터-모니터링까지">Apache Airflow 심화 가이드: DAG 최적화부터 모니터링까지</h1>
+
+<blockquote>
+  <p>실무에서 자주 사용되는 Apache Airflow의 고급 기능과 모범 사례를 학습하고 실제 프로젝트에 적용해봅니다.</p>
+</blockquote>
+
+<h2 id="-목차">📋 목차</h2>
+
+<ol>
+  <li><a href="#airflow-아키텍처-심화-이해">Airflow 아키텍처 심화 이해</a></li>
+  <li><a href="#dag-최적화-전략">DAG 최적화 전략</a></li>
+  <li><a href="#고급-스케줄링과-트리거">고급 스케줄링과 트리거</a></li>
+  <li><a href="#에러-처리와-재시도-전략">에러 처리와 재시도 전략</a></li>
+  <li><a href="#모니터링과-알림-시스템">모니터링과 알림 시스템</a></li>
+  <li><a href="#실습-실무급-데이터-파이프라인-구축">실습: 실무급 데이터 파이프라인 구축</a></li>
+  <li><a href="#성능-튜닝과-확장성">성능 튜닝과 확장성</a></li>
+  <li><a href="#보안과-권한-관리">보안과 권한 관리</a></li>
+  <li><a href="#학습-요약">학습 요약</a></li>
+</ol>
+
+<h2 id="️-airflow-아키텍처-심화-이해">🏗️ Airflow 아키텍처 심화 이해</h2>
+
+<h3 id="핵심-컴포넌트-분석">핵심 컴포넌트 분석</h3>
+
+<p>Apache Airflow는 다음과 같은 핵심 컴포넌트들로 구성됩니다:</p>
+
+<h4 id="1-scheduler"><strong>1. Scheduler</strong></h4>
+<ul>
+  <li><strong>역할</strong>: DAG 파싱, Task 인스턴스 생성, 실행 스케줄링</li>
+  <li><strong>동작 원리</strong>: 메타데이터베이스에서 DAG 상태를 주기적으로 확인</li>
+  <li><strong>성능 최적화</strong>: 병렬 처리, DAG 파싱 캐싱</li>
+</ul>
+
+<h4 id="2-executor"><strong>2. Executor</strong></h4>
+<ul>
+  <li><strong>LocalExecutor</strong>: 단일 머신에서 순차 실행</li>
+  <li><strong>CeleryExecutor</strong>: 분산 환경에서 병렬 실행</li>
+  <li><strong>KubernetesExecutor</strong>: 쿠버네티스 클러스터에서 실행</li>
+  <li><strong>LocalKubernetesExecutor</strong>: 하이브리드 실행 방식</li>
+</ul>
+
+<h4 id="3-webserver"><strong>3. Webserver</strong></h4>
+<ul>
+  <li><strong>UI 제공</strong>: DAG 모니터링, 로그 확인, 수동 실행</li>
+  <li><strong>REST API</strong>: 외부 시스템과의 연동</li>
+  <li><strong>인증/권한</strong>: 보안 관리</li>
+</ul>
+
+<h4 id="4-metadata-database"><strong>4. Metadata Database</strong></h4>
+<ul>
+  <li><strong>PostgreSQL/MySQL</strong>: 메타데이터 저장</li>
+  <li><strong>연결 정보</strong>: Connection, Variable, XCom</li>
+  <li><strong>실행 히스토리</strong>: Task 인스턴스, 로그 정보</li>
+</ul>
+
+<h3 id="메타데이터베이스-스키마-이해">메타데이터베이스 스키마 이해</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- 주요 테이블 구조</span>
+<span class="c1">-- dag: DAG 메타데이터</span>
+<span class="c1">-- dag_run: DAG 실행 인스턴스</span>
+<span class="c1">-- task_instance: Task 실행 인스턴스</span>
+<span class="c1">-- log: 실행 로그</span>
+<span class="c1">-- connection: 데이터베이스 연결 정보</span>
+<span class="c1">-- variable: 전역 변수</span>
+<span class="c1">-- xcom: Task 간 데이터 전달</span>
+</code></pre></div></div>
+
+<h2 id="-dag-최적화-전략">⚡ DAG 최적화 전략</h2>
+
+<h3 id="1-dag-구조-최적화">1. DAG 구조 최적화</h3>
+
+<h4 id="효율적인-task-정의"><strong>효율적인 Task 정의</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="n">airflow</span> <span class="kn">import</span> <span class="n">DAG</span>
+<span class="kn">from</span> <span class="n">airflow.operators.python</span> <span class="kn">import</span> <span class="n">PythonOperator</span>
+<span class="kn">from</span> <span class="n">airflow.operators.bash</span> <span class="kn">import</span> <span class="n">BashOperator</span>
+<span class="kn">from</span> <span class="n">airflow.sensors.filesystem</span> <span class="kn">import</span> <span class="n">FileSensor</span>
+<span class="kn">from</span> <span class="n">airflow.utils.task_group</span> <span class="kn">import</span> <span class="n">TaskGroup</span>
+
+<span class="c1"># 기본 DAG 설정
+</span><span class="n">default_args</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">'</span><span class="s">owner</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">data-team</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">depends_on_past</span><span class="sh">'</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">start_date</span><span class="sh">'</span><span class="p">:</span> <span class="nf">datetime</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="sh">'</span><span class="s">email_on_failure</span><span class="sh">'</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">email_on_retry</span><span class="sh">'</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">retries</span><span class="sh">'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">retry_delay</span><span class="sh">'</span><span class="p">:</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+    <span class="sh">'</span><span class="s">catchup</span><span class="sh">'</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>  <span class="c1"># 과거 실행 건너뛰기
+</span>    <span class="sh">'</span><span class="s">max_active_runs</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># 동시 실행 제한
+</span><span class="p">}</span>
+
+<span class="c1"># DAG 정의
+</span><span class="n">dag</span> <span class="o">=</span> <span class="nc">DAG</span><span class="p">(</span>
+    <span class="sh">'</span><span class="s">advanced_data_pipeline</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">default_args</span><span class="o">=</span><span class="n">default_args</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="sh">'</span><span class="s">고급 데이터 파이프라인</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">schedule_interval</span><span class="o">=</span><span class="sh">'</span><span class="s">0 2 * * *</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># 매일 오전 2시
+</span>    <span class="n">max_active_runs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">data-engineering</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">etl</span><span class="sh">'</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="c1"># Task Group을 활용한 구조화
+</span><span class="k">with</span> <span class="nc">TaskGroup</span><span class="p">(</span><span class="sh">"</span><span class="s">data_extraction</span><span class="sh">"</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="sh">"</span><span class="s">데이터 추출</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">extraction_group</span><span class="p">:</span>
+    <span class="c1"># 파일 존재 확인
+</span>    <span class="n">file_sensor</span> <span class="o">=</span> <span class="nc">FileSensor</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">check_source_file</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">filepath</span><span class="o">=</span><span class="sh">'</span><span class="s">/data/input/sales_data.csv</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">poke_interval</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># 데이터 검증
+</span>    <span class="n">validate_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">validate_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">validate_source_data</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">file_path</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">/data/input/sales_data.csv</span><span class="sh">'</span><span class="p">},</span>
+    <span class="p">)</span>
+
+<span class="c1"># 메인 처리 로직
+</span><span class="k">with</span> <span class="nc">TaskGroup</span><span class="p">(</span><span class="sh">"</span><span class="s">data_processing</span><span class="sh">"</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="sh">"</span><span class="s">데이터 처리</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">processing_group</span><span class="p">:</span>
+    <span class="c1"># 데이터 변환
+</span>    <span class="n">transform_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">transform_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">transform_sales_data</span><span class="p">,</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_processing_pool</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># 리소스 풀 사용
+</span>        <span class="n">pool_slots</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># 데이터 로드
+</span>    <span class="n">load_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">load_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">load_to_warehouse</span><span class="p">,</span>
+        <span class="n">trigger_rule</span><span class="o">=</span><span class="sh">'</span><span class="s">all_success</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="c1"># 의존성 설정
+</span><span class="n">extraction_group</span> <span class="o">&gt;&gt;</span> <span class="n">processing_group</span>
+</code></pre></div></div>
+
+<h3 id="2-리소스-관리-최적화">2. 리소스 관리 최적화</h3>
+
+<h4 id="pool과-queue-활용"><strong>Pool과 Queue 활용</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># airflow.cfg 설정
+</span><span class="p">[</span><span class="n">celery</span><span class="p">]</span>
+<span class="n">worker_concurrency</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">worker_precheck</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="c1"># Pool 정의
+</span><span class="kn">from</span> <span class="n">airflow.models</span> <span class="kn">import</span> <span class="n">Pool</span>
+
+<span class="c1"># 리소스 풀 생성
+</span><span class="n">Pool</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span>
+    <span class="n">pool_name</span><span class="o">=</span><span class="sh">'</span><span class="s">data_processing_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">slots</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="sh">'</span><span class="s">데이터 처리 전용 풀</span><span class="sh">'</span>
+<span class="p">)</span>
+
+<span class="n">Pool</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span>
+    <span class="n">pool_name</span><span class="o">=</span><span class="sh">'</span><span class="s">heavy_computation_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">slots</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="sh">'</span><span class="s">무거운 연산 전용 풀</span><span class="sh">'</span>
+<span class="p">)</span>
+
+<span class="c1"># Task에서 Pool 사용
+</span><span class="n">heavy_task</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">heavy_computation</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">python_callable</span><span class="o">=</span><span class="n">heavy_computation_function</span><span class="p">,</span>
+    <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">heavy_computation_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">pool_slots</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-메모리-사용량-최적화">3. 메모리 사용량 최적화</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 대용량 데이터 처리 시 청크 단위 처리
+</span><span class="k">def</span> <span class="nf">process_large_dataset</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">대용량 데이터를 청크 단위로 처리</span><span class="sh">"""</span>
+    <span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">10000</span>
+    
+    <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">pd</span><span class="p">.</span><span class="nf">read_csv</span><span class="p">(</span>
+        <span class="sh">'</span><span class="s">/data/large_dataset.csv</span><span class="sh">'</span><span class="p">,</span> 
+        <span class="n">chunksize</span><span class="o">=</span><span class="n">chunk_size</span>
+    <span class="p">):</span>
+        <span class="c1"># 청크별 처리
+</span>        <span class="n">processed_chunk</span> <span class="o">=</span> <span class="nf">process_chunk</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+        
+        <span class="c1"># 중간 결과 저장
+</span>        <span class="nf">save_intermediate_result</span><span class="p">(</span><span class="n">processed_chunk</span><span class="p">)</span>
+        
+        <span class="c1"># 메모리 정리
+</span>        <span class="k">del</span> <span class="n">processed_chunk</span>
+        <span class="n">gc</span><span class="p">.</span><span class="nf">collect</span><span class="p">()</span>
+
+<span class="c1"># XCom 대신 파일 기반 데이터 전달
+</span><span class="k">def</span> <span class="nf">save_large_data</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">대용량 데이터를 파일로 저장</span><span class="sh">"""</span>
+    <span class="n">large_data</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="nf">xcom_pull</span><span class="p">(</span><span class="n">task_ids</span><span class="o">=</span><span class="sh">'</span><span class="s">previous_task</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="c1"># 파일로 저장
+</span>    <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="sh">'</span><span class="s">/tmp/large_data.pkl</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">wb</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="p">.</span><span class="nf">dump</span><span class="p">(</span><span class="n">large_data</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="sh">'</span><span class="s">/tmp/large_data.pkl</span><span class="sh">'</span>
+
+<span class="k">def</span> <span class="nf">load_large_data</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">파일에서 대용량 데이터 로드</span><span class="sh">"""</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="nf">xcom_pull</span><span class="p">(</span><span class="n">task_ids</span><span class="o">=</span><span class="sh">'</span><span class="s">save_task</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="sh">'</span><span class="s">rb</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pickle</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-고급-스케줄링과-트리거">⏰ 고급 스케줄링과 트리거</h2>
+
+<h3 id="1-동적-스케줄링">1. 동적 스케줄링</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 조건부 스케줄링
+</span><span class="k">def</span> <span class="nf">should_run_dag</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">DAG 실행 조건 확인</span><span class="sh">"""</span>
+    <span class="c1"># 특정 조건에서만 실행
+</span>    <span class="k">if</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">().</span><span class="nf">weekday</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]:</span>  <span class="c1"># 월, 수, 금
+</span>        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="bp">False</span>
+
+<span class="c1"># 조건부 DAG
+</span><span class="n">dag</span> <span class="o">=</span> <span class="nc">DAG</span><span class="p">(</span>
+    <span class="sh">'</span><span class="s">conditional_dag</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">schedule_interval</span><span class="o">=</span><span class="sh">'</span><span class="s">0 9 * * *</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">catchup</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># 조건부 실행
+</span><span class="n">conditional_task</span> <span class="o">=</span> <span class="nc">BranchPythonOperator</span><span class="p">(</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">check_conditions</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">python_callable</span><span class="o">=</span><span class="n">should_run_dag</span><span class="p">,</span>
+    <span class="n">dag</span><span class="o">=</span><span class="n">dag</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># 동적 Task 생성
+</span><span class="k">def</span> <span class="nf">create_dynamic_tasks</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">실행 시점에 동적으로 Task 생성</span><span class="sh">"""</span>
+    <span class="c1"># 외부 시스템에서 Task 목록 조회
+</span>    <span class="n">task_list</span> <span class="o">=</span> <span class="nf">get_external_task_list</span><span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">task_info</span> <span class="ow">in</span> <span class="n">task_list</span><span class="p">:</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+            <span class="n">task_id</span><span class="o">=</span><span class="sa">f</span><span class="sh">"</span><span class="s">dynamic_task_</span><span class="si">{</span><span class="n">task_info</span><span class="p">[</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">python_callable</span><span class="o">=</span><span class="n">execute_dynamic_task</span><span class="p">,</span>
+            <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">task_info</span><span class="sh">'</span><span class="p">:</span> <span class="n">task_info</span><span class="p">},</span>
+        <span class="p">)</span>
+        <span class="k">yield</span> <span class="n">task</span>
+</code></pre></div></div>
+
+<h3 id="2-외부-트리거-활용">2. 외부 트리거 활용</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># REST API를 통한 외부 트리거
+</span><span class="kn">from</span> <span class="n">airflow.api_connexion.endpoints</span> <span class="kn">import</span> <span class="n">dag_run_endpoint</span>
+<span class="kn">from</span> <span class="n">airflow.models</span> <span class="kn">import</span> <span class="n">DagRun</span>
+
+<span class="c1"># 외부 시스템에서 DAG 실행
+</span><span class="k">def</span> <span class="nf">trigger_dag_externally</span><span class="p">(</span><span class="n">dag_id</span><span class="p">,</span> <span class="n">conf</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">외부에서 DAG 실행</span><span class="sh">"""</span>
+    <span class="n">dag_run</span> <span class="o">=</span> <span class="n">DagRun</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span>
+        <span class="n">dag_id</span><span class="o">=</span><span class="n">dag_id</span><span class="p">,</span>
+        <span class="n">execution_date</span><span class="o">=</span><span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">(),</span>
+        <span class="n">state</span><span class="o">=</span><span class="sh">'</span><span class="s">running</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">conf</span><span class="o">=</span><span class="n">conf</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">dag_run</span>
+
+<span class="c1"># 웹훅을 통한 트리거
+</span><span class="kn">from</span> <span class="n">airflow.operators.http_operator</span> <span class="kn">import</span> <span class="n">SimpleHttpOperator</span>
+
+<span class="n">webhook_trigger</span> <span class="o">=</span> <span class="nc">SimpleHttpOperator</span><span class="p">(</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">webhook_trigger</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">http_conn_id</span><span class="o">=</span><span class="sh">'</span><span class="s">webhook_connection</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">endpoint</span><span class="o">=</span><span class="sh">'</span><span class="s">trigger</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="sh">'</span><span class="s">POST</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">data</span><span class="o">=</span><span class="sh">'</span><span class="s">{</span><span class="sh">"</span><span class="s">dag_id</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">target_dag</span><span class="sh">"</span><span class="s">}</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">dag</span><span class="o">=</span><span class="n">dag</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-스케줄-최적화">3. 스케줄 최적화</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Cron 표현식 활용
+</span><span class="kn">from</span> <span class="n">airflow.timetables.trigger</span> <span class="kn">import</span> <span class="n">CronTriggerTimetable</span>
+
+<span class="c1"># 복잡한 스케줄링
+</span><span class="n">custom_schedule</span> <span class="o">=</span> <span class="nc">CronTriggerTimetable</span><span class="p">(</span>
+    <span class="n">cron</span><span class="o">=</span><span class="sh">'</span><span class="s">0 2 * * 1-5</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># 평일 오전 2시
+</span>    <span class="n">timezone</span><span class="o">=</span><span class="sh">'</span><span class="s">Asia/Seoul</span><span class="sh">'</span>
+<span class="p">)</span>
+
+<span class="n">dag</span> <span class="o">=</span> <span class="nc">DAG</span><span class="p">(</span>
+    <span class="sh">'</span><span class="s">business_hours_dag</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">timetable</span><span class="o">=</span><span class="n">custom_schedule</span><span class="p">,</span>
+    <span class="n">catchup</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># 데이터 기반 스케줄링
+</span><span class="k">def</span> <span class="nf">get_next_run_time</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">데이터 상태에 따라 다음 실행 시간 결정</span><span class="sh">"""</span>
+    <span class="n">last_processed</span> <span class="o">=</span> <span class="nf">get_last_processed_time</span><span class="p">()</span>
+    <span class="n">data_available</span> <span class="o">=</span> <span class="nf">check_data_availability</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="n">data_available</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">+</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-에러-처리와-재시도-전략">🚨 에러 처리와 재시도 전략</h2>
+
+<h3 id="1-고급-재시도-로직">1. 고급 재시도 로직</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 지수 백오프 재시도
+</span><span class="kn">from</span> <span class="n">airflow.models</span> <span class="kn">import</span> <span class="n">BaseOperator</span>
+<span class="kn">from</span> <span class="n">airflow.utils.decorators</span> <span class="kn">import</span> <span class="n">apply_defaults</span>
+<span class="kn">import</span> <span class="n">random</span>
+
+<span class="k">class</span> <span class="nc">SmartRetryOperator</span><span class="p">(</span><span class="n">BaseOperator</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">지능형 재시도 연산자</span><span class="sh">"""</span>
+    
+    <span class="nd">@apply_defaults</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="n">self</span><span class="p">,</span>
+        <span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">base_delay</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+        <span class="n">max_delay</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">exponential_base</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">jitter</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">max_retries</span> <span class="o">=</span> <span class="n">max_retries</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">base_delay</span> <span class="o">=</span> <span class="n">base_delay</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">max_delay</span> <span class="o">=</span> <span class="n">max_delay</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">exponential_base</span> <span class="o">=</span> <span class="n">exponential_base</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">jitter</span> <span class="o">=</span> <span class="n">jitter</span>
+    
+    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">실행 로직</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">_execute_logic</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="nf">_should_retry</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+                <span class="n">self</span><span class="p">.</span><span class="nf">_schedule_retry</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">e</span>
+    
+    <span class="k">def</span> <span class="nf">_should_retry</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">재시도 여부 판단</span><span class="sh">"""</span>
+        <span class="c1"># 특정 예외만 재시도
+</span>        <span class="n">retryable_exceptions</span> <span class="o">=</span> <span class="p">(</span><span class="nb">ConnectionError</span><span class="p">,</span> <span class="nb">TimeoutError</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">exception</span><span class="p">,</span> <span class="n">retryable_exceptions</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_schedule_retry</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">재시도 스케줄링</span><span class="sh">"""</span>
+        <span class="n">retry_count</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="n">try_number</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">delay</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">base_delay</span> <span class="o">*</span> <span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">exponential_base</span> <span class="o">**</span> <span class="n">retry_count</span><span class="p">),</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">max_delay</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">jitter</span><span class="p">:</span>
+            <span class="n">delay</span> <span class="o">+=</span> <span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">delay</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">)</span>
+        
+        <span class="c1"># 재시도 예약
+</span>        <span class="kn">from</span> <span class="n">airflow.models</span> <span class="kn">import</span> <span class="n">TaskInstance</span>
+        <span class="n">ti</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">]</span>
+        <span class="n">ti</span><span class="p">.</span><span class="n">state</span> <span class="o">=</span> <span class="sh">'</span><span class="s">up_for_retry</span><span class="sh">'</span>
+        <span class="n">ti</span><span class="p">.</span><span class="n">next_method</span> <span class="o">=</span> <span class="sh">'</span><span class="s">retry</span><span class="sh">'</span>
+        <span class="n">ti</span><span class="p">.</span><span class="n">next_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">delay</span><span class="sh">'</span><span class="p">:</span> <span class="n">delay</span><span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="2-에러-알림-시스템">2. 에러 알림 시스템</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 슬랙 알림
+</span><span class="kn">from</span> <span class="n">airflow.providers.slack.operators.slack_webhook</span> <span class="kn">import</span> <span class="n">SlackWebhookOperator</span>
+
+<span class="k">def</span> <span class="nf">send_slack_alert</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">슬랙으로 에러 알림</span><span class="sh">"""</span>
+    <span class="n">task_instance</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">]</span>
+    
+    <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"""</span><span class="s">
+    🚨 Airflow Task 실패 알림
+    
+    DAG: </span><span class="si">{</span><span class="n">task_instance</span><span class="p">.</span><span class="n">dag_id</span><span class="si">}</span><span class="s">
+    Task: </span><span class="si">{</span><span class="n">task_instance</span><span class="p">.</span><span class="n">task_id</span><span class="si">}</span><span class="s">
+    실행 시간: </span><span class="si">{</span><span class="n">task_instance</span><span class="p">.</span><span class="n">start_date</span><span class="si">}</span><span class="s">
+    에러: </span><span class="si">{</span><span class="n">context</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">exception</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Unknown error</span><span class="sh">'</span><span class="p">)</span><span class="si">}</span><span class="s">
+    로그: </span><span class="si">{</span><span class="n">task_instance</span><span class="p">.</span><span class="n">log_url</span><span class="si">}</span><span class="s">
+    </span><span class="sh">"""</span>
+    
+    <span class="k">return</span> <span class="nc">SlackWebhookOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">slack_alert</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">http_conn_id</span><span class="o">=</span><span class="sh">'</span><span class="s">slack_webhook</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="c1"># 이메일 알림
+</span><span class="kn">from</span> <span class="n">airflow.operators.email_operator</span> <span class="kn">import</span> <span class="n">EmailOperator</span>
+
+<span class="n">email_alert</span> <span class="o">=</span> <span class="nc">EmailOperator</span><span class="p">(</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">email_alert</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">to</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">data-team@company.com</span><span class="sh">'</span><span class="p">],</span>
+    <span class="n">subject</span><span class="o">=</span><span class="sh">'</span><span class="s">Airflow Task 실패 - </span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">html_content</span><span class="o">=</span><span class="sh">"""</span><span class="s">
+    &lt;h2&gt;Task 실패 알림&lt;/h2&gt;
+    &lt;p&gt;&lt;strong&gt;DAG:&lt;/strong&gt; {task_instance.dag_id}&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Task:&lt;/strong&gt; {task_instance.task_id}&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;실행 시간:&lt;/strong&gt; {task_instance.start_date}&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;에러:&lt;/strong&gt; {context.get(</span><span class="sh">'</span><span class="s">exception</span><span class="sh">'</span><span class="s">, </span><span class="sh">'</span><span class="s">Unknown error</span><span class="sh">'</span><span class="s">)}&lt;/p&gt;
+    </span><span class="sh">"""</span><span class="p">,</span>
+    <span class="n">trigger_rule</span><span class="o">=</span><span class="sh">'</span><span class="s">one_failed</span><span class="sh">'</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-circuit-breaker-패턴">3. Circuit Breaker 패턴</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CircuitBreakerOperator</span><span class="p">(</span><span class="n">BaseOperator</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">서킷 브레이커 패턴 구현</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="n">self</span><span class="p">,</span>
+        <span class="n">failure_threshold</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">recovery_timeout</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">expected_exception</span><span class="o">=</span><span class="nb">Exception</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">failure_threshold</span> <span class="o">=</span> <span class="n">failure_threshold</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">recovery_timeout</span> <span class="o">=</span> <span class="n">recovery_timeout</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">expected_exception</span> <span class="o">=</span> <span class="n">expected_exception</span>
+    
+    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">서킷 브레이커 로직</span><span class="sh">"""</span>
+        <span class="n">circuit_state</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_get_circuit_state</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">circuit_state</span> <span class="o">==</span> <span class="sh">'</span><span class="s">OPEN</span><span class="sh">'</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="nf">_should_attempt_reset</span><span class="p">():</span>
+                <span class="n">circuit_state</span> <span class="o">=</span> <span class="sh">'</span><span class="s">HALF_OPEN</span><span class="sh">'</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="nc">Exception</span><span class="p">(</span><span class="sh">"</span><span class="s">Circuit breaker is OPEN</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_execute_task</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_record_success</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">except</span> <span class="n">self</span><span class="p">.</span><span class="n">expected_exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_record_failure</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="n">e</span>
+    
+    <span class="k">def</span> <span class="nf">_get_circuit_state</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">서킷 상태 확인</span><span class="sh">"""</span>
+        <span class="c1"># 메타데이터베이스에서 상태 조회
+</span>        <span class="c1"># 구현 생략
+</span>        <span class="k">pass</span>
+</code></pre></div></div>
+
+<h2 id="-모니터링과-알림-시스템">📊 모니터링과 알림 시스템</h2>
+
+<h3 id="1-커스텀-메트릭-수집">1. 커스텀 메트릭 수집</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Prometheus 메트릭 수집
+</span><span class="kn">from</span> <span class="n">airflow.configuration</span> <span class="kn">import</span> <span class="n">conf</span>
+<span class="kn">from</span> <span class="n">airflow.stats</span> <span class="kn">import</span> <span class="n">Stats</span>
+
+<span class="k">def</span> <span class="nf">collect_custom_metrics</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">커스텀 메트릭 수집</span><span class="sh">"""</span>
+    <span class="n">task_instance</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">]</span>
+    
+    <span class="c1"># 실행 시간 메트릭
+</span>    <span class="n">execution_time</span> <span class="o">=</span> <span class="p">(</span><span class="n">task_instance</span><span class="p">.</span><span class="n">end_date</span> <span class="o">-</span> <span class="n">task_instance</span><span class="p">.</span><span class="n">start_date</span><span class="p">).</span><span class="nf">total_seconds</span><span class="p">()</span>
+    <span class="n">Stats</span><span class="p">.</span><span class="nf">gauge</span><span class="p">(</span><span class="sh">'</span><span class="s">task_execution_time</span><span class="sh">'</span><span class="p">,</span> <span class="n">execution_time</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span>
+        <span class="sh">'</span><span class="s">dag_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">task_instance</span><span class="p">.</span><span class="n">dag_id</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">task_instance</span><span class="p">.</span><span class="n">task_id</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># 메모리 사용량 메트릭
+</span>    <span class="kn">import</span> <span class="n">psutil</span>
+    <span class="n">memory_usage</span> <span class="o">=</span> <span class="n">psutil</span><span class="p">.</span><span class="nc">Process</span><span class="p">().</span><span class="nf">memory_info</span><span class="p">().</span><span class="n">rss</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span>  <span class="c1"># MB
+</span>    <span class="n">Stats</span><span class="p">.</span><span class="nf">gauge</span><span class="p">(</span><span class="sh">'</span><span class="s">task_memory_usage</span><span class="sh">'</span><span class="p">,</span> <span class="n">memory_usage</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span>
+        <span class="sh">'</span><span class="s">dag_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">task_instance</span><span class="p">.</span><span class="n">dag_id</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">task_instance</span><span class="p">.</span><span class="n">task_id</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># 데이터 처리량 메트릭
+</span>    <span class="n">processed_records</span> <span class="o">=</span> <span class="n">context</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">processed_records</span><span class="sh">'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">Stats</span><span class="p">.</span><span class="nf">gauge</span><span class="p">(</span><span class="sh">'</span><span class="s">processed_records</span><span class="sh">'</span><span class="p">,</span> <span class="n">processed_records</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span>
+        <span class="sh">'</span><span class="s">dag_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">task_instance</span><span class="p">.</span><span class="n">dag_id</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">task_instance</span><span class="p">.</span><span class="n">task_id</span>
+    <span class="p">})</span>
+
+<span class="c1"># 메트릭 수집 Task
+</span><span class="n">metrics_task</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">collect_metrics</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">python_callable</span><span class="o">=</span><span class="n">collect_custom_metrics</span><span class="p">,</span>
+    <span class="n">trigger_rule</span><span class="o">=</span><span class="sh">'</span><span class="s">all_done</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># 성공/실패 관계없이 실행
+</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-대시보드-구축">2. 대시보드 구축</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Grafana 대시보드용 쿼리
+</span><span class="k">def</span> <span class="nf">get_dag_performance_metrics</span><span class="p">():</span>
+    <span class="sh">"""</span><span class="s">DAG 성능 메트릭 조회</span><span class="sh">"""</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+    SELECT 
+        dag_id,
+        COUNT(*) as total_runs,
+        AVG(EXTRACT(EPOCH FROM (end_date - start_date))) as avg_duration,
+        COUNT(CASE WHEN state = </span><span class="sh">'</span><span class="s">success</span><span class="sh">'</span><span class="s"> THEN 1 END) as success_count,
+        COUNT(CASE WHEN state = </span><span class="sh">'</span><span class="s">failed</span><span class="sh">'</span><span class="s"> THEN 1 END) as failed_count
+    FROM dag_run 
+    WHERE start_date &gt;= NOW() - INTERVAL </span><span class="sh">'</span><span class="s">7 days</span><span class="sh">'</span><span class="s">
+    GROUP BY dag_id
+    ORDER BY avg_duration DESC
+    </span><span class="sh">"""</span>
+    <span class="k">return</span> <span class="n">query</span>
+
+<span class="c1"># Airflow UI 커스텀 뷰
+</span><span class="kn">from</span> <span class="n">airflow.plugins_manager</span> <span class="kn">import</span> <span class="n">AirflowPlugin</span>
+<span class="kn">from</span> <span class="n">flask</span> <span class="kn">import</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">render_template</span>
+
+<span class="k">class</span> <span class="nc">CustomViewPlugin</span><span class="p">(</span><span class="n">AirflowPlugin</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="sh">"</span><span class="s">custom_view_plugin</span><span class="sh">"</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">appbuilder_views</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Custom Dashboard</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Custom</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">view</span><span class="sh">"</span><span class="p">:</span> <span class="nc">CustomDashboardView</span><span class="p">(),</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">CustomDashboardView</span><span class="p">:</span>
+    <span class="nd">@expose</span><span class="p">(</span><span class="sh">"</span><span class="s">/custom-dashboard</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">custom_dashboard</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">커스텀 대시보드</span><span class="sh">"""</span>
+        <span class="c1"># 메트릭 데이터 조회
+</span>        <span class="n">metrics</span> <span class="o">=</span> <span class="nf">get_dag_performance_metrics</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">render_template</span><span class="p">(</span>
+            <span class="sh">"</span><span class="s">custom_dashboard.html</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span>
+        <span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-실시간-모니터링">3. 실시간 모니터링</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 실시간 알림 시스템
+</span><span class="kn">from</span> <span class="n">airflow.models</span> <span class="kn">import</span> <span class="n">BaseOperator</span>
+<span class="kn">from</span> <span class="n">airflow.utils.decorators</span> <span class="kn">import</span> <span class="n">apply_defaults</span>
+
+<span class="k">class</span> <span class="nc">RealTimeMonitorOperator</span><span class="p">(</span><span class="n">BaseOperator</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">실시간 모니터링 연산자</span><span class="sh">"""</span>
+    
+    <span class="nd">@apply_defaults</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="n">self</span><span class="p">,</span>
+        <span class="n">monitoring_interval</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+        <span class="n">alert_thresholds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">monitoring_interval</span> <span class="o">=</span> <span class="n">monitoring_interval</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">alert_thresholds</span> <span class="o">=</span> <span class="n">alert_thresholds</span> <span class="ow">or</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">실시간 모니터링 실행</span><span class="sh">"""</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># 시스템 상태 확인
+</span>                <span class="n">system_health</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_check_system_health</span><span class="p">()</span>
+                
+                <span class="c1"># 임계값 확인
+</span>                <span class="n">alerts</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_check_thresholds</span><span class="p">(</span><span class="n">system_health</span><span class="p">)</span>
+                
+                <span class="c1"># 알림 발송
+</span>                <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">alerts</span><span class="p">:</span>
+                    <span class="n">self</span><span class="p">.</span><span class="nf">_send_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">)</span>
+                
+                <span class="c1"># 대기
+</span>                <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">monitoring_interval</span><span class="p">)</span>
+                
+            <span class="k">except</span> <span class="nb">KeyboardInterrupt</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">log</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">모니터링 오류: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">monitoring_interval</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_check_system_health</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">시스템 상태 확인</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">cpu_usage</span><span class="sh">'</span><span class="p">:</span> <span class="n">psutil</span><span class="p">.</span><span class="nf">cpu_percent</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">memory_usage</span><span class="sh">'</span><span class="p">:</span> <span class="n">psutil</span><span class="p">.</span><span class="nf">virtual_memory</span><span class="p">().</span><span class="n">percent</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">disk_usage</span><span class="sh">'</span><span class="p">:</span> <span class="n">psutil</span><span class="p">.</span><span class="nf">disk_usage</span><span class="p">(</span><span class="sh">'</span><span class="s">/</span><span class="sh">'</span><span class="p">).</span><span class="n">percent</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">active_dags</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_count_active_dags</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">failed_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_count_failed_tasks</span><span class="p">(),</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">_check_thresholds</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">health_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">임계값 확인</span><span class="sh">"""</span>
+        <span class="n">alerts</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="n">health_data</span><span class="p">[</span><span class="sh">'</span><span class="s">cpu_usage</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">self</span><span class="p">.</span><span class="n">alert_thresholds</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">cpu</span><span class="sh">'</span><span class="p">,</span> <span class="mi">80</span><span class="p">):</span>
+            <span class="n">alerts</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">cpu_high</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">CPU 사용률이 높습니다: </span><span class="si">{</span><span class="n">health_data</span><span class="p">[</span><span class="sh">'</span><span class="s">cpu_usage</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">%</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="k">if</span> <span class="n">health_data</span><span class="p">[</span><span class="sh">'</span><span class="s">memory_usage</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">self</span><span class="p">.</span><span class="n">alert_thresholds</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">memory</span><span class="sh">'</span><span class="p">,</span> <span class="mi">85</span><span class="p">):</span>
+            <span class="n">alerts</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">memory_high</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">메모리 사용률이 높습니다: </span><span class="si">{</span><span class="n">health_data</span><span class="p">[</span><span class="sh">'</span><span class="s">memory_usage</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">%</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">alerts</span>
+</code></pre></div></div>
+
+<h2 id="️-실습-실무급-데이터-파이프라인-구축">🛠️ 실습: 실무급 데이터 파이프라인 구축</h2>
+
+<h3 id="1-환경-설정">1. 환경 설정</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Airflow 설치 및 설정</span>
+pip <span class="nb">install </span>apache-airflow[postgres,celery,redis,slack]
+pip <span class="nb">install </span>apache-airflow-providers-postgres
+pip <span class="nb">install </span>apache-airflow-providers-slack
+pip <span class="nb">install </span>apache-airflow-providers-http
+
+<span class="c"># 데이터베이스 설정</span>
+<span class="nb">export </span><span class="nv">AIRFLOW__CORE__SQL_ALCHEMY_CONN</span><span class="o">=</span><span class="s2">"postgresql://airflow:airflow@localhost/airflow"</span>
+<span class="nb">export </span><span class="nv">AIRFLOW__CORE__EXECUTOR</span><span class="o">=</span><span class="s2">"CeleryExecutor"</span>
+<span class="nb">export </span><span class="nv">AIRFLOW__CELERY__BROKER_URL</span><span class="o">=</span><span class="s2">"redis://localhost:6379/0"</span>
+<span class="nb">export </span><span class="nv">AIRFLOW__CELERY__RESULT_BACKEND</span><span class="o">=</span><span class="s2">"redis://localhost:6379/0"</span>
+
+<span class="c"># Airflow 초기화</span>
+airflow db init
+airflow <span class="nb">users </span>create <span class="se">\</span>
+    <span class="nt">--username</span> admin <span class="se">\</span>
+    <span class="nt">--firstname</span> Admin <span class="se">\</span>
+    <span class="nt">--lastname</span> User <span class="se">\</span>
+    <span class="nt">--role</span> Admin <span class="se">\</span>
+    <span class="nt">--email</span> admin@example.com
+</code></pre></div></div>
+
+<h3 id="2-실무급-etl-파이프라인">2. 실무급 ETL 파이프라인</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># dags/advanced_etl_pipeline.py
+</span><span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="n">airflow</span> <span class="kn">import</span> <span class="n">DAG</span>
+<span class="kn">from</span> <span class="n">airflow.operators.python</span> <span class="kn">import</span> <span class="n">PythonOperator</span>
+<span class="kn">from</span> <span class="n">airflow.operators.bash</span> <span class="kn">import</span> <span class="n">BashOperator</span>
+<span class="kn">from</span> <span class="n">airflow.sensors.filesystem</span> <span class="kn">import</span> <span class="n">FileSensor</span>
+<span class="kn">from</span> <span class="n">airflow.utils.task_group</span> <span class="kn">import</span> <span class="n">TaskGroup</span>
+<span class="kn">from</span> <span class="n">airflow.models</span> <span class="kn">import</span> <span class="n">Variable</span>
+<span class="kn">from</span> <span class="n">airflow.hooks.postgres_hook</span> <span class="kn">import</span> <span class="n">PostgresHook</span>
+<span class="kn">from</span> <span class="n">airflow.providers.slack.operators.slack_webhook</span> <span class="kn">import</span> <span class="n">SlackWebhookOperator</span>
+
+<span class="c1"># 설정값 로드
+</span><span class="n">BATCH_SIZE</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">Variable</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">batch_size</span><span class="sh">"</span><span class="p">,</span> <span class="n">default_var</span><span class="o">=</span><span class="mi">1000</span><span class="p">))</span>
+<span class="n">MAX_RETRIES</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">Variable</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">max_retries</span><span class="sh">"</span><span class="p">,</span> <span class="n">default_var</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="n">default_args</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">'</span><span class="s">owner</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">data-engineering-team</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">depends_on_past</span><span class="sh">'</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">start_date</span><span class="sh">'</span><span class="p">:</span> <span class="nf">datetime</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="sh">'</span><span class="s">email_on_failure</span><span class="sh">'</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">email_on_retry</span><span class="sh">'</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">retries</span><span class="sh">'</span><span class="p">:</span> <span class="n">MAX_RETRIES</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">retry_delay</span><span class="sh">'</span><span class="p">:</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+    <span class="sh">'</span><span class="s">retry_exponential_backoff</span><span class="sh">'</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">max_retry_delay</span><span class="sh">'</span><span class="p">:</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span>
+    <span class="sh">'</span><span class="s">catchup</span><span class="sh">'</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">max_active_runs</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">dag</span> <span class="o">=</span> <span class="nc">DAG</span><span class="p">(</span>
+    <span class="sh">'</span><span class="s">advanced_etl_pipeline</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">default_args</span><span class="o">=</span><span class="n">default_args</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="sh">'</span><span class="s">고급 ETL 파이프라인 - 데이터 추출, 변환, 로드</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">schedule_interval</span><span class="o">=</span><span class="sh">'</span><span class="s">0 2 * * *</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">max_active_runs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">etl</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">data-engineering</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">production</span><span class="sh">'</span><span class="p">],</span>
+    <span class="n">doc_md</span><span class="o">=</span><span class="n">__doc__</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># 데이터 추출 그룹
+</span><span class="k">with</span> <span class="nc">TaskGroup</span><span class="p">(</span><span class="sh">"</span><span class="s">data_extraction</span><span class="sh">"</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="sh">"</span><span class="s">데이터 추출</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">extraction_group</span><span class="p">:</span>
+    
+    <span class="c1"># 소스 파일 확인
+</span>    <span class="n">check_source_files</span> <span class="o">=</span> <span class="nc">FileSensor</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">check_source_files</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">filepath</span><span class="o">=</span><span class="p">[</span>
+            <span class="sh">'</span><span class="s">/data/input/sales_data.csv</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">/data/input/customer_data.csv</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">/data/input/product_data.csv</span><span class="sh">'</span>
+        <span class="p">],</span>
+        <span class="n">poke_interval</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="sh">'</span><span class="s">reschedule</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># 데이터 품질 검증
+</span>    <span class="n">validate_data_quality</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">validate_data_quality</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">validate_data_quality</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="sh">'</span><span class="s">source_files</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span>
+                <span class="sh">'</span><span class="s">/data/input/sales_data.csv</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">/data/input/customer_data.csv</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">/data/input/product_data.csv</span><span class="sh">'</span>
+            <span class="p">]</span>
+        <span class="p">},</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_validation_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># 데이터 추출
+</span>    <span class="n">extract_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">extract_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">extract_data_from_sources</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">batch_size</span><span class="sh">'</span><span class="p">:</span> <span class="n">BATCH_SIZE</span><span class="p">},</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_extraction_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="c1"># 데이터 변환 그룹
+</span><span class="k">with</span> <span class="nc">TaskGroup</span><span class="p">(</span><span class="sh">"</span><span class="s">data_transformation</span><span class="sh">"</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="sh">"</span><span class="s">데이터 변환</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">transformation_group</span><span class="p">:</span>
+    
+    <span class="c1"># 데이터 정제
+</span>    <span class="n">clean_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">clean_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">clean_and_validate_data</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">batch_size</span><span class="sh">'</span><span class="p">:</span> <span class="n">BATCH_SIZE</span><span class="p">},</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_processing_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># 데이터 변환
+</span>    <span class="n">transform_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">transform_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">transform_business_logic</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">batch_size</span><span class="sh">'</span><span class="p">:</span> <span class="n">BATCH_SIZE</span><span class="p">},</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_processing_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># 데이터 집계
+</span>    <span class="n">aggregate_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">aggregate_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">create_aggregated_metrics</span><span class="p">,</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_processing_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="c1"># 데이터 로드 그룹
+</span><span class="k">with</span> <span class="nc">TaskGroup</span><span class="p">(</span><span class="sh">"</span><span class="s">data_loading</span><span class="sh">"</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="sh">"</span><span class="s">데이터 로드</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">loading_group</span><span class="p">:</span>
+    
+    <span class="c1"># 스테이징 테이블 로드
+</span>    <span class="n">load_to_staging</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">load_to_staging</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">load_to_staging_tables</span><span class="p">,</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_loading_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># 데이터 웨어하우스 로드
+</span>    <span class="n">load_to_warehouse</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">load_to_warehouse</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">load_to_data_warehouse</span><span class="p">,</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_loading_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># 데이터 검증
+</span>    <span class="n">validate_loaded_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">validate_loaded_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">validate_loaded_data</span><span class="p">,</span>
+        <span class="n">trigger_rule</span><span class="o">=</span><span class="sh">'</span><span class="s">all_success</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="c1"># 알림 및 모니터링
+</span><span class="k">with</span> <span class="nc">TaskGroup</span><span class="p">(</span><span class="sh">"</span><span class="s">monitoring</span><span class="sh">"</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="sh">"</span><span class="s">모니터링</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">monitoring_group</span><span class="p">:</span>
+    
+    <span class="c1"># 성공 알림
+</span>    <span class="n">success_notification</span> <span class="o">=</span> <span class="nc">SlackWebhookOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">success_notification</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">http_conn_id</span><span class="o">=</span><span class="sh">'</span><span class="s">slack_webhook</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">message</span><span class="o">=</span><span class="sh">"""</span><span class="s">
+        ✅ ETL 파이프라인 성공적으로 완료
+        
+        실행 시간: 
+        처리된 레코드 수: {ti.xcom_pull(task_ids=</span><span class="sh">'</span><span class="s">extract_data</span><span class="sh">'</span><span class="s">)}
+        </span><span class="sh">"""</span><span class="p">,</span>
+        <span class="n">trigger_rule</span><span class="o">=</span><span class="sh">'</span><span class="s">all_success</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># 실패 알림
+</span>    <span class="n">failure_notification</span> <span class="o">=</span> <span class="nc">SlackWebhookOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">failure_notification</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">http_conn_id</span><span class="o">=</span><span class="sh">'</span><span class="s">slack_webhook</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">message</span><span class="o">=</span><span class="sh">"""</span><span class="s">
+        ❌ ETL 파이프라인 실패
+        
+        실행 시간: 
+        실패한 Task: 
+        에러 로그: 
+        </span><span class="sh">"""</span><span class="p">,</span>
+        <span class="n">trigger_rule</span><span class="o">=</span><span class="sh">'</span><span class="s">one_failed</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="c1"># 의존성 설정
+</span><span class="n">extraction_group</span> <span class="o">&gt;&gt;</span> <span class="n">transformation_group</span> <span class="o">&gt;&gt;</span> <span class="n">loading_group</span>
+<span class="p">[</span><span class="n">loading_group</span><span class="p">,</span> <span class="n">monitoring_group</span><span class="p">]</span>
+
+<span class="c1"># DAG 문서화
+</span><span class="n">dag</span><span class="p">.</span><span class="n">doc_md</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+# 고급 ETL 파이프라인
+
+이 DAG는 실무급 데이터 파이프라인을 구현합니다.
+
+## 주요 기능
+- 데이터 품질 검증
+- 배치 처리 최적화
+- 에러 처리 및 재시도
+- 실시간 모니터링
+- 알림 시스템
+
+## 실행 주기
+매일 오전 2시 실행
+
+## 모니터링
+- Slack 알림
+- 성능 메트릭 수집
+- 에러 추적
+</span><span class="sh">"""</span>
+</code></pre></div></div>
+
+<h3 id="3-핵심-함수-구현">3. 핵심 함수 구현</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># plugins/etl_functions.py
+</span><span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="n">airflow.hooks.postgres_hook</span> <span class="kn">import</span> <span class="n">PostgresHook</span>
+<span class="kn">from</span> <span class="n">airflow.models</span> <span class="kn">import</span> <span class="n">Variable</span>
+<span class="kn">import</span> <span class="n">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="p">.</span><span class="nf">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">validate_data_quality</span><span class="p">(</span><span class="n">source_files</span><span class="p">,</span> <span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">데이터 품질 검증</span><span class="sh">"""</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">데이터 품질 검증 시작</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="n">validation_results</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">source_files</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 파일 존재 확인
+</span>            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="nf">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="nc">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">파일을 찾을 수 없습니다: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            
+            <span class="c1"># 데이터 로드
+</span>            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nf">read_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+            
+            <span class="c1"># 기본 검증
+</span>            <span class="n">validation_result</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">file_path</span><span class="sh">'</span><span class="p">:</span> <span class="n">file_path</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">row_count</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">df</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">column_count</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">df</span><span class="p">.</span><span class="n">columns</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">null_count</span><span class="sh">'</span><span class="p">:</span> <span class="n">df</span><span class="p">.</span><span class="nf">isnull</span><span class="p">().</span><span class="nf">sum</span><span class="p">().</span><span class="nf">sum</span><span class="p">(),</span>
+                <span class="sh">'</span><span class="s">duplicate_count</span><span class="sh">'</span><span class="p">:</span> <span class="n">df</span><span class="p">.</span><span class="nf">duplicated</span><span class="p">().</span><span class="nf">sum</span><span class="p">(),</span>
+                <span class="sh">'</span><span class="s">file_size_mb</span><span class="sh">'</span><span class="p">:</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="nf">getsize</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">),</span>
+            <span class="p">}</span>
+            
+            <span class="c1"># 데이터 타입 검증
+</span>            <span class="n">validation_result</span><span class="p">[</span><span class="sh">'</span><span class="s">data_types</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="n">dtypes</span><span class="p">.</span><span class="nf">to_dict</span><span class="p">()</span>
+            
+            <span class="c1"># 이상치 검증 (IQR 방법)
+</span>            <span class="n">numeric_columns</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="p">.</span><span class="n">number</span><span class="p">]).</span><span class="n">columns</span>
+            <span class="n">outliers</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_columns</span><span class="p">:</span>
+                <span class="n">Q1</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">].</span><span class="nf">quantile</span><span class="p">(</span><span class="mf">0.25</span><span class="p">)</span>
+                <span class="n">Q3</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">].</span><span class="nf">quantile</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>
+                <span class="n">IQR</span> <span class="o">=</span> <span class="n">Q3</span> <span class="o">-</span> <span class="n">Q1</span>
+                <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">Q1</span> <span class="o">-</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">IQR</span>
+                <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">Q3</span> <span class="o">+</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">IQR</span>
+                <span class="n">outliers</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">lower_bound</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">upper_bound</span><span class="p">)])</span>
+            
+            <span class="n">validation_result</span><span class="p">[</span><span class="sh">'</span><span class="s">outliers</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">outliers</span>
+            
+            <span class="n">validation_results</span><span class="p">[</span><span class="n">file_path</span><span class="p">]</span> <span class="o">=</span> <span class="n">validation_result</span>
+            
+            <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">검증 완료: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="si">}</span><span class="s">행</span><span class="sh">"</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">검증 실패: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">e</span>
+    
+    <span class="c1"># 검증 결과를 XCom에 저장
+</span>    <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="nf">xcom_push</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="sh">'</span><span class="s">validation_results</span><span class="sh">'</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">validation_results</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">validation_results</span>
+
+<span class="k">def</span> <span class="nf">extract_data_from_sources</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">데이터 소스에서 데이터 추출</span><span class="sh">"""</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">데이터 추출 시작</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 검증 결과 로드
+</span>    <span class="n">validation_results</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="nf">xcom_pull</span><span class="p">(</span>
+        <span class="n">task_ids</span><span class="o">=</span><span class="sh">'</span><span class="s">validate_data_quality</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="sh">'</span><span class="s">validation_results</span><span class="sh">'</span>
+    <span class="p">)</span>
+    
+    <span class="n">extracted_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">total_records</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">for</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">validation</span> <span class="ow">in</span> <span class="n">validation_results</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 배치 단위로 데이터 로드
+</span>            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nf">read_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+            
+            <span class="c1"># 데이터 전처리
+</span>            <span class="n">df</span> <span class="o">=</span> <span class="nf">preprocess_data</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            
+            <span class="n">extracted_data</span><span class="p">[</span><span class="n">file_path</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
+            <span class="n">total_records</span> <span class="o">+=</span> <span class="nf">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            
+            <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">추출 완료: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="si">}</span><span class="s">행</span><span class="sh">"</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">추출 실패: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">e</span>
+    
+    <span class="c1"># 추출 결과를 XCom에 저장
+</span>    <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="nf">xcom_push</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="sh">'</span><span class="s">extracted_data</span><span class="sh">'</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">extracted_data</span><span class="p">)</span>
+    <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="nf">xcom_push</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="sh">'</span><span class="s">total_records</span><span class="sh">'</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">total_records</span><span class="p">)</span>
+    
+    <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">데이터 추출 완료 - 총 </span><span class="si">{</span><span class="n">total_records</span><span class="si">}</span><span class="s">개 레코드</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">total_records</span>
+
+<span class="k">def</span> <span class="nf">clean_and_validate_data</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">데이터 정제 및 검증</span><span class="sh">"""</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">데이터 정제 시작</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 추출된 데이터 로드
+</span>    <span class="n">extracted_data</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="nf">xcom_pull</span><span class="p">(</span>
+        <span class="n">task_ids</span><span class="o">=</span><span class="sh">'</span><span class="s">extract_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="sh">'</span><span class="s">extracted_data</span><span class="sh">'</span>
+    <span class="p">)</span>
+    
+    <span class="n">cleaned_data</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">for</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">extracted_data</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 결측값 처리
+</span>            <span class="n">df_cleaned</span> <span class="o">=</span> <span class="nf">handle_missing_values</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            
+            <span class="c1"># 중복 제거
+</span>            <span class="n">df_cleaned</span> <span class="o">=</span> <span class="nf">remove_duplicates</span><span class="p">(</span><span class="n">df_cleaned</span><span class="p">)</span>
+            
+            <span class="c1"># 이상치 처리
+</span>            <span class="n">df_cleaned</span> <span class="o">=</span> <span class="nf">handle_outliers</span><span class="p">(</span><span class="n">df_cleaned</span><span class="p">)</span>
+            
+            <span class="c1"># 데이터 타입 변환
+</span>            <span class="n">df_cleaned</span> <span class="o">=</span> <span class="nf">convert_data_types</span><span class="p">(</span><span class="n">df_cleaned</span><span class="p">)</span>
+            
+            <span class="n">cleaned_data</span><span class="p">[</span><span class="n">file_path</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_cleaned</span>
+            
+            <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">정제 완료: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">df_cleaned</span><span class="p">)</span><span class="si">}</span><span class="s">행</span><span class="sh">"</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">정제 실패: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">e</span>
+    
+    <span class="c1"># 정제 결과를 XCom에 저장
+</span>    <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="nf">xcom_push</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="sh">'</span><span class="s">cleaned_data</span><span class="sh">'</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">cleaned_data</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">cleaned_data</span>
+
+<span class="k">def</span> <span class="nf">transform_business_logic</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">비즈니스 로직 적용한 데이터 변환</span><span class="sh">"""</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">데이터 변환 시작</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 정제된 데이터 로드
+</span>    <span class="n">cleaned_data</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="nf">xcom_pull</span><span class="p">(</span>
+        <span class="n">task_ids</span><span class="o">=</span><span class="sh">'</span><span class="s">clean_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="sh">'</span><span class="s">cleaned_data</span><span class="sh">'</span>
+    <span class="p">)</span>
+    
+    <span class="n">transformed_data</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">for</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">cleaned_data</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 파일별 비즈니스 로직 적용
+</span>            <span class="k">if</span> <span class="sh">'</span><span class="s">sales_data</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">file_path</span><span class="p">:</span>
+                <span class="n">df_transformed</span> <span class="o">=</span> <span class="nf">transform_sales_data</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="sh">'</span><span class="s">customer_data</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">file_path</span><span class="p">:</span>
+                <span class="n">df_transformed</span> <span class="o">=</span> <span class="nf">transform_customer_data</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="sh">'</span><span class="s">product_data</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">file_path</span><span class="p">:</span>
+                <span class="n">df_transformed</span> <span class="o">=</span> <span class="nf">transform_product_data</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">df_transformed</span> <span class="o">=</span> <span class="n">df</span>
+            
+            <span class="n">transformed_data</span><span class="p">[</span><span class="n">file_path</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_transformed</span>
+            
+            <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">변환 완료: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">df_transformed</span><span class="p">)</span><span class="si">}</span><span class="s">행</span><span class="sh">"</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">변환 실패: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">e</span>
+    
+    <span class="c1"># 변환 결과를 XCom에 저장
+</span>    <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="nf">xcom_push</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="sh">'</span><span class="s">transformed_data</span><span class="sh">'</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">transformed_data</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">transformed_data</span>
+
+<span class="k">def</span> <span class="nf">load_to_data_warehouse</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">데이터 웨어하우스에 로드</span><span class="sh">"""</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">데이터 웨어하우스 로드 시작</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 변환된 데이터 로드
+</span>    <span class="n">transformed_data</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="nf">xcom_pull</span><span class="p">(</span>
+        <span class="n">task_ids</span><span class="o">=</span><span class="sh">'</span><span class="s">transform_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="sh">'</span><span class="s">transformed_data</span><span class="sh">'</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># 데이터베이스 연결
+</span>    <span class="n">postgres_hook</span> <span class="o">=</span> <span class="nc">PostgresHook</span><span class="p">(</span><span class="n">postgres_conn_id</span><span class="o">=</span><span class="sh">'</span><span class="s">data_warehouse_conn</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">transformed_data</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 테이블명 결정
+</span>            <span class="n">table_name</span> <span class="o">=</span> <span class="nf">determine_table_name</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+            
+            <span class="c1"># 데이터 로드
+</span>            <span class="n">postgres_hook</span><span class="p">.</span><span class="nf">insert_rows</span><span class="p">(</span>
+                <span class="n">table</span><span class="o">=</span><span class="n">table_name</span><span class="p">,</span>
+                <span class="n">rows</span><span class="o">=</span><span class="n">df</span><span class="p">.</span><span class="n">values</span><span class="p">.</span><span class="nf">tolist</span><span class="p">(),</span>
+                <span class="n">target_fields</span><span class="o">=</span><span class="n">df</span><span class="p">.</span><span class="n">columns</span><span class="p">.</span><span class="nf">tolist</span><span class="p">(),</span>
+                <span class="n">replace</span><span class="o">=</span><span class="bp">True</span>
+            <span class="p">)</span>
+            
+            <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">로드 완료: </span><span class="si">{</span><span class="n">table_name</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="si">}</span><span class="s">행</span><span class="sh">"</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">로드 실패: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">e</span>
+    
+    <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">데이터 웨어하우스 로드 완료</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 유틸리티 함수들
+</span><span class="k">def</span> <span class="nf">preprocess_data</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">데이터 전처리</span><span class="sh">"""</span>
+    <span class="c1"># 컬럼명 정규화
+</span>    <span class="n">df</span><span class="p">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="n">columns</span><span class="p">.</span><span class="nb">str</span><span class="p">.</span><span class="nf">lower</span><span class="p">().</span><span class="nb">str</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sh">'</span><span class="s"> </span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">_</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="c1"># 날짜 컬럼 처리
+</span>    <span class="n">date_columns</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">object</span><span class="sh">'</span><span class="p">]).</span><span class="n">columns</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">date_columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="sh">'</span><span class="s">date</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">col</span><span class="p">.</span><span class="nf">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="sh">'</span><span class="s">time</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">col</span><span class="p">.</span><span class="nf">lower</span><span class="p">():</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nf">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="sh">'</span><span class="s">coerce</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">df</span>
+
+<span class="k">def</span> <span class="nf">handle_missing_values</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">결측값 처리</span><span class="sh">"""</span>
+    <span class="c1"># 숫자형 컬럼: 평균값으로 대체
+</span>    <span class="n">numeric_columns</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="p">.</span><span class="n">number</span><span class="p">]).</span><span class="n">columns</span>
+    <span class="n">df</span><span class="p">[</span><span class="n">numeric_columns</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">numeric_columns</span><span class="p">].</span><span class="nf">fillna</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">numeric_columns</span><span class="p">].</span><span class="nf">mean</span><span class="p">())</span>
+    
+    <span class="c1"># 범주형 컬럼: 최빈값으로 대체
+</span>    <span class="n">categorical_columns</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">object</span><span class="sh">'</span><span class="p">]).</span><span class="n">columns</span>
+    <span class="n">df</span><span class="p">[</span><span class="n">categorical_columns</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">categorical_columns</span><span class="p">].</span><span class="nf">fillna</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">categorical_columns</span><span class="p">].</span><span class="nf">mode</span><span class="p">().</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    
+    <span class="k">return</span> <span class="n">df</span>
+
+<span class="k">def</span> <span class="nf">remove_duplicates</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">중복 제거</span><span class="sh">"""</span>
+    <span class="k">return</span> <span class="n">df</span><span class="p">.</span><span class="nf">drop_duplicates</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">handle_outliers</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">이상치 처리 (IQR 방법)</span><span class="sh">"""</span>
+    <span class="n">numeric_columns</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="p">.</span><span class="n">number</span><span class="p">]).</span><span class="n">columns</span>
+    
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_columns</span><span class="p">:</span>
+        <span class="n">Q1</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">].</span><span class="nf">quantile</span><span class="p">(</span><span class="mf">0.25</span><span class="p">)</span>
+        <span class="n">Q3</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">].</span><span class="nf">quantile</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>
+        <span class="n">IQR</span> <span class="o">=</span> <span class="n">Q3</span> <span class="o">-</span> <span class="n">Q1</span>
+        <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">Q1</span> <span class="o">-</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">IQR</span>
+        <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">Q3</span> <span class="o">+</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">IQR</span>
+        
+        <span class="c1"># 이상치를 경계값으로 대체
+</span>        <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">].</span><span class="nf">clip</span><span class="p">(</span><span class="n">lower</span><span class="o">=</span><span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="n">upper_bound</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">df</span>
+
+<span class="k">def</span> <span class="nf">convert_data_types</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">데이터 타입 변환</span><span class="sh">"""</span>
+    <span class="c1"># 날짜 컬럼 처리
+</span>    <span class="n">date_columns</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">object</span><span class="sh">'</span><span class="p">]).</span><span class="n">columns</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">date_columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="sh">'</span><span class="s">date</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">col</span><span class="p">.</span><span class="nf">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="sh">'</span><span class="s">time</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">col</span><span class="p">.</span><span class="nf">lower</span><span class="p">():</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nf">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="sh">'</span><span class="s">coerce</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="c1"># 숫자형 컬럼 처리
+</span>    <span class="n">numeric_columns</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">object</span><span class="sh">'</span><span class="p">]).</span><span class="n">columns</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">].</span><span class="n">dtype</span> <span class="o">==</span> <span class="sh">'</span><span class="s">object</span><span class="sh">'</span><span class="p">:</span>
+            <span class="c1"># 숫자로 변환 가능한지 확인
+</span>            <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">].</span><span class="nb">str</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sh">'</span><span class="s">.</span><span class="sh">'</span><span class="p">,</span> <span class="sh">''</span><span class="p">).</span><span class="nb">str</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sh">'</span><span class="s">-</span><span class="sh">'</span><span class="p">,</span> <span class="sh">''</span><span class="p">).</span><span class="nb">str</span><span class="p">.</span><span class="nf">isnumeric</span><span class="p">().</span><span class="nf">all</span><span class="p">():</span>
+                <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nf">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="sh">'</span><span class="s">coerce</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">df</span>
+
+<span class="k">def</span> <span class="nf">determine_table_name</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">파일 경로에서 테이블명 결정</span><span class="sh">"""</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="nf">basename</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+    <span class="n">table_name</span> <span class="o">=</span> <span class="n">filename</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sh">'</span><span class="s">.csv</span><span class="sh">'</span><span class="p">,</span> <span class="sh">''</span><span class="p">).</span><span class="nf">replace</span><span class="p">(</span><span class="sh">'</span><span class="s">_data</span><span class="sh">'</span><span class="p">,</span> <span class="sh">''</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">staging_</span><span class="si">{</span><span class="n">table_name</span><span class="si">}</span><span class="sh">"</span>
+
+<span class="c1"># 비즈니스 로직 변환 함수들
+</span><span class="k">def</span> <span class="nf">transform_sales_data</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">매출 데이터 변환</span><span class="sh">"""</span>
+    <span class="c1"># 매출 금액 계산
+</span>    <span class="k">if</span> <span class="sh">'</span><span class="s">quantity</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">df</span><span class="p">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="sh">'</span><span class="s">unit_price</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">df</span><span class="p">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">total_amount</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">quantity</span><span class="sh">'</span><span class="p">]</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">unit_price</span><span class="sh">'</span><span class="p">]</span>
+    
+    <span class="c1"># 할인율 적용
+</span>    <span class="k">if</span> <span class="sh">'</span><span class="s">discount_rate</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">df</span><span class="p">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">final_amount</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">total_amount</span><span class="sh">'</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">discount_rate</span><span class="sh">'</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">df</span>
+
+<span class="k">def</span> <span class="nf">transform_customer_data</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">고객 데이터 변환</span><span class="sh">"""</span>
+    <span class="c1"># 고객 등급 계산
+</span>    <span class="k">if</span> <span class="sh">'</span><span class="s">total_purchase</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">df</span><span class="p">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">customer_grade</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nf">cut</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">total_purchase</span><span class="sh">'</span><span class="p">],</span>
+            <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span> <span class="nf">float</span><span class="p">(</span><span class="sh">'</span><span class="s">inf</span><span class="sh">'</span><span class="p">)],</span>
+            <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">Bronze</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Silver</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Gold</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Platinum</span><span class="sh">'</span><span class="p">]</span>
+        <span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">df</span>
+
+<span class="k">def</span> <span class="nf">transform_product_data</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">상품 데이터 변환</span><span class="sh">"""</span>
+    <span class="c1"># 카테고리 정규화
+</span>    <span class="k">if</span> <span class="sh">'</span><span class="s">category</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">df</span><span class="p">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">category</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">category</span><span class="sh">'</span><span class="p">].</span><span class="nb">str</span><span class="p">.</span><span class="nf">upper</span><span class="p">().</span><span class="nb">str</span><span class="p">.</span><span class="nf">strip</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">df</span>
+</code></pre></div></div>
+
+<h2 id="-학습-요약">📚 학습 요약</h2>
+
+<h3 id="이번-포스트에서-학습한-내용">이번 포스트에서 학습한 내용</h3>
+
+<ol>
+  <li><strong>Airflow 아키텍처 심화 이해</strong>
+    <ul>
+      <li>핵심 컴포넌트 분석</li>
+      <li>메타데이터베이스 스키마</li>
+      <li>Executor 종류와 특징</li>
+    </ul>
+  </li>
+  <li><strong>DAG 최적화 전략</strong>
+    <ul>
+      <li>효율적인 Task 정의</li>
+      <li>리소스 관리 최적화</li>
+      <li>메모리 사용량 최적화</li>
+    </ul>
+  </li>
+  <li><strong>고급 스케줄링과 트리거</strong>
+    <ul>
+      <li>동적 스케줄링</li>
+      <li>외부 트리거 활용</li>
+      <li>스케줄 최적화</li>
+    </ul>
+  </li>
+  <li><strong>에러 처리와 재시도 전략</strong>
+    <ul>
+      <li>고급 재시도 로직</li>
+      <li>에러 알림 시스템</li>
+      <li>Circuit Breaker 패턴</li>
+    </ul>
+  </li>
+  <li><strong>모니터링과 알림 시스템</strong>
+    <ul>
+      <li>커스텀 메트릭 수집</li>
+      <li>대시보드 구축</li>
+      <li>실시간 모니터링</li>
+    </ul>
+  </li>
+  <li><strong>실무급 데이터 파이프라인 구축</strong>
+    <ul>
+      <li>완전한 ETL 파이프라인</li>
+      <li>데이터 품질 검증</li>
+      <li>에러 처리 및 알림</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="핵심-개념-정리">핵심 개념 정리</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>개념</th>
+      <th>설명</th>
+      <th>중요도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>DAG 최적화</strong></td>
+      <td>성능과 리소스 효율성 향상</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>에러 처리</strong></td>
+      <td>안정적인 파이프라인 운영</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>모니터링</strong></td>
+      <td>실시간 상태 추적</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>스케줄링</strong></td>
+      <td>유연한 실행 제어</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="실무-적용-시-고려사항">실무 적용 시 고려사항</h3>
+
+<ol>
+  <li><strong>성능 최적화</strong>: Pool, Queue, 메모리 관리</li>
+  <li><strong>안정성</strong>: 에러 처리, 재시도, Circuit Breaker</li>
+  <li><strong>모니터링</strong>: 메트릭 수집, 알림, 대시보드</li>
+  <li><strong>확장성</strong>: 분산 환경, 리소스 관리</li>
+</ol>
+
+<hr />
+
+<p><em>이 가이드를 통해 Apache Airflow의 고급 기능들을 마스터하고, 실무에서 안정적이고 효율적인 데이터 파이프라인을 구축할 수 있습니다!</em> 🚀</p>
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

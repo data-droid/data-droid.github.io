@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Learn advanced features and best practices of Apache Airflow commonly used in production environments and apply them to real projects.">
+
+
+
+<title>Apache Airflow Advanced Guide: From DAG Optimization to Monitoring - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Apache Airflow Advanced Guide: From DAG Optimization to Monitoring">
+<meta property="og:description" content="Learn advanced features and best practices of Apache Airflow commonly used in production environments and apply them to real projects.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2025-09-08-apache-airflow-advanced-guide.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Apache Airflow Advanced Guide: From DAG Optimization to Monitoring">
+<meta name="twitter:description" content="Learn advanced features and best practices of Apache Airflow commonly used in production environments and apply them to real projects.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2025/09/08/apache-airflow-advanced-guide.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2025-09-08-apache-airflow-advanced-guide.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 08일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Apache Airflow Advanced Guide: From DAG Optimization to Monitoring</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Airflow</span>
+      
+        <span class="tag">Data-Pipeline</span>
+      
+        <span class="tag">Workflow</span>
+      
+        <span class="tag">DAG</span>
+      
+        <span class="tag">Scheduling</span>
+      
+        <span class="tag">Monitoring</span>
+      
+        <span class="tag">Data-Engineering</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 25 min</span>
+      
+      
+        <span class="difficulty">📊 Advanced</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="apache-airflow-advanced-guide-from-dag-optimization-to-monitoring">Apache Airflow Advanced Guide: From DAG Optimization to Monitoring</h1>
+
+<blockquote>
+  <p>Learn advanced features and best practices of Apache Airflow commonly used in production environments and apply them to real projects.</p>
+</blockquote>
+
+<h2 id="-table-of-contents">📖 Table of Contents</h2>
+
+<ol>
+  <li><a href="#deep-understanding-of-airflow-architecture">Deep Understanding of Airflow Architecture</a></li>
+  <li><a href="#dag-optimization-strategies">DAG Optimization Strategies</a></li>
+  <li><a href="#advanced-scheduling-and-triggers">Advanced Scheduling and Triggers</a></li>
+  <li><a href="#error-handling-and-retry-strategies">Error Handling and Retry Strategies</a></li>
+  <li><a href="#monitoring-and-alerting-systems">Monitoring and Alerting Systems</a></li>
+  <li><a href="#hands-on-building-production-grade-data-pipeline">Hands-on: Building Production-Grade Data Pipeline</a></li>
+  <li><a href="#performance-tuning-and-scalability">Performance Tuning and Scalability</a></li>
+  <li><a href="#security-and-access-control">Security and Access Control</a></li>
+  <li><a href="#learning-summary">Learning Summary</a></li>
+</ol>
+
+<h2 id="️-deep-understanding-of-airflow-architecture">🏗️ Deep Understanding of Airflow Architecture</h2>
+
+<h3 id="core-component-analysis">Core Component Analysis</h3>
+
+<p>Apache Airflow consists of the following core components:</p>
+
+<h4 id="1-scheduler"><strong>1. Scheduler</strong></h4>
+<ul>
+  <li><strong>Role</strong>: DAG parsing, Task instance creation, execution scheduling</li>
+  <li><strong>Operation</strong>: Periodically checks DAG status in metadata database</li>
+  <li><strong>Performance Optimization</strong>: Parallel processing, DAG parsing caching</li>
+</ul>
+
+<h4 id="2-executor"><strong>2. Executor</strong></h4>
+<ul>
+  <li><strong>LocalExecutor</strong>: Sequential execution on single machine</li>
+  <li><strong>CeleryExecutor</strong>: Parallel execution in distributed environment</li>
+  <li><strong>KubernetesExecutor</strong>: Execution on Kubernetes cluster</li>
+  <li><strong>LocalKubernetesExecutor</strong>: Hybrid execution mode</li>
+</ul>
+
+<h4 id="3-webserver"><strong>3. Webserver</strong></h4>
+<ul>
+  <li><strong>UI Provision</strong>: DAG monitoring, log viewing, manual execution</li>
+  <li><strong>REST API</strong>: Integration with external systems</li>
+  <li><strong>Authentication/Authorization</strong>: Security management</li>
+</ul>
+
+<h4 id="4-metadata-database"><strong>4. Metadata Database</strong></h4>
+<ul>
+  <li><strong>PostgreSQL/MySQL</strong>: Metadata storage</li>
+  <li><strong>Connection Info</strong>: Connection, Variable, XCom</li>
+  <li><strong>Execution History</strong>: Task instances, log information</li>
+</ul>
+
+<h3 id="understanding-metadata-database-schema">Understanding Metadata Database Schema</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Key table structures</span>
+<span class="c1">-- dag: DAG metadata</span>
+<span class="c1">-- dag_run: DAG execution instances</span>
+<span class="c1">-- task_instance: Task execution instances</span>
+<span class="c1">-- log: Execution logs</span>
+<span class="c1">-- connection: Database connection information</span>
+<span class="c1">-- variable: Global variables</span>
+<span class="c1">-- xcom: Data transfer between tasks</span>
+</code></pre></div></div>
+
+<h2 id="-dag-optimization-strategies">⚡ DAG Optimization Strategies</h2>
+
+<h3 id="1-dag-structure-optimization">1. DAG Structure Optimization</h3>
+
+<h4 id="efficient-task-definition"><strong>Efficient Task Definition</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="n">airflow</span> <span class="kn">import</span> <span class="n">DAG</span>
+<span class="kn">from</span> <span class="n">airflow.operators.python</span> <span class="kn">import</span> <span class="n">PythonOperator</span>
+<span class="kn">from</span> <span class="n">airflow.operators.bash</span> <span class="kn">import</span> <span class="n">BashOperator</span>
+<span class="kn">from</span> <span class="n">airflow.sensors.filesystem</span> <span class="kn">import</span> <span class="n">FileSensor</span>
+<span class="kn">from</span> <span class="n">airflow.utils.task_group</span> <span class="kn">import</span> <span class="n">TaskGroup</span>
+
+<span class="c1"># Basic DAG settings
+</span><span class="n">default_args</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">'</span><span class="s">owner</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">data-team</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">depends_on_past</span><span class="sh">'</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">start_date</span><span class="sh">'</span><span class="p">:</span> <span class="nf">datetime</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="sh">'</span><span class="s">email_on_failure</span><span class="sh">'</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">email_on_retry</span><span class="sh">'</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">retries</span><span class="sh">'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">retry_delay</span><span class="sh">'</span><span class="p">:</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+    <span class="sh">'</span><span class="s">catchup</span><span class="sh">'</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>  <span class="c1"># Skip past executions
+</span>    <span class="sh">'</span><span class="s">max_active_runs</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Limit concurrent executions
+</span><span class="p">}</span>
+
+<span class="c1"># DAG definition
+</span><span class="n">dag</span> <span class="o">=</span> <span class="nc">DAG</span><span class="p">(</span>
+    <span class="sh">'</span><span class="s">advanced_data_pipeline</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">default_args</span><span class="o">=</span><span class="n">default_args</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="sh">'</span><span class="s">Advanced data pipeline</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">schedule_interval</span><span class="o">=</span><span class="sh">'</span><span class="s">0 2 * * *</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># Daily at 2 AM
+</span>    <span class="n">max_active_runs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">data-engineering</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">etl</span><span class="sh">'</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="c1"># Structured approach using Task Group
+</span><span class="k">with</span> <span class="nc">TaskGroup</span><span class="p">(</span><span class="sh">"</span><span class="s">data_extraction</span><span class="sh">"</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="sh">"</span><span class="s">Data extraction</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">extraction_group</span><span class="p">:</span>
+    <span class="c1"># File existence check
+</span>    <span class="n">file_sensor</span> <span class="o">=</span> <span class="nc">FileSensor</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">check_source_file</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">filepath</span><span class="o">=</span><span class="sh">'</span><span class="s">/data/input/sales_data.csv</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">poke_interval</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Data validation
+</span>    <span class="n">validate_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">validate_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">validate_source_data</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">file_path</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">/data/input/sales_data.csv</span><span class="sh">'</span><span class="p">},</span>
+    <span class="p">)</span>
+
+<span class="c1"># Main processing logic
+</span><span class="k">with</span> <span class="nc">TaskGroup</span><span class="p">(</span><span class="sh">"</span><span class="s">data_processing</span><span class="sh">"</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="sh">"</span><span class="s">Data processing</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">processing_group</span><span class="p">:</span>
+    <span class="c1"># Data transformation
+</span>    <span class="n">transform_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">transform_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">transform_sales_data</span><span class="p">,</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_processing_pool</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># Use resource pool
+</span>        <span class="n">pool_slots</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Data loading
+</span>    <span class="n">load_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">load_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">load_to_warehouse</span><span class="p">,</span>
+        <span class="n">trigger_rule</span><span class="o">=</span><span class="sh">'</span><span class="s">all_success</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="c1"># Dependency setup
+</span><span class="n">extraction_group</span> <span class="o">&gt;&gt;</span> <span class="n">processing_group</span>
+</code></pre></div></div>
+
+<h3 id="2-resource-management-optimization">2. Resource Management Optimization</h3>
+
+<h4 id="pool-and-queue-utilization"><strong>Pool and Queue Utilization</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># airflow.cfg settings
+</span><span class="p">[</span><span class="n">celery</span><span class="p">]</span>
+<span class="n">worker_concurrency</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">worker_precheck</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="c1"># Pool definition
+</span><span class="kn">from</span> <span class="n">airflow.models</span> <span class="kn">import</span> <span class="n">Pool</span>
+
+<span class="c1"># Create resource pools
+</span><span class="n">Pool</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span>
+    <span class="n">pool_name</span><span class="o">=</span><span class="sh">'</span><span class="s">data_processing_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">slots</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="sh">'</span><span class="s">Dedicated pool for data processing</span><span class="sh">'</span>
+<span class="p">)</span>
+
+<span class="n">Pool</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span>
+    <span class="n">pool_name</span><span class="o">=</span><span class="sh">'</span><span class="s">heavy_computation_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">slots</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="sh">'</span><span class="s">Dedicated pool for heavy computations</span><span class="sh">'</span>
+<span class="p">)</span>
+
+<span class="c1"># Use Pool in tasks
+</span><span class="n">heavy_task</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">heavy_computation</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">python_callable</span><span class="o">=</span><span class="n">heavy_computation_function</span><span class="p">,</span>
+    <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">heavy_computation_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">pool_slots</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-memory-usage-optimization">3. Memory Usage Optimization</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Chunk-based processing for large datasets
+</span><span class="k">def</span> <span class="nf">process_large_dataset</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Process large dataset in chunks</span><span class="sh">"""</span>
+    <span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">10000</span>
+    
+    <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">pd</span><span class="p">.</span><span class="nf">read_csv</span><span class="p">(</span>
+        <span class="sh">'</span><span class="s">/data/large_dataset.csv</span><span class="sh">'</span><span class="p">,</span> 
+        <span class="n">chunksize</span><span class="o">=</span><span class="n">chunk_size</span>
+    <span class="p">):</span>
+        <span class="c1"># Process each chunk
+</span>        <span class="n">processed_chunk</span> <span class="o">=</span> <span class="nf">process_chunk</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+        
+        <span class="c1"># Save intermediate results
+</span>        <span class="nf">save_intermediate_result</span><span class="p">(</span><span class="n">processed_chunk</span><span class="p">)</span>
+        
+        <span class="c1"># Clean up memory
+</span>        <span class="k">del</span> <span class="n">processed_chunk</span>
+        <span class="n">gc</span><span class="p">.</span><span class="nf">collect</span><span class="p">()</span>
+
+<span class="c1"># File-based data transfer instead of XCom
+</span><span class="k">def</span> <span class="nf">save_large_data</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Save large data to file</span><span class="sh">"""</span>
+    <span class="n">large_data</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="nf">xcom_pull</span><span class="p">(</span><span class="n">task_ids</span><span class="o">=</span><span class="sh">'</span><span class="s">previous_task</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="c1"># Save to file
+</span>    <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="sh">'</span><span class="s">/tmp/large_data.pkl</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">wb</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="p">.</span><span class="nf">dump</span><span class="p">(</span><span class="n">large_data</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="sh">'</span><span class="s">/tmp/large_data.pkl</span><span class="sh">'</span>
+
+<span class="k">def</span> <span class="nf">load_large_data</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Load large data from file</span><span class="sh">"""</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="nf">xcom_pull</span><span class="p">(</span><span class="n">task_ids</span><span class="o">=</span><span class="sh">'</span><span class="s">save_task</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="sh">'</span><span class="s">rb</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pickle</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-advanced-scheduling-and-triggers">⏰ Advanced Scheduling and Triggers</h2>
+
+<h3 id="1-dynamic-scheduling">1. Dynamic Scheduling</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Conditional scheduling
+</span><span class="k">def</span> <span class="nf">should_run_dag</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Check DAG execution conditions</span><span class="sh">"""</span>
+    <span class="c1"># Run only under specific conditions
+</span>    <span class="k">if</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">().</span><span class="nf">weekday</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]:</span>  <span class="c1"># Mon, Wed, Fri
+</span>        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="bp">False</span>
+
+<span class="c1"># Conditional DAG
+</span><span class="n">dag</span> <span class="o">=</span> <span class="nc">DAG</span><span class="p">(</span>
+    <span class="sh">'</span><span class="s">conditional_dag</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">schedule_interval</span><span class="o">=</span><span class="sh">'</span><span class="s">0 9 * * *</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">catchup</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Conditional execution
+</span><span class="n">conditional_task</span> <span class="o">=</span> <span class="nc">BranchPythonOperator</span><span class="p">(</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">check_conditions</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">python_callable</span><span class="o">=</span><span class="n">should_run_dag</span><span class="p">,</span>
+    <span class="n">dag</span><span class="o">=</span><span class="n">dag</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Dynamic task creation
+</span><span class="k">def</span> <span class="nf">create_dynamic_tasks</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Create tasks dynamically at runtime</span><span class="sh">"""</span>
+    <span class="c1"># Get task list from external system
+</span>    <span class="n">task_list</span> <span class="o">=</span> <span class="nf">get_external_task_list</span><span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">task_info</span> <span class="ow">in</span> <span class="n">task_list</span><span class="p">:</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+            <span class="n">task_id</span><span class="o">=</span><span class="sa">f</span><span class="sh">"</span><span class="s">dynamic_task_</span><span class="si">{</span><span class="n">task_info</span><span class="p">[</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">python_callable</span><span class="o">=</span><span class="n">execute_dynamic_task</span><span class="p">,</span>
+            <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">task_info</span><span class="sh">'</span><span class="p">:</span> <span class="n">task_info</span><span class="p">},</span>
+        <span class="p">)</span>
+        <span class="k">yield</span> <span class="n">task</span>
+</code></pre></div></div>
+
+<h3 id="2-external-trigger-utilization">2. External Trigger Utilization</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># External trigger via REST API
+</span><span class="kn">from</span> <span class="n">airflow.api_connexion.endpoints</span> <span class="kn">import</span> <span class="n">dag_run_endpoint</span>
+<span class="kn">from</span> <span class="n">airflow.models</span> <span class="kn">import</span> <span class="n">DagRun</span>
+
+<span class="c1"># Trigger DAG from external system
+</span><span class="k">def</span> <span class="nf">trigger_dag_externally</span><span class="p">(</span><span class="n">dag_id</span><span class="p">,</span> <span class="n">conf</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Trigger DAG from external system</span><span class="sh">"""</span>
+    <span class="n">dag_run</span> <span class="o">=</span> <span class="n">DagRun</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span>
+        <span class="n">dag_id</span><span class="o">=</span><span class="n">dag_id</span><span class="p">,</span>
+        <span class="n">execution_date</span><span class="o">=</span><span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">(),</span>
+        <span class="n">state</span><span class="o">=</span><span class="sh">'</span><span class="s">running</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">conf</span><span class="o">=</span><span class="n">conf</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">dag_run</span>
+
+<span class="c1"># Trigger via webhook
+</span><span class="kn">from</span> <span class="n">airflow.operators.http_operator</span> <span class="kn">import</span> <span class="n">SimpleHttpOperator</span>
+
+<span class="n">webhook_trigger</span> <span class="o">=</span> <span class="nc">SimpleHttpOperator</span><span class="p">(</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">webhook_trigger</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">http_conn_id</span><span class="o">=</span><span class="sh">'</span><span class="s">webhook_connection</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">endpoint</span><span class="o">=</span><span class="sh">'</span><span class="s">trigger</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="sh">'</span><span class="s">POST</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">data</span><span class="o">=</span><span class="sh">'</span><span class="s">{</span><span class="sh">"</span><span class="s">dag_id</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">target_dag</span><span class="sh">"</span><span class="s">}</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">dag</span><span class="o">=</span><span class="n">dag</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-schedule-optimization">3. Schedule Optimization</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Cron expression utilization
+</span><span class="kn">from</span> <span class="n">airflow.timetables.trigger</span> <span class="kn">import</span> <span class="n">CronTriggerTimetable</span>
+
+<span class="c1"># Complex scheduling
+</span><span class="n">custom_schedule</span> <span class="o">=</span> <span class="nc">CronTriggerTimetable</span><span class="p">(</span>
+    <span class="n">cron</span><span class="o">=</span><span class="sh">'</span><span class="s">0 2 * * 1-5</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># Weekdays at 2 AM
+</span>    <span class="n">timezone</span><span class="o">=</span><span class="sh">'</span><span class="s">Asia/Seoul</span><span class="sh">'</span>
+<span class="p">)</span>
+
+<span class="n">dag</span> <span class="o">=</span> <span class="nc">DAG</span><span class="p">(</span>
+    <span class="sh">'</span><span class="s">business_hours_dag</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">timetable</span><span class="o">=</span><span class="n">custom_schedule</span><span class="p">,</span>
+    <span class="n">catchup</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Data-driven scheduling
+</span><span class="k">def</span> <span class="nf">get_next_run_time</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Determine next run time based on data status</span><span class="sh">"""</span>
+    <span class="n">last_processed</span> <span class="o">=</span> <span class="nf">get_last_processed_time</span><span class="p">()</span>
+    <span class="n">data_available</span> <span class="o">=</span> <span class="nf">check_data_availability</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="n">data_available</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">+</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-error-handling-and-retry-strategies">🚨 Error Handling and Retry Strategies</h2>
+
+<h3 id="1-advanced-retry-logic">1. Advanced Retry Logic</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Exponential backoff retry
+</span><span class="kn">from</span> <span class="n">airflow.models</span> <span class="kn">import</span> <span class="n">BaseOperator</span>
+<span class="kn">from</span> <span class="n">airflow.utils.decorators</span> <span class="kn">import</span> <span class="n">apply_defaults</span>
+<span class="kn">import</span> <span class="n">random</span>
+
+<span class="k">class</span> <span class="nc">SmartRetryOperator</span><span class="p">(</span><span class="n">BaseOperator</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Intelligent retry operator</span><span class="sh">"""</span>
+    
+    <span class="nd">@apply_defaults</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="n">self</span><span class="p">,</span>
+        <span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">base_delay</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+        <span class="n">max_delay</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">exponential_base</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">jitter</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">max_retries</span> <span class="o">=</span> <span class="n">max_retries</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">base_delay</span> <span class="o">=</span> <span class="n">base_delay</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">max_delay</span> <span class="o">=</span> <span class="n">max_delay</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">exponential_base</span> <span class="o">=</span> <span class="n">exponential_base</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">jitter</span> <span class="o">=</span> <span class="n">jitter</span>
+    
+    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Execution logic</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">_execute_logic</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="nf">_should_retry</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+                <span class="n">self</span><span class="p">.</span><span class="nf">_schedule_retry</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">e</span>
+    
+    <span class="k">def</span> <span class="nf">_should_retry</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Determine retry necessity</span><span class="sh">"""</span>
+        <span class="c1"># Retry only specific exceptions
+</span>        <span class="n">retryable_exceptions</span> <span class="o">=</span> <span class="p">(</span><span class="nb">ConnectionError</span><span class="p">,</span> <span class="nb">TimeoutError</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">exception</span><span class="p">,</span> <span class="n">retryable_exceptions</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_schedule_retry</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Schedule retry</span><span class="sh">"""</span>
+        <span class="n">retry_count</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">].</span><span class="n">try_number</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">delay</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">base_delay</span> <span class="o">*</span> <span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">exponential_base</span> <span class="o">**</span> <span class="n">retry_count</span><span class="p">),</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">max_delay</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">jitter</span><span class="p">:</span>
+            <span class="n">delay</span> <span class="o">+=</span> <span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">delay</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">)</span>
+        
+        <span class="c1"># Schedule retry
+</span>        <span class="kn">from</span> <span class="n">airflow.models</span> <span class="kn">import</span> <span class="n">TaskInstance</span>
+        <span class="n">ti</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">]</span>
+        <span class="n">ti</span><span class="p">.</span><span class="n">state</span> <span class="o">=</span> <span class="sh">'</span><span class="s">up_for_retry</span><span class="sh">'</span>
+        <span class="n">ti</span><span class="p">.</span><span class="n">next_method</span> <span class="o">=</span> <span class="sh">'</span><span class="s">retry</span><span class="sh">'</span>
+        <span class="n">ti</span><span class="p">.</span><span class="n">next_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">delay</span><span class="sh">'</span><span class="p">:</span> <span class="n">delay</span><span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="2-error-alert-system">2. Error Alert System</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Slack notification
+</span><span class="kn">from</span> <span class="n">airflow.providers.slack.operators.slack_webhook</span> <span class="kn">import</span> <span class="n">SlackWebhookOperator</span>
+
+<span class="k">def</span> <span class="nf">send_slack_alert</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Send error alert to Slack</span><span class="sh">"""</span>
+    <span class="n">task_instance</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">]</span>
+    
+    <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"""</span><span class="s">
+    🚨 Airflow Task Failure Alert
+    
+    DAG: </span><span class="si">{</span><span class="n">task_instance</span><span class="p">.</span><span class="n">dag_id</span><span class="si">}</span><span class="s">
+    Task: </span><span class="si">{</span><span class="n">task_instance</span><span class="p">.</span><span class="n">task_id</span><span class="si">}</span><span class="s">
+    Execution Time: </span><span class="si">{</span><span class="n">task_instance</span><span class="p">.</span><span class="n">start_date</span><span class="si">}</span><span class="s">
+    Error: </span><span class="si">{</span><span class="n">context</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">exception</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Unknown error</span><span class="sh">'</span><span class="p">)</span><span class="si">}</span><span class="s">
+    Log: </span><span class="si">{</span><span class="n">task_instance</span><span class="p">.</span><span class="n">log_url</span><span class="si">}</span><span class="s">
+    </span><span class="sh">"""</span>
+    
+    <span class="k">return</span> <span class="nc">SlackWebhookOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">slack_alert</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">http_conn_id</span><span class="o">=</span><span class="sh">'</span><span class="s">slack_webhook</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="c1"># Email notification
+</span><span class="kn">from</span> <span class="n">airflow.operators.email_operator</span> <span class="kn">import</span> <span class="n">EmailOperator</span>
+
+<span class="n">email_alert</span> <span class="o">=</span> <span class="nc">EmailOperator</span><span class="p">(</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">email_alert</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">to</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">data-team@company.com</span><span class="sh">'</span><span class="p">],</span>
+    <span class="n">subject</span><span class="o">=</span><span class="sh">'</span><span class="s">Airflow Task Failure - </span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">html_content</span><span class="o">=</span><span class="sh">"""</span><span class="s">
+    &lt;h2&gt;Task Failure Alert&lt;/h2&gt;
+    &lt;p&gt;&lt;strong&gt;DAG:&lt;/strong&gt; {task_instance.dag_id}&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Task:&lt;/strong&gt; {task_instance.task_id}&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Execution Time:&lt;/strong&gt; {task_instance.start_date}&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Error:&lt;/strong&gt; {context.get(</span><span class="sh">'</span><span class="s">exception</span><span class="sh">'</span><span class="s">, </span><span class="sh">'</span><span class="s">Unknown error</span><span class="sh">'</span><span class="s">)}&lt;/p&gt;
+    </span><span class="sh">"""</span><span class="p">,</span>
+    <span class="n">trigger_rule</span><span class="o">=</span><span class="sh">'</span><span class="s">one_failed</span><span class="sh">'</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-circuit-breaker-pattern">3. Circuit Breaker Pattern</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CircuitBreakerOperator</span><span class="p">(</span><span class="n">BaseOperator</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Circuit breaker pattern implementation</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="n">self</span><span class="p">,</span>
+        <span class="n">failure_threshold</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">recovery_timeout</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">expected_exception</span><span class="o">=</span><span class="nb">Exception</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">failure_threshold</span> <span class="o">=</span> <span class="n">failure_threshold</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">recovery_timeout</span> <span class="o">=</span> <span class="n">recovery_timeout</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">expected_exception</span> <span class="o">=</span> <span class="n">expected_exception</span>
+    
+    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Circuit breaker logic</span><span class="sh">"""</span>
+        <span class="n">circuit_state</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_get_circuit_state</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">circuit_state</span> <span class="o">==</span> <span class="sh">'</span><span class="s">OPEN</span><span class="sh">'</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="nf">_should_attempt_reset</span><span class="p">():</span>
+                <span class="n">circuit_state</span> <span class="o">=</span> <span class="sh">'</span><span class="s">HALF_OPEN</span><span class="sh">'</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="nc">Exception</span><span class="p">(</span><span class="sh">"</span><span class="s">Circuit breaker is OPEN</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_execute_task</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_record_success</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">except</span> <span class="n">self</span><span class="p">.</span><span class="n">expected_exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_record_failure</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="n">e</span>
+    
+    <span class="k">def</span> <span class="nf">_get_circuit_state</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Check circuit state</span><span class="sh">"""</span>
+        <span class="c1"># Query state from metadata database
+</span>        <span class="c1"># Implementation omitted
+</span>        <span class="k">pass</span>
+</code></pre></div></div>
+
+<h2 id="-monitoring-and-alerting-systems">📊 Monitoring and Alerting Systems</h2>
+
+<h3 id="1-custom-metrics-collection">1. Custom Metrics Collection</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Prometheus metrics collection
+</span><span class="kn">from</span> <span class="n">airflow.configuration</span> <span class="kn">import</span> <span class="n">conf</span>
+<span class="kn">from</span> <span class="n">airflow.stats</span> <span class="kn">import</span> <span class="n">Stats</span>
+
+<span class="k">def</span> <span class="nf">collect_custom_metrics</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Collect custom metrics</span><span class="sh">"""</span>
+    <span class="n">task_instance</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="sh">'</span><span class="s">task_instance</span><span class="sh">'</span><span class="p">]</span>
+    
+    <span class="c1"># Execution time metrics
+</span>    <span class="n">execution_time</span> <span class="o">=</span> <span class="p">(</span><span class="n">task_instance</span><span class="p">.</span><span class="n">end_date</span> <span class="o">-</span> <span class="n">task_instance</span><span class="p">.</span><span class="n">start_date</span><span class="p">).</span><span class="nf">total_seconds</span><span class="p">()</span>
+    <span class="n">Stats</span><span class="p">.</span><span class="nf">gauge</span><span class="p">(</span><span class="sh">'</span><span class="s">task_execution_time</span><span class="sh">'</span><span class="p">,</span> <span class="n">execution_time</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span>
+        <span class="sh">'</span><span class="s">dag_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">task_instance</span><span class="p">.</span><span class="n">dag_id</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">task_instance</span><span class="p">.</span><span class="n">task_id</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># Memory usage metrics
+</span>    <span class="kn">import</span> <span class="n">psutil</span>
+    <span class="n">memory_usage</span> <span class="o">=</span> <span class="n">psutil</span><span class="p">.</span><span class="nc">Process</span><span class="p">().</span><span class="nf">memory_info</span><span class="p">().</span><span class="n">rss</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span>  <span class="c1"># MB
+</span>    <span class="n">Stats</span><span class="p">.</span><span class="nf">gauge</span><span class="p">(</span><span class="sh">'</span><span class="s">task_memory_usage</span><span class="sh">'</span><span class="p">,</span> <span class="n">memory_usage</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span>
+        <span class="sh">'</span><span class="s">dag_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">task_instance</span><span class="p">.</span><span class="n">dag_id</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">task_instance</span><span class="p">.</span><span class="n">task_id</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># Data processing volume metrics
+</span>    <span class="n">processed_records</span> <span class="o">=</span> <span class="n">context</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">processed_records</span><span class="sh">'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">Stats</span><span class="p">.</span><span class="nf">gauge</span><span class="p">(</span><span class="sh">'</span><span class="s">processed_records</span><span class="sh">'</span><span class="p">,</span> <span class="n">processed_records</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span>
+        <span class="sh">'</span><span class="s">dag_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">task_instance</span><span class="p">.</span><span class="n">dag_id</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">task_instance</span><span class="p">.</span><span class="n">task_id</span>
+    <span class="p">})</span>
+
+<span class="c1"># Metrics collection task
+</span><span class="n">metrics_task</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">collect_metrics</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">python_callable</span><span class="o">=</span><span class="n">collect_custom_metrics</span><span class="p">,</span>
+    <span class="n">trigger_rule</span><span class="o">=</span><span class="sh">'</span><span class="s">all_done</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># Execute regardless of success/failure
+</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-dashboard-construction">2. Dashboard Construction</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Grafana dashboard queries
+</span><span class="k">def</span> <span class="nf">get_dag_performance_metrics</span><span class="p">():</span>
+    <span class="sh">"""</span><span class="s">Query DAG performance metrics</span><span class="sh">"""</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+    SELECT 
+        dag_id,
+        COUNT(*) as total_runs,
+        AVG(EXTRACT(EPOCH FROM (end_date - start_date))) as avg_duration,
+        COUNT(CASE WHEN state = </span><span class="sh">'</span><span class="s">success</span><span class="sh">'</span><span class="s"> THEN 1 END) as success_count,
+        COUNT(CASE WHEN state = </span><span class="sh">'</span><span class="s">failed</span><span class="sh">'</span><span class="s"> THEN 1 END) as failed_count
+    FROM dag_run 
+    WHERE start_date &gt;= NOW() - INTERVAL </span><span class="sh">'</span><span class="s">7 days</span><span class="sh">'</span><span class="s">
+    GROUP BY dag_id
+    ORDER BY avg_duration DESC
+    </span><span class="sh">"""</span>
+    <span class="k">return</span> <span class="n">query</span>
+
+<span class="c1"># Airflow UI custom view
+</span><span class="kn">from</span> <span class="n">airflow.plugins_manager</span> <span class="kn">import</span> <span class="n">AirflowPlugin</span>
+<span class="kn">from</span> <span class="n">flask</span> <span class="kn">import</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">render_template</span>
+
+<span class="k">class</span> <span class="nc">CustomViewPlugin</span><span class="p">(</span><span class="n">AirflowPlugin</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="sh">"</span><span class="s">custom_view_plugin</span><span class="sh">"</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">appbuilder_views</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Custom Dashboard</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Custom</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">view</span><span class="sh">"</span><span class="p">:</span> <span class="nc">CustomDashboardView</span><span class="p">(),</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">CustomDashboardView</span><span class="p">:</span>
+    <span class="nd">@expose</span><span class="p">(</span><span class="sh">"</span><span class="s">/custom-dashboard</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">custom_dashboard</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Custom dashboard</span><span class="sh">"""</span>
+        <span class="c1"># Query metrics data
+</span>        <span class="n">metrics</span> <span class="o">=</span> <span class="nf">get_dag_performance_metrics</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">render_template</span><span class="p">(</span>
+            <span class="sh">"</span><span class="s">custom_dashboard.html</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span>
+        <span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-real-time-monitoring">3. Real-time Monitoring</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Real-time alerting system
+</span><span class="kn">from</span> <span class="n">airflow.models</span> <span class="kn">import</span> <span class="n">BaseOperator</span>
+<span class="kn">from</span> <span class="n">airflow.utils.decorators</span> <span class="kn">import</span> <span class="n">apply_defaults</span>
+
+<span class="k">class</span> <span class="nc">RealTimeMonitorOperator</span><span class="p">(</span><span class="n">BaseOperator</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Real-time monitoring operator</span><span class="sh">"""</span>
+    
+    <span class="nd">@apply_defaults</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="n">self</span><span class="p">,</span>
+        <span class="n">monitoring_interval</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+        <span class="n">alert_thresholds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">monitoring_interval</span> <span class="o">=</span> <span class="n">monitoring_interval</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">alert_thresholds</span> <span class="o">=</span> <span class="n">alert_thresholds</span> <span class="ow">or</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Execute real-time monitoring</span><span class="sh">"""</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Check system status
+</span>                <span class="n">system_health</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_check_system_health</span><span class="p">()</span>
+                
+                <span class="c1"># Check thresholds
+</span>                <span class="n">alerts</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_check_thresholds</span><span class="p">(</span><span class="n">system_health</span><span class="p">)</span>
+                
+                <span class="c1"># Send alerts
+</span>                <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">alerts</span><span class="p">:</span>
+                    <span class="n">self</span><span class="p">.</span><span class="nf">_send_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">)</span>
+                
+                <span class="c1"># Wait
+</span>                <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">monitoring_interval</span><span class="p">)</span>
+                
+            <span class="k">except</span> <span class="nb">KeyboardInterrupt</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">log</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Monitoring error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">monitoring_interval</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_check_system_health</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Check system status</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">cpu_usage</span><span class="sh">'</span><span class="p">:</span> <span class="n">psutil</span><span class="p">.</span><span class="nf">cpu_percent</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">memory_usage</span><span class="sh">'</span><span class="p">:</span> <span class="n">psutil</span><span class="p">.</span><span class="nf">virtual_memory</span><span class="p">().</span><span class="n">percent</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">disk_usage</span><span class="sh">'</span><span class="p">:</span> <span class="n">psutil</span><span class="p">.</span><span class="nf">disk_usage</span><span class="p">(</span><span class="sh">'</span><span class="s">/</span><span class="sh">'</span><span class="p">).</span><span class="n">percent</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">active_dags</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_count_active_dags</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">failed_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_count_failed_tasks</span><span class="p">(),</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">_check_thresholds</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">health_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Check thresholds</span><span class="sh">"""</span>
+        <span class="n">alerts</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="n">health_data</span><span class="p">[</span><span class="sh">'</span><span class="s">cpu_usage</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">self</span><span class="p">.</span><span class="n">alert_thresholds</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">cpu</span><span class="sh">'</span><span class="p">,</span> <span class="mi">80</span><span class="p">):</span>
+            <span class="n">alerts</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">cpu_high</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">High CPU usage: </span><span class="si">{</span><span class="n">health_data</span><span class="p">[</span><span class="sh">'</span><span class="s">cpu_usage</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">%</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="k">if</span> <span class="n">health_data</span><span class="p">[</span><span class="sh">'</span><span class="s">memory_usage</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">self</span><span class="p">.</span><span class="n">alert_thresholds</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">memory</span><span class="sh">'</span><span class="p">,</span> <span class="mi">85</span><span class="p">):</span>
+            <span class="n">alerts</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">memory_high</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">High memory usage: </span><span class="si">{</span><span class="n">health_data</span><span class="p">[</span><span class="sh">'</span><span class="s">memory_usage</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">%</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">alerts</span>
+</code></pre></div></div>
+
+<h2 id="️-hands-on-building-production-grade-data-pipeline">🛠️ Hands-on: Building Production-Grade Data Pipeline</h2>
+
+<h3 id="1-environment-setup">1. Environment Setup</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Airflow installation and configuration</span>
+pip <span class="nb">install </span>apache-airflow[postgres,celery,redis,slack]
+pip <span class="nb">install </span>apache-airflow-providers-postgres
+pip <span class="nb">install </span>apache-airflow-providers-slack
+pip <span class="nb">install </span>apache-airflow-providers-http
+
+<span class="c"># Database configuration</span>
+<span class="nb">export </span><span class="nv">AIRFLOW__CORE__SQL_ALCHEMY_CONN</span><span class="o">=</span><span class="s2">"postgresql://airflow:airflow@localhost/airflow"</span>
+<span class="nb">export </span><span class="nv">AIRFLOW__CORE__EXECUTOR</span><span class="o">=</span><span class="s2">"CeleryExecutor"</span>
+<span class="nb">export </span><span class="nv">AIRFLOW__CELERY__BROKER_URL</span><span class="o">=</span><span class="s2">"redis://localhost:6379/0"</span>
+<span class="nb">export </span><span class="nv">AIRFLOW__CELERY__RESULT_BACKEND</span><span class="o">=</span><span class="s2">"redis://localhost:6379/0"</span>
+
+<span class="c"># Airflow initialization</span>
+airflow db init
+airflow <span class="nb">users </span>create <span class="se">\</span>
+    <span class="nt">--username</span> admin <span class="se">\</span>
+    <span class="nt">--firstname</span> Admin <span class="se">\</span>
+    <span class="nt">--lastname</span> User <span class="se">\</span>
+    <span class="nt">--role</span> Admin <span class="se">\</span>
+    <span class="nt">--email</span> admin@example.com
+</code></pre></div></div>
+
+<h3 id="2-production-grade-etl-pipeline">2. Production-Grade ETL Pipeline</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># dags/advanced_etl_pipeline.py
+</span><span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="n">airflow</span> <span class="kn">import</span> <span class="n">DAG</span>
+<span class="kn">from</span> <span class="n">airflow.operators.python</span> <span class="kn">import</span> <span class="n">PythonOperator</span>
+<span class="kn">from</span> <span class="n">airflow.operators.bash</span> <span class="kn">import</span> <span class="n">BashOperator</span>
+<span class="kn">from</span> <span class="n">airflow.sensors.filesystem</span> <span class="kn">import</span> <span class="n">FileSensor</span>
+<span class="kn">from</span> <span class="n">airflow.utils.task_group</span> <span class="kn">import</span> <span class="n">TaskGroup</span>
+<span class="kn">from</span> <span class="n">airflow.models</span> <span class="kn">import</span> <span class="n">Variable</span>
+<span class="kn">from</span> <span class="n">airflow.hooks.postgres_hook</span> <span class="kn">import</span> <span class="n">PostgresHook</span>
+<span class="kn">from</span> <span class="n">airflow.providers.slack.operators.slack_webhook</span> <span class="kn">import</span> <span class="n">SlackWebhookOperator</span>
+
+<span class="c1"># Load configuration values
+</span><span class="n">BATCH_SIZE</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">Variable</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">batch_size</span><span class="sh">"</span><span class="p">,</span> <span class="n">default_var</span><span class="o">=</span><span class="mi">1000</span><span class="p">))</span>
+<span class="n">MAX_RETRIES</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">Variable</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">max_retries</span><span class="sh">"</span><span class="p">,</span> <span class="n">default_var</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="n">default_args</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">'</span><span class="s">owner</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">data-engineering-team</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">depends_on_past</span><span class="sh">'</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">start_date</span><span class="sh">'</span><span class="p">:</span> <span class="nf">datetime</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="sh">'</span><span class="s">email_on_failure</span><span class="sh">'</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">email_on_retry</span><span class="sh">'</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">retries</span><span class="sh">'</span><span class="p">:</span> <span class="n">MAX_RETRIES</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">retry_delay</span><span class="sh">'</span><span class="p">:</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+    <span class="sh">'</span><span class="s">retry_exponential_backoff</span><span class="sh">'</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">max_retry_delay</span><span class="sh">'</span><span class="p">:</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span>
+    <span class="sh">'</span><span class="s">catchup</span><span class="sh">'</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">max_active_runs</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">dag</span> <span class="o">=</span> <span class="nc">DAG</span><span class="p">(</span>
+    <span class="sh">'</span><span class="s">advanced_etl_pipeline</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">default_args</span><span class="o">=</span><span class="n">default_args</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="sh">'</span><span class="s">Advanced ETL pipeline - Extract, Transform, Load</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">schedule_interval</span><span class="o">=</span><span class="sh">'</span><span class="s">0 2 * * *</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">max_active_runs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">etl</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">data-engineering</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">production</span><span class="sh">'</span><span class="p">],</span>
+    <span class="n">doc_md</span><span class="o">=</span><span class="n">__doc__</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Data extraction group
+</span><span class="k">with</span> <span class="nc">TaskGroup</span><span class="p">(</span><span class="sh">"</span><span class="s">data_extraction</span><span class="sh">"</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="sh">"</span><span class="s">Data extraction</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">extraction_group</span><span class="p">:</span>
+    
+    <span class="c1"># Check source files
+</span>    <span class="n">check_source_files</span> <span class="o">=</span> <span class="nc">FileSensor</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">check_source_files</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">filepath</span><span class="o">=</span><span class="p">[</span>
+            <span class="sh">'</span><span class="s">/data/input/sales_data.csv</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">/data/input/customer_data.csv</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">/data/input/product_data.csv</span><span class="sh">'</span>
+        <span class="p">],</span>
+        <span class="n">poke_interval</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="sh">'</span><span class="s">reschedule</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Data quality validation
+</span>    <span class="n">validate_data_quality</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">validate_data_quality</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">validate_data_quality</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="sh">'</span><span class="s">source_files</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span>
+                <span class="sh">'</span><span class="s">/data/input/sales_data.csv</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">/data/input/customer_data.csv</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">/data/input/product_data.csv</span><span class="sh">'</span>
+            <span class="p">]</span>
+        <span class="p">},</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_validation_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Data extraction
+</span>    <span class="n">extract_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">extract_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">extract_data_from_sources</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">batch_size</span><span class="sh">'</span><span class="p">:</span> <span class="n">BATCH_SIZE</span><span class="p">},</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_extraction_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="c1"># Data transformation group
+</span><span class="k">with</span> <span class="nc">TaskGroup</span><span class="p">(</span><span class="sh">"</span><span class="s">data_transformation</span><span class="sh">"</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="sh">"</span><span class="s">Data transformation</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">transformation_group</span><span class="p">:</span>
+    
+    <span class="c1"># Data cleaning
+</span>    <span class="n">clean_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">clean_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">clean_and_validate_data</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">batch_size</span><span class="sh">'</span><span class="p">:</span> <span class="n">BATCH_SIZE</span><span class="p">},</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_processing_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Data transformation
+</span>    <span class="n">transform_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">transform_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">transform_business_logic</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">batch_size</span><span class="sh">'</span><span class="p">:</span> <span class="n">BATCH_SIZE</span><span class="p">},</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_processing_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Data aggregation
+</span>    <span class="n">aggregate_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">aggregate_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">create_aggregated_metrics</span><span class="p">,</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_processing_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="c1"># Data loading group
+</span><span class="k">with</span> <span class="nc">TaskGroup</span><span class="p">(</span><span class="sh">"</span><span class="s">data_loading</span><span class="sh">"</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="sh">"</span><span class="s">Data loading</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">loading_group</span><span class="p">:</span>
+    
+    <span class="c1"># Load to staging tables
+</span>    <span class="n">load_to_staging</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">load_to_staging</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">load_to_staging_tables</span><span class="p">,</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_loading_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Load to data warehouse
+</span>    <span class="n">load_to_warehouse</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">load_to_warehouse</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">load_to_data_warehouse</span><span class="p">,</span>
+        <span class="n">pool</span><span class="o">=</span><span class="sh">'</span><span class="s">data_loading_pool</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Data validation
+</span>    <span class="n">validate_loaded_data</span> <span class="o">=</span> <span class="nc">PythonOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">validate_loaded_data</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">python_callable</span><span class="o">=</span><span class="n">validate_loaded_data</span><span class="p">,</span>
+        <span class="n">trigger_rule</span><span class="o">=</span><span class="sh">'</span><span class="s">all_success</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="c1"># Notifications and monitoring
+</span><span class="k">with</span> <span class="nc">TaskGroup</span><span class="p">(</span><span class="sh">"</span><span class="s">monitoring</span><span class="sh">"</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="sh">"</span><span class="s">Monitoring</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">monitoring_group</span><span class="p">:</span>
+    
+    <span class="c1"># Success notification
+</span>    <span class="n">success_notification</span> <span class="o">=</span> <span class="nc">SlackWebhookOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">success_notification</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">http_conn_id</span><span class="o">=</span><span class="sh">'</span><span class="s">slack_webhook</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">message</span><span class="o">=</span><span class="sh">"""</span><span class="s">
+        ✅ ETL Pipeline Successfully Completed
+        
+        Execution Time: 
+        Processed Records: {ti.xcom_pull(task_ids=</span><span class="sh">'</span><span class="s">extract_data</span><span class="sh">'</span><span class="s">)}
+        </span><span class="sh">"""</span><span class="p">,</span>
+        <span class="n">trigger_rule</span><span class="o">=</span><span class="sh">'</span><span class="s">all_success</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Failure notification
+</span>    <span class="n">failure_notification</span> <span class="o">=</span> <span class="nc">SlackWebhookOperator</span><span class="p">(</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="sh">'</span><span class="s">failure_notification</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">http_conn_id</span><span class="o">=</span><span class="sh">'</span><span class="s">slack_webhook</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">message</span><span class="o">=</span><span class="sh">"""</span><span class="s">
+        ❌ ETL Pipeline Failed
+        
+        Execution Time: 
+        Failed Task: 
+        Error Log: 
+        </span><span class="sh">"""</span><span class="p">,</span>
+        <span class="n">trigger_rule</span><span class="o">=</span><span class="sh">'</span><span class="s">one_failed</span><span class="sh">'</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="c1"># Dependency setup
+</span><span class="n">extraction_group</span> <span class="o">&gt;&gt;</span> <span class="n">transformation_group</span> <span class="o">&gt;&gt;</span> <span class="n">loading_group</span>
+<span class="p">[</span><span class="n">loading_group</span><span class="p">,</span> <span class="n">monitoring_group</span><span class="p">]</span>
+
+<span class="c1"># DAG documentation
+</span><span class="n">dag</span><span class="p">.</span><span class="n">doc_md</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+# Advanced ETL Pipeline
+
+This DAG implements a production-grade data pipeline.
+
+## Key Features
+- Data quality validation
+- Batch processing optimization
+- Error handling and retry
+- Real-time monitoring
+- Alerting system
+
+## Execution Schedule
+Daily at 2 AM
+
+## Monitoring
+- Slack notifications
+- Performance metrics collection
+- Error tracking
+</span><span class="sh">"""</span>
+</code></pre></div></div>
+
+<h2 id="-learning-summary">📚 Learning Summary</h2>
+
+<h3 id="what-we-learned-in-this-post">What We Learned in This Post</h3>
+
+<ol>
+  <li><strong>Deep Understanding of Airflow Architecture</strong>
+    <ul>
+      <li>Core component analysis</li>
+      <li>Metadata database schema</li>
+      <li>Executor types and features</li>
+    </ul>
+  </li>
+  <li><strong>DAG Optimization Strategies</strong>
+    <ul>
+      <li>Efficient task definition</li>
+      <li>Resource management optimization</li>
+      <li>Memory usage optimization</li>
+    </ul>
+  </li>
+  <li><strong>Advanced Scheduling and Triggers</strong>
+    <ul>
+      <li>Dynamic scheduling</li>
+      <li>External trigger utilization</li>
+      <li>Schedule optimization</li>
+    </ul>
+  </li>
+  <li><strong>Error Handling and Retry Strategies</strong>
+    <ul>
+      <li>Advanced retry logic</li>
+      <li>Error alert system</li>
+      <li>Circuit breaker pattern</li>
+    </ul>
+  </li>
+  <li><strong>Monitoring and Alerting Systems</strong>
+    <ul>
+      <li>Custom metrics collection</li>
+      <li>Dashboard construction</li>
+      <li>Real-time monitoring</li>
+    </ul>
+  </li>
+  <li><strong>Building Production-Grade Data Pipeline</strong>
+    <ul>
+      <li>Complete ETL pipeline</li>
+      <li>Data quality validation</li>
+      <li>Error handling and alerts</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="key-concepts-summary">Key Concepts Summary</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>Description</th>
+      <th>Importance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>DAG Optimization</strong></td>
+      <td>Improving performance and resource efficiency</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Error Handling</strong></td>
+      <td>Stable pipeline operation</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Monitoring</strong></td>
+      <td>Real-time status tracking</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Scheduling</strong></td>
+      <td>Flexible execution control</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="practical-application-considerations">Practical Application Considerations</h3>
+
+<ol>
+  <li><strong>Performance Optimization</strong>: Pool, Queue, memory management</li>
+  <li><strong>Stability</strong>: Error handling, retry, Circuit Breaker</li>
+  <li><strong>Monitoring</strong>: Metrics collection, alerts, dashboard</li>
+  <li><strong>Scalability</strong>: Distributed environment, resource management</li>
+</ol>
+
+<hr />
+
+<p><em>With this guide, you can master the advanced features of Apache Airflow and build stable and efficient data pipelines in production!</em> 🚀</p>
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
