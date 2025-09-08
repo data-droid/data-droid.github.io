@@ -579,7 +579,7 @@ mse, mae, rmse = evaluate_model(model, test_loader, scaler)
 
 **← 이전**: [Part 2: 딥러닝 기반 시계열 예측 - N-BEATS와 DeepAR](/data-ai/2025/09/01/time-series-deep-learning.html)
 
-**다음 →**: Part 4: 최신 생성형 AI 모델들 (Coming Soon)
+**다음 →**: [Part 4: 최신 생성형 AI 모델들 - TimeGPT, Lag-Llama, Moirai, Chronos](/data-ai/2025/09/07/time-series-llm-models.html)
 
 ---
 

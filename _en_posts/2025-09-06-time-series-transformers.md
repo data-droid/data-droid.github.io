@@ -579,7 +579,7 @@ Transformer-based models present a new paradigm for time series forecasting. Joi
 
 **← Previous**: [Part 2: Deep Learning-based Time Series Forecasting - N-BEATS and DeepAR](/en_posts/2025-09-01-time-series-deep-learning.html)
 
-**Next →**: Part 4: Latest Generative AI Models (Coming Soon)
+**Next →**: [Part 4: Latest Generative AI Models - TimeGPT, Lag-Llama, Moirai, Chronos](/en_posts/2025-09-07-time-series-llm-models.html)
 
 ---
 
