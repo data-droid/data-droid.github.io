@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Python을 활용한 Apache Kafka 실시간 스트리밍 개발과 데이터 처리 기법을 학습하고 실제 프로젝트에 적용해봅니다.">
+
+
+
+<title>Apache Kafka Python 가이드: 실시간 스트리밍과 데이터 처리 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Apache Kafka Python 가이드: 실시간 스트리밍과 데이터 처리">
+<meta property="og:description" content="Python을 활용한 Apache Kafka 실시간 스트리밍 개발과 데이터 처리 기법을 학습하고 실제 프로젝트에 적용해봅니다.">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2025/09/09/apache-kafka-python-guide.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Apache Kafka Python 가이드: 실시간 스트리밍과 데이터 처리">
+<meta name="twitter:description" content="Python을 활용한 Apache Kafka 실시간 스트리밍 개발과 데이터 처리 기법을 학습하고 실제 프로젝트에 적용해봅니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2025/09/09/apache-kafka-python-guide.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2025-09-09-apache-kafka-python-guide.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 09일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Apache Kafka Python 가이드: 실시간 스트리밍과 데이터 처리</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Kafka</span>
+      
+        <span class="tag">Python</span>
+      
+        <span class="tag">실시간스트리밍</span>
+      
+        <span class="tag">데이터처리</span>
+      
+        <span class="tag">kafka-python</span>
+      
+        <span class="tag">confluent-kafka</span>
+      
+        <span class="tag">faust</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 25분</span>
+      
+      
+        <span class="difficulty">📊 고급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="apache-kafka-python-가이드-실시간-스트리밍과-데이터-처리">Apache Kafka Python 가이드: 실시간 스트리밍과 데이터 처리</h1>
+
+<blockquote>
+  <p>Python을 활용한 Apache Kafka 실시간 스트리밍 개발과 데이터 처리 기법을 학습하고 실제 프로젝트에 적용해봅니다.</p>
+</blockquote>
+
+<h2 id="-목차">📋 목차</h2>
+
+<ol>
+  <li><a href="#python-kafka-라이브러리-선택">Python Kafka 라이브러리 선택</a></li>
+  <li><a href="#kafka-python-기본-사용법">kafka-python 기본 사용법</a></li>
+  <li><a href="#confluent-kafka-고성능-처리">confluent-kafka 고성능 처리</a></li>
+  <li><a href="#faust-스트리밍-처리">Faust 스트리밍 처리</a></li>
+  <li><a href="#실습-python-기반-스트리밍-시스템">실습: Python 기반 스트리밍 시스템</a></li>
+  <li><a href="#성능-최적화와-모니터링">성능 최적화와 모니터링</a></li>
+  <li><a href="#학습-요약">학습 요약</a></li>
+</ol>
+
+<h2 id="-python-kafka-라이브러리-선택">🐍 Python Kafka 라이브러리 선택</h2>
+
+<h3 id="주요-라이브러리-비교">주요 라이브러리 비교</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>라이브러리</th>
+      <th>특징</th>
+      <th>장점</th>
+      <th>단점</th>
+      <th>사용 사례</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>kafka-python</strong></td>
+      <td>순수 Python 구현</td>
+      <td>설치 간단, 이해하기 쉬움</td>
+      <td>성능 제한</td>
+      <td>학습, 프로토타입</td>
+    </tr>
+    <tr>
+      <td><strong>confluent-kafka</strong></td>
+      <td>C 라이브러리 래핑</td>
+      <td>고성능, 안정성</td>
+      <td>설치 복잡</td>
+      <td>프로덕션 환경</td>
+    </tr>
+    <tr>
+      <td><strong>faust</strong></td>
+      <td>스트리밍 전용</td>
+      <td>간단한 스트리밍</td>
+      <td>제한적 기능</td>
+      <td>스트리밍 처리</td>
+    </tr>
+    <tr>
+      <td><strong>aiokafka</strong></td>
+      <td>비동기 처리</td>
+      <td>비동기 지원</td>
+      <td>복잡성</td>
+      <td>고성능 비동기</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="설치-방법">설치 방법</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># kafka-python 설치</span>
+pip <span class="nb">install </span>kafka-python
+
+<span class="c"># confluent-kafka 설치 (권장)</span>
+pip <span class="nb">install </span>confluent-kafka
+
+<span class="c"># faust 설치</span>
+pip <span class="nb">install </span>faust[rocksdb]
+
+<span class="c"># aiokafka 설치</span>
+pip <span class="nb">install </span>aiokafka
+
+<span class="c"># 추가 의존성</span>
+pip <span class="nb">install </span>pandas numpy asyncio
+</code></pre></div></div>
+
+<h2 id="-kafka-python-기본-사용법">⚡ kafka-python 기본 사용법</h2>
+
+<h3 id="1-프로듀서-구현">1. 프로듀서 구현</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">kafka</span> <span class="kn">import</span> <span class="n">KafkaProducer</span>
+<span class="kn">from</span> <span class="n">kafka.errors</span> <span class="kn">import</span> <span class="n">KafkaError</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="n">logging</span>
+
+<span class="c1"># 로깅 설정
+</span><span class="n">logging</span><span class="p">.</span><span class="nf">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="p">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="p">.</span><span class="nf">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">PythonKafkaProducer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">bootstrap_servers</span><span class="o">=</span><span class="sh">'</span><span class="s">localhost:9092</span><span class="sh">'</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span> <span class="o">=</span> <span class="nc">KafkaProducer</span><span class="p">(</span>
+            <span class="n">bootstrap_servers</span><span class="o">=</span><span class="p">[</span><span class="n">bootstrap_servers</span><span class="p">],</span>
+            <span class="n">value_serializer</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">v</span><span class="p">).</span><span class="nf">encode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">),</span>
+            <span class="n">key_serializer</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">k</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="c1"># 성능 최적화 설정
+</span>            <span class="n">batch_size</span><span class="o">=</span><span class="mi">16384</span><span class="p">,</span>  <span class="c1"># 16KB
+</span>            <span class="n">linger_ms</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>       <span class="c1"># 5ms 대기
+</span>            <span class="n">compression_type</span><span class="o">=</span><span class="sh">'</span><span class="s">snappy</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># 압축
+</span>            <span class="n">acks</span><span class="o">=</span><span class="sh">'</span><span class="s">all</span><span class="sh">'</span><span class="p">,</span>        <span class="c1"># 모든 복제본 확인
+</span>            <span class="n">retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>         <span class="c1"># 재시도 횟수
+</span>            <span class="n">retry_backoff_ms</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="c1"># 재시도 간격
+</span>            <span class="c1"># 안전성 설정
+</span>            <span class="n">enable_idempotence</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>  <span class="c1"># 멱등성 보장
+</span>            <span class="n">max_in_flight_requests_per_connection</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">request_timeout_ms</span><span class="o">=</span><span class="mi">30000</span><span class="p">,</span>
+        <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">send_message</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메시지 전송</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">future</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">send</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">record_metadata</span> <span class="o">=</span> <span class="n">future</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Message sent to </span><span class="si">{</span><span class="n">record_metadata</span><span class="p">.</span><span class="n">topic</span><span class="si">}</span><span class="s"> </span><span class="sh">"</span>
+                       <span class="sa">f</span><span class="sh">"</span><span class="s">partition </span><span class="si">{</span><span class="n">record_metadata</span><span class="p">.</span><span class="n">partition</span><span class="si">}</span><span class="s"> </span><span class="sh">"</span>
+                       <span class="sa">f</span><span class="sh">"</span><span class="s">offset </span><span class="si">{</span><span class="n">record_metadata</span><span class="p">.</span><span class="n">offset</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span> <span class="n">KafkaError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed to send message: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+    
+    <span class="k">def</span> <span class="nf">send_batch</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">배치 메시지 전송</span><span class="sh">"""</span>
+        <span class="n">futures</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
+            <span class="n">future</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">send</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">futures</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+        
+        <span class="c1"># 모든 메시지 전송 완료 대기
+</span>        <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">futures</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">future</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">KafkaError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Batch send failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">프로듀서 종료</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>  <span class="c1"># 남은 메시지 전송
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+
+<span class="c1"># 사용 예제
+</span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">producer</span> <span class="o">=</span> <span class="nc">PythonKafkaProducer</span><span class="p">()</span>
+    
+    <span class="c1"># 단일 메시지 전송
+</span>    <span class="n">producer</span><span class="p">.</span><span class="nf">send_message</span><span class="p">(</span>
+        <span class="n">topic</span><span class="o">=</span><span class="sh">"</span><span class="s">user-events</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="sh">"</span><span class="s">user123</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">login</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()}</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># 배치 메시지 전송
+</span>    <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="sh">"</span><span class="s">user123</span><span class="sh">"</span><span class="p">,</span> <span class="p">{</span><span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">view</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">page</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/home</span><span class="sh">"</span><span class="p">}),</span>
+        <span class="p">(</span><span class="sh">"</span><span class="s">user456</span><span class="sh">"</span><span class="p">,</span> <span class="p">{</span><span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">purchase</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">:</span> <span class="mf">99.99</span><span class="p">}),</span>
+        <span class="p">(</span><span class="sh">"</span><span class="s">user789</span><span class="sh">"</span><span class="p">,</span> <span class="p">{</span><span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">logout</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()})</span>
+    <span class="p">]</span>
+    <span class="n">producer</span><span class="p">.</span><span class="nf">send_batch</span><span class="p">(</span><span class="sh">"</span><span class="s">user-events</span><span class="sh">"</span><span class="p">,</span> <span class="n">messages</span><span class="p">)</span>
+    
+    <span class="n">producer</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="2-컨슈머-구현">2. 컨슈머 구현</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">kafka</span> <span class="kn">import</span> <span class="n">KafkaConsumer</span>
+<span class="kn">from</span> <span class="n">kafka.errors</span> <span class="kn">import</span> <span class="n">KafkaError</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">import</span> <span class="n">logging</span>
+<span class="kn">from</span> <span class="n">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+
+<span class="k">class</span> <span class="nc">PythonKafkaConsumer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">bootstrap_servers</span><span class="o">=</span><span class="sh">'</span><span class="s">localhost:9092</span><span class="sh">'</span><span class="p">,</span> <span class="n">group_id</span><span class="o">=</span><span class="sh">'</span><span class="s">python-consumer</span><span class="sh">'</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span> <span class="o">=</span> <span class="nc">KafkaConsumer</span><span class="p">(</span>
+            <span class="n">bootstrap_servers</span><span class="o">=</span><span class="p">[</span><span class="n">bootstrap_servers</span><span class="p">],</span>
+            <span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span>
+            <span class="n">value_deserializer</span><span class="o">=</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="nf">decode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">)),</span>
+            <span class="n">key_deserializer</span><span class="o">=</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">m</span><span class="p">.</span><span class="nf">decode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">)</span> <span class="k">if</span> <span class="n">m</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="c1"># 오프셋 관리
+</span>            <span class="n">auto_offset_reset</span><span class="o">=</span><span class="sh">'</span><span class="s">earliest</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># earliest, latest, none
+</span>            <span class="n">enable_auto_commit</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>      <span class="c1"># 수동 오프셋 커밋
+</span>            <span class="c1"># 성능 설정
+</span>            <span class="n">max_poll_records</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>          <span class="c1"># 한 번에 처리할 레코드 수
+</span>            <span class="n">session_timeout_ms</span><span class="o">=</span><span class="mi">30000</span><span class="p">,</span>      <span class="c1"># 세션 타임아웃
+</span>            <span class="n">heartbeat_interval_ms</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span>    <span class="c1"># 하트비트 간격
+</span>            <span class="c1"># 재시도 설정
+</span>            <span class="n">retry_backoff_ms</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+            <span class="n">request_timeout_ms</span><span class="o">=</span><span class="mi">30000</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">message_handler</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">subscribe</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topics</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">토픽 구독</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">subscribe</span><span class="p">(</span><span class="n">topics</span><span class="p">)</span>
+        <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Subscribed to topics: </span><span class="si">{</span><span class="n">topics</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">set_message_handler</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="bp">None</span><span class="p">]):</span>
+        <span class="sh">"""</span><span class="s">메시지 처리 핸들러 설정</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">message_handler</span> <span class="o">=</span> <span class="n">handler</span>
+    
+    <span class="k">def</span> <span class="nf">start_consuming</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메시지 소비 시작</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">message_batch</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">poll</span><span class="p">(</span><span class="n">timeout_ms</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+                
+                <span class="k">for</span> <span class="n">topic_partition</span><span class="p">,</span> <span class="n">messages</span> <span class="ow">in</span> <span class="n">message_batch</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
+                        <span class="n">self</span><span class="p">.</span><span class="nf">_process_message</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                
+                <span class="c1"># 오프셋 커밋
+</span>                <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+                
+        <span class="k">except</span> <span class="nb">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">Consumer stopped by user</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Consumer error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">_process_message</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메시지 처리</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Received message: </span><span class="si">{</span><span class="n">message</span><span class="p">.</span><span class="n">key</span><span class="si">}</span><span class="s"> -&gt; </span><span class="si">{</span><span class="n">message</span><span class="p">.</span><span class="n">value</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">message_handler</span><span class="p">:</span>
+                <span class="n">self</span><span class="p">.</span><span class="nf">message_handler</span><span class="p">(</span><span class="n">message</span><span class="p">.</span><span class="n">key</span><span class="p">,</span> <span class="n">message</span><span class="p">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># 기본 처리
+</span>                <span class="n">self</span><span class="p">.</span><span class="nf">_default_handler</span><span class="p">(</span><span class="n">message</span><span class="p">.</span><span class="n">key</span><span class="p">,</span> <span class="n">message</span><span class="p">.</span><span class="n">value</span><span class="p">)</span>
+                
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error processing message: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_default_handler</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">기본 메시지 핸들러</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s">, Value: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 사용 예제
+</span><span class="k">def</span> <span class="nf">custom_message_handler</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">커스텀 메시지 핸들러</span><span class="sh">"""</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Processing: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s"> -&gt; </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="c1"># 여기에 실제 처리 로직 구현
+</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">consumer</span> <span class="o">=</span> <span class="nc">PythonKafkaConsumer</span><span class="p">()</span>
+    <span class="n">consumer</span><span class="p">.</span><span class="nf">subscribe</span><span class="p">([</span><span class="sh">'</span><span class="s">user-events</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">order-events</span><span class="sh">'</span><span class="p">])</span>
+    <span class="n">consumer</span><span class="p">.</span><span class="nf">set_message_handler</span><span class="p">(</span><span class="n">custom_message_handler</span><span class="p">)</span>
+    <span class="n">consumer</span><span class="p">.</span><span class="nf">start_consuming</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="-confluent-kafka-고성능-처리">🚀 confluent-kafka 고성능 처리</h2>
+
+<h3 id="1-고성능-프로듀서">1. 고성능 프로듀서</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">confluent_kafka</span> <span class="kn">import</span> <span class="n">Producer</span><span class="p">,</span> <span class="n">Consumer</span><span class="p">,</span> <span class="n">KafkaError</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="n">threading</span>
+<span class="kn">from</span> <span class="n">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="k">class</span> <span class="nc">ConfluentKafkaProducer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span> <span class="o">=</span> <span class="nc">Producer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">delivery_callback_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">delivery_callback_errors</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">def</span> <span class="nf">delivery_callback</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">전송 결과 콜백</span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="n">err</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">delivery_callback_errors</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Message delivery failed: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">delivery_callback_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Message delivered to </span><span class="si">{</span><span class="n">msg</span><span class="p">.</span><span class="nf">topic</span><span class="p">()</span><span class="si">}</span><span class="s"> [</span><span class="si">{</span><span class="n">msg</span><span class="p">.</span><span class="nf">partition</span><span class="p">()</span><span class="si">}</span><span class="s">] at offset </span><span class="si">{</span><span class="n">msg</span><span class="p">.</span><span class="nf">offset</span><span class="p">()</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">produce_message</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메시지 전송</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">produce</span><span class="p">(</span>
+                <span class="n">topic</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+                <span class="n">value</span><span class="o">=</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">).</span><span class="nf">encode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">),</span>
+                <span class="n">callback</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">delivery_callback</span>
+            <span class="p">)</span>
+            <span class="c1"># 비동기 전송이므로 주기적으로 flush 필요
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">poll</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">BufferError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Producer queue is full: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+            <span class="k">raise</span>
+    
+    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">남은 메시지 전송</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+
+<span class="c1"># 설정 예제
+</span><span class="n">producer_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">'</span><span class="s">bootstrap.servers</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">localhost:9092</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">compression.type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">snappy</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">batch.size</span><span class="sh">'</span><span class="p">:</span> <span class="mi">16384</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">linger.ms</span><span class="sh">'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">acks</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">all</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">retries</span><span class="sh">'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">enable.idempotence</span><span class="sh">'</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">max.in.flight.requests.per.connection</span><span class="sh">'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">producer</span> <span class="o">=</span> <span class="nc">ConfluentKafkaProducer</span><span class="p">(</span><span class="n">producer_config</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-고성능-컨슈머">2. 고성능 컨슈머</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ConfluentKafkaConsumer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span> <span class="o">=</span> <span class="nc">Consumer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">True</span>
+    
+    <span class="k">def</span> <span class="nf">subscribe</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topics</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">토픽 구독</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">subscribe</span><span class="p">(</span><span class="n">topics</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">consume_messages</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메시지 소비</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">self</span><span class="p">.</span><span class="n">running</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">poll</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">msg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                
+                <span class="k">if</span> <span class="n">msg</span><span class="p">.</span><span class="nf">error</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">msg</span><span class="p">.</span><span class="nf">error</span><span class="p">().</span><span class="nf">code</span><span class="p">()</span> <span class="o">==</span> <span class="n">KafkaError</span><span class="p">.</span><span class="n">_PARTITION_EOF</span><span class="p">:</span>
+                        <span class="c1"># 파티션 끝에 도달
+</span>                        <span class="k">continue</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Consumer error: </span><span class="si">{</span><span class="n">msg</span><span class="p">.</span><span class="nf">error</span><span class="p">()</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                
+                <span class="c1"># 메시지 처리
+</span>                <span class="n">self</span><span class="p">.</span><span class="nf">process_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                
+        <span class="k">except</span> <span class="nb">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Consumer interrupted by user</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">process_message</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메시지 처리</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">msg</span><span class="p">.</span><span class="nf">key</span><span class="p">().</span><span class="nf">decode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">)</span> <span class="k">if</span> <span class="n">msg</span><span class="p">.</span><span class="nf">key</span><span class="p">()</span> <span class="k">else</span> <span class="bp">None</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="nf">value</span><span class="p">().</span><span class="nf">decode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">))</span>
+            
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Received message: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s"> -&gt; </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            
+            <span class="c1"># 여기에 실제 처리 로직 구현
+</span>            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error processing message: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">컨슈머 종료</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+
+<span class="c1"># 설정 예제
+</span><span class="n">consumer_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">'</span><span class="s">bootstrap.servers</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">localhost:9092</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">group.id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">python-consumer-group</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">auto.offset.reset</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">earliest</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">enable.auto.commit</span><span class="sh">'</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">max.poll.records</span><span class="sh">'</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">session.timeout.ms</span><span class="sh">'</span><span class="p">:</span> <span class="mi">30000</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">heartbeat.interval.ms</span><span class="sh">'</span><span class="p">:</span> <span class="mi">3000</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">consumer</span> <span class="o">=</span> <span class="nc">ConfluentKafkaConsumer</span><span class="p">(</span><span class="n">consumer_config</span><span class="p">)</span>
+<span class="n">consumer</span><span class="p">.</span><span class="nf">subscribe</span><span class="p">([</span><span class="sh">'</span><span class="s">user-events</span><span class="sh">'</span><span class="p">])</span>
+<span class="n">consumer</span><span class="p">.</span><span class="nf">consume_messages</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="-faust-스트리밍-처리">🌊 Faust 스트리밍 처리</h2>
+
+<h3 id="1-faust-기본-설정">1. Faust 기본 설정</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">faust</span>
+<span class="kn">from</span> <span class="n">faust</span> <span class="kn">import</span> <span class="n">Record</span>
+<span class="kn">import</span> <span class="n">asyncio</span>
+<span class="kn">from</span> <span class="n">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="c1"># Faust 앱 설정
+</span><span class="n">app</span> <span class="o">=</span> <span class="n">faust</span><span class="p">.</span><span class="nc">App</span><span class="p">(</span>
+    <span class="sh">'</span><span class="s">kafka-streaming-app</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">broker</span><span class="o">=</span><span class="sh">'</span><span class="s">kafka://localhost:9092</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">store</span><span class="o">=</span><span class="sh">'</span><span class="s">rocksdb://</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># 상태 저장소
+</span>    <span class="n">value_serializer</span><span class="o">=</span><span class="sh">'</span><span class="s">json</span><span class="sh">'</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># 데이터 모델 정의
+</span><span class="k">class</span> <span class="nc">UserEvent</span><span class="p">(</span><span class="n">Record</span><span class="p">):</span>
+    <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">action</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="k">class</span> <span class="nc">OrderEvent</span><span class="p">(</span><span class="n">Record</span><span class="p">):</span>
+    <span class="n">order_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">amount</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">items</span><span class="p">:</span> <span class="nb">list</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span>
+
+<span class="c1"># 토픽 정의
+</span><span class="n">user_events_topic</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="nf">topic</span><span class="p">(</span><span class="sh">'</span><span class="s">user-events</span><span class="sh">'</span><span class="p">,</span> <span class="n">value_type</span><span class="o">=</span><span class="n">UserEvent</span><span class="p">)</span>
+<span class="n">order_events_topic</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="nf">topic</span><span class="p">(</span><span class="sh">'</span><span class="s">order-events</span><span class="sh">'</span><span class="p">,</span> <span class="n">value_type</span><span class="o">=</span><span class="n">OrderEvent</span><span class="p">)</span>
+<span class="n">processed_events_topic</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="nf">topic</span><span class="p">(</span><span class="sh">'</span><span class="s">processed-events</span><span class="sh">'</span><span class="p">,</span> <span class="n">value_type</span><span class="o">=</span><span class="n">UserEvent</span><span class="p">)</span>
+
+<span class="c1"># 테이블 정의 (상태 저장소)
+</span><span class="n">user_activity_table</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="nc">Table</span><span class="p">(</span><span class="sh">'</span><span class="s">user-activity</span><span class="sh">'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+<span class="n">order_summary_table</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="nc">Table</span><span class="p">(</span><span class="sh">'</span><span class="s">order-summary</span><span class="sh">'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-스트림-처리-예제">2. 스트림 처리 예제</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@app.agent</span><span class="p">(</span><span class="n">user_events_topic</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">process_user_events</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">사용자 이벤트 처리</span><span class="sh">"""</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+        <span class="c1"># 이벤트 처리
+</span>        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Processing user event: </span><span class="si">{</span><span class="n">event</span><span class="p">.</span><span class="n">user_id</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="n">event</span><span class="p">.</span><span class="n">action</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># 상태 업데이트
+</span>        <span class="n">user_activity_table</span><span class="p">[</span><span class="n">event</span><span class="p">.</span><span class="n">user_id</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="c1"># 이벤트 변환
+</span>        <span class="n">processed_event</span> <span class="o">=</span> <span class="nc">UserEvent</span><span class="p">(</span>
+            <span class="n">user_id</span><span class="o">=</span><span class="n">event</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="sa">f</span><span class="sh">"</span><span class="s">processed_</span><span class="si">{</span><span class="n">event</span><span class="p">.</span><span class="n">action</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">event</span><span class="p">.</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">processed_by</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">faust</span><span class="sh">"</span><span class="p">}</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># 결과 전송
+</span>        <span class="k">await</span> <span class="n">processed_events_topic</span><span class="p">.</span><span class="nf">send</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">processed_event</span><span class="p">)</span>
+
+<span class="nd">@app.agent</span><span class="p">(</span><span class="n">order_events_topic</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">process_order_events</span><span class="p">(</span><span class="n">orders</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">주문 이벤트 처리</span><span class="sh">"""</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">order</span> <span class="ow">in</span> <span class="n">orders</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Processing order: </span><span class="si">{</span><span class="n">order</span><span class="p">.</span><span class="n">order_id</span><span class="si">}</span><span class="s"> - $</span><span class="si">{</span><span class="n">order</span><span class="p">.</span><span class="n">amount</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># 주문 요약 업데이트
+</span>        <span class="k">if</span> <span class="n">order</span><span class="p">.</span><span class="n">user_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">order_summary_table</span><span class="p">:</span>
+            <span class="n">order_summary_table</span><span class="p">[</span><span class="n">order</span><span class="p">.</span><span class="n">user_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">total_orders</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">total_amount</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">last_order_time</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.0</span>
+            <span class="p">}</span>
+        
+        <span class="n">summary</span> <span class="o">=</span> <span class="n">order_summary_table</span><span class="p">[</span><span class="n">order</span><span class="p">.</span><span class="n">user_id</span><span class="p">]</span>
+        <span class="n">summary</span><span class="p">[</span><span class="sh">'</span><span class="s">total_orders</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">summary</span><span class="p">[</span><span class="sh">'</span><span class="s">total_amount</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="n">order</span><span class="p">.</span><span class="n">amount</span>
+        <span class="n">summary</span><span class="p">[</span><span class="sh">'</span><span class="s">last_order_time</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">order</span><span class="p">.</span><span class="n">timestamp</span>
+        
+        <span class="c1"># 주문 금액별 분류
+</span>        <span class="k">if</span> <span class="n">order</span><span class="p">.</span><span class="n">amount</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">app</span><span class="p">.</span><span class="nf">topic</span><span class="p">(</span><span class="sh">'</span><span class="s">high-value-orders</span><span class="sh">'</span><span class="p">).</span><span class="nf">send</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">app</span><span class="p">.</span><span class="nf">topic</span><span class="p">(</span><span class="sh">'</span><span class="s">regular-orders</span><span class="sh">'</span><span class="p">).</span><span class="nf">send</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+
+<span class="c1"># 윈도우 집계
+</span><span class="nd">@app.timer</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mf">60.0</span><span class="p">)</span>  <span class="c1"># 1분마다 실행
+</span><span class="k">async</span> <span class="k">def</span> <span class="nf">aggregate_metrics</span><span class="p">():</span>
+    <span class="sh">"""</span><span class="s">메트릭 집계</span><span class="sh">"""</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== User Activity Summary ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">user_activity_table</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">User </span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s"> events</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== Order Summary ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">summary</span> <span class="ow">in</span> <span class="n">order_summary_table</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">User </span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">summary</span><span class="p">[</span><span class="sh">'</span><span class="s">total_orders</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s"> orders, $</span><span class="si">{</span><span class="n">summary</span><span class="p">[</span><span class="sh">'</span><span class="s">total_amount</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">'</span><span class="s">__main__</span><span class="sh">'</span><span class="p">:</span>
+    <span class="n">app</span><span class="p">.</span><span class="nf">main</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="3-고급-스트림-처리">3. 고급 스트림 처리</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">faust</span> <span class="kn">import</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">Table</span>
+<span class="kn">from</span> <span class="n">faust.types</span> <span class="kn">import</span> <span class="n">StreamT</span>
+
+<span class="c1"># 스트림 조인
+</span><span class="nd">@app.agent</span><span class="p">(</span><span class="n">user_events_topic</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">join_user_orders</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">사용자 이벤트와 주문 조인</span><span class="sh">"""</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+        <span class="c1"># 사용자 주문 정보 조회
+</span>        <span class="n">order_summary</span> <span class="o">=</span> <span class="n">order_summary_table</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span> <span class="p">{})</span>
+        
+        <span class="c1"># 조인된 데이터 처리
+</span>        <span class="n">enriched_event</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">event</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">action</span><span class="sh">'</span><span class="p">:</span> <span class="n">event</span><span class="p">.</span><span class="n">action</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">event</span><span class="p">.</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">user_orders</span><span class="sh">'</span><span class="p">:</span> <span class="n">order_summary</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">total_orders</span><span class="sh">'</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">user_spent</span><span class="sh">'</span><span class="p">:</span> <span class="n">order_summary</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">total_amount</span><span class="sh">'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Enriched event: </span><span class="si">{</span><span class="n">enriched_event</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 윈도우 집계
+</span><span class="nd">@app.agent</span><span class="p">(</span><span class="n">user_events_topic</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">window_aggregation</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">시간 윈도우 집계</span><span class="sh">"""</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+        <span class="c1"># 5분 윈도우로 집계
+</span>        <span class="n">window</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">//</span> <span class="mi">300</span>  <span class="c1"># 5분 = 300초
+</span>        
+        <span class="c1"># 윈도우별 카운트
+</span>        <span class="n">window_key</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">window_</span><span class="si">{</span><span class="n">window</span><span class="si">}</span><span class="sh">"</span>
+        <span class="n">user_activity_table</span><span class="p">[</span><span class="n">window_key</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="c1"># 윈도우가 완료되면 결과 전송
+</span>        <span class="k">if</span> <span class="n">window_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">processed_windows</span><span class="p">:</span>
+            <span class="n">processed_windows</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">window_key</span><span class="p">)</span>
+            <span class="k">await</span> <span class="n">app</span><span class="p">.</span><span class="nf">topic</span><span class="p">(</span><span class="sh">'</span><span class="s">window-results</span><span class="sh">'</span><span class="p">).</span><span class="nf">send</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">window</span><span class="sh">'</span><span class="p">:</span> <span class="n">window</span><span class="p">,</span> <span class="sh">'</span><span class="s">count</span><span class="sh">'</span><span class="p">:</span> <span class="n">user_activity_table</span><span class="p">[</span><span class="n">window_key</span><span class="p">]}</span>
+            <span class="p">)</span>
+
+<span class="n">processed_windows</span> <span class="o">=</span> <span class="nf">set</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="️-실습-python-기반-스트리밍-시스템">🛠️ 실습: Python 기반 스트리밍 시스템</h2>
+
+<h3 id="1-실시간-로그-처리-시스템">1. 실시간 로그 처리 시스템</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">asyncio</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="n">logging</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="n">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+
+<span class="k">class</span> <span class="nc">LogProcessingSystem</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span> <span class="o">=</span> <span class="nc">ConfluentKafkaProducer</span><span class="p">(</span><span class="n">producer_config</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span> <span class="o">=</span> <span class="nc">ConfluentKafkaConsumer</span><span class="p">(</span><span class="n">consumer_config</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">log_stats</span> <span class="o">=</span> <span class="nf">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">start_log_collector</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">로그 수집기 시작</span><span class="sh">"""</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="c1"># 로그 파일에서 읽기 (실제로는 파일 모니터링)
+</span>            <span class="n">log_line</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">simulate_log_line</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">log_line</span><span class="p">:</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">produce_message</span><span class="p">(</span><span class="sh">'</span><span class="s">raw-logs</span><span class="sh">'</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">log_line</span><span class="p">)</span>
+            
+            <span class="k">await</span> <span class="n">asyncio</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># 100ms 간격
+</span>    
+    <span class="k">def</span> <span class="nf">simulate_log_line</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">로그 라인 시뮬레이션</span><span class="sh">"""</span>
+        <span class="kn">import</span> <span class="n">random</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s">INFO</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">WARN</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">ERROR</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">DEBUG</span><span class="sh">'</span><span class="p">]</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s">login</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">logout</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">purchase</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">view</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">search</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">().</span><span class="nf">isoformat</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">level</span><span class="sh">'</span><span class="p">:</span> <span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">levels</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">User </span><span class="si">{</span><span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span><span class="si">}</span><span class="s"> performed </span><span class="si">{</span><span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">ip</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">192.168.1.</span><span class="si">{</span><span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">user_agent</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Mozilla/5.0...</span><span class="sh">'</span>
+        <span class="p">}</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">start_log_processor</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">로그 처리기 시작</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">subscribe</span><span class="p">([</span><span class="sh">'</span><span class="s">raw-logs</span><span class="sh">'</span><span class="p">])</span>
+        
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">consume_messages</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">msg</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">process_log_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logging</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error processing log: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">process_log_message</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">로그 메시지 처리</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 로그 레벨별 통계
+</span>            <span class="n">level</span> <span class="o">=</span> <span class="n">log_data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">level</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">UNKNOWN</span><span class="sh">'</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">log_stats</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+            <span class="c1"># 에러 로그 특별 처리
+</span>            <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="sh">'</span><span class="s">ERROR</span><span class="sh">'</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">handle_error_log</span><span class="p">(</span><span class="n">log_data</span><span class="p">)</span>
+            
+            <span class="c1"># 사용자 행동 분석
+</span>            <span class="k">if</span> <span class="sh">'</span><span class="s">performed</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">log_data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">,</span> <span class="sh">''</span><span class="p">):</span>
+                <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">analyze_user_behavior</span><span class="p">(</span><span class="n">log_data</span><span class="p">)</span>
+            
+            <span class="c1"># 메트릭 업데이트
+</span>            <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">update_metrics</span><span class="p">(</span><span class="n">log_data</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error processing log message: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_error_log</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">에러 로그 처리</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">ERROR detected: </span><span class="si">{</span><span class="n">log_data</span><span class="p">[</span><span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="c1"># 에러 알림 전송
+</span>        <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">send_alert</span><span class="p">(</span><span class="sh">'</span><span class="s">ERROR</span><span class="sh">'</span><span class="p">,</span> <span class="n">log_data</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">analyze_user_behavior</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">사용자 행동 분석</span><span class="sh">"""</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="n">log_data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">,</span> <span class="sh">''</span><span class="p">)</span>
+        <span class="k">if</span> <span class="sh">'</span><span class="s">login</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">message</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">User login detected</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="sh">'</span><span class="s">purchase</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">message</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Purchase activity detected</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">send_alert</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">log_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">알림 전송</span><span class="sh">"""</span>
+        <span class="n">alert</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">log_alert</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">level</span><span class="sh">'</span><span class="p">:</span> <span class="n">level</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="n">log_data</span><span class="p">[</span><span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">log_data</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">]</span>
+        <span class="p">}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">produce_message</span><span class="p">(</span><span class="sh">'</span><span class="s">alerts</span><span class="sh">'</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">alert</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">update_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메트릭 업데이트</span><span class="sh">"""</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">level_counts</span><span class="sh">'</span><span class="p">:</span> <span class="nf">dict</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">log_stats</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">total_logs</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">log_stats</span><span class="p">.</span><span class="nf">values</span><span class="p">())</span>
+        <span class="p">}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">produce_message</span><span class="p">(</span><span class="sh">'</span><span class="s">log-metrics</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">metrics</span><span class="sh">'</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">start_system</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">시스템 시작</span><span class="sh">"""</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">asyncio</span><span class="p">.</span><span class="nf">create_task</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">start_log_collector</span><span class="p">()),</span>
+            <span class="n">asyncio</span><span class="p">.</span><span class="nf">create_task</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">start_log_processor</span><span class="p">())</span>
+        <span class="p">]</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="p">.</span><span class="nf">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">System stopped by user</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+
+<span class="c1"># 실행
+</span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="nc">LogProcessingSystem</span><span class="p">()</span>
+    <span class="n">asyncio</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="nf">start_system</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h3 id="2-이벤트-기반-마이크로서비스">2. 이벤트 기반 마이크로서비스</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">EventDrivenMicroservice</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">service_name</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">service_name</span> <span class="o">=</span> <span class="n">service_name</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span> <span class="o">=</span> <span class="nc">ConfluentKafkaConsumer</span><span class="p">(</span><span class="n">consumer_config</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span> <span class="o">=</span> <span class="nc">ConfluentKafkaProducer</span><span class="p">(</span><span class="n">producer_config</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">True</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">start_service</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">서비스 시작</span><span class="sh">"""</span>
+        <span class="n">topics</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s">user-events</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">order-events</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">payment-events</span><span class="sh">'</span><span class="p">]</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">subscribe</span><span class="p">(</span><span class="n">topics</span><span class="p">)</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">service_name</span><span class="si">}</span><span class="s"> started, listening to </span><span class="si">{</span><span class="n">topics</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">while</span> <span class="n">self</span><span class="p">.</span><span class="n">running</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">consume_messages</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">msg</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">handle_event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logging</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error in </span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">service_name</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_event</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">event_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">이벤트 처리</span><span class="sh">"""</span>
+        <span class="n">event_type</span> <span class="o">=</span> <span class="n">event_data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">event_type</span> <span class="o">==</span> <span class="sh">'</span><span class="s">user_event</span><span class="sh">'</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">handle_user_event</span><span class="p">(</span><span class="n">event_data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event_type</span> <span class="o">==</span> <span class="sh">'</span><span class="s">order_event</span><span class="sh">'</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">handle_order_event</span><span class="p">(</span><span class="n">event_data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event_type</span> <span class="o">==</span> <span class="sh">'</span><span class="s">payment_event</span><span class="sh">'</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">handle_payment_event</span><span class="p">(</span><span class="n">event_data</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_user_event</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">사용자 이벤트 처리</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Processing user event: </span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="c1"># 사용자 이벤트 처리 로직
+</span>        <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">send_event</span><span class="p">(</span><span class="sh">'</span><span class="s">user-processed</span><span class="sh">'</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_order_event</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">주문 이벤트 처리</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Processing order event: </span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="c1"># 주문 이벤트 처리 로직
+</span>        <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">send_event</span><span class="p">(</span><span class="sh">'</span><span class="s">order-processed</span><span class="sh">'</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_payment_event</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">결제 이벤트 처리</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Processing payment event: </span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="c1"># 결제 이벤트 처리 로직
+</span>        <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">send_event</span><span class="p">(</span><span class="sh">'</span><span class="s">payment-processed</span><span class="sh">'</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">send_event</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">event_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">이벤트 전송</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">produce_message</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">event_data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">),</span> <span class="n">event_data</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">서비스 중지</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+
+<span class="c1"># 서비스 실행
+</span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">service</span> <span class="o">=</span> <span class="nc">EventDrivenMicroservice</span><span class="p">(</span><span class="sh">"</span><span class="s">event-processor</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">asyncio</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">service</span><span class="p">.</span><span class="nf">start_service</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h2 id="-성능-최적화와-모니터링">📊 성능 최적화와 모니터링</h2>
+
+<h3 id="1-성능-모니터링">1. 성능 모니터링</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">psutil</span>
+<span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="n">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="n">threading</span>
+
+<span class="k">class</span> <span class="nc">KafkaPerformanceMonitor</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="nf">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">monitor_thread</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">start_monitoring</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">모니터링 시작</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">monitor_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="p">.</span><span class="nc">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">_monitor_loop</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">monitor_thread</span><span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">_monitor_loop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">모니터링 루프</span><span class="sh">"""</span>
+        <span class="k">while</span> <span class="n">self</span><span class="p">.</span><span class="n">running</span><span class="p">:</span>
+            <span class="c1"># 시스템 메트릭 수집
+</span>            <span class="n">cpu_percent</span> <span class="o">=</span> <span class="n">psutil</span><span class="p">.</span><span class="nf">cpu_percent</span><span class="p">()</span>
+            <span class="n">memory_percent</span> <span class="o">=</span> <span class="n">psutil</span><span class="p">.</span><span class="nf">virtual_memory</span><span class="p">().</span><span class="n">percent</span>
+            <span class="n">disk_io</span> <span class="o">=</span> <span class="n">psutil</span><span class="p">.</span><span class="nf">disk_io_counters</span><span class="p">()</span>
+            <span class="n">network_io</span> <span class="o">=</span> <span class="n">psutil</span><span class="p">.</span><span class="nf">net_io_counters</span><span class="p">()</span>
+            
+            <span class="c1"># 메트릭 저장
+</span>            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">cpu</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">cpu_percent</span><span class="p">))</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">memory</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">memory_percent</span><span class="p">))</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">disk_read</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">disk_io</span><span class="p">.</span><span class="n">read_bytes</span><span class="p">))</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">disk_write</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">disk_io</span><span class="p">.</span><span class="n">write_bytes</span><span class="p">))</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">network_sent</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">network_io</span><span class="p">.</span><span class="n">bytes_sent</span><span class="p">))</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">network_recv</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">network_io</span><span class="p">.</span><span class="n">bytes_recv</span><span class="p">))</span>
+            
+            <span class="c1"># 오래된 메트릭 정리 (1시간 이상)
+</span>            <span class="n">cutoff_time</span> <span class="o">=</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="mi">3600</span>
+            <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">:</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">cutoff_time</span>
+                <span class="p">]</span>
+            
+            <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># 10초마다 수집
+</span>    
+    <span class="k">def</span> <span class="nf">get_metrics_summary</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메트릭 요약 반환</span><span class="sh">"""</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">values</span><span class="p">:</span>
+                <span class="n">recent_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">:]]</span>  <span class="c1"># 최근 10개
+</span>                <span class="n">summary</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">current</span><span class="sh">'</span><span class="p">:</span> <span class="n">recent_values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">recent_values</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">average</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">recent_values</span><span class="p">)</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">recent_values</span><span class="p">)</span> <span class="k">if</span> <span class="n">recent_values</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">max</span><span class="sh">'</span><span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="n">recent_values</span><span class="p">)</span> <span class="k">if</span> <span class="n">recent_values</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">min</span><span class="sh">'</span><span class="p">:</span> <span class="nf">min</span><span class="p">(</span><span class="n">recent_values</span><span class="p">)</span> <span class="k">if</span> <span class="n">recent_values</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="p">}</span>
+        <span class="k">return</span> <span class="n">summary</span>
+    
+    <span class="k">def</span> <span class="nf">stop_monitoring</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">모니터링 중지</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">monitor_thread</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">monitor_thread</span><span class="p">.</span><span class="nf">join</span><span class="p">()</span>
+
+<span class="c1"># 사용 예제
+</span><span class="n">monitor</span> <span class="o">=</span> <span class="nc">KafkaPerformanceMonitor</span><span class="p">()</span>
+<span class="n">monitor</span><span class="p">.</span><span class="nf">start_monitoring</span><span class="p">()</span>
+
+<span class="c1"># 1분 후 메트릭 확인
+</span><span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">summary</span> <span class="o">=</span> <span class="n">monitor</span><span class="p">.</span><span class="nf">get_metrics_summary</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Performance Summary:</span><span class="sh">"</span><span class="p">,</span> <span class="n">summary</span><span class="p">)</span>
+
+<span class="n">monitor</span><span class="p">.</span><span class="nf">stop_monitoring</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="2-에러-처리와-재시도">2. 에러 처리와 재시도</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">asyncio</span>
+<span class="kn">from</span> <span class="n">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">import</span> <span class="n">random</span>
+
+<span class="k">def</span> <span class="nf">retry_with_backoff</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">base_delay</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_delay</span><span class="o">=</span><span class="mi">60</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">재시도 데코레이터</span><span class="sh">"""</span>
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">max_retries</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="k">await</span> <span class="nf">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">attempt</span> <span class="o">==</span> <span class="n">max_retries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">e</span>
+                    
+                    <span class="c1"># 지수 백오프
+</span>                    <span class="n">delay</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span><span class="n">base_delay</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">attempt</span><span class="p">),</span> <span class="n">max_delay</span><span class="p">)</span>
+                    <span class="n">jitter</span> <span class="o">=</span> <span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">delay</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">)</span>
+                    <span class="k">await</span> <span class="n">asyncio</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="n">delay</span> <span class="o">+</span> <span class="n">jitter</span><span class="p">)</span>
+                    
+                    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Retry </span><span class="si">{</span><span class="n">attempt</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">max_retries</span><span class="si">}</span><span class="s"> after </span><span class="si">{</span><span class="n">delay</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">s: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+    <span class="k">return</span> <span class="n">decorator</span>
+
+<span class="k">class</span> <span class="nc">ResilientKafkaProducer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span> <span class="o">=</span> <span class="nc">ConfluentKafkaProducer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">dead_letter_queue</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="nd">@retry_with_backoff</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">produce_with_retry</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">재시도가 있는 메시지 전송</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">produce_message</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed to produce message: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">e</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">produce_message</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메시지 전송 (재시도 포함)</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">produce_with_retry</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># 최종 실패 시 데드 레터 큐에 추가
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">dead_letter_queue</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">topic</span><span class="sh">'</span><span class="p">:</span> <span class="n">topic</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">key</span><span class="sh">'</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">error</span><span class="sh">'</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+            <span class="p">})</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Message sent to dead letter queue: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get_dead_letter_queue</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">데드 레터 큐 반환</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">dead_letter_queue</span>
+    
+    <span class="k">def</span> <span class="nf">retry_dead_letter_queue</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">데드 레터 큐 재시도</span><span class="sh">"""</span>
+        <span class="n">retry_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">dead_letter_queue</span><span class="p">[:]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">produce_message</span><span class="p">(</span>
+                    <span class="n">item</span><span class="p">[</span><span class="sh">'</span><span class="s">topic</span><span class="sh">'</span><span class="p">],</span> 
+                    <span class="n">item</span><span class="p">[</span><span class="sh">'</span><span class="s">key</span><span class="sh">'</span><span class="p">],</span> 
+                    <span class="n">item</span><span class="p">[</span><span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">dead_letter_queue</span><span class="p">.</span><span class="nf">remove</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="n">retry_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed to retry dead letter: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Retried </span><span class="si">{</span><span class="n">retry_count</span><span class="si">}</span><span class="s"> messages from dead letter queue</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-학습-요약">📚 학습 요약</h2>
+
+<h3 id="이번-포스트에서-학습한-내용">이번 포스트에서 학습한 내용</h3>
+
+<ol>
+  <li><strong>Python Kafka 라이브러리 선택</strong>
+    <ul>
+      <li>kafka-python, confluent-kafka, faust, aiokafka 비교</li>
+      <li>각 라이브러리의 특징과 사용 사례</li>
+    </ul>
+  </li>
+  <li><strong>kafka-python 기본 사용법</strong>
+    <ul>
+      <li>프로듀서와 컨슈머 구현</li>
+      <li>배치 처리와 오프셋 관리</li>
+    </ul>
+  </li>
+  <li><strong>confluent-kafka 고성능 처리</strong>
+    <ul>
+      <li>고성능 프로듀서/컨슈머 구현</li>
+      <li>비동기 처리와 콜백 활용</li>
+    </ul>
+  </li>
+  <li><strong>Faust 스트리밍 처리</strong>
+    <ul>
+      <li>스트림 처리와 상태 저장소</li>
+      <li>윈도우 집계와 조인 연산</li>
+    </ul>
+  </li>
+  <li><strong>실무급 스트리밍 시스템 구축</strong>
+    <ul>
+      <li>실시간 로그 처리 시스템</li>
+      <li>이벤트 기반 마이크로서비스</li>
+    </ul>
+  </li>
+  <li><strong>성능 최적화와 모니터링</strong>
+    <ul>
+      <li>성능 모니터링 시스템</li>
+      <li>에러 처리와 재시도 전략</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="핵심-개념-정리">핵심 개념 정리</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>개념</th>
+      <th>설명</th>
+      <th>중요도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>라이브러리 선택</strong></td>
+      <td>프로젝트 요구사항에 맞는 라이브러리 선택</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>비동기 처리</strong></td>
+      <td>고성능을 위한 비동기 프로그래밍</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>스트리밍 처리</strong></td>
+      <td>실시간 데이터 변환과 집계</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>모니터링</strong></td>
+      <td>시스템 상태 추적과 성능 최적화</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="실무-적용-시-고려사항">실무 적용 시 고려사항</h3>
+
+<ol>
+  <li><strong>라이브러리 선택</strong>: 프로젝트 요구사항과 성능 요구사항 고려</li>
+  <li><strong>비동기 처리</strong>: asyncio를 활용한 고성능 처리</li>
+  <li><strong>에러 처리</strong>: 재시도 전략과 데드 레터 큐 활용</li>
+  <li><strong>모니터링</strong>: 실시간 메트릭 수집과 알림 시스템</li>
+</ol>
+
+<hr />
+
+<p><em>이 가이드를 통해 Python으로 Apache Kafka를 활용한 고성능 스트리밍 시스템을 구축할 수 있습니다!</em> 🚀</p>
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

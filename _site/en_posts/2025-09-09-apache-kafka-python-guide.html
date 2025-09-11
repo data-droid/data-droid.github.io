@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Learn real-time streaming development and data processing techniques using Apache Kafka with Python and apply them to real projects.">
+
+
+
+<title>Apache Kafka Python Guide: Real-time Streaming and Data Processing - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Apache Kafka Python Guide: Real-time Streaming and Data Processing">
+<meta property="og:description" content="Learn real-time streaming development and data processing techniques using Apache Kafka with Python and apply them to real projects.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2025-09-09-apache-kafka-python-guide.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Apache Kafka Python Guide: Real-time Streaming and Data Processing">
+<meta name="twitter:description" content="Learn real-time streaming development and data processing techniques using Apache Kafka with Python and apply them to real projects.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2025/09/09/apache-kafka-python-guide.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2025-09-09-apache-kafka-python-guide.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 09일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Apache Kafka Python Guide: Real-time Streaming and Data Processing</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Kafka</span>
+      
+        <span class="tag">Python</span>
+      
+        <span class="tag">Real-time-Streaming</span>
+      
+        <span class="tag">Data-Processing</span>
+      
+        <span class="tag">kafka-python</span>
+      
+        <span class="tag">confluent-kafka</span>
+      
+        <span class="tag">faust</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 25 min</span>
+      
+      
+        <span class="difficulty">📊 Advanced</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="apache-kafka-python-guide-real-time-streaming-and-data-processing">Apache Kafka Python Guide: Real-time Streaming and Data Processing</h1>
+
+<blockquote>
+  <p>Learn real-time streaming development and data processing techniques using Apache Kafka with Python and apply them to real projects.</p>
+</blockquote>
+
+<h2 id="-table-of-contents">📖 Table of Contents</h2>
+
+<ol>
+  <li><a href="#choosing-python-kafka-libraries">Choosing Python Kafka Libraries</a></li>
+  <li><a href="#basic-usage-of-kafka-python">Basic Usage of kafka-python</a></li>
+  <li><a href="#high-performance-processing-with-confluent-kafka">High-Performance Processing with confluent-kafka</a></li>
+  <li><a href="#faust-stream-processing">Faust Stream Processing</a></li>
+  <li><a href="#hands-on-python-based-streaming-system">Hands-on: Python-based Streaming System</a></li>
+  <li><a href="#performance-optimization-and-monitoring">Performance Optimization and Monitoring</a></li>
+  <li><a href="#learning-summary">Learning Summary</a></li>
+</ol>
+
+<h2 id="-choosing-python-kafka-libraries">🐍 Choosing Python Kafka Libraries</h2>
+
+<h3 id="major-library-comparison">Major Library Comparison</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Library</th>
+      <th>Features</th>
+      <th>Pros</th>
+      <th>Cons</th>
+      <th>Use Cases</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>kafka-python</strong></td>
+      <td>Pure Python implementation</td>
+      <td>Easy installation, simple to understand</td>
+      <td>Performance limitations</td>
+      <td>Learning, prototyping</td>
+    </tr>
+    <tr>
+      <td><strong>confluent-kafka</strong></td>
+      <td>C library wrapper</td>
+      <td>High performance, stability</td>
+      <td>Complex installation</td>
+      <td>Production environments</td>
+    </tr>
+    <tr>
+      <td><strong>faust</strong></td>
+      <td>Streaming-focused</td>
+      <td>Simple streaming</td>
+      <td>Limited features</td>
+      <td>Stream processing</td>
+    </tr>
+    <tr>
+      <td><strong>aiokafka</strong></td>
+      <td>Async processing</td>
+      <td>Async support</td>
+      <td>Complexity</td>
+      <td>High-performance async</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="installation-methods">Installation Methods</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Install kafka-python</span>
+pip <span class="nb">install </span>kafka-python
+
+<span class="c"># Install confluent-kafka (recommended)</span>
+pip <span class="nb">install </span>confluent-kafka
+
+<span class="c"># Install faust</span>
+pip <span class="nb">install </span>faust[rocksdb]
+
+<span class="c"># Install aiokafka</span>
+pip <span class="nb">install </span>aiokafka
+
+<span class="c"># Additional dependencies</span>
+pip <span class="nb">install </span>pandas numpy asyncio
+</code></pre></div></div>
+
+<h2 id="-basic-usage-of-kafka-python">⚡ Basic Usage of kafka-python</h2>
+
+<h3 id="1-producer-implementation">1. Producer Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">kafka</span> <span class="kn">import</span> <span class="n">KafkaProducer</span>
+<span class="kn">from</span> <span class="n">kafka.errors</span> <span class="kn">import</span> <span class="n">KafkaError</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="n">logging</span>
+
+<span class="c1"># Logging configuration
+</span><span class="n">logging</span><span class="p">.</span><span class="nf">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="p">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="p">.</span><span class="nf">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">PythonKafkaProducer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">bootstrap_servers</span><span class="o">=</span><span class="sh">'</span><span class="s">localhost:9092</span><span class="sh">'</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span> <span class="o">=</span> <span class="nc">KafkaProducer</span><span class="p">(</span>
+            <span class="n">bootstrap_servers</span><span class="o">=</span><span class="p">[</span><span class="n">bootstrap_servers</span><span class="p">],</span>
+            <span class="n">value_serializer</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">v</span><span class="p">).</span><span class="nf">encode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">),</span>
+            <span class="n">key_serializer</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">k</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="c1"># Performance optimization settings
+</span>            <span class="n">batch_size</span><span class="o">=</span><span class="mi">16384</span><span class="p">,</span>  <span class="c1"># 16KB
+</span>            <span class="n">linger_ms</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>       <span class="c1"># 5ms wait
+</span>            <span class="n">compression_type</span><span class="o">=</span><span class="sh">'</span><span class="s">snappy</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># Compression
+</span>            <span class="n">acks</span><span class="o">=</span><span class="sh">'</span><span class="s">all</span><span class="sh">'</span><span class="p">,</span>        <span class="c1"># All replicas confirmation
+</span>            <span class="n">retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>         <span class="c1"># Retry count
+</span>            <span class="n">retry_backoff_ms</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="c1"># Retry interval
+</span>            <span class="c1"># Safety settings
+</span>            <span class="n">enable_idempotence</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>  <span class="c1"># Idempotence guarantee
+</span>            <span class="n">max_in_flight_requests_per_connection</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">request_timeout_ms</span><span class="o">=</span><span class="mi">30000</span><span class="p">,</span>
+        <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">send_message</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Send message</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">future</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">send</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">record_metadata</span> <span class="o">=</span> <span class="n">future</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Message sent to </span><span class="si">{</span><span class="n">record_metadata</span><span class="p">.</span><span class="n">topic</span><span class="si">}</span><span class="s"> </span><span class="sh">"</span>
+                       <span class="sa">f</span><span class="sh">"</span><span class="s">partition </span><span class="si">{</span><span class="n">record_metadata</span><span class="p">.</span><span class="n">partition</span><span class="si">}</span><span class="s"> </span><span class="sh">"</span>
+                       <span class="sa">f</span><span class="sh">"</span><span class="s">offset </span><span class="si">{</span><span class="n">record_metadata</span><span class="p">.</span><span class="n">offset</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span> <span class="n">KafkaError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed to send message: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+    
+    <span class="k">def</span> <span class="nf">send_batch</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Send batch messages</span><span class="sh">"""</span>
+        <span class="n">futures</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
+            <span class="n">future</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">send</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">futures</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+        
+        <span class="c1"># Wait for all messages to be sent
+</span>        <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">futures</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">future</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">KafkaError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Batch send failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Close producer</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>  <span class="c1"># Send remaining messages
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+
+<span class="c1"># Usage example
+</span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">producer</span> <span class="o">=</span> <span class="nc">PythonKafkaProducer</span><span class="p">()</span>
+    
+    <span class="c1"># Send single message
+</span>    <span class="n">producer</span><span class="p">.</span><span class="nf">send_message</span><span class="p">(</span>
+        <span class="n">topic</span><span class="o">=</span><span class="sh">"</span><span class="s">user-events</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="sh">"</span><span class="s">user123</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">login</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()}</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Send batch messages
+</span>    <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="sh">"</span><span class="s">user123</span><span class="sh">"</span><span class="p">,</span> <span class="p">{</span><span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">view</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">page</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/home</span><span class="sh">"</span><span class="p">}),</span>
+        <span class="p">(</span><span class="sh">"</span><span class="s">user456</span><span class="sh">"</span><span class="p">,</span> <span class="p">{</span><span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">purchase</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">:</span> <span class="mf">99.99</span><span class="p">}),</span>
+        <span class="p">(</span><span class="sh">"</span><span class="s">user789</span><span class="sh">"</span><span class="p">,</span> <span class="p">{</span><span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">logout</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()})</span>
+    <span class="p">]</span>
+    <span class="n">producer</span><span class="p">.</span><span class="nf">send_batch</span><span class="p">(</span><span class="sh">"</span><span class="s">user-events</span><span class="sh">"</span><span class="p">,</span> <span class="n">messages</span><span class="p">)</span>
+    
+    <span class="n">producer</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="2-consumer-implementation">2. Consumer Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">kafka</span> <span class="kn">import</span> <span class="n">KafkaConsumer</span>
+<span class="kn">from</span> <span class="n">kafka.errors</span> <span class="kn">import</span> <span class="n">KafkaError</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">import</span> <span class="n">logging</span>
+<span class="kn">from</span> <span class="n">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+
+<span class="k">class</span> <span class="nc">PythonKafkaConsumer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">bootstrap_servers</span><span class="o">=</span><span class="sh">'</span><span class="s">localhost:9092</span><span class="sh">'</span><span class="p">,</span> <span class="n">group_id</span><span class="o">=</span><span class="sh">'</span><span class="s">python-consumer</span><span class="sh">'</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span> <span class="o">=</span> <span class="nc">KafkaConsumer</span><span class="p">(</span>
+            <span class="n">bootstrap_servers</span><span class="o">=</span><span class="p">[</span><span class="n">bootstrap_servers</span><span class="p">],</span>
+            <span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span>
+            <span class="n">value_deserializer</span><span class="o">=</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="nf">decode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">)),</span>
+            <span class="n">key_deserializer</span><span class="o">=</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">m</span><span class="p">.</span><span class="nf">decode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">)</span> <span class="k">if</span> <span class="n">m</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="c1"># Offset management
+</span>            <span class="n">auto_offset_reset</span><span class="o">=</span><span class="sh">'</span><span class="s">earliest</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># earliest, latest, none
+</span>            <span class="n">enable_auto_commit</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>      <span class="c1"># Manual offset commit
+</span>            <span class="c1"># Performance settings
+</span>            <span class="n">max_poll_records</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>          <span class="c1"># Records to process at once
+</span>            <span class="n">session_timeout_ms</span><span class="o">=</span><span class="mi">30000</span><span class="p">,</span>      <span class="c1"># Session timeout
+</span>            <span class="n">heartbeat_interval_ms</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span>    <span class="c1"># Heartbeat interval
+</span>            <span class="c1"># Retry settings
+</span>            <span class="n">retry_backoff_ms</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+            <span class="n">request_timeout_ms</span><span class="o">=</span><span class="mi">30000</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">message_handler</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">subscribe</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topics</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Subscribe to topics</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">subscribe</span><span class="p">(</span><span class="n">topics</span><span class="p">)</span>
+        <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Subscribed to topics: </span><span class="si">{</span><span class="n">topics</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">set_message_handler</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="bp">None</span><span class="p">]):</span>
+        <span class="sh">"""</span><span class="s">Set message handler</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">message_handler</span> <span class="o">=</span> <span class="n">handler</span>
+    
+    <span class="k">def</span> <span class="nf">start_consuming</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Start consuming messages</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">message_batch</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">poll</span><span class="p">(</span><span class="n">timeout_ms</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+                
+                <span class="k">for</span> <span class="n">topic_partition</span><span class="p">,</span> <span class="n">messages</span> <span class="ow">in</span> <span class="n">message_batch</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
+                        <span class="n">self</span><span class="p">.</span><span class="nf">_process_message</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                
+                <span class="c1"># Commit offset
+</span>                <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+                
+        <span class="k">except</span> <span class="nb">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">Consumer stopped by user</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Consumer error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">_process_message</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Process message</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Received message: </span><span class="si">{</span><span class="n">message</span><span class="p">.</span><span class="n">key</span><span class="si">}</span><span class="s"> -&gt; </span><span class="si">{</span><span class="n">message</span><span class="p">.</span><span class="n">value</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">message_handler</span><span class="p">:</span>
+                <span class="n">self</span><span class="p">.</span><span class="nf">message_handler</span><span class="p">(</span><span class="n">message</span><span class="p">.</span><span class="n">key</span><span class="p">,</span> <span class="n">message</span><span class="p">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Default processing
+</span>                <span class="n">self</span><span class="p">.</span><span class="nf">_default_handler</span><span class="p">(</span><span class="n">message</span><span class="p">.</span><span class="n">key</span><span class="p">,</span> <span class="n">message</span><span class="p">.</span><span class="n">value</span><span class="p">)</span>
+                
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error processing message: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_default_handler</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Default message handler</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s">, Value: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Usage example
+</span><span class="k">def</span> <span class="nf">custom_message_handler</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Custom message handler</span><span class="sh">"""</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Processing: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s"> -&gt; </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="c1"># Implement actual processing logic here
+</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">consumer</span> <span class="o">=</span> <span class="nc">PythonKafkaConsumer</span><span class="p">()</span>
+    <span class="n">consumer</span><span class="p">.</span><span class="nf">subscribe</span><span class="p">([</span><span class="sh">'</span><span class="s">user-events</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">order-events</span><span class="sh">'</span><span class="p">])</span>
+    <span class="n">consumer</span><span class="p">.</span><span class="nf">set_message_handler</span><span class="p">(</span><span class="n">custom_message_handler</span><span class="p">)</span>
+    <span class="n">consumer</span><span class="p">.</span><span class="nf">start_consuming</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="-high-performance-processing-with-confluent-kafka">🚀 High-Performance Processing with confluent-kafka</h2>
+
+<h3 id="1-high-performance-producer">1. High-Performance Producer</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">confluent_kafka</span> <span class="kn">import</span> <span class="n">Producer</span><span class="p">,</span> <span class="n">Consumer</span><span class="p">,</span> <span class="n">KafkaError</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="n">threading</span>
+<span class="kn">from</span> <span class="n">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="k">class</span> <span class="nc">ConfluentKafkaProducer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span> <span class="o">=</span> <span class="nc">Producer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">delivery_callback_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">delivery_callback_errors</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">def</span> <span class="nf">delivery_callback</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Delivery result callback</span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="n">err</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">delivery_callback_errors</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Message delivery failed: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">delivery_callback_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Message delivered to </span><span class="si">{</span><span class="n">msg</span><span class="p">.</span><span class="nf">topic</span><span class="p">()</span><span class="si">}</span><span class="s"> [</span><span class="si">{</span><span class="n">msg</span><span class="p">.</span><span class="nf">partition</span><span class="p">()</span><span class="si">}</span><span class="s">] at offset </span><span class="si">{</span><span class="n">msg</span><span class="p">.</span><span class="nf">offset</span><span class="p">()</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">produce_message</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Produce message</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">produce</span><span class="p">(</span>
+                <span class="n">topic</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+                <span class="n">value</span><span class="o">=</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">).</span><span class="nf">encode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">),</span>
+                <span class="n">callback</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">delivery_callback</span>
+            <span class="p">)</span>
+            <span class="c1"># Poll for async delivery
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">poll</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">BufferError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Producer queue is full: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+            <span class="k">raise</span>
+    
+    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Flush remaining messages</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+
+<span class="c1"># Configuration example
+</span><span class="n">producer_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">'</span><span class="s">bootstrap.servers</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">localhost:9092</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">compression.type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">snappy</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">batch.size</span><span class="sh">'</span><span class="p">:</span> <span class="mi">16384</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">linger.ms</span><span class="sh">'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">acks</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">all</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">retries</span><span class="sh">'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">enable.idempotence</span><span class="sh">'</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">max.in.flight.requests.per.connection</span><span class="sh">'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">producer</span> <span class="o">=</span> <span class="nc">ConfluentKafkaProducer</span><span class="p">(</span><span class="n">producer_config</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-high-performance-consumer">2. High-Performance Consumer</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ConfluentKafkaConsumer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span> <span class="o">=</span> <span class="nc">Consumer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">True</span>
+    
+    <span class="k">def</span> <span class="nf">subscribe</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topics</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Subscribe to topics</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">subscribe</span><span class="p">(</span><span class="n">topics</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">consume_messages</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Consume messages</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">self</span><span class="p">.</span><span class="n">running</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">poll</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">msg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                
+                <span class="k">if</span> <span class="n">msg</span><span class="p">.</span><span class="nf">error</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">msg</span><span class="p">.</span><span class="nf">error</span><span class="p">().</span><span class="nf">code</span><span class="p">()</span> <span class="o">==</span> <span class="n">KafkaError</span><span class="p">.</span><span class="n">_PARTITION_EOF</span><span class="p">:</span>
+                        <span class="c1"># Reached end of partition
+</span>                        <span class="k">continue</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Consumer error: </span><span class="si">{</span><span class="n">msg</span><span class="p">.</span><span class="nf">error</span><span class="p">()</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                
+                <span class="c1"># Process message
+</span>                <span class="n">self</span><span class="p">.</span><span class="nf">process_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                
+        <span class="k">except</span> <span class="nb">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Consumer interrupted by user</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">process_message</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Process message</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">msg</span><span class="p">.</span><span class="nf">key</span><span class="p">().</span><span class="nf">decode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">)</span> <span class="k">if</span> <span class="n">msg</span><span class="p">.</span><span class="nf">key</span><span class="p">()</span> <span class="k">else</span> <span class="bp">None</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="nf">value</span><span class="p">().</span><span class="nf">decode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">))</span>
+            
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Received message: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s"> -&gt; </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            
+            <span class="c1"># Implement actual processing logic here
+</span>            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error processing message: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Close consumer</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+
+<span class="c1"># Configuration example
+</span><span class="n">consumer_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">'</span><span class="s">bootstrap.servers</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">localhost:9092</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">group.id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">python-consumer-group</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">auto.offset.reset</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">earliest</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">enable.auto.commit</span><span class="sh">'</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">max.poll.records</span><span class="sh">'</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">session.timeout.ms</span><span class="sh">'</span><span class="p">:</span> <span class="mi">30000</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">heartbeat.interval.ms</span><span class="sh">'</span><span class="p">:</span> <span class="mi">3000</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">consumer</span> <span class="o">=</span> <span class="nc">ConfluentKafkaConsumer</span><span class="p">(</span><span class="n">consumer_config</span><span class="p">)</span>
+<span class="n">consumer</span><span class="p">.</span><span class="nf">subscribe</span><span class="p">([</span><span class="sh">'</span><span class="s">user-events</span><span class="sh">'</span><span class="p">])</span>
+<span class="n">consumer</span><span class="p">.</span><span class="nf">consume_messages</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="-faust-stream-processing">🌊 Faust Stream Processing</h2>
+
+<h3 id="1-faust-basic-configuration">1. Faust Basic Configuration</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">faust</span>
+<span class="kn">from</span> <span class="n">faust</span> <span class="kn">import</span> <span class="n">Record</span>
+<span class="kn">import</span> <span class="n">asyncio</span>
+<span class="kn">from</span> <span class="n">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="c1"># Faust app configuration
+</span><span class="n">app</span> <span class="o">=</span> <span class="n">faust</span><span class="p">.</span><span class="nc">App</span><span class="p">(</span>
+    <span class="sh">'</span><span class="s">kafka-streaming-app</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">broker</span><span class="o">=</span><span class="sh">'</span><span class="s">kafka://localhost:9092</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">store</span><span class="o">=</span><span class="sh">'</span><span class="s">rocksdb://</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># State store
+</span>    <span class="n">value_serializer</span><span class="o">=</span><span class="sh">'</span><span class="s">json</span><span class="sh">'</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Data model definition
+</span><span class="k">class</span> <span class="nc">UserEvent</span><span class="p">(</span><span class="n">Record</span><span class="p">):</span>
+    <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">action</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="k">class</span> <span class="nc">OrderEvent</span><span class="p">(</span><span class="n">Record</span><span class="p">):</span>
+    <span class="n">order_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">amount</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">items</span><span class="p">:</span> <span class="nb">list</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span>
+
+<span class="c1"># Topic definition
+</span><span class="n">user_events_topic</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="nf">topic</span><span class="p">(</span><span class="sh">'</span><span class="s">user-events</span><span class="sh">'</span><span class="p">,</span> <span class="n">value_type</span><span class="o">=</span><span class="n">UserEvent</span><span class="p">)</span>
+<span class="n">order_events_topic</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="nf">topic</span><span class="p">(</span><span class="sh">'</span><span class="s">order-events</span><span class="sh">'</span><span class="p">,</span> <span class="n">value_type</span><span class="o">=</span><span class="n">OrderEvent</span><span class="p">)</span>
+<span class="n">processed_events_topic</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="nf">topic</span><span class="p">(</span><span class="sh">'</span><span class="s">processed-events</span><span class="sh">'</span><span class="p">,</span> <span class="n">value_type</span><span class="o">=</span><span class="n">UserEvent</span><span class="p">)</span>
+
+<span class="c1"># Table definition (state store)
+</span><span class="n">user_activity_table</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="nc">Table</span><span class="p">(</span><span class="sh">'</span><span class="s">user-activity</span><span class="sh">'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+<span class="n">order_summary_table</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="nc">Table</span><span class="p">(</span><span class="sh">'</span><span class="s">order-summary</span><span class="sh">'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-stream-processing-example">2. Stream Processing Example</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@app.agent</span><span class="p">(</span><span class="n">user_events_topic</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">process_user_events</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Process user events</span><span class="sh">"""</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+        <span class="c1"># Process event
+</span>        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Processing user event: </span><span class="si">{</span><span class="n">event</span><span class="p">.</span><span class="n">user_id</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="n">event</span><span class="p">.</span><span class="n">action</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># Update state
+</span>        <span class="n">user_activity_table</span><span class="p">[</span><span class="n">event</span><span class="p">.</span><span class="n">user_id</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="c1"># Transform event
+</span>        <span class="n">processed_event</span> <span class="o">=</span> <span class="nc">UserEvent</span><span class="p">(</span>
+            <span class="n">user_id</span><span class="o">=</span><span class="n">event</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="sa">f</span><span class="sh">"</span><span class="s">processed_</span><span class="si">{</span><span class="n">event</span><span class="p">.</span><span class="n">action</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">event</span><span class="p">.</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">processed_by</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">faust</span><span class="sh">"</span><span class="p">}</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Send result
+</span>        <span class="k">await</span> <span class="n">processed_events_topic</span><span class="p">.</span><span class="nf">send</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">processed_event</span><span class="p">)</span>
+
+<span class="nd">@app.agent</span><span class="p">(</span><span class="n">order_events_topic</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">process_order_events</span><span class="p">(</span><span class="n">orders</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Process order events</span><span class="sh">"""</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">order</span> <span class="ow">in</span> <span class="n">orders</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Processing order: </span><span class="si">{</span><span class="n">order</span><span class="p">.</span><span class="n">order_id</span><span class="si">}</span><span class="s"> - $</span><span class="si">{</span><span class="n">order</span><span class="p">.</span><span class="n">amount</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># Update order summary
+</span>        <span class="k">if</span> <span class="n">order</span><span class="p">.</span><span class="n">user_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">order_summary_table</span><span class="p">:</span>
+            <span class="n">order_summary_table</span><span class="p">[</span><span class="n">order</span><span class="p">.</span><span class="n">user_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">total_orders</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">total_amount</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">last_order_time</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.0</span>
+            <span class="p">}</span>
+        
+        <span class="n">summary</span> <span class="o">=</span> <span class="n">order_summary_table</span><span class="p">[</span><span class="n">order</span><span class="p">.</span><span class="n">user_id</span><span class="p">]</span>
+        <span class="n">summary</span><span class="p">[</span><span class="sh">'</span><span class="s">total_orders</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">summary</span><span class="p">[</span><span class="sh">'</span><span class="s">total_amount</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="n">order</span><span class="p">.</span><span class="n">amount</span>
+        <span class="n">summary</span><span class="p">[</span><span class="sh">'</span><span class="s">last_order_time</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">order</span><span class="p">.</span><span class="n">timestamp</span>
+        
+        <span class="c1"># Classify by order amount
+</span>        <span class="k">if</span> <span class="n">order</span><span class="p">.</span><span class="n">amount</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">app</span><span class="p">.</span><span class="nf">topic</span><span class="p">(</span><span class="sh">'</span><span class="s">high-value-orders</span><span class="sh">'</span><span class="p">).</span><span class="nf">send</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">app</span><span class="p">.</span><span class="nf">topic</span><span class="p">(</span><span class="sh">'</span><span class="s">regular-orders</span><span class="sh">'</span><span class="p">).</span><span class="nf">send</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+
+<span class="c1"># Window aggregation
+</span><span class="nd">@app.timer</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mf">60.0</span><span class="p">)</span>  <span class="c1"># Run every 1 minute
+</span><span class="k">async</span> <span class="k">def</span> <span class="nf">aggregate_metrics</span><span class="p">():</span>
+    <span class="sh">"""</span><span class="s">Aggregate metrics</span><span class="sh">"""</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== User Activity Summary ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">user_activity_table</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">User </span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s"> events</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== Order Summary ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">summary</span> <span class="ow">in</span> <span class="n">order_summary_table</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">User </span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">summary</span><span class="p">[</span><span class="sh">'</span><span class="s">total_orders</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s"> orders, $</span><span class="si">{</span><span class="n">summary</span><span class="p">[</span><span class="sh">'</span><span class="s">total_amount</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">'</span><span class="s">__main__</span><span class="sh">'</span><span class="p">:</span>
+    <span class="n">app</span><span class="p">.</span><span class="nf">main</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="3-advanced-stream-processing">3. Advanced Stream Processing</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">faust</span> <span class="kn">import</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">Table</span>
+<span class="kn">from</span> <span class="n">faust.types</span> <span class="kn">import</span> <span class="n">StreamT</span>
+
+<span class="c1"># Stream join
+</span><span class="nd">@app.agent</span><span class="p">(</span><span class="n">user_events_topic</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">join_user_orders</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Join user events with orders</span><span class="sh">"""</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+        <span class="c1"># Get user order information
+</span>        <span class="n">order_summary</span> <span class="o">=</span> <span class="n">order_summary_table</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span> <span class="p">{})</span>
+        
+        <span class="c1"># Process joined data
+</span>        <span class="n">enriched_event</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">event</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">action</span><span class="sh">'</span><span class="p">:</span> <span class="n">event</span><span class="p">.</span><span class="n">action</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">event</span><span class="p">.</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">user_orders</span><span class="sh">'</span><span class="p">:</span> <span class="n">order_summary</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">total_orders</span><span class="sh">'</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">user_spent</span><span class="sh">'</span><span class="p">:</span> <span class="n">order_summary</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">total_amount</span><span class="sh">'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Enriched event: </span><span class="si">{</span><span class="n">enriched_event</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Window aggregation
+</span><span class="nd">@app.agent</span><span class="p">(</span><span class="n">user_events_topic</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">window_aggregation</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Time window aggregation</span><span class="sh">"""</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+        <span class="c1"># Aggregate by 5-minute window
+</span>        <span class="n">window</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">//</span> <span class="mi">300</span>  <span class="c1"># 5 minutes = 300 seconds
+</span>        
+        <span class="c1"># Count by window
+</span>        <span class="n">window_key</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">window_</span><span class="si">{</span><span class="n">window</span><span class="si">}</span><span class="sh">"</span>
+        <span class="n">user_activity_table</span><span class="p">[</span><span class="n">window_key</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="c1"># Send result when window is complete
+</span>        <span class="k">if</span> <span class="n">window_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">processed_windows</span><span class="p">:</span>
+            <span class="n">processed_windows</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">window_key</span><span class="p">)</span>
+            <span class="k">await</span> <span class="n">app</span><span class="p">.</span><span class="nf">topic</span><span class="p">(</span><span class="sh">'</span><span class="s">window-results</span><span class="sh">'</span><span class="p">).</span><span class="nf">send</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">window</span><span class="sh">'</span><span class="p">:</span> <span class="n">window</span><span class="p">,</span> <span class="sh">'</span><span class="s">count</span><span class="sh">'</span><span class="p">:</span> <span class="n">user_activity_table</span><span class="p">[</span><span class="n">window_key</span><span class="p">]}</span>
+            <span class="p">)</span>
+
+<span class="n">processed_windows</span> <span class="o">=</span> <span class="nf">set</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="️-hands-on-python-based-streaming-system">🛠️ Hands-on: Python-based Streaming System</h2>
+
+<h3 id="1-real-time-log-processing-system">1. Real-time Log Processing System</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">asyncio</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="n">logging</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="n">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+
+<span class="k">class</span> <span class="nc">LogProcessingSystem</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span> <span class="o">=</span> <span class="nc">ConfluentKafkaProducer</span><span class="p">(</span><span class="n">producer_config</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span> <span class="o">=</span> <span class="nc">ConfluentKafkaConsumer</span><span class="p">(</span><span class="n">consumer_config</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">log_stats</span> <span class="o">=</span> <span class="nf">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">start_log_collector</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Start log collector</span><span class="sh">"""</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="c1"># Read from log file (in practice, monitor file)
+</span>            <span class="n">log_line</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">simulate_log_line</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">log_line</span><span class="p">:</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">produce_message</span><span class="p">(</span><span class="sh">'</span><span class="s">raw-logs</span><span class="sh">'</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">log_line</span><span class="p">)</span>
+            
+            <span class="k">await</span> <span class="n">asyncio</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># 100ms interval
+</span>    
+    <span class="k">def</span> <span class="nf">simulate_log_line</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Simulate log line</span><span class="sh">"""</span>
+        <span class="kn">import</span> <span class="n">random</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s">INFO</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">WARN</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">ERROR</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">DEBUG</span><span class="sh">'</span><span class="p">]</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s">login</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">logout</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">purchase</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">view</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">search</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">().</span><span class="nf">isoformat</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">level</span><span class="sh">'</span><span class="p">:</span> <span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">levels</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">User </span><span class="si">{</span><span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span><span class="si">}</span><span class="s"> performed </span><span class="si">{</span><span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">ip</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">192.168.1.</span><span class="si">{</span><span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">user_agent</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Mozilla/5.0...</span><span class="sh">'</span>
+        <span class="p">}</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">start_log_processor</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Start log processor</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">subscribe</span><span class="p">([</span><span class="sh">'</span><span class="s">raw-logs</span><span class="sh">'</span><span class="p">])</span>
+        
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">consume_messages</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">msg</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">process_log_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logging</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error processing log: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">process_log_message</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Process log message</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Statistics by log level
+</span>            <span class="n">level</span> <span class="o">=</span> <span class="n">log_data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">level</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">UNKNOWN</span><span class="sh">'</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">log_stats</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+            <span class="c1"># Special handling for error logs
+</span>            <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="sh">'</span><span class="s">ERROR</span><span class="sh">'</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">handle_error_log</span><span class="p">(</span><span class="n">log_data</span><span class="p">)</span>
+            
+            <span class="c1"># User behavior analysis
+</span>            <span class="k">if</span> <span class="sh">'</span><span class="s">performed</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">log_data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">,</span> <span class="sh">''</span><span class="p">):</span>
+                <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">analyze_user_behavior</span><span class="p">(</span><span class="n">log_data</span><span class="p">)</span>
+            
+            <span class="c1"># Update metrics
+</span>            <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">update_metrics</span><span class="p">(</span><span class="n">log_data</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error processing log message: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_error_log</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Handle error log</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">ERROR detected: </span><span class="si">{</span><span class="n">log_data</span><span class="p">[</span><span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="c1"># Send error alert
+</span>        <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">send_alert</span><span class="p">(</span><span class="sh">'</span><span class="s">ERROR</span><span class="sh">'</span><span class="p">,</span> <span class="n">log_data</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">analyze_user_behavior</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Analyze user behavior</span><span class="sh">"""</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="n">log_data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">,</span> <span class="sh">''</span><span class="p">)</span>
+        <span class="k">if</span> <span class="sh">'</span><span class="s">login</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">message</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">User login detected</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="sh">'</span><span class="s">purchase</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">message</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Purchase activity detected</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">send_alert</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">log_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Send alert</span><span class="sh">"""</span>
+        <span class="n">alert</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">log_alert</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">level</span><span class="sh">'</span><span class="p">:</span> <span class="n">level</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="n">log_data</span><span class="p">[</span><span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">log_data</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">]</span>
+        <span class="p">}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">produce_message</span><span class="p">(</span><span class="sh">'</span><span class="s">alerts</span><span class="sh">'</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">alert</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">update_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Update metrics</span><span class="sh">"""</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">level_counts</span><span class="sh">'</span><span class="p">:</span> <span class="nf">dict</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">log_stats</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">total_logs</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">log_stats</span><span class="p">.</span><span class="nf">values</span><span class="p">())</span>
+        <span class="p">}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">produce_message</span><span class="p">(</span><span class="sh">'</span><span class="s">log-metrics</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">metrics</span><span class="sh">'</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">start_system</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Start system</span><span class="sh">"""</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">asyncio</span><span class="p">.</span><span class="nf">create_task</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">start_log_collector</span><span class="p">()),</span>
+            <span class="n">asyncio</span><span class="p">.</span><span class="nf">create_task</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">start_log_processor</span><span class="p">())</span>
+        <span class="p">]</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="p">.</span><span class="nf">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">System stopped by user</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+
+<span class="c1"># Run
+</span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="nc">LogProcessingSystem</span><span class="p">()</span>
+    <span class="n">asyncio</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="nf">start_system</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h3 id="2-event-driven-microservices">2. Event-driven Microservices</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">EventDrivenMicroservice</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">service_name</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">service_name</span> <span class="o">=</span> <span class="n">service_name</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span> <span class="o">=</span> <span class="nc">ConfluentKafkaConsumer</span><span class="p">(</span><span class="n">consumer_config</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span> <span class="o">=</span> <span class="nc">ConfluentKafkaProducer</span><span class="p">(</span><span class="n">producer_config</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">True</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">start_service</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Start service</span><span class="sh">"""</span>
+        <span class="n">topics</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s">user-events</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">order-events</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">payment-events</span><span class="sh">'</span><span class="p">]</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">subscribe</span><span class="p">(</span><span class="n">topics</span><span class="p">)</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">service_name</span><span class="si">}</span><span class="s"> started, listening to </span><span class="si">{</span><span class="n">topics</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">while</span> <span class="n">self</span><span class="p">.</span><span class="n">running</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">consume_messages</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">msg</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">handle_event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logging</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error in </span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">service_name</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_event</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">event_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Handle event</span><span class="sh">"""</span>
+        <span class="n">event_type</span> <span class="o">=</span> <span class="n">event_data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">event_type</span> <span class="o">==</span> <span class="sh">'</span><span class="s">user_event</span><span class="sh">'</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">handle_user_event</span><span class="p">(</span><span class="n">event_data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event_type</span> <span class="o">==</span> <span class="sh">'</span><span class="s">order_event</span><span class="sh">'</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">handle_order_event</span><span class="p">(</span><span class="n">event_data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event_type</span> <span class="o">==</span> <span class="sh">'</span><span class="s">payment_event</span><span class="sh">'</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">handle_payment_event</span><span class="p">(</span><span class="n">event_data</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_user_event</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Handle user event</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Processing user event: </span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="c1"># User event processing logic
+</span>        <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">send_event</span><span class="p">(</span><span class="sh">'</span><span class="s">user-processed</span><span class="sh">'</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_order_event</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Handle order event</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Processing order event: </span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="c1"># Order event processing logic
+</span>        <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">send_event</span><span class="p">(</span><span class="sh">'</span><span class="s">order-processed</span><span class="sh">'</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_payment_event</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Handle payment event</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Processing payment event: </span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="c1"># Payment event processing logic
+</span>        <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">send_event</span><span class="p">(</span><span class="sh">'</span><span class="s">payment-processed</span><span class="sh">'</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">send_event</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">event_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Send event</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">produce_message</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">event_data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">),</span> <span class="n">event_data</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Stop service</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">consumer</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+
+<span class="c1"># Run service
+</span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">service</span> <span class="o">=</span> <span class="nc">EventDrivenMicroservice</span><span class="p">(</span><span class="sh">"</span><span class="s">event-processor</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">asyncio</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">service</span><span class="p">.</span><span class="nf">start_service</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h2 id="-performance-optimization-and-monitoring">📊 Performance Optimization and Monitoring</h2>
+
+<h3 id="1-performance-monitoring">1. Performance Monitoring</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">psutil</span>
+<span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="n">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="n">threading</span>
+
+<span class="k">class</span> <span class="nc">KafkaPerformanceMonitor</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="nf">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">monitor_thread</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">start_monitoring</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Start monitoring</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">monitor_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="p">.</span><span class="nc">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">_monitor_loop</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">monitor_thread</span><span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">_monitor_loop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Monitoring loop</span><span class="sh">"""</span>
+        <span class="k">while</span> <span class="n">self</span><span class="p">.</span><span class="n">running</span><span class="p">:</span>
+            <span class="c1"># Collect system metrics
+</span>            <span class="n">cpu_percent</span> <span class="o">=</span> <span class="n">psutil</span><span class="p">.</span><span class="nf">cpu_percent</span><span class="p">()</span>
+            <span class="n">memory_percent</span> <span class="o">=</span> <span class="n">psutil</span><span class="p">.</span><span class="nf">virtual_memory</span><span class="p">().</span><span class="n">percent</span>
+            <span class="n">disk_io</span> <span class="o">=</span> <span class="n">psutil</span><span class="p">.</span><span class="nf">disk_io_counters</span><span class="p">()</span>
+            <span class="n">network_io</span> <span class="o">=</span> <span class="n">psutil</span><span class="p">.</span><span class="nf">net_io_counters</span><span class="p">()</span>
+            
+            <span class="c1"># Store metrics
+</span>            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">cpu</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">cpu_percent</span><span class="p">))</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">memory</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">memory_percent</span><span class="p">))</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">disk_read</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">disk_io</span><span class="p">.</span><span class="n">read_bytes</span><span class="p">))</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">disk_write</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">disk_io</span><span class="p">.</span><span class="n">write_bytes</span><span class="p">))</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">network_sent</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">network_io</span><span class="p">.</span><span class="n">bytes_sent</span><span class="p">))</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">network_recv</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">((</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">network_io</span><span class="p">.</span><span class="n">bytes_recv</span><span class="p">))</span>
+            
+            <span class="c1"># Clean old metrics (older than 1 hour)
+</span>            <span class="n">cutoff_time</span> <span class="o">=</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="mi">3600</span>
+            <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">:</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">cutoff_time</span>
+                <span class="p">]</span>
+            
+            <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># Collect every 10 seconds
+</span>    
+    <span class="k">def</span> <span class="nf">get_metrics_summary</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Get metrics summary</span><span class="sh">"""</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">values</span><span class="p">:</span>
+                <span class="n">recent_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">:]]</span>  <span class="c1"># Last 10
+</span>                <span class="n">summary</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">current</span><span class="sh">'</span><span class="p">:</span> <span class="n">recent_values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">recent_values</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">average</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">recent_values</span><span class="p">)</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">recent_values</span><span class="p">)</span> <span class="k">if</span> <span class="n">recent_values</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">max</span><span class="sh">'</span><span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="n">recent_values</span><span class="p">)</span> <span class="k">if</span> <span class="n">recent_values</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">min</span><span class="sh">'</span><span class="p">:</span> <span class="nf">min</span><span class="p">(</span><span class="n">recent_values</span><span class="p">)</span> <span class="k">if</span> <span class="n">recent_values</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="p">}</span>
+        <span class="k">return</span> <span class="n">summary</span>
+    
+    <span class="k">def</span> <span class="nf">stop_monitoring</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Stop monitoring</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">monitor_thread</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">monitor_thread</span><span class="p">.</span><span class="nf">join</span><span class="p">()</span>
+
+<span class="c1"># Usage example
+</span><span class="n">monitor</span> <span class="o">=</span> <span class="nc">KafkaPerformanceMonitor</span><span class="p">()</span>
+<span class="n">monitor</span><span class="p">.</span><span class="nf">start_monitoring</span><span class="p">()</span>
+
+<span class="c1"># Check metrics after 1 minute
+</span><span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">summary</span> <span class="o">=</span> <span class="n">monitor</span><span class="p">.</span><span class="nf">get_metrics_summary</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Performance Summary:</span><span class="sh">"</span><span class="p">,</span> <span class="n">summary</span><span class="p">)</span>
+
+<span class="n">monitor</span><span class="p">.</span><span class="nf">stop_monitoring</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="2-error-handling-and-retry">2. Error Handling and Retry</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">asyncio</span>
+<span class="kn">from</span> <span class="n">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">import</span> <span class="n">random</span>
+
+<span class="k">def</span> <span class="nf">retry_with_backoff</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">base_delay</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_delay</span><span class="o">=</span><span class="mi">60</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Retry decorator</span><span class="sh">"""</span>
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">max_retries</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="k">await</span> <span class="nf">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">attempt</span> <span class="o">==</span> <span class="n">max_retries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">e</span>
+                    
+                    <span class="c1"># Exponential backoff
+</span>                    <span class="n">delay</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span><span class="n">base_delay</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">attempt</span><span class="p">),</span> <span class="n">max_delay</span><span class="p">)</span>
+                    <span class="n">jitter</span> <span class="o">=</span> <span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">delay</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">)</span>
+                    <span class="k">await</span> <span class="n">asyncio</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="n">delay</span> <span class="o">+</span> <span class="n">jitter</span><span class="p">)</span>
+                    
+                    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Retry </span><span class="si">{</span><span class="n">attempt</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">max_retries</span><span class="si">}</span><span class="s"> after </span><span class="si">{</span><span class="n">delay</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">s: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+    <span class="k">return</span> <span class="n">decorator</span>
+
+<span class="k">class</span> <span class="nc">ResilientKafkaProducer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">producer</span> <span class="o">=</span> <span class="nc">ConfluentKafkaProducer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">dead_letter_queue</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="nd">@retry_with_backoff</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">produce_with_retry</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Produce message with retry</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">produce_message</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed to produce message: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">e</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">produce_message</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Produce message (with retry)</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">produce_with_retry</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># Add to dead letter queue on final failure
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">dead_letter_queue</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">topic</span><span class="sh">'</span><span class="p">:</span> <span class="n">topic</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">key</span><span class="sh">'</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">error</span><span class="sh">'</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+            <span class="p">})</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Message sent to dead letter queue: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get_dead_letter_queue</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Get dead letter queue</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">dead_letter_queue</span>
+    
+    <span class="k">def</span> <span class="nf">retry_dead_letter_queue</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Retry dead letter queue</span><span class="sh">"""</span>
+        <span class="n">retry_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">dead_letter_queue</span><span class="p">[:]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">producer</span><span class="p">.</span><span class="nf">produce_message</span><span class="p">(</span>
+                    <span class="n">item</span><span class="p">[</span><span class="sh">'</span><span class="s">topic</span><span class="sh">'</span><span class="p">],</span> 
+                    <span class="n">item</span><span class="p">[</span><span class="sh">'</span><span class="s">key</span><span class="sh">'</span><span class="p">],</span> 
+                    <span class="n">item</span><span class="p">[</span><span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">dead_letter_queue</span><span class="p">.</span><span class="nf">remove</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="n">retry_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed to retry dead letter: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Retried </span><span class="si">{</span><span class="n">retry_count</span><span class="si">}</span><span class="s"> messages from dead letter queue</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-learning-summary">📚 Learning Summary</h2>
+
+<h3 id="what-we-learned-in-this-post">What We Learned in This Post</h3>
+
+<ol>
+  <li><strong>Choosing Python Kafka Libraries</strong>
+    <ul>
+      <li>Comparison of kafka-python, confluent-kafka, faust, aiokafka</li>
+      <li>Features and use cases of each library</li>
+    </ul>
+  </li>
+  <li><strong>Basic Usage of kafka-python</strong>
+    <ul>
+      <li>Producer and consumer implementation</li>
+      <li>Batch processing and offset management</li>
+    </ul>
+  </li>
+  <li><strong>High-Performance Processing with confluent-kafka</strong>
+    <ul>
+      <li>High-performance producer/consumer implementation</li>
+      <li>Async processing and callback utilization</li>
+    </ul>
+  </li>
+  <li><strong>Faust Stream Processing</strong>
+    <ul>
+      <li>Stream processing and state stores</li>
+      <li>Window aggregation and join operations</li>
+    </ul>
+  </li>
+  <li><strong>Building Production-Grade Streaming System</strong>
+    <ul>
+      <li>Real-time log processing system</li>
+      <li>Event-driven microservices</li>
+    </ul>
+  </li>
+  <li><strong>Performance Optimization and Monitoring</strong>
+    <ul>
+      <li>Performance monitoring system</li>
+      <li>Error handling and retry strategies</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="key-concepts-summary">Key Concepts Summary</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>Description</th>
+      <th>Importance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Library Selection</strong></td>
+      <td>Choosing the right library for project requirements</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Async Processing</strong></td>
+      <td>High-performance async programming</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Stream Processing</strong></td>
+      <td>Real-time data transformation and aggregation</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Monitoring</strong></td>
+      <td>System status tracking and performance optimization</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="practical-application-considerations">Practical Application Considerations</h3>
+
+<ol>
+  <li><strong>Library Selection</strong>: Consider project requirements and performance needs</li>
+  <li><strong>Async Processing</strong>: Use asyncio for high-performance processing</li>
+  <li><strong>Error Handling</strong>: Implement retry strategies and dead letter queues</li>
+  <li><strong>Monitoring</strong>: Real-time metrics collection and alerting systems</li>
+</ol>
+
+<hr />
+
+<p><em>With this guide, you can build high-performance streaming systems using Apache Kafka with Python!</em> 🚀</p>
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="대용량 실시간 데이터를 처리하는 Apache Kafka의 핵심 개념과 실무 활용 방법을 학습하고 실제 프로젝트에 적용해봅니다.">
+
+
+
+<title>Apache Kafka 실시간 스트리밍 가이드: 프로듀서부터 컨슈머까지 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Apache Kafka 실시간 스트리밍 가이드: 프로듀서부터 컨슈머까지">
+<meta property="og:description" content="대용량 실시간 데이터를 처리하는 Apache Kafka의 핵심 개념과 실무 활용 방법을 학습하고 실제 프로젝트에 적용해봅니다.">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2025/09/09/apache-kafka-streaming-guide.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Apache Kafka 실시간 스트리밍 가이드: 프로듀서부터 컨슈머까지">
+<meta name="twitter:description" content="대용량 실시간 데이터를 처리하는 Apache Kafka의 핵심 개념과 실무 활용 방법을 학습하고 실제 프로젝트에 적용해봅니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2025/09/09/apache-kafka-streaming-guide.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2025-09-09-apache-kafka-streaming-guide.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 09일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Apache Kafka 실시간 스트리밍 가이드: 프로듀서부터 컨슈머까지</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Kafka</span>
+      
+        <span class="tag">실시간스트리밍</span>
+      
+        <span class="tag">데이터파이프라인</span>
+      
+        <span class="tag">메시지큐</span>
+      
+        <span class="tag">이벤트드리븐</span>
+      
+        <span class="tag">마이크로서비스</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 30분</span>
+      
+      
+        <span class="difficulty">📊 고급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="apache-kafka-실시간-스트리밍-가이드-프로듀서부터-컨슈머까지">Apache Kafka 실시간 스트리밍 가이드: 프로듀서부터 컨슈머까지</h1>
+
+<blockquote>
+  <p>대용량 실시간 데이터를 처리하는 Apache Kafka의 핵심 개념과 실무 활용 방법을 학습하고 실제 프로젝트에 적용해봅니다.</p>
+</blockquote>
+
+<h2 id="-목차">📋 목차</h2>
+
+<ol>
+  <li><a href="#kafka-아키텍처-심화-이해">Kafka 아키텍처 심화 이해</a></li>
+  <li><a href="#프로듀서-최적화-전략">프로듀서 최적화 전략</a></li>
+  <li><a href="#컨슈머-그룹과-파티셔닝">컨슈머 그룹과 파티셔닝</a></li>
+  <li><a href="#스트리밍-처리와-kstreams">스트리밍 처리와 KStreams</a></li>
+  <li><a href="#모니터링과-운영-관리">모니터링과 운영 관리</a></li>
+  <li><a href="#실습-실무급-스트리밍-시스템-구축">실습: 실무급 스트리밍 시스템 구축</a></li>
+  <li><a href="#성능-튜닝과-확장성">성능 튜닝과 확장성</a></li>
+  <li><a href="#보안과-권한-관리">보안과 권한 관리</a></li>
+  <li><a href="#학습-요약">학습 요약</a></li>
+</ol>
+
+<h2 id="️-kafka-아키텍처-심화-이해">🏗️ Kafka 아키텍처 심화 이해</h2>
+
+<h3 id="핵심-컴포넌트-분석">핵심 컴포넌트 분석</h3>
+
+<p>Apache Kafka는 다음과 같은 핵심 컴포넌트들로 구성됩니다:</p>
+
+<h4 id="1-broker"><strong>1. Broker</strong></h4>
+<ul>
+  <li><strong>역할</strong>: 메시지 저장 및 전달의 핵심 엔진</li>
+  <li><strong>동작 원리</strong>: 파티션별로 메시지를 순차적으로 저장</li>
+  <li><strong>성능 최적화</strong>: 배치 처리, 압축, 인덱싱</li>
+</ul>
+
+<h4 id="2-topic--partition"><strong>2. Topic &amp; Partition</strong></h4>
+<ul>
+  <li><strong>Topic</strong>: 메시지의 논리적 분류</li>
+  <li><strong>Partition</strong>: Topic의 물리적 분할 단위</li>
+  <li><strong>Replication</strong>: 데이터 안정성 보장</li>
+</ul>
+
+<h4 id="3-producer"><strong>3. Producer</strong></h4>
+<ul>
+  <li><strong>역할</strong>: 메시지 생산 및 전송</li>
+  <li><strong>특징</strong>: 비동기 전송, 배치 처리, 압축</li>
+  <li><strong>성능</strong>: Throughput과 Latency의 균형</li>
+</ul>
+
+<h4 id="4-consumer"><strong>4. Consumer</strong></h4>
+<ul>
+  <li><strong>역할</strong>: 메시지 소비 및 처리</li>
+  <li><strong>Consumer Group</strong>: 병렬 처리 및 부하 분산</li>
+  <li><strong>Offset Management</strong>: 메시지 처리 상태 추적</li>
+</ul>
+
+<h3 id="메시지-전달-보장-delivery-guarantees">메시지 전달 보장 (Delivery Guarantees)</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 메시지 전달 보장 레벨</span>
+<span class="na">at-least-once</span><span class="pi">:</span>  <span class="c1"># 최소 한 번 전달 (중복 가능)</span>
+<span class="na">exactly-once</span><span class="pi">:</span>   <span class="c1"># 정확히 한 번 전달 (중복 없음)</span>
+<span class="na">at-most-once</span><span class="pi">:</span>   <span class="c1"># 최대 한 번 전달 (손실 가능)</span>
+</code></pre></div></div>
+
+<h2 id="-프로듀서-최적화-전략">⚡ 프로듀서 최적화 전략</h2>
+
+<h3 id="1-배치-처리-최적화">1. 배치 처리 최적화</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Producer 설정 최적화</span>
+<span class="nc">Properties</span> <span class="n">props</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Properties</span><span class="o">();</span>
+<span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"bootstrap.servers"</span><span class="o">,</span> <span class="s">"localhost:9092"</span><span class="o">);</span>
+<span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"key.serializer"</span><span class="o">,</span> <span class="s">"org.apache.kafka.common.serialization.StringSerializer"</span><span class="o">);</span>
+<span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"value.serializer"</span><span class="o">,</span> <span class="s">"org.apache.kafka.common.serialization.StringSerializer"</span><span class="o">);</span>
+
+<span class="c1">// 배치 처리 설정</span>
+<span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"batch.size"</span><span class="o">,</span> <span class="mi">16384</span><span class="o">);</span>                    <span class="c1">// 배치 크기 (16KB)</span>
+<span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"linger.ms"</span><span class="o">,</span> <span class="mi">5</span><span class="o">);</span>                         <span class="c1">// 배치 대기 시간 (5ms)</span>
+<span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"compression.type"</span><span class="o">,</span> <span class="s">"snappy"</span><span class="o">);</span>           <span class="c1">// 압축 타입</span>
+<span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"acks"</span><span class="o">,</span> <span class="s">"all"</span><span class="o">);</span>                          <span class="c1">// 모든 복제본 확인</span>
+<span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"retries"</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>                           <span class="c1">// 재시도 횟수</span>
+<span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"retry.backoff.ms"</span><span class="o">,</span> <span class="mi">100</span><span class="o">);</span>               <span class="c1">// 재시도 간격</span>
+
+<span class="c1">// 고성능 설정</span>
+<span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"buffer.memory"</span><span class="o">,</span> <span class="mi">33554432</span><span class="o">);</span>              <span class="c1">// 버퍼 메모리 (32MB)</span>
+<span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"max.in.flight.requests.per.connection"</span><span class="o">,</span> <span class="mi">5</span><span class="o">);</span> <span class="c1">// 동시 요청 수</span>
+<span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"enable.idempotence"</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>             <span class="c1">// 멱등성 보장</span>
+
+<span class="nc">KafkaProducer</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">producer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">KafkaProducer</span><span class="o">&lt;&gt;(</span><span class="n">props</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h3 id="2-파티셔닝-전략">2. 파티셔닝 전략</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 커스텀 파티셔너 구현</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CustomPartitioner</span> <span class="kd">implements</span> <span class="nc">Partitioner</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">partition</span><span class="o">(</span><span class="nc">String</span> <span class="n">topic</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">key</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">keyBytes</span><span class="o">,</span> 
+                        <span class="nc">Object</span> <span class="n">value</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">valueBytes</span><span class="o">,</span> <span class="nc">Cluster</span> <span class="n">cluster</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">PartitionInfo</span><span class="o">&gt;</span> <span class="n">partitions</span> <span class="o">=</span> <span class="n">cluster</span><span class="o">.</span><span class="na">partitionsForTopic</span><span class="o">(</span><span class="n">topic</span><span class="o">);</span>
+        <span class="kt">int</span> <span class="n">numPartitions</span> <span class="o">=</span> <span class="n">partitions</span><span class="o">.</span><span class="na">size</span><span class="o">();</span>
+        
+        <span class="c1">// 키 기반 파티셔닝</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">key</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="nc">Math</span><span class="o">.</span><span class="na">abs</span><span class="o">(</span><span class="n">key</span><span class="o">.</span><span class="na">hashCode</span><span class="o">())</span> <span class="o">%</span> <span class="n">numPartitions</span><span class="o">;</span>
+        <span class="o">}</span>
+        
+        <span class="c1">// 라운드 로빈 파티셔닝</span>
+        <span class="k">return</span> <span class="nc">ThreadLocalRandom</span><span class="o">.</span><span class="na">current</span><span class="o">().</span><span class="na">nextInt</span><span class="o">(</span><span class="n">numPartitions</span><span class="o">);</span>
+    <span class="o">}</span>
+    
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">()</span> <span class="o">{}</span>
+    
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">(</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="o">?&gt;</span> <span class="n">configs</span><span class="o">)</span> <span class="o">{}</span>
+<span class="o">}</span>
+
+<span class="c1">// 파티셔너 설정</span>
+<span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"partitioner.class"</span><span class="o">,</span> <span class="s">"com.example.CustomPartitioner"</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h3 id="3-압축과-압축">3. 압축과 압축</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 압축 설정 비교</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CompressionComparison</span> <span class="o">{</span>
+    
+    <span class="c1">// Snappy 압축 (빠른 압축/해제)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setupSnappyCompression</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"compression.type"</span><span class="o">,</span> <span class="s">"snappy"</span><span class="o">);</span>
+        <span class="c1">// 장점: 낮은 CPU 사용량, 빠른 처리</span>
+        <span class="c1">// 단점: 압축률이 낮음</span>
+    <span class="o">}</span>
+    
+    <span class="c1">// Gzip 압축 (높은 압축률)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setupGzipCompression</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"compression.type"</span><span class="o">,</span> <span class="s">"gzip"</span><span class="o">);</span>
+        <span class="c1">// 장점: 높은 압축률, 네트워크 대역폭 절약</span>
+        <span class="c1">// 단점: 높은 CPU 사용량</span>
+    <span class="o">}</span>
+    
+    <span class="c1">// LZ4 압축 (균형잡힌 성능)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setupLZ4Compression</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"compression.type"</span><span class="o">,</span> <span class="s">"lz4"</span><span class="o">);</span>
+        <span class="c1">// 장점: 빠른 압축/해제, 적당한 압축률</span>
+        <span class="c1">// 단점: Snappy보다 약간 느림</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="-컨슈머-그룹과-파티셔닝">🔄 컨슈머 그룹과 파티셔닝</h2>
+
+<h3 id="1-컨슈머-그룹-관리">1. 컨슈머 그룹 관리</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 컨슈머 그룹 설정</span>
+<span class="nc">Properties</span> <span class="n">consumerProps</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Properties</span><span class="o">();</span>
+<span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"bootstrap.servers"</span><span class="o">,</span> <span class="s">"localhost:9092"</span><span class="o">);</span>
+<span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"group.id"</span><span class="o">,</span> <span class="s">"my-consumer-group"</span><span class="o">);</span>
+<span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"key.deserializer"</span><span class="o">,</span> <span class="s">"org.apache.kafka.common.serialization.StringDeserializer"</span><span class="o">);</span>
+<span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"value.deserializer"</span><span class="o">,</span> <span class="s">"org.apache.kafka.common.serialization.StringDeserializer"</span><span class="o">);</span>
+
+<span class="c1">// 오프셋 관리 설정</span>
+<span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"auto.offset.reset"</span><span class="o">,</span> <span class="s">"earliest"</span><span class="o">);</span>  <span class="c1">// earliest, latest, none</span>
+<span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"enable.auto.commit"</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>      <span class="c1">// 수동 오프셋 커밋</span>
+<span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"max.poll.records"</span><span class="o">,</span> <span class="mi">500</span><span class="o">);</span>          <span class="c1">// 한 번에 처리할 레코드 수</span>
+<span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"session.timeout.ms"</span><span class="o">,</span> <span class="mi">30000</span><span class="o">);</span>      <span class="c1">// 세션 타임아웃</span>
+<span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"heartbeat.interval.ms"</span><span class="o">,</span> <span class="mi">3000</span><span class="o">);</span>    <span class="c1">// 하트비트 간격</span>
+
+<span class="nc">KafkaConsumer</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">KafkaConsumer</span><span class="o">&lt;&gt;(</span><span class="n">consumerProps</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h3 id="2-수동-오프셋-관리">2. 수동 오프셋 관리</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 수동 오프셋 커밋 예제</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ManualOffsetCommit</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">KafkaConsumer</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">consumer</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">TopicPartition</span><span class="o">,</span> <span class="nc">OffsetAndMetadata</span><span class="o">&gt;</span> <span class="n">offsets</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+    
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">processMessages</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">consumer</span><span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"my-topic"</span><span class="o">));</span>
+        
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">ConsumerRecords</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">records</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="na">poll</span><span class="o">(</span><span class="nc">Duration</span><span class="o">.</span><span class="na">ofMillis</span><span class="o">(</span><span class="mi">1000</span><span class="o">));</span>
+                
+                <span class="k">for</span> <span class="o">(</span><span class="nc">ConsumerRecord</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="kd">record</span> <span class="err">:</span> <span class="nc">records</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="c1">// 메시지 처리</span>
+                    <span class="n">processMessage</span><span class="o">(</span><span class="kd">record</span><span class="err">);</span>
+                    
+                    <span class="err">//</span> <span class="nc">오프셋</span> <span class="n">저장</span> <span class="o">(</span><span class="n">다음에</span> <span class="n">커밋할</span> <span class="n">오프셋</span><span class="o">)</span>
+                    <span class="nc">TopicPartition</span> <span class="n">partition</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">TopicPartition</span><span class="o">(</span><span class="kd">record</span><span class="err">.</span><span class="nc">topic</span><span class="o">(),</span> <span class="kd">record</span><span class="err">.</span><span class="nc">partition</span><span class="o">());</span>
+                    <span class="nc">OffsetAndMetadata</span> <span class="n">offset</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">OffsetAndMetadata</span><span class="o">(</span><span class="kd">record</span><span class="err">.</span><span class="nc">offset</span><span class="o">()</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span>
+                    <span class="n">offsets</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">partition</span><span class="o">,</span> <span class="n">offset</span><span class="o">);</span>
+                <span class="o">}</span>
+                
+                <span class="c1">// 배치 단위로 오프셋 커밋</span>
+                <span class="k">if</span> <span class="o">(!</span><span class="n">offsets</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>
+                    <span class="n">consumer</span><span class="o">.</span><span class="na">commitSync</span><span class="o">(</span><span class="n">offsets</span><span class="o">);</span>
+                    <span class="n">offsets</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">// 오류 발생 시 오프셋 롤백</span>
+            <span class="n">consumer</span><span class="o">.</span><span class="na">seekToBeginning</span><span class="o">(</span><span class="n">consumer</span><span class="o">.</span><span class="na">assignment</span><span class="o">());</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">processMessage</span><span class="o">(</span><span class="nc">ConsumerRecord</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="kd">record</span><span class="err">)</span> <span class="err">{</span>
+        <span class="err">//</span> <span class="nc">메시지</span> <span class="n">처리</span> <span class="n">로직</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"Topic: %s, Partition: %d, Offset: %d, Key: %s, Value: %s%n"</span><span class="o">,</span>
+                <span class="kd">record</span><span class="err">.</span><span class="nc">topic</span><span class="o">(),</span> <span class="kd">record</span><span class="err">.</span><span class="nc">partition</span><span class="o">(),</span> <span class="kd">record</span><span class="err">.</span><span class="nc">offset</span><span class="o">(),</span> 
+                <span class="kd">record</span><span class="err">.</span><span class="nc">key</span><span class="o">(),</span> <span class="kd">record</span><span class="err">.</span><span class="nc">value</span><span class="o">());</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="3-리밸런싱-처리">3. 리밸런싱 처리</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 리밸런싱 리스너 구현</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RebalanceListener</span> <span class="kd">implements</span> <span class="nc">ConsumerRebalanceListener</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">TopicPartition</span><span class="o">,</span> <span class="nc">OffsetAndMetadata</span><span class="o">&gt;</span> <span class="n">currentOffsets</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+    <span class="kd">private</span> <span class="nc">KafkaConsumer</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">consumer</span><span class="o">;</span>
+    
+    <span class="kd">public</span> <span class="nf">RebalanceListener</span><span class="o">(</span><span class="nc">KafkaConsumer</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">consumer</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">consumer</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">;</span>
+    <span class="o">}</span>
+    
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPartitionsRevoked</span><span class="o">(</span><span class="nc">Collection</span><span class="o">&lt;</span><span class="nc">TopicPartition</span><span class="o">&gt;</span> <span class="n">partitions</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// 파티션 해제 전 현재 오프셋 커밋</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Partitions revoked: "</span> <span class="o">+</span> <span class="n">partitions</span><span class="o">);</span>
+        <span class="n">consumer</span><span class="o">.</span><span class="na">commitSync</span><span class="o">(</span><span class="n">currentOffsets</span><span class="o">);</span>
+        <span class="n">currentOffsets</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+    <span class="o">}</span>
+    
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPartitionsAssigned</span><span class="o">(</span><span class="nc">Collection</span><span class="o">&lt;</span><span class="nc">TopicPartition</span><span class="o">&gt;</span> <span class="n">partitions</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// 파티션 할당 후 오프셋 복원</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Partitions assigned: "</span> <span class="o">+</span> <span class="n">partitions</span><span class="o">);</span>
+        <span class="k">for</span> <span class="o">(</span><span class="nc">TopicPartition</span> <span class="n">partition</span> <span class="o">:</span> <span class="n">partitions</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">consumer</span><span class="o">.</span><span class="na">seekToBeginning</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">partition</span><span class="o">));</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">addOffset</span><span class="o">(</span><span class="nc">TopicPartition</span> <span class="n">partition</span><span class="o">,</span> <span class="kt">long</span> <span class="n">offset</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">currentOffsets</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">partition</span><span class="o">,</span> <span class="k">new</span> <span class="nc">OffsetAndMetadata</span><span class="o">(</span><span class="n">offset</span><span class="o">));</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="-스트리밍-처리와-kstreams">🌊 스트리밍 처리와 KStreams</h2>
+
+<h3 id="1-kstreams-기본-설정">1. KStreams 기본 설정</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// KStreams 애플리케이션 설정</span>
+<span class="nc">Properties</span> <span class="n">streamsProps</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Properties</span><span class="o">();</span>
+<span class="n">streamsProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="nc">StreamsConfig</span><span class="o">.</span><span class="na">APPLICATION_ID_CONFIG</span><span class="o">,</span> <span class="s">"my-streams-app"</span><span class="o">);</span>
+<span class="n">streamsProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="nc">StreamsConfig</span><span class="o">.</span><span class="na">BOOTSTRAP_SERVERS_CONFIG</span><span class="o">,</span> <span class="s">"localhost:9092"</span><span class="o">);</span>
+<span class="n">streamsProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="nc">StreamsConfig</span><span class="o">.</span><span class="na">DEFAULT_KEY_SERDE_CLASS_CONFIG</span><span class="o">,</span> <span class="nc">Serdes</span><span class="o">.</span><span class="na">String</span><span class="o">().</span><span class="na">getClass</span><span class="o">());</span>
+<span class="n">streamsProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="nc">StreamsConfig</span><span class="o">.</span><span class="na">DEFAULT_VALUE_SERDE_CLASS_CONFIG</span><span class="o">,</span> <span class="nc">Serdes</span><span class="o">.</span><span class="na">String</span><span class="o">().</span><span class="na">getClass</span><span class="o">());</span>
+
+<span class="c1">// 상태 저장소 설정</span>
+<span class="n">streamsProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="nc">StreamsConfig</span><span class="o">.</span><span class="na">STATE_DIR_CONFIG</span><span class="o">,</span> <span class="s">"/tmp/kafka-streams"</span><span class="o">);</span>
+<span class="n">streamsProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="nc">StreamsConfig</span><span class="o">.</span><span class="na">COMMIT_INTERVAL_MS_CONFIG</span><span class="o">,</span> <span class="mi">1000</span><span class="o">);</span>
+
+<span class="c1">// 성능 최적화 설정</span>
+<span class="n">streamsProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="nc">StreamsConfig</span><span class="o">.</span><span class="na">NUM_STREAM_THREADS_CONFIG</span><span class="o">,</span> <span class="mi">4</span><span class="o">);</span>
+<span class="n">streamsProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="nc">StreamsConfig</span><span class="o">.</span><span class="na">CACHE_MAX_BYTES_BUFFERING_CONFIG</span><span class="o">,</span> <span class="mi">10</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">);</span> <span class="c1">// 10MB</span>
+
+<span class="nc">StreamsBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StreamsBuilder</span><span class="o">();</span>
+</code></pre></div></div>
+
+<h3 id="2-스트림-처리-예제">2. 스트림 처리 예제</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 실시간 데이터 변환 및 집계</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">StreamProcessingExample</span> <span class="o">{</span>
+    
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setupStreamProcessing</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">StreamsBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StreamsBuilder</span><span class="o">();</span>
+        
+        <span class="c1">// 소스 스트림 생성</span>
+        <span class="nc">KStream</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">sourceStream</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="na">stream</span><span class="o">(</span><span class="s">"input-topic"</span><span class="o">);</span>
+        
+        <span class="c1">// 데이터 변환</span>
+        <span class="nc">KStream</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">transformedStream</span> <span class="o">=</span> <span class="n">sourceStream</span>
+            <span class="o">.</span><span class="na">filter</span><span class="o">((</span><span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">value</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">value</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span>
+            <span class="o">.</span><span class="na">mapValues</span><span class="o">(</span><span class="n">value</span> <span class="o">-&gt;</span> <span class="n">value</span><span class="o">.</span><span class="na">toUpperCase</span><span class="o">())</span>
+            <span class="o">.</span><span class="na">map</span><span class="o">((</span><span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">KeyValue</span><span class="o">.</span><span class="na">pair</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="s">"PROCESSED: "</span> <span class="o">+</span> <span class="n">value</span><span class="o">));</span>
+        
+        <span class="c1">// 윈도우 집계</span>
+        <span class="nc">KTable</span><span class="o">&lt;</span><span class="nc">Windowed</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;,</span> <span class="nc">Long</span><span class="o">&gt;</span> <span class="n">windowedCounts</span> <span class="o">=</span> <span class="n">sourceStream</span>
+            <span class="o">.</span><span class="na">groupByKey</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">windowedBy</span><span class="o">(</span><span class="nc">TimeWindows</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="nc">Duration</span><span class="o">.</span><span class="na">ofMinutes</span><span class="o">(</span><span class="mi">5</span><span class="o">)))</span>
+            <span class="o">.</span><span class="na">count</span><span class="o">();</span>
+        
+        <span class="c1">// 결과를 출력 토픽으로 전송</span>
+        <span class="n">transformedStream</span><span class="o">.</span><span class="na">to</span><span class="o">(</span><span class="s">"output-topic"</span><span class="o">);</span>
+        <span class="n">windowedCounts</span><span class="o">.</span><span class="na">toStream</span><span class="o">().</span><span class="na">to</span><span class="o">(</span><span class="s">"aggregated-topic"</span><span class="o">);</span>
+        
+        <span class="c1">// 스트림 시작</span>
+        <span class="nc">KafkaStreams</span> <span class="n">streams</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">KafkaStreams</span><span class="o">(</span><span class="n">builder</span><span class="o">.</span><span class="na">build</span><span class="o">(),</span> <span class="n">streamsProps</span><span class="o">);</span>
+        <span class="n">streams</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        
+        <span class="c1">// 종료 시그널 처리</span>
+        <span class="nc">Runtime</span><span class="o">.</span><span class="na">getRuntime</span><span class="o">().</span><span class="na">addShutdownHook</span><span class="o">(</span><span class="k">new</span> <span class="nc">Thread</span><span class="o">(</span><span class="nl">streams:</span><span class="o">:</span><span class="n">close</span><span class="o">));</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="3-상태-저장소-활용">3. 상태 저장소 활용</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 상태 저장소를 활용한 집계</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">StatefulStreamProcessing</span> <span class="o">{</span>
+    
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setupStatefulProcessing</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">StreamsBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StreamsBuilder</span><span class="o">();</span>
+        
+        <span class="c1">// 상태 저장소 생성</span>
+        <span class="nc">StoreBuilder</span><span class="o">&lt;</span><span class="nc">KeyValueStore</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Long</span><span class="o">&gt;&gt;</span> <span class="n">storeBuilder</span> <span class="o">=</span> <span class="nc">Stores</span><span class="o">.</span><span class="na">keyValueStoreBuilder</span><span class="o">(</span>
+            <span class="nc">Stores</span><span class="o">.</span><span class="na">persistentKeyValueStore</span><span class="o">(</span><span class="s">"user-counts"</span><span class="o">),</span>
+            <span class="nc">Serdes</span><span class="o">.</span><span class="na">String</span><span class="o">(),</span>
+            <span class="nc">Serdes</span><span class="o">.</span><span class="na">Long</span><span class="o">()</span>
+        <span class="o">);</span>
+        <span class="n">builder</span><span class="o">.</span><span class="na">addStateStore</span><span class="o">(</span><span class="n">storeBuilder</span><span class="o">);</span>
+        
+        <span class="c1">// 상태 저장소를 사용한 집계</span>
+        <span class="nc">KStream</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">sourceStream</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="na">stream</span><span class="o">(</span><span class="s">"user-events"</span><span class="o">);</span>
+        
+        <span class="n">sourceStream</span>
+            <span class="o">.</span><span class="na">groupByKey</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">aggregate</span><span class="o">(</span>
+                <span class="o">()</span> <span class="o">-&gt;</span> <span class="mi">0L</span><span class="o">,</span>
+                <span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">aggregate</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">aggregate</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span>
+                <span class="nc">Materialized</span><span class="o">.&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Long</span><span class="o">,</span> <span class="nc">KeyValueStore</span><span class="o">&lt;</span><span class="nc">Bytes</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]&gt;&gt;</span><span class="n">as</span><span class="o">(</span><span class="s">"user-counts"</span><span class="o">)</span>
+                    <span class="o">.</span><span class="na">withKeySerde</span><span class="o">(</span><span class="nc">Serdes</span><span class="o">.</span><span class="na">String</span><span class="o">())</span>
+                    <span class="o">.</span><span class="na">withValueSerde</span><span class="o">(</span><span class="nc">Serdes</span><span class="o">.</span><span class="na">Long</span><span class="o">())</span>
+            <span class="o">)</span>
+            <span class="o">.</span><span class="na">toStream</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">to</span><span class="o">(</span><span class="s">"user-counts-topic"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="-모니터링과-운영-관리">📊 모니터링과 운영 관리</h2>
+
+<h3 id="1-jmx-메트릭-수집">1. JMX 메트릭 수집</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// JMX 메트릭 모니터링</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">KafkaMetricsMonitor</span> <span class="o">{</span>
+    
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setupJMXMonitoring</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">// JMX 설정</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"com.sun.management.jmxremote"</span><span class="o">,</span> <span class="s">"true"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"com.sun.management.jmxremote.port"</span><span class="o">,</span> <span class="s">"9999"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"com.sun.management.jmxremote.authenticate"</span><span class="o">,</span> <span class="s">"false"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"com.sun.management.jmxremote.ssl"</span><span class="o">,</span> <span class="s">"false"</span><span class="o">);</span>
+        
+        <span class="c1">// 메트릭 수집</span>
+        <span class="nc">MBeanServer</span> <span class="n">mBeanServer</span> <span class="o">=</span> <span class="nc">ManagementFactory</span><span class="o">.</span><span class="na">getPlatformMBeanServer</span><span class="o">();</span>
+        
+        <span class="c1">// Producer 메트릭</span>
+        <span class="nc">ObjectName</span> <span class="n">producerMetrics</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ObjectName</span><span class="o">(</span><span class="s">"kafka.producer:type=producer-metrics,client-id=my-producer"</span><span class="o">);</span>
+        <span class="nc">ObjectName</span> <span class="n">consumerMetrics</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ObjectName</span><span class="o">(</span><span class="s">"kafka.consumer:type=consumer-metrics,client-id=my-consumer"</span><span class="o">);</span>
+        
+        <span class="c1">// 메트릭 값 조회</span>
+        <span class="nc">Double</span> <span class="n">recordSendRate</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Double</span><span class="o">)</span> <span class="n">mBeanServer</span><span class="o">.</span><span class="na">getAttribute</span><span class="o">(</span><span class="n">producerMetrics</span><span class="o">,</span> <span class="s">"record-send-rate"</span><span class="o">);</span>
+        <span class="nc">Double</span> <span class="n">recordSendTotal</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Double</span><span class="o">)</span> <span class="n">mBeanServer</span><span class="o">.</span><span class="na">getAttribute</span><span class="o">(</span><span class="n">producerMetrics</span><span class="o">,</span> <span class="s">"record-send-total"</span><span class="o">);</span>
+        
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Record Send Rate: "</span> <span class="o">+</span> <span class="n">recordSendRate</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Record Send Total: "</span> <span class="o">+</span> <span class="n">recordSendTotal</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="2-카프카-관리-도구">2. 카프카 관리 도구</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="c"># Kafka 관리 스크립트</span>
+
+<span class="c"># 토픽 생성</span>
+kafka-topics.sh <span class="nt">--create</span> <span class="se">\</span>
+  <span class="nt">--bootstrap-server</span> localhost:9092 <span class="se">\</span>
+  <span class="nt">--topic</span> my-topic <span class="se">\</span>
+  <span class="nt">--partitions</span> 3 <span class="se">\</span>
+  <span class="nt">--replication-factor</span> 2
+
+<span class="c"># 토픽 목록 조회</span>
+kafka-topics.sh <span class="nt">--list</span> <span class="nt">--bootstrap-server</span> localhost:9092
+
+<span class="c"># 토픽 상세 정보</span>
+kafka-topics.sh <span class="nt">--describe</span> <span class="se">\</span>
+  <span class="nt">--bootstrap-server</span> localhost:9092 <span class="se">\</span>
+  <span class="nt">--topic</span> my-topic
+
+<span class="c"># 컨슈머 그룹 상태 확인</span>
+kafka-consumer-groups.sh <span class="nt">--bootstrap-server</span> localhost:9092 <span class="se">\</span>
+  <span class="nt">--group</span> my-consumer-group <span class="nt">--describe</span>
+
+<span class="c"># 오프셋 리셋</span>
+kafka-consumer-groups.sh <span class="nt">--bootstrap-server</span> localhost:9092 <span class="se">\</span>
+  <span class="nt">--group</span> my-consumer-group <span class="nt">--reset-offsets</span> <span class="se">\</span>
+  <span class="nt">--to-earliest</span> <span class="nt">--topic</span> my-topic <span class="nt">--execute</span>
+
+<span class="c"># 메시지 전송 테스트</span>
+kafka-console-producer.sh <span class="nt">--bootstrap-server</span> localhost:9092 <span class="se">\</span>
+  <span class="nt">--topic</span> my-topic
+
+<span class="c"># 메시지 수신 테스트</span>
+kafka-console-consumer.sh <span class="nt">--bootstrap-server</span> localhost:9092 <span class="se">\</span>
+  <span class="nt">--topic</span> my-topic <span class="nt">--from-beginning</span>
+</code></pre></div></div>
+
+<h3 id="3-알림-시스템-구축">3. 알림 시스템 구축</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Kafka 모니터링 알림 시스템</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">KafkaAlertSystem</span> <span class="o">{</span>
+    
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setupAlerting</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">// 메트릭 수집 스레드</span>
+        <span class="nc">ScheduledExecutorService</span> <span class="n">scheduler</span> <span class="o">=</span> <span class="nc">Executors</span><span class="o">.</span><span class="na">newScheduledThreadPool</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+        
+        <span class="n">scheduler</span><span class="o">.</span><span class="na">scheduleAtFixedRate</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="c1">// 지연 시간 모니터링</span>
+                <span class="kt">double</span> <span class="n">consumerLag</span> <span class="o">=</span> <span class="n">getConsumerLag</span><span class="o">();</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">consumerLag</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">sendAlert</span><span class="o">(</span><span class="s">"High consumer lag detected: "</span> <span class="o">+</span> <span class="n">consumerLag</span><span class="o">);</span>
+                <span class="o">}</span>
+                
+                <span class="c1">// 처리량 모니터링</span>
+                <span class="kt">double</span> <span class="n">throughput</span> <span class="o">=</span> <span class="n">getThroughput</span><span class="o">();</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">throughput</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">sendAlert</span><span class="o">(</span><span class="s">"Low throughput detected: "</span> <span class="o">+</span> <span class="n">throughput</span><span class="o">);</span>
+                <span class="o">}</span>
+                
+                <span class="c1">// 에러율 모니터링</span>
+                <span class="kt">double</span> <span class="n">errorRate</span> <span class="o">=</span> <span class="n">getErrorRate</span><span class="o">();</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">errorRate</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">sendAlert</span><span class="o">(</span><span class="s">"High error rate detected: "</span> <span class="o">+</span> <span class="n">errorRate</span><span class="o">);</span>
+                <span class="o">}</span>
+                
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Error in monitoring: "</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+            <span class="o">}</span>
+        <span class="o">},</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">30</span><span class="o">,</span> <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">);</span>
+    <span class="o">}</span>
+    
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">sendAlert</span><span class="o">(</span><span class="nc">String</span> <span class="n">message</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// Slack, 이메일, SMS 등으로 알림 전송</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"ALERT: "</span> <span class="o">+</span> <span class="n">message</span><span class="o">);</span>
+        <span class="c1">// 실제 알림 구현</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="️-실습-실무급-스트리밍-시스템-구축">🛠️ 실습: 실무급 스트리밍 시스템 구축</h2>
+
+<h3 id="1-환경-설정">1. 환경 설정</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Docker Compose로 Kafka 클러스터 구성</span>
+version: <span class="s1">'3.8'</span>
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - <span class="s2">"2181:2181"</span>
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - <span class="s2">"9092:9092"</span>
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: <span class="nb">true
+      </span>KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    depends_on:
+      - kafka
+    ports:
+      - <span class="s2">"8080:8080"</span>
+    environment:
+      KAFKA_CLUSTERS_0_NAME: <span class="nb">local
+      </span>KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+</code></pre></div></div>
+
+<h3 id="2-실시간-로그-처리-시스템">2. 실시간 로그 처리 시스템</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 실시간 로그 처리 시스템</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">LogProcessingSystem</span> <span class="o">{</span>
+    
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// Producer 설정</span>
+        <span class="nc">Properties</span> <span class="n">producerProps</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Properties</span><span class="o">();</span>
+        <span class="n">producerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"bootstrap.servers"</span><span class="o">,</span> <span class="s">"localhost:9092"</span><span class="o">);</span>
+        <span class="n">producerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"key.serializer"</span><span class="o">,</span> <span class="s">"org.apache.kafka.common.serialization.StringSerializer"</span><span class="o">);</span>
+        <span class="n">producerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"value.serializer"</span><span class="o">,</span> <span class="s">"org.apache.kafka.common.serialization.StringSerializer"</span><span class="o">);</span>
+        <span class="n">producerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"compression.type"</span><span class="o">,</span> <span class="s">"snappy"</span><span class="o">);</span>
+        <span class="n">producerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"batch.size"</span><span class="o">,</span> <span class="mi">16384</span><span class="o">);</span>
+        <span class="n">producerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"linger.ms"</span><span class="o">,</span> <span class="mi">5</span><span class="o">);</span>
+        
+        <span class="c1">// Consumer 설정</span>
+        <span class="nc">Properties</span> <span class="n">consumerProps</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Properties</span><span class="o">();</span>
+        <span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"bootstrap.servers"</span><span class="o">,</span> <span class="s">"localhost:9092"</span><span class="o">);</span>
+        <span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"group.id"</span><span class="o">,</span> <span class="s">"log-processor"</span><span class="o">);</span>
+        <span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"key.deserializer"</span><span class="o">,</span> <span class="s">"org.apache.kafka.common.serialization.StringDeserializer"</span><span class="o">);</span>
+        <span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"value.deserializer"</span><span class="o">,</span> <span class="s">"org.apache.kafka.common.serialization.StringDeserializer"</span><span class="o">);</span>
+        <span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"auto.offset.reset"</span><span class="o">,</span> <span class="s">"earliest"</span><span class="o">);</span>
+        <span class="n">consumerProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"enable.auto.commit"</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+        
+        <span class="c1">// 로그 수집 스레드</span>
+        <span class="nc">Thread</span> <span class="n">logCollector</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">(</span><span class="nc">KafkaProducer</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">producer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">KafkaProducer</span><span class="o">&lt;&gt;(</span><span class="n">producerProps</span><span class="o">))</span> <span class="o">{</span>
+                <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="c1">// 로그 파일에서 읽기</span>
+                    <span class="nc">String</span> <span class="n">logLine</span> <span class="o">=</span> <span class="n">readLogLine</span><span class="o">();</span>
+                    <span class="k">if</span> <span class="o">(</span><span class="n">logLine</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="nc">ProducerRecord</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="kd">record</span> <span class="err">=</span> <span class="nc">new</span> <span class="nc">ProducerRecord</span><span class="o">&lt;&gt;(</span><span class="s">"raw-logs"</span><span class="o">,</span> <span class="n">logLine</span><span class="o">);</span>
+                        <span class="n">producer</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="kd">record</span><span class="err">,</span> <span class="err">(</span><span class="nc">metadata</span><span class="o">,</span> <span class="n">exception</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span>
+                            <span class="k">if</span> <span class="o">(</span><span class="n">exception</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                                <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Error sending log: "</span> <span class="o">+</span> <span class="n">exception</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+                            <span class="o">}</span>
+                        <span class="o">});</span>
+                    <span class="o">}</span>
+                    <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span> <span class="c1">// 100ms 간격</span>
+                <span class="o">}</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Error in log collector: "</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+            <span class="o">}</span>
+        <span class="o">});</span>
+        
+        <span class="c1">// 로그 처리 스레드</span>
+        <span class="nc">Thread</span> <span class="n">logProcessor</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">(</span><span class="nc">KafkaConsumer</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">KafkaConsumer</span><span class="o">&lt;&gt;(</span><span class="n">consumerProps</span><span class="o">))</span> <span class="o">{</span>
+                <span class="n">consumer</span><span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"raw-logs"</span><span class="o">));</span>
+                
+                <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="nc">ConsumerRecords</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">records</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="na">poll</span><span class="o">(</span><span class="nc">Duration</span><span class="o">.</span><span class="na">ofMillis</span><span class="o">(</span><span class="mi">1000</span><span class="o">));</span>
+                    
+                    <span class="k">for</span> <span class="o">(</span><span class="nc">ConsumerRecord</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="kd">record</span> <span class="err">:</span> <span class="nc">records</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// 로그 파싱 및 처리</span>
+                        <span class="nc">LogEntry</span> <span class="n">logEntry</span> <span class="o">=</span> <span class="n">parseLog</span><span class="o">(</span><span class="kd">record</span><span class="err">.</span><span class="nc">value</span><span class="o">());</span>
+                        <span class="k">if</span> <span class="o">(</span><span class="n">logEntry</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                            <span class="n">processLogEntry</span><span class="o">(</span><span class="n">logEntry</span><span class="o">);</span>
+                        <span class="o">}</span>
+                    <span class="o">}</span>
+                    
+                    <span class="c1">// 오프셋 커밋</span>
+                    <span class="n">consumer</span><span class="o">.</span><span class="na">commitSync</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Error in log processor: "</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+            <span class="o">}</span>
+        <span class="o">});</span>
+        
+        <span class="c1">// 스레드 시작</span>
+        <span class="n">logCollector</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">logProcessor</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        
+        <span class="c1">// 종료 시그널 대기</span>
+        <span class="nc">Runtime</span><span class="o">.</span><span class="na">getRuntime</span><span class="o">().</span><span class="na">addShutdownHook</span><span class="o">(</span><span class="k">new</span> <span class="nc">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+            <span class="n">logCollector</span><span class="o">.</span><span class="na">interrupt</span><span class="o">();</span>
+            <span class="n">logProcessor</span><span class="o">.</span><span class="na">interrupt</span><span class="o">();</span>
+        <span class="o">}));</span>
+    <span class="o">}</span>
+    
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">readLogLine</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">// 실제 로그 파일에서 읽기 구현</span>
+        <span class="k">return</span> <span class="s">"2025-09-09 10:30:45 INFO User login successful user_id=12345"</span><span class="o">;</span>
+    <span class="o">}</span>
+    
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">LogEntry</span> <span class="nf">parseLog</span><span class="o">(</span><span class="nc">String</span> <span class="n">logLine</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// 로그 파싱 로직 구현</span>
+        <span class="nc">String</span><span class="o">[]</span> <span class="n">parts</span> <span class="o">=</span> <span class="n">logLine</span><span class="o">.</span><span class="na">split</span><span class="o">(</span><span class="s">" "</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">parts</span><span class="o">.</span><span class="na">length</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="k">new</span> <span class="nf">LogEntry</span><span class="o">(</span><span class="n">parts</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">+</span> <span class="s">" "</span> <span class="o">+</span> <span class="n">parts</span><span class="o">[</span><span class="mi">1</span><span class="o">],</span> <span class="n">parts</span><span class="o">[</span><span class="mi">2</span><span class="o">],</span> <span class="n">parts</span><span class="o">[</span><span class="mi">3</span><span class="o">]);</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+    
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">processLogEntry</span><span class="o">(</span><span class="nc">LogEntry</span> <span class="n">logEntry</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// 로그 처리 로직 구현</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Processing log: "</span> <span class="o">+</span> <span class="n">logEntry</span><span class="o">);</span>
+    <span class="o">}</span>
+    
+    <span class="kd">static</span> <span class="kd">class</span> <span class="nc">LogEntry</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">timestamp</span><span class="o">;</span>
+        <span class="nc">String</span> <span class="n">level</span><span class="o">;</span>
+        <span class="nc">String</span> <span class="n">message</span><span class="o">;</span>
+        
+        <span class="nc">LogEntry</span><span class="o">(</span><span class="nc">String</span> <span class="n">timestamp</span><span class="o">,</span> <span class="nc">String</span> <span class="n">level</span><span class="o">,</span> <span class="nc">String</span> <span class="n">message</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">this</span><span class="o">.</span><span class="na">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span><span class="o">;</span>
+            <span class="k">this</span><span class="o">.</span><span class="na">level</span> <span class="o">=</span> <span class="n">level</span><span class="o">;</span>
+            <span class="k">this</span><span class="o">.</span><span class="na">message</span> <span class="o">=</span> <span class="n">message</span><span class="o">;</span>
+        <span class="o">}</span>
+        
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="nc">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"[%s] %s: %s"</span><span class="o">,</span> <span class="n">timestamp</span><span class="o">,</span> <span class="n">level</span><span class="o">,</span> <span class="n">message</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="3-이벤트-기반-마이크로서비스">3. 이벤트 기반 마이크로서비스</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 이벤트 기반 마이크로서비스 예제</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">EventDrivenMicroservice</span> <span class="o">{</span>
+    
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// 이벤트 처리 서비스</span>
+        <span class="nc">EventProcessor</span> <span class="n">eventProcessor</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">EventProcessor</span><span class="o">();</span>
+        <span class="n">eventProcessor</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        
+        <span class="c1">// 주문 서비스</span>
+        <span class="nc">OrderService</span> <span class="n">orderService</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">OrderService</span><span class="o">();</span>
+        <span class="n">orderService</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        
+        <span class="c1">// 재고 서비스</span>
+        <span class="nc">InventoryService</span> <span class="n">inventoryService</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">InventoryService</span><span class="o">();</span>
+        <span class="n">inventoryService</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+    
+    <span class="c1">// 이벤트 처리기</span>
+    <span class="kd">static</span> <span class="kd">class</span> <span class="nc">EventProcessor</span> <span class="o">{</span>
+        <span class="kd">private</span> <span class="nc">KafkaConsumer</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">consumer</span><span class="o">;</span>
+        
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">start</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nc">Properties</span> <span class="n">props</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Properties</span><span class="o">();</span>
+            <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"bootstrap.servers"</span><span class="o">,</span> <span class="s">"localhost:9092"</span><span class="o">);</span>
+            <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"group.id"</span><span class="o">,</span> <span class="s">"event-processor"</span><span class="o">);</span>
+            <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"key.deserializer"</span><span class="o">,</span> <span class="s">"org.apache.kafka.common.serialization.StringDeserializer"</span><span class="o">);</span>
+            <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"value.deserializer"</span><span class="o">,</span> <span class="s">"org.apache.kafka.common.serialization.StringDeserializer"</span><span class="o">);</span>
+            
+            <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">KafkaConsumer</span><span class="o">&lt;&gt;(</span><span class="n">props</span><span class="o">);</span>
+            <span class="n">consumer</span><span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"orders"</span><span class="o">,</span> <span class="s">"inventory"</span><span class="o">,</span> <span class="s">"payments"</span><span class="o">));</span>
+            
+            <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">ConsumerRecords</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">records</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="na">poll</span><span class="o">(</span><span class="nc">Duration</span><span class="o">.</span><span class="na">ofMillis</span><span class="o">(</span><span class="mi">1000</span><span class="o">));</span>
+                
+                <span class="k">for</span> <span class="o">(</span><span class="nc">ConsumerRecord</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="kd">record</span> <span class="err">:</span> <span class="nc">records</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">processEvent</span><span class="o">(</span><span class="kd">record</span><span class="err">.</span><span class="nc">topic</span><span class="o">(),</span> <span class="kd">record</span><span class="err">.</span><span class="nc">key</span><span class="o">(),</span> <span class="kd">record</span><span class="err">.</span><span class="nc">value</span><span class="o">());</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        
+        <span class="kd">private</span> <span class="kt">void</span> <span class="nf">processEvent</span><span class="o">(</span><span class="nc">String</span> <span class="n">topic</span><span class="o">,</span> <span class="nc">String</span> <span class="n">key</span><span class="o">,</span> <span class="nc">String</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">switch</span> <span class="o">(</span><span class="n">topic</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">case</span> <span class="s">"orders"</span><span class="o">:</span>
+                    <span class="n">handleOrderEvent</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+                    <span class="k">break</span><span class="o">;</span>
+                <span class="k">case</span> <span class="s">"inventory"</span><span class="o">:</span>
+                    <span class="n">handleInventoryEvent</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+                    <span class="k">break</span><span class="o">;</span>
+                <span class="k">case</span> <span class="s">"payments"</span><span class="o">:</span>
+                    <span class="n">handlePaymentEvent</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+                    <span class="k">break</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        
+        <span class="kd">private</span> <span class="kt">void</span> <span class="nf">handleOrderEvent</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">,</span> <span class="nc">String</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Processing order event: "</span> <span class="o">+</span> <span class="n">key</span> <span class="o">+</span> <span class="s">" -&gt; "</span> <span class="o">+</span> <span class="n">value</span><span class="o">);</span>
+            <span class="c1">// 주문 이벤트 처리 로직</span>
+        <span class="o">}</span>
+        
+        <span class="kd">private</span> <span class="kt">void</span> <span class="nf">handleInventoryEvent</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">,</span> <span class="nc">String</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Processing inventory event: "</span> <span class="o">+</span> <span class="n">key</span> <span class="o">+</span> <span class="s">" -&gt; "</span> <span class="o">+</span> <span class="n">value</span><span class="o">);</span>
+            <span class="c1">// 재고 이벤트 처리 로직</span>
+        <span class="o">}</span>
+        
+        <span class="kd">private</span> <span class="kt">void</span> <span class="nf">handlePaymentEvent</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">,</span> <span class="nc">String</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Processing payment event: "</span> <span class="o">+</span> <span class="n">key</span> <span class="o">+</span> <span class="s">" -&gt; "</span> <span class="o">+</span> <span class="n">value</span><span class="o">);</span>
+            <span class="c1">// 결제 이벤트 처리 로직</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="-학습-요약">📚 학습 요약</h2>
+
+<h3 id="이번-포스트에서-학습한-내용">이번 포스트에서 학습한 내용</h3>
+
+<ol>
+  <li><strong>Kafka 아키텍처 심화 이해</strong>
+    <ul>
+      <li>핵심 컴포넌트 분석</li>
+      <li>메시지 전달 보장 레벨</li>
+      <li>파티셔닝과 복제 전략</li>
+    </ul>
+  </li>
+  <li><strong>프로듀서 최적화 전략</strong>
+    <ul>
+      <li>배치 처리 최적화</li>
+      <li>파티셔닝 전략</li>
+      <li>압축과 압축</li>
+    </ul>
+  </li>
+  <li><strong>컨슈머 그룹과 파티셔닝</strong>
+    <ul>
+      <li>컨슈머 그룹 관리</li>
+      <li>수동 오프셋 관리</li>
+      <li>리밸런싱 처리</li>
+    </ul>
+  </li>
+  <li><strong>스트리밍 처리와 KStreams</strong>
+    <ul>
+      <li>KStreams 기본 설정</li>
+      <li>스트림 처리 예제</li>
+      <li>상태 저장소 활용</li>
+    </ul>
+  </li>
+  <li><strong>모니터링과 운영 관리</strong>
+    <ul>
+      <li>JMX 메트릭 수집</li>
+      <li>카프카 관리 도구</li>
+      <li>알림 시스템 구축</li>
+    </ul>
+  </li>
+  <li><strong>실무급 스트리밍 시스템 구축</strong>
+    <ul>
+      <li>실시간 로그 처리 시스템</li>
+      <li>이벤트 기반 마이크로서비스</li>
+      <li>Docker 환경 구성</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="핵심-개념-정리">핵심 개념 정리</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>개념</th>
+      <th>설명</th>
+      <th>중요도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>프로듀서 최적화</strong></td>
+      <td>성능과 안정성 향상</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>컨슈머 그룹</strong></td>
+      <td>병렬 처리 및 부하 분산</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>스트리밍 처리</strong></td>
+      <td>실시간 데이터 변환</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>모니터링</strong></td>
+      <td>시스템 상태 추적</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="실무-적용-시-고려사항">실무 적용 시 고려사항</h3>
+
+<ol>
+  <li><strong>성능 최적화</strong>: 배치 처리, 압축, 파티셔닝</li>
+  <li><strong>안정성</strong>: 복제, 오프셋 관리, 에러 처리</li>
+  <li><strong>모니터링</strong>: 메트릭 수집, 알림, 로그 분석</li>
+  <li><strong>확장성</strong>: 클러스터 구성, 부하 분산</li>
+</ol>
+
+<hr />
+
+<p><em>이 가이드를 통해 Apache Kafka의 고급 기능들을 마스터하고, 실무에서 안정적이고 효율적인 스트리밍 시스템을 구축할 수 있습니다!</em> 🚀</p>
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
