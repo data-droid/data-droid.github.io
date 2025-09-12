@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Apache Spark의 기본 구조와 핵심 개념인 RDD, DataFrame, Spark SQL을 학습하고 실습해봅니다.">
+
+
+
+<title>Part 1: Apache Spark 기초와 핵심 개념 - RDD부터 DataFrame까지 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 1: Apache Spark 기초와 핵심 개념 - RDD부터 DataFrame까지">
+<meta property="og:description" content="Apache Spark의 기본 구조와 핵심 개념인 RDD, DataFrame, Spark SQL을 학습하고 실습해봅니다.">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2025/09/11/apache-spark-basics.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 1: Apache Spark 기초와 핵심 개념 - RDD부터 DataFrame까지">
+<meta name="twitter:description" content="Apache Spark의 기본 구조와 핵심 개념인 RDD, DataFrame, Spark SQL을 학습하고 실습해봅니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2025/09/11/apache-spark-basics.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2025-09-11-apache-spark-basics.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 11일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 1: Apache Spark 기초와 핵심 개념 - RDD부터 DataFrame까지</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Spark</span>
+      
+        <span class="tag">RDD</span>
+      
+        <span class="tag">DataFrame</span>
+      
+        <span class="tag">Spark-SQL</span>
+      
+        <span class="tag">빅데이터처리</span>
+      
+        <span class="tag">Python</span>
+      
+        <span class="tag">PySpark</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Apache spark complete guide 시리즈</span>
+      <span class="series-order">Part 2</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 30분</span>
+      
+      
+        <span class="difficulty">📊 중급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-1-apache-spark-기초와-핵심-개념---rdd부터-dataframe까지">Part 1: Apache Spark 기초와 핵심 개념 - RDD부터 DataFrame까지</h1>
+
+<blockquote>
+  <p>Apache Spark의 기본 구조와 핵심 개념인 RDD, DataFrame, Spark SQL을 학습하고 실습해봅니다.</p>
+</blockquote>
+
+<h2 id="-목차">📋 목차</h2>
+
+<ol>
+  <li><a href="#spark-아키텍처-이해">Spark 아키텍처 이해</a></li>
+  <li><a href="#rdd-resilient-distributed-dataset">RDD (Resilient Distributed Dataset)</a></li>
+  <li><a href="#dataframe과-dataset">DataFrame과 Dataset</a></li>
+  <li><a href="#spark-sql">Spark SQL</a></li>
+  <li><a href="#실습-기본-데이터-처리">실습: 기본 데이터 처리</a></li>
+  <li><a href="#학습-요약">학습 요약</a></li>
+</ol>
+
+<h2 id="️-spark-아키텍처-이해">🏗️ Spark 아키텍처 이해</h2>
+
+<h3 id="핵심-컴포넌트">핵심 컴포넌트</h3>
+
+<p>Apache Spark는 분산 컴퓨팅을 위한 통합 분석 엔진입니다. 다음과 같은 핵심 컴포넌트로 구성됩니다:</p>
+
+<h4 id="1-driver-program"><strong>1. Driver Program</strong></h4>
+<ul>
+  <li><strong>역할</strong>: 애플리케이션의 메인 함수 실행</li>
+  <li><strong>기능</strong>: SparkContext 생성, 작업 스케줄링, 결과 수집</li>
+  <li><strong>위치</strong>: 클라이언트 노드에서 실행</li>
+</ul>
+
+<h4 id="2-cluster-manager"><strong>2. Cluster Manager</strong></h4>
+<ul>
+  <li><strong>Standalone</strong>: Spark 자체 클러스터 매니저</li>
+  <li><strong>YARN</strong>: Hadoop 생태계의 리소스 매니저</li>
+  <li><strong>Mesos</strong>: 범용 클러스터 매니저</li>
+  <li><strong>Kubernetes</strong>: 컨테이너 오케스트레이션</li>
+</ul>
+
+<h4 id="3-worker-node"><strong>3. Worker Node</strong></h4>
+<ul>
+  <li><strong>Executor</strong>: 실제 작업을 수행하는 JVM 프로세스</li>
+  <li><strong>Task</strong>: Executor에서 실행되는 개별 작업 단위</li>
+  <li><strong>Cache</strong>: 메모리 기반 데이터 저장소</li>
+</ul>
+
+<h3 id="sparkcontext와-sparksession">SparkContext와 SparkSession</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyspark</span> <span class="kn">import</span> <span class="n">SparkContext</span><span class="p">,</span> <span class="n">SparkConf</span>
+<span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="c1"># SparkContext 생성 (RDD용)
+</span><span class="n">conf</span> <span class="o">=</span> <span class="nc">SparkConf</span><span class="p">().</span><span class="nf">setAppName</span><span class="p">(</span><span class="sh">"</span><span class="s">MyApp</span><span class="sh">"</span><span class="p">).</span><span class="nf">setMaster</span><span class="p">(</span><span class="sh">"</span><span class="s">local[*]</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">sc</span> <span class="o">=</span> <span class="nc">SparkContext</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="n">conf</span><span class="p">)</span>
+
+<span class="c1"># SparkSession 생성 (DataFrame/SQL용)
+</span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">MyApp</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">master</span><span class="p">(</span><span class="sh">"</span><span class="s">local[*]</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.adaptive.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># SparkContext 접근
+</span><span class="n">sc_from_session</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">sparkContext</span>
+</code></pre></div></div>
+
+<h2 id="-rdd-resilient-distributed-dataset">🔄 RDD (Resilient Distributed Dataset)</h2>
+
+<h3 id="rdd란">RDD란?</h3>
+
+<p>RDD는 Spark의 기본 데이터 추상화입니다. <strong>불변(immutable)</strong>, <strong>분산(distributed)</strong>, <strong>탄력적(resilient)</strong>한 데이터셋입니다.</p>
+
+<h4 id="rdd의-특성"><strong>RDD의 특성</strong></h4>
+<ol>
+  <li><strong>불변성</strong>: 생성 후 수정 불가, 변환을 통해 새로운 RDD 생성</li>
+  <li><strong>분산성</strong>: 여러 노드에 걸쳐 분산 저장</li>
+  <li><strong>탄력성</strong>: 장애 발생 시 자동 복구 (Lineage 기반)</li>
+  <li><strong>지연 실행</strong>: Action 호출 시까지 실제 연산 지연</li>
+</ol>
+
+<h3 id="rdd-생성-방법">RDD 생성 방법</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 1. 컬렉션에서 RDD 생성
+</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+<span class="n">rdd</span> <span class="o">=</span> <span class="n">sc</span><span class="p">.</span><span class="nf">parallelize</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">numSlices</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>  <span class="c1"># 4개 파티션으로 분할
+</span>
+<span class="c1"># 2. 외부 파일에서 RDD 생성
+</span><span class="n">rdd_text</span> <span class="o">=</span> <span class="n">sc</span><span class="p">.</span><span class="nf">textFile</span><span class="p">(</span><span class="sh">"</span><span class="s">hdfs://path/to/file.txt</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">rdd_csv</span> <span class="o">=</span> <span class="n">sc</span><span class="p">.</span><span class="nf">textFile</span><span class="p">(</span><span class="sh">"</span><span class="s">hdfs://path/to/file.csv</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 3. 다른 RDD에서 변환
+</span><span class="n">rdd_transformed</span> <span class="o">=</span> <span class="n">rdd</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="rdd-기본-연산">RDD 기본 연산</h3>
+
+<h4 id="transformation-변환"><strong>Transformation (변환)</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Map: 각 요소에 함수 적용
+</span><span class="n">rdd</span> <span class="o">=</span> <span class="n">sc</span><span class="p">.</span><span class="nf">parallelize</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="n">doubled</span> <span class="o">=</span> <span class="n">rdd</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">doubled</span><span class="p">.</span><span class="nf">collect</span><span class="p">())</span>  <span class="c1"># [2, 4, 6, 8, 10]
+</span>
+<span class="c1"># Filter: 조건에 맞는 요소만 선택
+</span><span class="n">evens</span> <span class="o">=</span> <span class="n">rdd</span><span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">evens</span><span class="p">.</span><span class="nf">collect</span><span class="p">())</span>  <span class="c1"># [2, 4]
+</span>
+<span class="c1"># FlatMap: 각 요소를 여러 요소로 확장
+</span><span class="n">words</span> <span class="o">=</span> <span class="n">sc</span><span class="p">.</span><span class="nf">parallelize</span><span class="p">([</span><span class="sh">"</span><span class="s">hello world</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">spark tutorial</span><span class="sh">"</span><span class="p">])</span>
+<span class="n">word_list</span> <span class="o">=</span> <span class="n">words</span><span class="p">.</span><span class="nf">flatMap</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s"> </span><span class="sh">"</span><span class="p">))</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">word_list</span><span class="p">.</span><span class="nf">collect</span><span class="p">())</span>  <span class="c1"># ['hello', 'world', 'spark', 'tutorial']
+</span>
+<span class="c1"># Distinct: 중복 제거
+</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">rdd</span> <span class="o">=</span> <span class="n">sc</span><span class="p">.</span><span class="nf">parallelize</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">unique</span> <span class="o">=</span> <span class="n">rdd</span><span class="p">.</span><span class="nf">distinct</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">unique</span><span class="p">.</span><span class="nf">collect</span><span class="p">())</span>  <span class="c1"># [1, 2, 3]
+</span></code></pre></div></div>
+
+<h4 id="action-액션"><strong>Action (액션)</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Collect: 모든 데이터를 드라이버로 수집
+</span><span class="n">rdd</span> <span class="o">=</span> <span class="n">sc</span><span class="p">.</span><span class="nf">parallelize</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">rdd</span><span class="p">.</span><span class="nf">collect</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  <span class="c1"># [1, 2, 3, 4, 5]
+</span>
+<span class="c1"># Count: 요소 개수 반환
+</span><span class="n">count</span> <span class="o">=</span> <span class="n">rdd</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>  <span class="c1"># 5
+</span>
+<span class="c1"># First: 첫 번째 요소 반환
+</span><span class="n">first</span> <span class="o">=</span> <span class="n">rdd</span><span class="p">.</span><span class="nf">first</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">first</span><span class="p">)</span>  <span class="c1"># 1
+</span>
+<span class="c1"># Take: 처음 n개 요소 반환
+</span><span class="n">first_three</span> <span class="o">=</span> <span class="n">rdd</span><span class="p">.</span><span class="nf">take</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">first_three</span><span class="p">)</span>  <span class="c1"># [1, 2, 3]
+</span>
+<span class="c1"># Reduce: 요소들을 하나로 축약
+</span><span class="n">sum_result</span> <span class="o">=</span> <span class="n">rdd</span><span class="p">.</span><span class="nf">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">sum_result</span><span class="p">)</span>  <span class="c1"># 15
+</span>
+<span class="c1"># Fold: 초기값을 사용한 축약
+</span><span class="n">sum_with_zero</span> <span class="o">=</span> <span class="n">rdd</span><span class="p">.</span><span class="nf">fold</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">sum_with_zero</span><span class="p">)</span>  <span class="c1"># 15
+</span></code></pre></div></div>
+
+<h3 id="고급-rdd-연산">고급 RDD 연산</h3>
+
+<h4 id="그룹화와-집계"><strong>그룹화와 집계</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># GroupByKey: 키별로 그룹화
+</span><span class="n">data</span> <span class="o">=</span> <span class="p">[(</span><span class="sh">"</span><span class="s">apple</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="sh">"</span><span class="s">banana</span><span class="sh">"</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="sh">"</span><span class="s">apple</span><span class="sh">"</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="sh">"</span><span class="s">banana</span><span class="sh">"</span><span class="p">,</span> <span class="mi">4</span><span class="p">)]</span>
+<span class="n">rdd</span> <span class="o">=</span> <span class="n">sc</span><span class="p">.</span><span class="nf">parallelize</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">grouped</span> <span class="o">=</span> <span class="n">rdd</span><span class="p">.</span><span class="nf">groupByKey</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">grouped</span><span class="p">.</span><span class="nf">mapValues</span><span class="p">(</span><span class="nb">list</span><span class="p">).</span><span class="nf">collect</span><span class="p">())</span>
+<span class="c1"># [('apple', [1, 3]), ('banana', [2, 4])]
+</span>
+<span class="c1"># ReduceByKey: 키별로 값들을 축약
+</span><span class="n">reduced</span> <span class="o">=</span> <span class="n">rdd</span><span class="p">.</span><span class="nf">reduceByKey</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">reduced</span><span class="p">.</span><span class="nf">collect</span><span class="p">())</span>  <span class="c1"># [('apple', 4), ('banana', 6)]
+</span>
+<span class="c1"># AggregateByKey: 복잡한 집계
+# 초기값, 시퀀스 함수, 결합 함수
+</span><span class="n">aggregated</span> <span class="o">=</span> <span class="n">rdd</span><span class="p">.</span><span class="nf">aggregateByKey</span><span class="p">(</span>
+    <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># 초기값: (합계, 개수)
+</span>    <span class="k">lambda</span> <span class="n">acc</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="p">(</span><span class="n">acc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">val</span><span class="p">,</span> <span class="n">acc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>  <span class="c1"># 시퀀스 함수
+</span>    <span class="k">lambda</span> <span class="n">acc1</span><span class="p">,</span> <span class="n">acc2</span><span class="p">:</span> <span class="p">(</span><span class="n">acc1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">acc2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">acc1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">acc2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># 결합 함수
+</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">aggregated</span><span class="p">.</span><span class="nf">collect</span><span class="p">())</span>
+<span class="c1"># [('apple', (4, 2)), ('banana', (6, 2))]
+</span></code></pre></div></div>
+
+<h4 id="조인-연산"><strong>조인 연산</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 두 RDD 생성
+</span><span class="n">rdd1</span> <span class="o">=</span> <span class="n">sc</span><span class="p">.</span><span class="nf">parallelize</span><span class="p">([(</span><span class="sh">"</span><span class="s">apple</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="sh">"</span><span class="s">banana</span><span class="sh">"</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])</span>
+<span class="n">rdd2</span> <span class="o">=</span> <span class="n">sc</span><span class="p">.</span><span class="nf">parallelize</span><span class="p">([(</span><span class="sh">"</span><span class="s">apple</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">red</span><span class="sh">"</span><span class="p">),</span> <span class="p">(</span><span class="sh">"</span><span class="s">banana</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">yellow</span><span class="sh">"</span><span class="p">)])</span>
+
+<span class="c1"># Inner Join
+</span><span class="n">inner_join</span> <span class="o">=</span> <span class="n">rdd1</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">rdd2</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">inner_join</span><span class="p">.</span><span class="nf">collect</span><span class="p">())</span>
+<span class="c1"># [('apple', (1, 'red')), ('banana', (2, 'yellow'))]
+</span>
+<span class="c1"># Left Outer Join
+</span><span class="n">left_join</span> <span class="o">=</span> <span class="n">rdd1</span><span class="p">.</span><span class="nf">leftOuterJoin</span><span class="p">(</span><span class="n">rdd2</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">left_join</span><span class="p">.</span><span class="nf">collect</span><span class="p">())</span>
+<span class="c1"># [('apple', (1, 'red')), ('banana', (2, 'yellow'))]
+</span>
+<span class="c1"># Cartesian Product (카테시안 곱)
+</span><span class="n">cartesian</span> <span class="o">=</span> <span class="n">rdd1</span><span class="p">.</span><span class="nf">cartesian</span><span class="p">(</span><span class="n">rdd2</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">cartesian</span><span class="p">.</span><span class="nf">collect</span><span class="p">())</span>
+<span class="c1"># [('apple', ('apple', 'red')), ('apple', ('banana', 'yellow')), ...]
+</span></code></pre></div></div>
+
+<h2 id="-dataframe과-dataset">📊 DataFrame과 Dataset</h2>
+
+<h3 id="dataframe-소개">DataFrame 소개</h3>
+
+<p>DataFrame은 RDD의 진화된 형태로, <strong>구조화된 데이터</strong>를 효율적으로 처리할 수 있습니다.</p>
+
+<h4 id="dataframe의-장점"><strong>DataFrame의 장점</strong></h4>
+<ol>
+  <li><strong>최적화된 실행</strong>: Catalyst Optimizer가 쿼리 최적화</li>
+  <li><strong>스키마 정보</strong>: 컬럼 타입과 이름 정보 포함</li>
+  <li><strong>풍부한 API</strong>: SQL, Python, Scala, R 지원</li>
+  <li><strong>메모리 효율성</strong>: Tungsten 엔진으로 메모리 최적화</li>
+</ol>
+
+<h3 id="dataframe-생성">DataFrame 생성</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 1. RDD에서 DataFrame 생성
+</span><span class="kn">from</span> <span class="n">pyspark.sql.types</span> <span class="kn">import</span> <span class="n">StructType</span><span class="p">,</span> <span class="n">StructField</span><span class="p">,</span> <span class="n">StringType</span><span class="p">,</span> <span class="n">IntegerType</span>
+
+<span class="c1"># 스키마 정의
+</span><span class="n">schema</span> <span class="o">=</span> <span class="nc">StructType</span><span class="p">([</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="nc">StringType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">,</span> <span class="nc">IntegerType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">city</span><span class="sh">"</span><span class="p">,</span> <span class="nc">StringType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="c1"># 데이터 생성
+</span><span class="n">data</span> <span class="o">=</span> <span class="p">[(</span><span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="sh">"</span><span class="s">Seoul</span><span class="sh">"</span><span class="p">),</span> <span class="p">(</span><span class="sh">"</span><span class="s">Bob</span><span class="sh">"</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="sh">"</span><span class="s">Busan</span><span class="sh">"</span><span class="p">),</span> <span class="p">(</span><span class="sh">"</span><span class="s">Charlie</span><span class="sh">"</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="sh">"</span><span class="s">Seoul</span><span class="sh">"</span><span class="p">)]</span>
+<span class="n">rdd</span> <span class="o">=</span> <span class="n">sc</span><span class="p">.</span><span class="nf">parallelize</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="nf">createDataFrame</span><span class="p">(</span><span class="n">rdd</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+<span class="n">df</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># 2. 직접 DataFrame 생성
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="nf">createDataFrame</span><span class="p">([</span>
+    <span class="p">(</span><span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="sh">"</span><span class="s">Seoul</span><span class="sh">"</span><span class="p">),</span>
+    <span class="p">(</span><span class="sh">"</span><span class="s">Bob</span><span class="sh">"</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="sh">"</span><span class="s">Busan</span><span class="sh">"</span><span class="p">),</span>
+    <span class="p">(</span><span class="sh">"</span><span class="s">Charlie</span><span class="sh">"</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="sh">"</span><span class="s">Seoul</span><span class="sh">"</span><span class="p">)</span>
+<span class="p">],</span> <span class="p">[</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">city</span><span class="sh">"</span><span class="p">])</span>
+
+<span class="c1"># 3. 외부 파일에서 로드
+</span><span class="n">df_csv</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">csv</span><span class="p">(</span><span class="sh">"</span><span class="s">path/to/file.csv</span><span class="sh">"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">inferSchema</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">df_json</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">json</span><span class="p">(</span><span class="sh">"</span><span class="s">path/to/file.json</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">df_parquet</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">path/to/file.parquet</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="dataframe-기본-연산">DataFrame 기본 연산</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 기본 정보 확인
+</span><span class="n">df</span><span class="p">.</span><span class="nf">printSchema</span><span class="p">()</span>  <span class="c1"># 스키마 출력
+</span><span class="n">df</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>  <span class="c1"># 데이터 출력
+</span><span class="n">df</span><span class="p">.</span><span class="nf">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># 처음 5행 출력
+</span><span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>  <span class="c1"># 행 개수
+</span><span class="n">df</span><span class="p">.</span><span class="n">columns</span>  <span class="c1"># 컬럼 목록
+</span><span class="n">df</span><span class="p">.</span><span class="n">dtypes</span>  <span class="c1"># 컬럼 타입
+</span>
+<span class="c1"># 컬럼 선택
+</span><span class="n">df</span><span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">).</span><span class="nf">show</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="n">df</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">df</span><span class="p">.</span><span class="n">age</span> <span class="o">+</span> <span class="mi">1</span><span class="p">).</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># 조건 필터링
+</span><span class="n">df</span><span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="n">df</span><span class="p">.</span><span class="n">age</span> <span class="o">&gt;</span> <span class="mi">25</span><span class="p">).</span><span class="nf">show</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="sh">"</span><span class="s">age &gt; 25</span><span class="sh">"</span><span class="p">).</span><span class="nf">show</span><span class="p">()</span>  <span class="c1"># SQL 스타일
+</span>
+<span class="c1"># 정렬
+</span><span class="n">df</span><span class="p">.</span><span class="nf">orderBy</span><span class="p">(</span><span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">).</span><span class="nf">show</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="nf">orderBy</span><span class="p">(</span><span class="n">df</span><span class="p">.</span><span class="n">age</span><span class="p">.</span><span class="nf">desc</span><span class="p">()).</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># 그룹화와 집계
+</span><span class="n">df</span><span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="sh">"</span><span class="s">city</span><span class="sh">"</span><span class="p">).</span><span class="nf">count</span><span class="p">().</span><span class="nf">show</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="sh">"</span><span class="s">city</span><span class="sh">"</span><span class="p">).</span><span class="nf">agg</span><span class="p">({</span><span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">avg</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">}).</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="고급-dataframe-연산">고급 DataFrame 연산</h3>
+
+<h4 id="윈도우-함수"><strong>윈도우 함수</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyspark.sql.window</span> <span class="kn">import</span> <span class="n">Window</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">row_number</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">dense_rank</span><span class="p">,</span> <span class="n">lag</span><span class="p">,</span> <span class="n">lead</span>
+
+<span class="c1"># 윈도우 정의
+</span><span class="n">window_spec</span> <span class="o">=</span> <span class="n">Window</span><span class="p">.</span><span class="nf">partitionBy</span><span class="p">(</span><span class="sh">"</span><span class="s">city</span><span class="sh">"</span><span class="p">).</span><span class="nf">orderBy</span><span class="p">(</span><span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 윈도우 함수 적용
+</span><span class="n">df</span><span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">row_num</span><span class="sh">"</span><span class="p">,</span> <span class="nf">row_number</span><span class="p">().</span><span class="nf">over</span><span class="p">(</span><span class="n">window_spec</span><span class="p">))</span> \
+  <span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">rank</span><span class="sh">"</span><span class="p">,</span> <span class="nf">rank</span><span class="p">().</span><span class="nf">over</span><span class="p">(</span><span class="n">window_spec</span><span class="p">))</span> \
+  <span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">dense_rank</span><span class="sh">"</span><span class="p">,</span> <span class="nf">dense_rank</span><span class="p">().</span><span class="nf">over</span><span class="p">(</span><span class="n">window_spec</span><span class="p">))</span> \
+  <span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">prev_age</span><span class="sh">"</span><span class="p">,</span> <span class="nf">lag</span><span class="p">(</span><span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">).</span><span class="nf">over</span><span class="p">(</span><span class="n">window_spec</span><span class="p">))</span> \
+  <span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">next_age</span><span class="sh">"</span><span class="p">,</span> <span class="nf">lead</span><span class="p">(</span><span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">).</span><span class="nf">over</span><span class="p">(</span><span class="n">window_spec</span><span class="p">))</span> \
+  <span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h4 id="조인-연산-1"><strong>조인 연산</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 두 DataFrame 생성
+</span><span class="n">df1</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="nf">createDataFrame</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="sh">"</span><span class="s">Bob</span><span class="sh">"</span><span class="p">)],</span> <span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">])</span>
+<span class="n">df2</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="nf">createDataFrame</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="sh">"</span><span class="s">Engineer</span><span class="sh">"</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="sh">"</span><span class="s">Manager</span><span class="sh">"</span><span class="p">)],</span> <span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">job</span><span class="sh">"</span><span class="p">])</span>
+
+<span class="c1"># Inner Join
+</span><span class="n">df1</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">df2</span><span class="p">,</span> <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">).</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># Left Join
+</span><span class="n">df1</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">df2</span><span class="p">,</span> <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">left</span><span class="sh">"</span><span class="p">).</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># Cross Join
+</span><span class="n">df1</span><span class="p">.</span><span class="nf">crossJoin</span><span class="p">(</span><span class="n">df2</span><span class="p">).</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="-spark-sql">🔍 Spark SQL</h2>
+
+<h3 id="spark-sql-소개">Spark SQL 소개</h3>
+
+<p>Spark SQL은 구조화된 데이터 처리를 위한 Spark 모듈입니다. SQL 쿼리와 DataFrame API를 통합합니다.</p>
+
+<h3 id="테이블-뷰-생성">테이블 뷰 생성</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># DataFrame을 임시 뷰로 등록
+</span><span class="n">df</span><span class="p">.</span><span class="nf">createOrReplaceTempView</span><span class="p">(</span><span class="sh">"</span><span class="s">people</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># SQL 쿼리 실행
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    SELECT city, COUNT(*) as count, AVG(age) as avg_age
+    FROM people
+    WHERE age &gt; 25
+    GROUP BY city
+    ORDER BY count DESC
+</span><span class="sh">"""</span><span class="p">)</span>
+<span class="n">result</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="고급-sql-기능">고급 SQL 기능</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 복잡한 쿼리 예제
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    SELECT 
+        name,
+        age,
+        city,
+        ROW_NUMBER() OVER (PARTITION BY city ORDER BY age DESC) as rank_in_city,
+        AVG(age) OVER (PARTITION BY city) as avg_age_in_city
+    FROM people
+    WHERE age &gt; 20
+</span><span class="sh">"""</span><span class="p">).</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># CTE (Common Table Expression) 사용
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    WITH city_stats AS (
+        SELECT city, COUNT(*) as count, AVG(age) as avg_age
+        FROM people
+        GROUP BY city
+    )
+    SELECT p.name, p.age, p.city, cs.avg_age
+    FROM people p
+    JOIN city_stats cs ON p.city = cs.city
+    WHERE p.age &gt; cs.avg_age
+</span><span class="sh">"""</span><span class="p">).</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="️-실습-기본-데이터-처리">🛠️ 실습: 기본 데이터 처리</h2>
+
+<h3 id="실습-1-로그-데이터-분석">실습 1: 로그 데이터 분석</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 로그 데이터 생성
+</span><span class="n">log_data</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sh">"</span><span class="s">2025-09-11 10:30:45 INFO User login successful user_id=12345</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">2025-09-11 10:31:12 ERROR Database connection failed</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">2025-09-11 10:31:45 INFO User login successful user_id=67890</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">2025-09-11 10:32:01 WARN High memory usage detected</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">2025-09-11 10:32:15 INFO User logout user_id=12345</span><span class="sh">"</span>
+<span class="p">]</span>
+
+<span class="c1"># RDD로 로그 분석
+</span><span class="n">rdd_logs</span> <span class="o">=</span> <span class="n">sc</span><span class="p">.</span><span class="nf">parallelize</span><span class="p">(</span><span class="n">log_data</span><span class="p">)</span>
+
+<span class="c1"># 로그 레벨별 통계
+</span><span class="n">log_levels</span> <span class="o">=</span> <span class="n">rdd_logs</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="n">line</span><span class="p">.</span><span class="nf">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">])</span>  <span class="c1"># 로그 레벨 추출
+</span><span class="n">level_counts</span> <span class="o">=</span> <span class="n">log_levels</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">level</span><span class="p">:</span> <span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="mi">1</span><span class="p">)).</span><span class="nf">reduceByKey</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">로그 레벨별 통계:</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">level</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">level_counts</span><span class="p">.</span><span class="nf">collect</span><span class="p">():</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 에러 로그만 필터링
+</span><span class="n">error_logs</span> <span class="o">=</span> <span class="n">rdd_logs</span><span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="sh">"</span><span class="s">ERROR</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">line</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">에러 로그:</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">error_logs</span><span class="p">.</span><span class="nf">foreach</span><span class="p">(</span><span class="k">print</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="실습-2-구조화된-데이터-처리">실습 2: 구조화된 데이터 처리</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 판매 데이터 생성
+</span><span class="n">sales_data</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="sh">"</span><span class="s">2025-09-11</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Laptop</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1200</span><span class="p">,</span> <span class="sh">"</span><span class="s">Seoul</span><span class="sh">"</span><span class="p">),</span>
+    <span class="p">(</span><span class="sh">"</span><span class="s">2025-09-11</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Bob</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Mouse</span><span class="sh">"</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="sh">"</span><span class="s">Busan</span><span class="sh">"</span><span class="p">),</span>
+    <span class="p">(</span><span class="sh">"</span><span class="s">2025-09-11</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Charlie</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Keyboard</span><span class="sh">"</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="sh">"</span><span class="s">Seoul</span><span class="sh">"</span><span class="p">),</span>
+    <span class="p">(</span><span class="sh">"</span><span class="s">2025-09-12</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Monitor</span><span class="sh">"</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="sh">"</span><span class="s">Seoul</span><span class="sh">"</span><span class="p">),</span>
+    <span class="p">(</span><span class="sh">"</span><span class="s">2025-09-12</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Bob</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Laptop</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1200</span><span class="p">,</span> <span class="sh">"</span><span class="s">Busan</span><span class="sh">"</span><span class="p">),</span>
+    <span class="p">(</span><span class="sh">"</span><span class="s">2025-09-12</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">David</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Headphone</span><span class="sh">"</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="sh">"</span><span class="s">Daegu</span><span class="sh">"</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="c1"># DataFrame 생성
+</span><span class="n">df_sales</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="nf">createDataFrame</span><span class="p">(</span><span class="n">sales_data</span><span class="p">,</span> <span class="p">[</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">customer</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">product</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">price</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">city</span><span class="sh">"</span><span class="p">])</span>
+<span class="n">df_sales</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># 고객별 총 구매액 계산
+</span><span class="n">customer_total</span> <span class="o">=</span> <span class="n">df_sales</span><span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="sh">"</span><span class="s">customer</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">agg</span><span class="p">({</span><span class="sh">"</span><span class="s">price</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">sum</span><span class="sh">"</span><span class="p">})</span> \
+    <span class="p">.</span><span class="nf">withColumnRenamed</span><span class="p">(</span><span class="sh">"</span><span class="s">sum(price)</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">total_spent</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">orderBy</span><span class="p">(</span><span class="sh">"</span><span class="s">total_spent</span><span class="sh">"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">customer_total</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># 도시별 평균 구매액
+</span><span class="n">city_avg</span> <span class="o">=</span> <span class="n">df_sales</span><span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="sh">"</span><span class="s">city</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">agg</span><span class="p">({</span><span class="sh">"</span><span class="s">price</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">avg</span><span class="sh">"</span><span class="p">})</span> \
+    <span class="p">.</span><span class="nf">withColumnRenamed</span><span class="p">(</span><span class="sh">"</span><span class="s">avg(price)</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">avg_price</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">orderBy</span><span class="p">(</span><span class="sh">"</span><span class="s">avg_price</span><span class="sh">"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">city_avg</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># 고가 제품 구매 고객 (1000원 이상)
+</span><span class="n">high_value_customers</span> <span class="o">=</span> <span class="n">df_sales</span><span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="n">df_sales</span><span class="p">.</span><span class="n">price</span> <span class="o">&gt;=</span> <span class="mi">1000</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="sh">"</span><span class="s">customer</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">product</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">price</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">distinct</span><span class="p">()</span>
+<span class="n">high_value_customers</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="실습-3-복잡한-분석">실습 3: 복잡한 분석</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 윈도우 함수를 사용한 고급 분석
+</span><span class="kn">from</span> <span class="n">pyspark.sql.window</span> <span class="kn">import</span> <span class="n">Window</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">row_number</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">lag</span><span class="p">,</span> <span class="nb">sum</span> <span class="k">as</span> <span class="n">spark_sum</span>
+
+<span class="c1"># 고객별 구매 순위 (도시별)
+</span><span class="n">window_spec</span> <span class="o">=</span> <span class="n">Window</span><span class="p">.</span><span class="nf">partitionBy</span><span class="p">(</span><span class="sh">"</span><span class="s">city</span><span class="sh">"</span><span class="p">).</span><span class="nf">orderBy</span><span class="p">(</span><span class="n">df_sales</span><span class="p">.</span><span class="n">price</span><span class="p">.</span><span class="nf">desc</span><span class="p">())</span>
+
+<span class="n">df_ranked</span> <span class="o">=</span> <span class="n">df_sales</span><span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">rank_in_city</span><span class="sh">"</span><span class="p">,</span> <span class="nf">rank</span><span class="p">().</span><span class="nf">over</span><span class="p">(</span><span class="n">window_spec</span><span class="p">))</span> \
+    <span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">row_number_in_city</span><span class="sh">"</span><span class="p">,</span> <span class="nf">row_number</span><span class="p">().</span><span class="nf">over</span><span class="p">(</span><span class="n">window_spec</span><span class="p">))</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">도시별 구매 순위:</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">df_ranked</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># 고객별 누적 구매액 계산
+</span><span class="n">window_cumulative</span> <span class="o">=</span> <span class="n">Window</span><span class="p">.</span><span class="nf">partitionBy</span><span class="p">(</span><span class="sh">"</span><span class="s">customer</span><span class="sh">"</span><span class="p">).</span><span class="nf">orderBy</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">df_cumulative</span> <span class="o">=</span> <span class="n">df_sales</span><span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">cumulative_spent</span><span class="sh">"</span><span class="p">,</span> 
+    <span class="nf">spark_sum</span><span class="p">(</span><span class="sh">"</span><span class="s">price</span><span class="sh">"</span><span class="p">).</span><span class="nf">over</span><span class="p">(</span><span class="n">window_cumulative</span><span class="p">))</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">고객별 누적 구매액:</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">df_cumulative</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># 전일 대비 구매액 변화
+</span><span class="n">window_lag</span> <span class="o">=</span> <span class="n">Window</span><span class="p">.</span><span class="nf">partitionBy</span><span class="p">(</span><span class="sh">"</span><span class="s">customer</span><span class="sh">"</span><span class="p">).</span><span class="nf">orderBy</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">df_with_lag</span> <span class="o">=</span> <span class="n">df_sales</span><span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">prev_day_total</span><span class="sh">"</span><span class="p">,</span> 
+    <span class="nf">lag</span><span class="p">(</span><span class="nf">spark_sum</span><span class="p">(</span><span class="sh">"</span><span class="s">price</span><span class="sh">"</span><span class="p">).</span><span class="nf">over</span><span class="p">(</span><span class="n">window_lag</span><span class="p">),</span> <span class="mi">1</span><span class="p">).</span><span class="nf">over</span><span class="p">(</span><span class="n">window_lag</span><span class="p">))</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">전일 대비 구매액 변화:</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">df_with_lag</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="-학습-요약">📚 학습 요약</h2>
+
+<h3 id="이번-파트에서-학습한-내용">이번 파트에서 학습한 내용</h3>
+
+<ol>
+  <li><strong>Spark 아키텍처 이해</strong>
+    <ul>
+      <li>Driver, Cluster Manager, Worker Node</li>
+      <li>SparkContext와 SparkSession</li>
+    </ul>
+  </li>
+  <li><strong>RDD (Resilient Distributed Dataset)</strong>
+    <ul>
+      <li>RDD의 특성과 생성 방법</li>
+      <li>Transformation과 Action 연산</li>
+      <li>고급 연산 (그룹화, 조인)</li>
+    </ul>
+  </li>
+  <li><strong>DataFrame과 Dataset</strong>
+    <ul>
+      <li>구조화된 데이터 처리</li>
+      <li>윈도우 함수와 조인 연산</li>
+      <li>최적화된 실행 엔진</li>
+    </ul>
+  </li>
+  <li><strong>Spark SQL</strong>
+    <ul>
+      <li>SQL 쿼리와 DataFrame API 통합</li>
+      <li>복잡한 분석 쿼리 작성</li>
+    </ul>
+  </li>
+  <li><strong>실습 프로젝트</strong>
+    <ul>
+      <li>로그 데이터 분석</li>
+      <li>구조화된 데이터 처리</li>
+      <li>고급 분석 기법</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="핵심-개념-정리">핵심 개념 정리</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>개념</th>
+      <th>설명</th>
+      <th>중요도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>RDD</strong></td>
+      <td>분산 데이터셋의 기본 추상화</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>DataFrame</strong></td>
+      <td>구조화된 데이터 처리</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Spark SQL</strong></td>
+      <td>SQL 기반 분석</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Transformation/Action</strong></td>
+      <td>지연 실행 모델</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="다음-파트-미리보기">다음 파트 미리보기</h3>
+
+<p><strong>Part 2: 대용량 배치 처리</strong>에서는 다음 내용을 다룹니다:</p>
+<ul>
+  <li>UDF (User Defined Function) 작성</li>
+  <li>고급 집계와 윈도우 함수</li>
+  <li>파티셔닝 전략과 성능 최적화</li>
+  <li>실무 프로젝트: 대용량 데이터 처리</li>
+</ul>
+
+<hr />
+
+<p><strong>다음 파트</strong>: <a href="/data-engineering/2025/09/12/apache-spark-batch-processing.html">Part 2: 대용량 배치 처리와 UDF 활용</a></p>
+
+<hr />
+
+<p><em>이제 Spark의 기본기를 마스터했습니다! 다음 파트에서는 더 고급 기법들을 배워보겠습니다.</em> 🚀</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+          
+          
+      
+      
+      
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
