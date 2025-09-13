@@ -860,6 +860,534 @@ kubectl cp kubernetes/airflow-dag.py airflow-web-0:/opt/airflow/dags/
 echo "Deployment completed!"
 ```
 
+## ⚡ 배치 처리 처리량 최적화
+
+### 처리량 분석 도구
+
+```python
+# 배치 처리량 분석 및 최적화 도구
+class BatchThroughputOptimizer:
+    def __init__(self, spark_session):
+        self.spark = spark_session
+        
+    def analyze_throughput(self, df, operation_name="batch_operation"):
+        """처리량 분석"""
+        import time
+        from pyspark.sql.functions import count
+        
+        # 데이터 크기 측정
+        row_count = df.count()
+        num_partitions = df.rdd.getNumPartitions()
+        
+        # 처리 시간 측정
+        start_time = time.time()
+        
+        # 샘플 작업 실행 (실제 작업으로 대체)
+        result = df.select(count("*").alias("total_count")).collect()
+        
+        end_time = time.time()
+        processing_time = end_time - start_time
+        
+        # 처리량 계산
+        throughput_records_per_second = row_count / processing_time if processing_time > 0 else 0
+        
+        return {
+            'operation_name': operation_name,
+            'total_records': row_count,
+            'num_partitions': num_partitions,
+            'processing_time_seconds': processing_time,
+            'throughput_records_per_second': throughput_records_per_second,
+            'throughput_records_per_minute': throughput_records_per_second * 60,
+            'avg_records_per_partition': row_count / num_partitions if num_partitions > 0 else 0
+        }
+    
+    def optimize_partitioning_for_throughput(self, df, target_records_per_partition=100000):
+        """처리량을 위한 파티셔닝 최적화"""
+        current_partitions = df.rdd.getNumPartitions()
+        row_count = df.count()
+        
+        # 최적 파티션 수 계산
+        optimal_partitions = max(1, row_count // target_records_per_partition)
+        
+        # 파티션 크기 기반 조정
+        if optimal_partitions > current_partitions:
+            # 파티션 수 증가
+            optimized_df = df.repartition(optimal_partitions)
+            action = f"repartitioned from {current_partitions} to {optimal_partitions} partitions"
+        elif optimal_partitions < current_partitions:
+            # 파티션 수 감소
+            optimized_df = df.coalesce(optimal_partitions)
+            action = f"coalesced from {current_partitions} to {optimal_partitions} partitions"
+        else:
+            optimized_df = df
+            action = "no partitioning change needed"
+        
+        return {
+            'optimized_dataframe': optimized_df,
+            'original_partitions': current_partitions,
+            'optimized_partitions': optimal_partitions,
+            'action_taken': action,
+            'target_records_per_partition': target_records_per_partition
+        }
+    
+    def optimize_memory_for_throughput(self, spark_session):
+        """처리량을 위한 메모리 최적화"""
+        memory_configs = {
+            # 메모리 관련 설정
+            'spark.sql.adaptive.enabled': 'true',
+            'spark.sql.adaptive.coalescePartitions.enabled': 'true',
+            'spark.sql.adaptive.advisoryPartitionSizeInBytes': '128MB',
+            'spark.sql.adaptive.skewJoin.enabled': 'true',
+            
+            # 직렬화 최적화
+            'spark.serializer': 'org.apache.spark.serializer.KryoSerializer',
+            'spark.sql.execution.arrow.pyspark.enabled': 'true',
+            'spark.sql.execution.arrow.maxRecordsPerBatch': '10000',
+            
+            # 캐싱 최적화
+            'spark.sql.execution.arrow.pyspark.fallback.enabled': 'true',
+            'spark.sql.adaptive.localShuffleReader.enabled': 'true',
+            
+            # 조인 최적화
+            'spark.sql.adaptive.skewJoin.skewedPartitionFactor': '5',
+            'spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes': '256MB'
+        }
+        
+        for key, value in memory_configs.items():
+            spark_session.conf.set(key, value)
+        
+        return memory_configs
+    
+    def implement_parallel_processing(self, df, parallelism_factor=2):
+        """병렬 처리 구현"""
+        current_partitions = df.rdd.getNumPartitions()
+        optimized_partitions = current_partitions * parallelism_factor
+        
+        return df.repartition(optimized_partitions)
+    
+    def optimize_data_loading(self, file_path, format_type="parquet"):
+        """데이터 로딩 최적화"""
+        if format_type == "parquet":
+            # Parquet 파일 최적화
+            df = self.spark.read.parquet(file_path)
+            
+            # 파티션 프루닝 활성화
+            self.spark.conf.set("spark.sql.optimizer.metadataOnly", "true")
+            self.spark.conf.set("spark.sql.parquet.filterPushdown", "true")
+            self.spark.conf.set("spark.sql.parquet.mergeSchema", "false")
+            
+        elif format_type == "csv":
+            # CSV 파일 최적화
+            df = self.spark.read.option("header", "true").option("inferSchema", "true").csv(file_path)
+            
+            # 병렬 로딩을 위한 파티셔닝
+            df = df.repartition(200)
+            
+        return df
+
+# 처리량 최적화 예제
+def batch_throughput_optimization_example():
+    spark = SparkSession.builder.appName("BatchThroughputOptimization").getOrCreate()
+    optimizer = BatchThroughputOptimizer(spark)
+    
+    # 샘플 데이터 생성
+    data = [(i, f"product_{i}", i * 10.5, i % 10) for i in range(1000000)]
+    df = spark.createDataFrame(data, ["id", "name", "price", "category"])
+    
+    # 처리량 분석
+    throughput_analysis = optimizer.analyze_throughput(df, "sample_analysis")
+    print("=== Batch Throughput Analysis ===")
+    print(f"Total Records: {throughput_analysis['total_records']:,}")
+    print(f"Processing Time: {throughput_analysis['processing_time_seconds']:.2f}s")
+    print(f"Throughput: {throughput_analysis['throughput_records_per_second']:.2f} records/sec")
+    print(f"Partitions: {throughput_analysis['num_partitions']}")
+    
+    # 파티셔닝 최적화
+    partitioning_result = optimizer.optimize_partitioning_for_throughput(df)
+    print(f"\nPartitioning Optimization: {partitioning_result['action_taken']}")
+    
+    # 메모리 최적화
+    memory_configs = optimizer.optimize_memory_for_throughput(spark)
+    print("\n=== Memory Optimization Configs ===")
+    for key, value in memory_configs.items():
+        print(f"{key}: {value}")
+    
+    # 병렬 처리 최적화
+    parallel_df = optimizer.implement_parallel_processing(df)
+    print(f"\nParallel Processing: {parallel_df.rdd.getNumPartitions()} partitions")
+    
+    return optimizer
+```
+
+### 고급 처리량 최적화 기법
+
+```python
+# 고급 처리량 최적화 클래스
+class AdvancedThroughputOptimizer:
+    def __init__(self, spark_session):
+        self.spark = spark_session
+    
+    def implement_columnar_processing(self, df):
+        """컬럼형 처리 최적화"""
+        # Parquet 형식으로 저장하여 컬럼형 처리 활성화
+        temp_path = "/tmp/optimized_data"
+        
+        df.write.mode("overwrite").parquet(temp_path)
+        
+        # 최적화된 설정으로 다시 읽기
+        optimized_configs = {
+            'spark.sql.parquet.filterPushdown': 'true',
+            'spark.sql.parquet.mergeSchema': 'false',
+            'spark.sql.parquet.enableVectorizedReader': 'true',
+            'spark.sql.parquet.columnarReaderBatchSize': '4096'
+        }
+        
+        for key, value in optimized_configs.items():
+            self.spark.conf.set(key, value)
+        
+        return self.spark.read.parquet(temp_path)
+    
+    def optimize_joins_for_throughput(self, df1, df2, join_key):
+        """조인 최적화"""
+        # 브로드캐스트 조인 힌트 적용 (작은 테이블의 경우)
+        from pyspark.sql.functions import broadcast
+        
+        # 테이블 크기 비교
+        size1 = df1.count()
+        size2 = df2.count()
+        
+        if size1 < size2 and size1 < 100000:  # 10만 레코드 미만
+            optimized_df1 = broadcast(df1)
+            optimized_df2 = df2
+        elif size2 < 100000:
+            optimized_df1 = df1
+            optimized_df2 = broadcast(df2)
+        else:
+            optimized_df1 = df1
+            optimized_df2 = df2
+        
+        # 조인 실행
+        result = optimized_df1.join(optimized_df2, join_key, "inner")
+        
+        return result
+    
+    def implement_bucketing_strategy(self, df, bucket_columns, num_buckets=200):
+        """버킷팅 전략 구현"""
+        # 버킷팅을 위한 임시 테이블 생성
+        temp_table_name = "temp_bucketed_table"
+        
+        # 버킷팅 설정
+        bucketing_configs = {
+            'spark.sql.sources.bucketing.enabled': 'true',
+            'spark.sql.sources.bucketing.autoBucketedScan.enabled': 'true'
+        }
+        
+        for key, value in bucketing_configs.items():
+            self.spark.conf.set(key, value)
+        
+        # 버킷팅된 테이블로 저장
+        df.write \
+            .bucketBy(num_buckets, *bucket_columns) \
+            .mode("overwrite") \
+            .saveAsTable(temp_table_name)
+        
+        # 버킷팅된 테이블 읽기
+        bucketed_df = self.spark.table(temp_table_name)
+        
+        return bucketed_df
+    
+    def optimize_aggregations(self, df, group_columns, agg_columns):
+        """집계 최적화"""
+        from pyspark.sql.functions import col, sum as spark_sum, avg, count, max as spark_max
+        
+        # 집계 전 파티셔닝 최적화
+        optimized_df = df.repartition(*group_columns)
+        
+        # 집계 실행
+        aggregation_result = optimized_df.groupBy(*group_columns).agg(
+            count("*").alias("record_count"),
+            spark_sum(agg_columns[0]).alias(f"total_{agg_columns[0]}"),
+            avg(agg_columns[0]).alias(f"avg_{agg_columns[0]}"),
+            spark_max(agg_columns[0]).alias(f"max_{agg_columns[0]}")
+        )
+        
+        return aggregation_result
+    
+    def implement_caching_strategy(self, df, access_frequency="high"):
+        """캐싱 전략 구현"""
+        from pyspark import StorageLevel
+        
+        if access_frequency == "high":
+            # 자주 사용되는 데이터는 메모리에 캐싱
+            cached_df = df.persist(StorageLevel.MEMORY_ONLY)
+        elif access_frequency == "medium":
+            # 중간 빈도는 메모리+디스크 캐싱
+            cached_df = df.persist(StorageLevel.MEMORY_AND_DISK_SER)
+        else:
+            # 낮은 빈도는 디스크 캐싱
+            cached_df = df.persist(StorageLevel.DISK_ONLY)
+        
+        return cached_df
+    
+    def optimize_file_formats(self, df, output_path, format_type="parquet"):
+        """파일 형식 최적화"""
+        if format_type == "parquet":
+            # Parquet 최적화 설정
+            df.write \
+                .mode("overwrite") \
+                .option("compression", "snappy") \
+                .option("parquet.block.size", "134217728") \
+                .option("parquet.page.size", "1048576") \
+                .parquet(output_path)
+                
+        elif format_type == "orc":
+            # ORC 최적화 설정
+            df.write \
+                .mode("overwrite") \
+                .option("compression", "zlib") \
+                .option("orc.stripe.size", "67108864") \
+                .orc(output_path)
+                
+        elif format_type == "delta":
+            # Delta Lake 최적화 설정
+            df.write \
+                .mode("overwrite") \
+                .format("delta") \
+                .option("delta.autoOptimize.optimizeWrite", "true") \
+                .option("delta.autoOptimize.autoCompact", "true") \
+                .save(output_path)
+        
+        return f"Data saved to {output_path} in {format_type} format"
+
+# 고급 처리량 최적화 예제
+def advanced_throughput_optimization_example():
+    spark = SparkSession.builder.appName("AdvancedThroughputOptimization").getOrCreate()
+    optimizer = AdvancedThroughputOptimizer(spark)
+    
+    # 샘플 데이터 생성
+    data1 = [(i, f"product_{i}", i * 10.5, i % 100) for i in range(500000)]
+    df1 = spark.createDataFrame(data1, ["id", "name", "price", "category_id"])
+    
+    data2 = [(i, f"category_{i}") for i in range(100)]
+    df2 = spark.createDataFrame(data2, ["category_id", "category_name"])
+    
+    # 컬럼형 처리 최적화
+    print("=== Implementing Columnar Processing ===")
+    columnar_df = optimizer.implement_columnar_processing(df1)
+    print(f"Columnar processing implemented: {columnar_df.count()} records")
+    
+    # 조인 최적화
+    print("\n=== Optimizing Joins ===")
+    joined_df = optimizer.optimize_joins_for_throughput(df1, df2, "category_id")
+    print(f"Join optimization completed: {joined_df.count()} records")
+    
+    # 집계 최적화
+    print("\n=== Optimizing Aggregations ===")
+    aggregated_df = optimizer.optimize_aggregations(joined_df, ["category_name"], ["price"])
+    print(f"Aggregation optimization completed: {aggregated_df.count()} groups")
+    
+    # 파일 형식 최적화
+    print("\n=== Optimizing File Formats ===")
+    output_result = optimizer.optimize_file_formats(aggregated_df, "/tmp/optimized_output", "parquet")
+    print(output_result)
+    
+    return optimizer
+```
+
+### 처리량 모니터링 시스템
+
+```python
+# 처리량 모니터링 시스템
+class ThroughputMonitoringSystem:
+    def __init__(self, spark_session):
+        self.spark = spark_session
+        self.metrics_history = []
+    
+    def monitor_batch_throughput(self, df, operation_name, batch_size=100000):
+        """배치 처리량 모니터링"""
+        import time
+        
+        total_records = df.count()
+        num_batches = (total_records + batch_size - 1) // batch_size
+        
+        batch_metrics = []
+        
+        for batch_idx in range(num_batches):
+            start_idx = batch_idx * batch_size
+            end_idx = min((batch_idx + 1) * batch_size, total_records)
+            
+            # 배치 데이터 추출
+            batch_df = df.limit(end_idx).subtract(df.limit(start_idx))
+            
+            # 배치 처리 시간 측정
+            start_time = time.time()
+            batch_count = batch_df.count()
+            end_time = time.time()
+            
+            processing_time = end_time - start_time
+            throughput = batch_count / processing_time if processing_time > 0 else 0
+            
+            batch_metric = {
+                'operation_name': operation_name,
+                'batch_idx': batch_idx,
+                'batch_size': batch_count,
+                'processing_time': processing_time,
+                'throughput_records_per_second': throughput,
+                'timestamp': time.time()
+            }
+            
+            batch_metrics.append(batch_metric)
+            print(f"Batch {batch_idx + 1}/{num_batches}: {throughput:.2f} records/sec")
+        
+        # 전체 통계 계산
+        total_time = sum(m['processing_time'] for m in batch_metrics)
+        avg_throughput = total_records / total_time if total_time > 0 else 0
+        
+        summary = {
+            'operation_name': operation_name,
+            'total_records': total_records,
+            'total_batches': num_batches,
+            'total_processing_time': total_time,
+            'average_throughput': avg_throughput,
+            'batch_metrics': batch_metrics
+        }
+        
+        self.metrics_history.append(summary)
+        return summary
+    
+    def generate_throughput_report(self):
+        """처리량 보고서 생성"""
+        if not self.metrics_history:
+            return {"message": "No metrics available"}
+        
+        # 전체 통계 계산
+        total_operations = len(self.metrics_history)
+        total_records = sum(m['total_records'] for m in self.metrics_history)
+        total_time = sum(m['total_processing_time'] for m in self.metrics_history)
+        overall_throughput = total_records / total_time if total_time > 0 else 0
+        
+        # 최고/최저 처리량 찾기
+        max_throughput = max(m['average_throughput'] for m in self.metrics_history)
+        min_throughput = min(m['average_throughput'] for m in self.metrics_history)
+        
+        report = {
+            'summary': {
+                'total_operations': total_operations,
+                'total_records_processed': total_records,
+                'total_processing_time': total_time,
+                'overall_throughput': overall_throughput,
+                'max_throughput': max_throughput,
+                'min_throughput': min_throughput
+            },
+            'operation_details': self.metrics_history,
+            'recommendations': self._generate_throughput_recommendations()
+        }
+        
+        return report
+    
+    def _generate_throughput_recommendations(self):
+        """처리량 개선 권장사항 생성"""
+        recommendations = []
+        
+        if not self.metrics_history:
+            return recommendations
+        
+        # 평균 처리량 계산
+        avg_throughput = sum(m['average_throughput'] for m in self.metrics_history) / len(self.metrics_history)
+        
+        # 처리량이 낮은 경우 권장사항
+        if avg_throughput < 10000:  # 10,000 records/sec 미만
+            recommendations.append({
+                'priority': 'high',
+                'category': 'partitioning',
+                'action': '파티션 수를 증가시켜 병렬 처리를 향상시키세요',
+                'details': 'repartition() 또는 coalesce() 사용 고려'
+            })
+            
+            recommendations.append({
+                'priority': 'medium',
+                'category': 'caching',
+                'action': '자주 사용되는 데이터를 캐싱하세요',
+                'details': 'cache() 또는 persist() 사용'
+            })
+        
+        # 처리량 변동이 큰 경우
+        throughputs = [m['average_throughput'] for m in self.metrics_history]
+        throughput_variance = max(throughputs) - min(throughputs)
+        
+        if throughput_variance > avg_throughput * 0.5:  # 변동이 평균의 50% 이상
+            recommendations.append({
+                'priority': 'medium',
+                'category': 'stability',
+                'action': '처리량 안정성을 위해 데이터 분포를 개선하세요',
+                'details': '데이터 스큐 문제 확인 및 해결'
+            })
+        
+        return recommendations
+    
+    def export_metrics_to_monitoring_system(self, report):
+        """모니터링 시스템으로 메트릭 내보내기"""
+        import requests
+        import json
+        
+        # Prometheus 형식으로 메트릭 변환
+        prometheus_metrics = []
+        
+        for operation in report['operation_details']:
+            metric = {
+                'metric_name': 'spark_batch_throughput',
+                'labels': {
+                    'operation': operation['operation_name']
+                },
+                'value': operation['average_throughput'],
+                'timestamp': operation.get('timestamp', time.time())
+            }
+            prometheus_metrics.append(metric)
+        
+        # 실제 환경에서는 Prometheus Pushgateway로 전송
+        print("=== Exported Metrics to Monitoring System ===")
+        for metric in prometheus_metrics:
+            print(f"{metric['metric_name']} {metric['labels']} = {metric['value']:.2f}")
+
+# 처리량 모니터링 예제
+def throughput_monitoring_example():
+    spark = SparkSession.builder.appName("ThroughputMonitoring").getOrCreate()
+    monitor = ThroughputMonitoringSystem(spark)
+    
+    # 샘플 데이터 생성
+    data = [(i, f"data_{i}", i * 1.5) for i in range(1000000)]
+    df = spark.createDataFrame(data, ["id", "value", "score"])
+    
+    # 처리량 모니터링
+    throughput_summary = monitor.monitor_batch_throughput(df, "sample_processing", batch_size=100000)
+    
+    print("\n=== Throughput Summary ===")
+    print(f"Total Records: {throughput_summary['total_records']:,}")
+    print(f"Average Throughput: {throughput_summary['average_throughput']:.2f} records/sec")
+    print(f"Total Processing Time: {throughput_summary['total_processing_time']:.2f}s")
+    
+    # 보고서 생성
+    report = monitor.generate_throughput_report()
+    
+    print("\n=== Throughput Report ===")
+    print(f"Overall Throughput: {report['summary']['overall_throughput']:.2f} records/sec")
+    print(f"Max Throughput: {report['summary']['max_throughput']:.2f} records/sec")
+    print(f"Min Throughput: {report['summary']['min_throughput']:.2f} records/sec")
+    
+    # 권장사항 출력
+    if report['recommendations']:
+        print("\n=== Recommendations ===")
+        for rec in report['recommendations']:
+            priority_icon = "🔴" if rec['priority'] == 'high' else "🟡" if rec['priority'] == 'medium' else "🟢"
+            print(f"{priority_icon} [{rec['priority'].upper()}] {rec['action']}")
+            print(f"   Details: {rec['details']}")
+    
+    # 메트릭 내보내기
+    monitor.export_metrics_to_monitoring_system(report)
+    
+    return monitor
+```
+
 ## 📚 학습 요약
 
 ### 이번 파트에서 학습한 내용
@@ -888,6 +1416,11 @@ echo "Deployment completed!"
    - Docker 컨테이너화
    - Kubernetes Job 배포
    - Airflow 스케줄링
+
+6. **배치 처리 처리량 최적화**
+   - 처리량 분석 도구
+   - 고급 처리량 최적화 기법
+   - 처리량 모니터링 시스템
 
 ### 핵심 기술 스택
 

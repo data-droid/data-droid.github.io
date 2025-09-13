@@ -1028,6 +1028,477 @@ def export_metrics_to_prometheus(metrics_df):
         time.sleep(10)  # 10초마다 전송
 ```
 
+## ⚡ 실시간 분석 지연시간 최적화
+
+### 지연시간 분석 도구
+
+```python
+# 실시간 지연시간 분석 및 최적화 도구
+class StreamingLatencyOptimizer:
+    def __init__(self, spark_session):
+        self.spark = spark_session
+        
+    def analyze_processing_latency(self, streaming_df, latency_threshold_ms=1000):
+        """처리 지연시간 분석"""
+        from pyspark.sql.functions import col, current_timestamp, unix_timestamp, when
+        
+        # 이벤트 시간과 처리 시간 사이의 지연 계산
+        latency_df = streaming_df.withColumn(
+            "processing_latency_ms",
+            (unix_timestamp(current_timestamp()) - unix_timestamp("timestamp")) * 1000
+        )
+        
+        # 지연시간 통계 계산
+        latency_stats = latency_df.select(
+            col("processing_latency_ms"),
+            when(col("processing_latency_ms") > latency_threshold_ms, 1).otherwise(0).alias("is_slow")
+        ).agg({
+            "processing_latency_ms": "avg",
+            "processing_latency_ms": "max",
+            "processing_latency_ms": "min",
+            "is_slow": "sum"
+        }).collect()[0]
+        
+        total_records = latency_df.count()
+        
+        return {
+            'avg_latency_ms': latency_stats[0],
+            'max_latency_ms': latency_stats[1],
+            'min_latency_ms': latency_stats[2],
+            'slow_records_count': latency_stats[3],
+            'slow_records_ratio': latency_stats[3] / total_records if total_records > 0 else 0,
+            'total_records': total_records,
+            'latency_threshold_ms': latency_threshold_ms
+        }
+    
+    def optimize_streaming_configuration(self, current_config):
+        """스트리밍 설정 최적화"""
+        optimized_config = current_config.copy()
+        
+        # 배치 간격 최적화 (지연시간에 따라 조정)
+        if current_config.get('batch_interval_seconds', 10) > 5:
+            optimized_config['batch_interval_seconds'] = 1  # 1초로 단축
+        
+        # 백프레셔 설정 최적화
+        optimized_config.update({
+            'spark.sql.streaming.rateLimit.enabled': 'true',
+            'spark.sql.streaming.rateLimit.maxOffsetsPerTrigger': '10000',
+            'spark.sql.streaming.rateLimit.maxRecordsPerSecond': '5000'
+        })
+        
+        # 체크포인트 최적화
+        optimized_config.update({
+            'spark.sql.streaming.checkpointLocation': '/tmp/optimized_checkpoint',
+            'spark.sql.streaming.minBatchesToRetain': '1',  # 최소 배치 유지
+            'spark.sql.streaming.stateStore.providerClass': 'org.apache.spark.sql.execution.streaming.state.HDFSBackedStateStoreProvider'
+        })
+        
+        # 메모리 최적화
+        optimized_config.update({
+            'spark.sql.streaming.stateStore.maintenanceInterval': '10s',  # 상태 정리 간격 단축
+            'spark.sql.streaming.stateStore.minDeltasForSnapshot': '10'   # 스냅샷 생성 빈도 증가
+        })
+        
+        return optimized_config
+    
+    def implement_adaptive_batching(self, streaming_df, target_latency_ms=500):
+        """적응형 배칭 구현"""
+        from pyspark.sql.functions import col, window, count, max as spark_max
+        
+        # 윈도우 크기를 동적으로 조정하는 함수
+        def create_adaptive_window(df, base_window_size="10 seconds"):
+            # 현재 시스템 부하에 따라 윈도우 크기 조정
+            current_load = self._get_system_load()
+            
+            if current_load > 0.8:  # 높은 부하
+                window_size = "30 seconds"
+            elif current_load > 0.5:  # 중간 부하
+                window_size = "20 seconds"
+            else:  # 낮은 부하
+                window_size = "10 seconds"
+            
+            return df.withWatermark("timestamp", window_size)
+        
+        return create_adaptive_window(streaming_df)
+    
+    def _get_system_load(self):
+        """시스템 부하 측정"""
+        status_tracker = self.spark.sparkContext.statusTracker()
+        executor_infos = status_tracker.getExecutorInfos()
+        
+        if not executor_infos:
+            return 0.0
+        
+        total_memory = sum(info.maxMemory for info in executor_infos)
+        used_memory = sum(info.memoryUsed for info in executor_infos)
+        
+        return used_memory / total_memory if total_memory > 0 else 0.0
+    
+    def optimize_watermark_strategy(self, streaming_df, data_lateness_hours=2):
+        """워터마크 전략 최적화"""
+        from pyspark.sql.functions import col, window, count, max as spark_max
+        
+        # 데이터 지연 패턴에 따른 적응형 워터마크
+        watermark_delay = f"{data_lateness_hours} hours"
+        
+        # 지연시간이 긴 데이터를 위한 추가 처리
+        optimized_df = streaming_df.withWatermark("timestamp", watermark_delay)
+        
+        return optimized_df
+    
+    def implement_latency_monitoring(self, streaming_df):
+        """지연시간 모니터링 구현"""
+        from pyspark.sql.functions import col, current_timestamp, unix_timestamp, window, count, avg
+        
+        # 실시간 지연시간 메트릭 생성
+        latency_metrics = streaming_df.withColumn(
+            "processing_latency_ms",
+            (unix_timestamp(current_timestamp()) - unix_timestamp("timestamp")) * 1000
+        ).withWatermark("timestamp", "10 minutes").groupBy(
+            window("timestamp", "1 minute"),
+            "service"
+        ).agg(
+            count("*").alias("record_count"),
+            avg("processing_latency_ms").alias("avg_latency_ms")
+        )
+        
+        return latency_metrics
+
+# 지연시간 최적화 예제
+def streaming_latency_optimization_example():
+    spark = SparkSession.builder.appName("StreamingLatencyOptimization").getOrCreate()
+    optimizer = StreamingLatencyOptimizer(spark)
+    
+    # 스트리밍 데이터 생성 (Kafka에서 읽는 것으로 가정)
+    streaming_df = spark.readStream \
+        .format("kafka") \
+        .option("kafka.bootstrap.servers", "localhost:9092") \
+        .option("subscribe", "logs") \
+        .load()
+    
+    # JSON 파싱
+    from pyspark.sql.functions import col, from_json
+    from pyspark.sql.types import StructType, StructField, StringType, TimestampType
+    
+    schema = StructType([
+        StructField("timestamp", TimestampType(), True),
+        StructField("service", StringType(), True),
+        StructField("message", StringType(), True)
+    ])
+    
+    parsed_df = streaming_df.select(
+        from_json(col("value").cast("string"), schema).alias("data")
+    ).select("data.*")
+    
+    # 지연시간 분석
+    latency_analysis = optimizer.analyze_processing_latency(parsed_df)
+    print("=== Streaming Latency Analysis ===")
+    print(f"Average Latency: {latency_analysis['avg_latency_ms']:.2f}ms")
+    print(f"Max Latency: {latency_analysis['max_latency_ms']:.2f}ms")
+    print(f"Slow Records Ratio: {latency_analysis['slow_records_ratio']:.2%}")
+    
+    # 설정 최적화
+    current_config = {
+        'batch_interval_seconds': 10,
+        'checkpoint_location': '/tmp/checkpoint'
+    }
+    
+    optimized_config = optimizer.optimize_streaming_configuration(current_config)
+    print("\n=== Optimized Configuration ===")
+    for key, value in optimized_config.items():
+        print(f"{key}: {value}")
+    
+    # 지연시간 모니터링 설정
+    latency_metrics = optimizer.implement_latency_monitoring(parsed_df)
+    
+    # 스트리밍 쿼리 시작
+    query = latency_metrics.writeStream \
+        .outputMode("update") \
+        .format("console") \
+        .option("truncate", False) \
+        .start()
+    
+    return query
+```
+
+### 고급 지연시간 최적화 기법
+
+```python
+# 고급 지연시간 최적화 클래스
+class AdvancedLatencyOptimizer:
+    def __init__(self, spark_session):
+        self.spark = spark_session
+    
+    def implement_parallel_processing(self, streaming_df, parallelism_factor=2):
+        """병렬 처리 구현"""
+        # 파티션 수를 증가시켜 병렬 처리 향상
+        current_partitions = streaming_df.rdd.getNumPartitions()
+        optimized_partitions = current_partitions * parallelism_factor
+        
+        return streaming_df.repartition(optimized_partitions)
+    
+    def optimize_memory_usage_for_low_latency(self, spark_session):
+        """저지연을 위한 메모리 최적화"""
+        # 저지연 처리를 위한 메모리 설정
+        memory_configs = {
+            'spark.sql.streaming.stateStore.maintenanceInterval': '5s',
+            'spark.sql.streaming.stateStore.minDeltasForSnapshot': '5',
+            'spark.sql.streaming.stateStore.compression.enabled': 'true',
+            'spark.sql.streaming.stateStore.compression.codec': 'lz4',
+            'spark.sql.streaming.stateStore.rocksdb.compression': 'true',
+            'spark.sql.streaming.stateStore.rocksdb.blockSizeKB': '64',
+            'spark.sql.streaming.stateStore.rocksdb.blockCacheSizeMB': '128'
+        }
+        
+        for key, value in memory_configs.items():
+            spark_session.conf.set(key, value)
+        
+        return memory_configs
+    
+    def implement_backpressure_control(self, streaming_df):
+        """백프레셔 제어 구현"""
+        from pyspark.sql.functions import col, lag, when
+        
+        # 데이터 처리 속도를 모니터링하고 조절
+        backpressure_df = streaming_df.withColumn(
+            "processing_rate",
+            col("timestamp").cast("long") - lag(col("timestamp").cast("long"), 1).over(
+                window(col("timestamp"), "1 minute")
+            )
+        ).withColumn(
+            "should_throttle",
+            when(col("processing_rate") > 1000, True).otherwise(False)  # 1초당 1000개 이상이면 스로틀링
+        )
+        
+        return backpressure_df
+    
+    def optimize_serialization_for_low_latency(self, spark_session):
+        """저지연을 위한 직렬화 최적화"""
+        serialization_configs = {
+            'spark.serializer': 'org.apache.spark.serializer.KryoSerializer',
+            'spark.sql.execution.arrow.pyspark.enabled': 'true',
+            'spark.sql.execution.arrow.maxRecordsPerBatch': '10000',
+            'spark.sql.execution.arrow.pyspark.fallback.enabled': 'true'
+        }
+        
+        for key, value in serialization_configs.items():
+            spark_session.conf.set(key, value)
+        
+        return serialization_configs
+    
+    def implement_caching_for_streaming(self, streaming_df):
+        """스트리밍을 위한 캐싱 전략"""
+        from pyspark import StorageLevel
+        
+        # 자주 사용되는 데이터를 메모리에 캐싱
+        cached_df = streaming_df.persist(StorageLevel.MEMORY_AND_DISK_SER)
+        
+        return cached_df
+
+# 고급 지연시간 최적화 예제
+def advanced_latency_optimization_example():
+    spark = SparkSession.builder.appName("AdvancedLatencyOptimization").getOrCreate()
+    optimizer = AdvancedLatencyOptimizer(spark)
+    
+    # 스트리밍 데이터 생성
+    data = [(f"service_{i % 5}", f"message_{i}", time.time()) for i in range(1000)]
+    df = spark.createDataFrame(data, ["service", "message", "timestamp"])
+    
+    # 병렬 처리 최적화
+    parallel_df = optimizer.implement_parallel_processing(df)
+    print(f"Parallel processing partitions: {parallel_df.rdd.getNumPartitions()}")
+    
+    # 메모리 최적화
+    memory_configs = optimizer.optimize_memory_usage_for_low_latency(spark)
+    print("\n=== Memory Optimization Configs ===")
+    for key, value in memory_configs.items():
+        print(f"{key}: {value}")
+    
+    # 직렬화 최적화
+    serialization_configs = optimizer.optimize_serialization_for_low_latency(spark)
+    print("\n=== Serialization Optimization Configs ===")
+    for key, value in serialization_configs.items():
+        print(f"{key}: {value}")
+    
+    # 캐싱 전략 적용
+    cached_df = optimizer.implement_caching_for_streaming(df)
+    
+    return cached_df
+```
+
+### 실시간 지연시간 모니터링 대시보드
+
+```python
+# 실시간 지연시간 모니터링 대시보드
+class RealTimeLatencyDashboard:
+    def __init__(self, spark_session):
+        self.spark = spark_session
+        
+    def create_latency_monitoring_dashboard(self, streaming_df):
+        """지연시간 모니터링 대시보드 생성"""
+        from pyspark.sql.functions import col, current_timestamp, unix_timestamp, window, count, avg, max as spark_max, min as spark_min
+        
+        # 실시간 지연시간 메트릭 계산
+        latency_metrics = streaming_df.withColumn(
+            "processing_latency_ms",
+            (unix_timestamp(current_timestamp()) - unix_timestamp("timestamp")) * 1000
+        ).withWatermark("timestamp", "5 minutes").groupBy(
+            window("timestamp", "30 seconds"),
+            "service"
+        ).agg(
+            count("*").alias("record_count"),
+            avg("processing_latency_ms").alias("avg_latency_ms"),
+            spark_max("processing_latency_ms").alias("max_latency_ms"),
+            spark_min("processing_latency_ms").alias("min_latency_ms")
+        )
+        
+        # 지연시간 알림 생성
+        alerts = latency_metrics.withColumn(
+            "alert_level",
+            when(col("avg_latency_ms") > 2000, "CRITICAL")
+            .when(col("avg_latency_ms") > 1000, "WARNING")
+            .when(col("avg_latency_ms") > 500, "INFO")
+            .otherwise("OK")
+        )
+        
+        return {
+            'metrics': latency_metrics,
+            'alerts': alerts
+        }
+    
+    def export_latency_metrics_to_grafana(self, metrics_df):
+        """Grafana용 지연시간 메트릭 내보내기"""
+        import requests
+        import json
+        import time
+        
+        def export_to_grafana():
+            while True:
+                try:
+                    # 최신 메트릭 수집
+                    latest_metrics = metrics_df.collect()
+                    
+                    for metric in latest_metrics:
+                        # Grafana 데이터 포인트 형식
+                        grafana_data = {
+                            "time": int(time.time() * 1000),
+                            "value": metric['avg_latency_ms'],
+                            "tags": {
+                                "service": metric['service'],
+                                "window": str(metric['window'])
+                            }
+                        }
+                        
+                        # Grafana API로 전송
+                        response = requests.post(
+                            'http://localhost:3000/api/datasources/proxy/1/write',
+                            json=grafana_data,
+                            headers={'Content-Type': 'application/json'}
+                        )
+                        
+                        if response.status_code == 200:
+                            print(f"Latency metric exported: {metric['service']} - {metric['avg_latency_ms']:.2f}ms")
+                        else:
+                            print(f"Failed to export metric: {response.status_code}")
+                    
+                    time.sleep(30)  # 30초마다 전송
+                    
+                except Exception as e:
+                    print(f"Error exporting metrics: {e}")
+                    time.sleep(60)  # 에러 시 1분 대기
+        
+        return export_to_grafana
+    
+    def create_latency_alerting_system(self, alerts_df):
+        """지연시간 알림 시스템 생성"""
+        def process_alerts():
+            while True:
+                try:
+                    # 최신 알림 수집
+                    latest_alerts = alerts_df.collect()
+                    
+                    for alert in latest_alerts:
+                        if alert['alert_level'] in ['WARNING', 'CRITICAL']:
+                            # 알림 메시지 생성
+                            alert_message = {
+                                'level': alert['alert_level'],
+                                'service': alert['service'],
+                                'avg_latency_ms': alert['avg_latency_ms'],
+                                'max_latency_ms': alert['max_latency_ms'],
+                                'timestamp': str(alert['window']),
+                                'message': f"Service {alert['service']} has high latency: {alert['avg_latency_ms']:.2f}ms"
+                            }
+                            
+                            # Slack, 이메일, SMS 등으로 알림 전송
+                            self._send_alert(alert_message)
+                    
+                    time.sleep(60)  # 1분마다 알림 체크
+                    
+                except Exception as e:
+                    print(f"Error processing alerts: {e}")
+                    time.sleep(120)  # 에러 시 2분 대기
+        
+        return process_alerts
+    
+    def _send_alert(self, alert_message):
+        """알림 전송 (Slack 예시)"""
+        import requests
+        
+        slack_webhook_url = "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+        
+        slack_message = {
+            "text": f"🚨 Spark Streaming Latency Alert",
+            "attachments": [
+                {
+                    "color": "danger" if alert_message['level'] == 'CRITICAL' else "warning",
+                    "fields": [
+                        {"title": "Service", "value": alert_message['service'], "short": True},
+                        {"title": "Average Latency", "value": f"{alert_message['avg_latency_ms']:.2f}ms", "short": True},
+                        {"title": "Max Latency", "value": f"{alert_message['max_latency_ms']:.2f}ms", "short": True},
+                        {"title": "Alert Level", "value": alert_message['level'], "short": True}
+                    ]
+                }
+            ]
+        }
+        
+        try:
+            response = requests.post(slack_webhook_url, json=slack_message)
+            if response.status_code == 200:
+                print(f"Alert sent successfully: {alert_message['message']}")
+            else:
+                print(f"Failed to send alert: {response.status_code}")
+        except Exception as e:
+            print(f"Error sending alert: {e}")
+
+# 실시간 지연시간 모니터링 예제
+def real_time_latency_monitoring_example():
+    spark = SparkSession.builder.appName("RealTimeLatencyMonitoring").getOrCreate()
+    dashboard = RealTimeLatencyDashboard(spark)
+    
+    # 스트리밍 데이터 생성
+    data = [(f"service_{i % 3}", f"message_{i}", time.time()) for i in range(1000)]
+    df = spark.createDataFrame(data, ["service", "message", "timestamp"])
+    
+    # 지연시간 모니터링 대시보드 생성
+    dashboard_data = dashboard.create_latency_monitoring_dashboard(df)
+    
+    # 메트릭 내보내기 함수
+    export_function = dashboard.export_latency_metrics_to_grafana(dashboard_data['metrics'])
+    
+    # 알림 처리 함수
+    alert_function = dashboard.create_latency_alerting_system(dashboard_data['alerts'])
+    
+    print("=== Real-time Latency Monitoring Dashboard Created ===")
+    print("Metrics and alerts are being processed in real-time")
+    
+    # 실제 환경에서는 별도 스레드에서 실행
+    # import threading
+    # threading.Thread(target=export_function, daemon=True).start()
+    # threading.Thread(target=alert_function, daemon=True).start()
+    
+    return dashboard_data
+```
+
 ## 📚 학습 요약
 
 ### 이번 파트에서 학습한 내용
@@ -1061,6 +1532,11 @@ def export_metrics_to_prometheus(metrics_df):
    - Grafana 대시보드 구축
    - Prometheus 메트릭 내보내기
    - 실시간 모니터링
+
+7. **실시간 분석 지연시간 최적화**
+   - 지연시간 분석 도구
+   - 고급 지연시간 최적화 기법
+   - 실시간 지연시간 모니터링 대시보드
 
 ### 핵심 기술 스택
 

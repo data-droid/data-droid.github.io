@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Complete production environment setup through Apache Spark performance monitoring, profiling, memory optimization, and cluster tuning.">
+
+
+
+<title>Part 4: Apache Spark Monitoring and Performance Tuning - Production Environment Completion - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 4: Apache Spark Monitoring and Performance Tuning - Production Environment Completion">
+<meta property="og:description" content="Complete production environment setup through Apache Spark performance monitoring, profiling, memory optimization, and cluster tuning.">
+<meta property="og:url" content="http://0.0.0.0:4000/en_posts/2025-09-13-apache-spark-monitoring-tuning.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 4: Apache Spark Monitoring and Performance Tuning - Production Environment Completion">
+<meta name="twitter:description" content="Complete production environment setup through Apache Spark performance monitoring, profiling, memory optimization, and cluster tuning.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2025/09/13/apache-spark-monitoring-tuning.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2025-09-13-apache-spark-monitoring-tuning.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 13일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 4: Apache Spark Monitoring and Performance Tuning - Production Environment Completion</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Spark</span>
+      
+        <span class="tag">Performance-Tuning</span>
+      
+        <span class="tag">Monitoring</span>
+      
+        <span class="tag">Profiling</span>
+      
+        <span class="tag">Memory-Optimization</span>
+      
+        <span class="tag">Cluster-Management</span>
+      
+        <span class="tag">Python</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Apache spark complete guide 시리즈</span>
+      <span class="series-order">Part 5</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 55 min</span>
+      
+      
+        <span class="difficulty">📊 Expert</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-4-apache-spark-monitoring-and-performance-tuning---production-environment-completion">Part 4: Apache Spark Monitoring and Performance Tuning - Production Environment Completion</h1>
+
+<blockquote>
+  <p>Complete production environment setup through Apache Spark performance monitoring, profiling, memory optimization, and cluster tuning.</p>
+</blockquote>
+
+<h2 id="-table-of-contents">📖 Table of Contents</h2>
+
+<ol>
+  <li><a href="#spark-ui-and-metrics-analysis">Spark UI and Metrics Analysis</a></li>
+  <li><a href="#performance-monitoring-and-profiling">Performance Monitoring and Profiling</a></li>
+  <li><a href="#memory-optimization-and-caching-strategies">Memory Optimization and Caching Strategies</a></li>
+  <li><a href="#cluster-tuning-and-scalability">Cluster Tuning and Scalability</a></li>
+  <li><a href="#real-world-project-performance-optimization-system">Real-world Project: Performance Optimization System</a></li>
+  <li><a href="#production-environment-setup">Production Environment Setup</a></li>
+  <li><a href="#learning-summary">Learning Summary</a></li>
+</ol>
+
+<h2 id="️-spark-ui-and-metrics-analysis">🖥️ Spark UI and Metrics Analysis</h2>
+
+<h3 id="spark-ui-overview">Spark UI Overview</h3>
+
+<p>Spark UI is a web-based interface for monitoring and analyzing Spark application performance.</p>
+
+<h4 id="core-tabs-and-features"><strong>Core Tabs and Features</strong></h4>
+
+<ol>
+  <li><strong>Jobs Tab</strong>
+    <ul>
+      <li>Job execution status and timing</li>
+      <li>Stage-by-stage execution information</li>
+      <li>Job failure cause analysis</li>
+    </ul>
+  </li>
+  <li><strong>Stages Tab</strong>
+    <ul>
+      <li>Detailed information for each stage</li>
+      <li>Task execution distribution</li>
+      <li>Data skew analysis</li>
+    </ul>
+  </li>
+  <li><strong>Storage Tab</strong>
+    <ul>
+      <li>Cached data information</li>
+      <li>Memory usage</li>
+      <li>Disk storage status</li>
+    </ul>
+  </li>
+  <li><strong>Environment Tab</strong>
+    <ul>
+      <li>Spark configuration information</li>
+      <li>System environment variables</li>
+      <li>JVM settings</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="metrics-analysis-tools">Metrics Analysis Tools</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark metrics collection and analysis
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">import</span> <span class="n">time</span>
+
+<span class="k">class</span> <span class="nc">SparkMetricsCollector</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">spark_session</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">spark</span> <span class="o">=</span> <span class="n">spark_session</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">sc</span> <span class="o">=</span> <span class="n">spark_session</span><span class="p">.</span><span class="n">sparkContext</span>
+        
+    <span class="k">def</span> <span class="nf">collect_job_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Collect job metrics</span><span class="sh">"""</span>
+        <span class="n">status_tracker</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">sc</span><span class="p">.</span><span class="nf">statusTracker</span><span class="p">()</span>
+        
+        <span class="c1"># Active job information
+</span>        <span class="n">active_jobs</span> <span class="o">=</span> <span class="n">status_tracker</span><span class="p">.</span><span class="nf">getActiveJobIds</span><span class="p">()</span>
+        
+        <span class="c1"># Collect metrics by job
+</span>        <span class="n">job_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">job_id</span> <span class="ow">in</span> <span class="n">active_jobs</span><span class="p">:</span>
+            <span class="n">job_info</span> <span class="o">=</span> <span class="n">status_tracker</span><span class="p">.</span><span class="nf">getJobInfo</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+            <span class="n">job_metrics</span><span class="p">[</span><span class="n">job_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">status</span><span class="sh">'</span><span class="p">:</span> <span class="n">job_info</span><span class="p">.</span><span class="n">status</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">num_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="n">job_info</span><span class="p">.</span><span class="n">numTasks</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">num_active_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="n">job_info</span><span class="p">.</span><span class="n">numActiveTasks</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">num_completed_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="n">job_info</span><span class="p">.</span><span class="n">numCompletedTasks</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">num_failed_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="n">job_info</span><span class="p">.</span><span class="n">numFailedTasks</span>
+            <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">job_metrics</span>
+    
+    <span class="k">def</span> <span class="nf">collect_stage_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Collect stage metrics</span><span class="sh">"""</span>
+        <span class="n">status_tracker</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">sc</span><span class="p">.</span><span class="nf">statusTracker</span><span class="p">()</span>
+        
+        <span class="c1"># Active stage information
+</span>        <span class="n">active_stages</span> <span class="o">=</span> <span class="n">status_tracker</span><span class="p">.</span><span class="nf">getActiveStageIds</span><span class="p">()</span>
+        
+        <span class="n">stage_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">stage_id</span> <span class="ow">in</span> <span class="n">active_stages</span><span class="p">:</span>
+            <span class="n">stage_info</span> <span class="o">=</span> <span class="n">status_tracker</span><span class="p">.</span><span class="nf">getStageInfo</span><span class="p">(</span><span class="n">stage_id</span><span class="p">)</span>
+            <span class="n">stage_metrics</span><span class="p">[</span><span class="n">stage_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">num_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="n">stage_info</span><span class="p">.</span><span class="n">numTasks</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">num_active_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="n">stage_info</span><span class="p">.</span><span class="n">numActiveTasks</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">num_completed_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="n">stage_info</span><span class="p">.</span><span class="n">numCompletedTasks</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">num_failed_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="n">stage_info</span><span class="p">.</span><span class="n">numFailedTasks</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">executor_run_time</span><span class="sh">'</span><span class="p">:</span> <span class="n">stage_info</span><span class="p">.</span><span class="n">executorRunTime</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">executor_cpu_time</span><span class="sh">'</span><span class="p">:</span> <span class="n">stage_info</span><span class="p">.</span><span class="n">executorCpuTime</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">input_bytes</span><span class="sh">'</span><span class="p">:</span> <span class="n">stage_info</span><span class="p">.</span><span class="n">inputBytes</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">output_bytes</span><span class="sh">'</span><span class="p">:</span> <span class="n">stage_info</span><span class="p">.</span><span class="n">outputBytes</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">shuffle_read_bytes</span><span class="sh">'</span><span class="p">:</span> <span class="n">stage_info</span><span class="p">.</span><span class="n">shuffleReadBytes</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">shuffle_write_bytes</span><span class="sh">'</span><span class="p">:</span> <span class="n">stage_info</span><span class="p">.</span><span class="n">shuffleWriteBytes</span>
+            <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">stage_metrics</span>
+    
+    <span class="k">def</span> <span class="nf">collect_executor_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Collect executor metrics</span><span class="sh">"""</span>
+        <span class="n">status_tracker</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">sc</span><span class="p">.</span><span class="nf">statusTracker</span><span class="p">()</span>
+        <span class="n">executor_infos</span> <span class="o">=</span> <span class="n">status_tracker</span><span class="p">.</span><span class="nf">getExecutorInfos</span><span class="p">()</span>
+        
+        <span class="n">executor_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">executor_info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">:</span>
+            <span class="n">executor_metrics</span><span class="p">[</span><span class="n">executor_info</span><span class="p">.</span><span class="n">executorId</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">host</span><span class="sh">'</span><span class="p">:</span> <span class="n">executor_info</span><span class="p">.</span><span class="n">host</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">total_cores</span><span class="sh">'</span><span class="p">:</span> <span class="n">executor_info</span><span class="p">.</span><span class="n">totalCores</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">max_memory</span><span class="sh">'</span><span class="p">:</span> <span class="n">executor_info</span><span class="p">.</span><span class="n">maxMemory</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">memory_used</span><span class="sh">'</span><span class="p">:</span> <span class="n">executor_info</span><span class="p">.</span><span class="n">memoryUsed</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">disk_used</span><span class="sh">'</span><span class="p">:</span> <span class="n">executor_info</span><span class="p">.</span><span class="n">diskUsed</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">active_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="n">executor_info</span><span class="p">.</span><span class="n">activeTasks</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">completed_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="n">executor_info</span><span class="p">.</span><span class="n">completedTasks</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">failed_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="n">executor_info</span><span class="p">.</span><span class="n">failedTasks</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">total_duration</span><span class="sh">'</span><span class="p">:</span> <span class="n">executor_info</span><span class="p">.</span><span class="n">totalDuration</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">total_gc_time</span><span class="sh">'</span><span class="p">:</span> <span class="n">executor_info</span><span class="p">.</span><span class="n">totalGCTime</span>
+            <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">executor_metrics</span>
+
+<span class="c1"># Usage example
+</span><span class="k">def</span> <span class="nf">monitor_spark_application</span><span class="p">():</span>
+    <span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">MetricsExample</span><span class="sh">"</span><span class="p">).</span><span class="nf">getOrCreate</span><span class="p">()</span>
+    <span class="n">collector</span> <span class="o">=</span> <span class="nc">SparkMetricsCollector</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
+    
+    <span class="c1"># Collect metrics periodically
+</span>    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">job_metrics</span> <span class="o">=</span> <span class="n">collector</span><span class="p">.</span><span class="nf">collect_job_metrics</span><span class="p">()</span>
+        <span class="n">stage_metrics</span> <span class="o">=</span> <span class="n">collector</span><span class="p">.</span><span class="nf">collect_stage_metrics</span><span class="p">()</span>
+        <span class="n">executor_metrics</span> <span class="o">=</span> <span class="n">collector</span><span class="p">.</span><span class="nf">collect_executor_metrics</span><span class="p">()</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== Job Metrics ===</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">job_metrics</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== Stage Metrics ===</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">stage_metrics</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== Executor Metrics ===</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">executor_metrics</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+        
+        <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># Collect every 10 seconds
+</span></code></pre></div></div>
+
+<h2 id="-performance-monitoring-and-profiling">📊 Performance Monitoring and Profiling</h2>
+
+<h3 id="performance-profiling-tools">Performance Profiling Tools</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Performance profiling class
+</span><span class="k">class</span> <span class="nc">SparkProfiler</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">spark_session</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">spark</span> <span class="o">=</span> <span class="n">spark_session</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">sc</span> <span class="o">=</span> <span class="n">spark_session</span><span class="p">.</span><span class="n">sparkContext</span>
+    
+    <span class="k">def</span> <span class="nf">profile_query_execution</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">query_name</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Profile query execution</span><span class="sh">"""</span>
+        <span class="kn">import</span> <span class="n">time</span>
+        
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+        
+        <span class="c1"># Analyze execution plan
+</span>        <span class="n">execution_plan</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">explain</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        
+        <span class="c1"># Execute query
+</span>        <span class="n">result</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">collect</span><span class="p">()</span>
+        
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+        <span class="n">execution_time</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+        
+        <span class="c1"># Collect metrics
+</span>        <span class="n">status_tracker</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">sc</span><span class="p">.</span><span class="nf">statusTracker</span><span class="p">()</span>
+        <span class="n">executor_infos</span> <span class="o">=</span> <span class="n">status_tracker</span><span class="p">.</span><span class="nf">getExecutorInfos</span><span class="p">()</span>
+        
+        <span class="n">total_memory_used</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">memoryUsed</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">)</span>
+        <span class="n">total_gc_time</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">totalGCTime</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">)</span>
+        
+        <span class="n">profile_result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">query_name</span><span class="sh">'</span><span class="p">:</span> <span class="n">query_name</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">execution_time</span><span class="sh">'</span><span class="p">:</span> <span class="n">execution_time</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">total_memory_used</span><span class="sh">'</span><span class="p">:</span> <span class="n">total_memory_used</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">total_gc_time</span><span class="sh">'</span><span class="p">:</span> <span class="n">total_gc_time</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">execution_plan</span><span class="sh">'</span><span class="p">:</span> <span class="n">execution_plan</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">result_count</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">profile_result</span>
+    
+    <span class="k">def</span> <span class="nf">analyze_data_skew</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">key_columns</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Analyze data skew</span><span class="sh">"""</span>
+        <span class="c1"># Analyze data distribution by key
+</span>        <span class="n">key_counts</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="o">*</span><span class="n">key_columns</span><span class="p">).</span><span class="nf">count</span><span class="p">()</span>
+        
+        <span class="c1"># Collect statistics
+</span>        <span class="n">stats</span> <span class="o">=</span> <span class="n">key_counts</span><span class="p">.</span><span class="nf">select</span><span class="p">(</span>
+            <span class="nf">count</span><span class="p">(</span><span class="sh">"</span><span class="s">*</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">total_keys</span><span class="sh">"</span><span class="p">),</span>
+            <span class="nf">min</span><span class="p">(</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">min_count</span><span class="sh">"</span><span class="p">),</span>
+            <span class="nf">max</span><span class="p">(</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">max_count</span><span class="sh">"</span><span class="p">),</span>
+            <span class="nf">avg</span><span class="p">(</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">avg_count</span><span class="sh">"</span><span class="p">),</span>
+            <span class="nf">stddev</span><span class="p">(</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">stddev_count</span><span class="sh">"</span><span class="p">)</span>
+        <span class="p">).</span><span class="nf">collect</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="c1"># Calculate skew ratio
+</span>        <span class="n">skew_ratio</span> <span class="o">=</span> <span class="n">stats</span><span class="p">[</span><span class="sh">'</span><span class="s">max_count</span><span class="sh">'</span><span class="p">]</span> <span class="o">/</span> <span class="n">stats</span><span class="p">[</span><span class="sh">'</span><span class="s">avg_count</span><span class="sh">'</span><span class="p">]</span> <span class="k">if</span> <span class="n">stats</span><span class="p">[</span><span class="sh">'</span><span class="s">avg_count</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        
+        <span class="n">skew_analysis</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">total_keys</span><span class="sh">'</span><span class="p">:</span> <span class="n">stats</span><span class="p">[</span><span class="sh">'</span><span class="s">total_keys</span><span class="sh">'</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">min_count</span><span class="sh">'</span><span class="p">:</span> <span class="n">stats</span><span class="p">[</span><span class="sh">'</span><span class="s">min_count</span><span class="sh">'</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">max_count</span><span class="sh">'</span><span class="p">:</span> <span class="n">stats</span><span class="p">[</span><span class="sh">'</span><span class="s">max_count</span><span class="sh">'</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">avg_count</span><span class="sh">'</span><span class="p">:</span> <span class="n">stats</span><span class="p">[</span><span class="sh">'</span><span class="s">avg_count</span><span class="sh">'</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">stddev_count</span><span class="sh">'</span><span class="p">:</span> <span class="n">stats</span><span class="p">[</span><span class="sh">'</span><span class="s">stddev_count</span><span class="sh">'</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">skew_ratio</span><span class="sh">'</span><span class="p">:</span> <span class="n">skew_ratio</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">is_skewed</span><span class="sh">'</span><span class="p">:</span> <span class="n">skew_ratio</span> <span class="o">&gt;</span> <span class="mf">2.0</span>  <span class="c1"># Skew threshold
+</span>        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">skew_analysis</span>
+    
+    <span class="k">def</span> <span class="nf">monitor_memory_usage</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Monitor memory usage</span><span class="sh">"""</span>
+        <span class="n">status_tracker</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">sc</span><span class="p">.</span><span class="nf">statusTracker</span><span class="p">()</span>
+        <span class="n">executor_infos</span> <span class="o">=</span> <span class="n">status_tracker</span><span class="p">.</span><span class="nf">getExecutorInfos</span><span class="p">()</span>
+        
+        <span class="n">memory_stats</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">total_executors</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">executor_infos</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">total_memory_used</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">memoryUsed</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">total_max_memory</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">maxMemory</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">memory_utilization</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">executor_details</span><span class="sh">'</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">:</span>
+            <span class="n">executor_detail</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">executor_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">info</span><span class="p">.</span><span class="n">executorId</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">host</span><span class="sh">'</span><span class="p">:</span> <span class="n">info</span><span class="p">.</span><span class="n">host</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">memory_used</span><span class="sh">'</span><span class="p">:</span> <span class="n">info</span><span class="p">.</span><span class="n">memoryUsed</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">max_memory</span><span class="sh">'</span><span class="p">:</span> <span class="n">info</span><span class="p">.</span><span class="n">maxMemory</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">utilization</span><span class="sh">'</span><span class="p">:</span> <span class="n">info</span><span class="p">.</span><span class="n">memoryUsed</span> <span class="o">/</span> <span class="n">info</span><span class="p">.</span><span class="n">maxMemory</span> <span class="k">if</span> <span class="n">info</span><span class="p">.</span><span class="n">maxMemory</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="p">}</span>
+            <span class="n">memory_stats</span><span class="p">[</span><span class="sh">'</span><span class="s">executor_details</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="n">executor_detail</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">memory_stats</span><span class="p">[</span><span class="sh">'</span><span class="s">total_max_memory</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">memory_stats</span><span class="p">[</span><span class="sh">'</span><span class="s">memory_utilization</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">memory_stats</span><span class="p">[</span><span class="sh">'</span><span class="s">total_memory_used</span><span class="sh">'</span><span class="p">]</span> <span class="o">/</span> <span class="n">memory_stats</span><span class="p">[</span><span class="sh">'</span><span class="s">total_max_memory</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">memory_stats</span>
+
+<span class="c1"># Performance analysis tool usage example
+</span><span class="k">def</span> <span class="nf">performance_analysis_example</span><span class="p">():</span>
+    <span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">PerformanceAnalysis</span><span class="sh">"</span><span class="p">).</span><span class="nf">getOrCreate</span><span class="p">()</span>
+    <span class="n">profiler</span> <span class="o">=</span> <span class="nc">SparkProfiler</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
+    
+    <span class="c1"># Create sample data
+</span>    <span class="n">data</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="sh">"</span><span class="s">user_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">)]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="nf">createDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">])</span>
+    
+    <span class="c1"># Query profiling
+</span>    <span class="n">profile_result</span> <span class="o">=</span> <span class="n">profiler</span><span class="p">.</span><span class="nf">profile_query_execution</span><span class="p">(</span>
+        <span class="sh">"</span><span class="s">sample_aggregation</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">).</span><span class="nf">agg</span><span class="p">(</span><span class="nf">sum</span><span class="p">(</span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">total_value</span><span class="sh">"</span><span class="p">))</span>
+    <span class="p">)</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Query Profile Result:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">profile_result</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="c1"># Data skew analysis
+</span>    <span class="n">skew_analysis</span> <span class="o">=</span> <span class="n">profiler</span><span class="p">.</span><span class="nf">analyze_data_skew</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="p">[</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">])</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">Data Skew Analysis:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">skew_analysis</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="c1"># Memory usage monitoring
+</span>    <span class="n">memory_stats</span> <span class="o">=</span> <span class="n">profiler</span><span class="p">.</span><span class="nf">monitor_memory_usage</span><span class="p">()</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">Memory Usage Stats:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">memory_stats</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h2 id="-memory-optimization-and-caching-strategies">💾 Memory Optimization and Caching Strategies</h2>
+
+<h3 id="memory-management-optimization">Memory Management Optimization</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Memory optimization tools
+</span><span class="k">class</span> <span class="nc">MemoryOptimizer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">spark_session</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">spark</span> <span class="o">=</span> <span class="n">spark_session</span>
+        
+    <span class="k">def</span> <span class="nf">optimize_dataframe_memory</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Optimize DataFrame memory</span><span class="sh">"""</span>
+        <span class="kn">from</span> <span class="n">pyspark.sql.types</span> <span class="kn">import</span> <span class="n">IntegerType</span><span class="p">,</span> <span class="n">LongType</span><span class="p">,</span> <span class="n">FloatType</span><span class="p">,</span> <span class="n">DoubleType</span>
+        
+        <span class="n">optimized_df</span> <span class="o">=</span> <span class="n">df</span>
+        
+        <span class="c1"># Optimize column types
+</span>        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">df</span><span class="p">.</span><span class="n">schema</span><span class="p">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="n">field_name</span> <span class="o">=</span> <span class="n">field</span><span class="p">.</span><span class="n">name</span>
+            <span class="n">field_type</span> <span class="o">=</span> <span class="n">field</span><span class="p">.</span><span class="n">dataType</span>
+            
+            <span class="k">if</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">field_type</span><span class="p">,</span> <span class="n">IntegerType</span><span class="p">):</span>
+                <span class="c1"># Change to smaller type if no large integer values
+</span>                <span class="n">max_val</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="nf">max</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="n">field_name</span><span class="p">))).</span><span class="nf">collect</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">min_val</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="nf">min</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="n">field_name</span><span class="p">))).</span><span class="nf">collect</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                
+                <span class="k">if</span> <span class="o">-</span><span class="mi">128</span> <span class="o">&lt;=</span> <span class="n">min_val</span> <span class="o">&lt;=</span> <span class="mi">127</span> <span class="ow">and</span> <span class="o">-</span><span class="mi">128</span> <span class="o">&lt;=</span> <span class="n">max_val</span> <span class="o">&lt;=</span> <span class="mi">127</span><span class="p">:</span>
+                    <span class="n">optimized_df</span> <span class="o">=</span> <span class="n">optimized_df</span><span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span>
+                        <span class="n">field_name</span><span class="p">,</span> <span class="nf">col</span><span class="p">(</span><span class="n">field_name</span><span class="p">).</span><span class="nf">cast</span><span class="p">(</span><span class="sh">"</span><span class="s">tinyint</span><span class="sh">"</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="o">-</span><span class="mi">32768</span> <span class="o">&lt;=</span> <span class="n">min_val</span> <span class="o">&lt;=</span> <span class="mi">32767</span> <span class="ow">and</span> <span class="o">-</span><span class="mi">32768</span> <span class="o">&lt;=</span> <span class="n">max_val</span> <span class="o">&lt;=</span> <span class="mi">32767</span><span class="p">:</span>
+                    <span class="n">optimized_df</span> <span class="o">=</span> <span class="n">optimized_df</span><span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span>
+                        <span class="n">field_name</span><span class="p">,</span> <span class="nf">col</span><span class="p">(</span><span class="n">field_name</span><span class="p">).</span><span class="nf">cast</span><span class="p">(</span><span class="sh">"</span><span class="s">smallint</span><span class="sh">"</span><span class="p">)</span>
+                    <span class="p">)</span>
+            
+            <span class="k">elif</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">field_type</span><span class="p">,</span> <span class="n">FloatType</span><span class="p">):</span>
+                <span class="c1"># Change Float to Double for better precision
+</span>                <span class="n">optimized_df</span> <span class="o">=</span> <span class="n">optimized_df</span><span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span>
+                    <span class="n">field_name</span><span class="p">,</span> <span class="nf">col</span><span class="p">(</span><span class="n">field_name</span><span class="p">).</span><span class="nf">cast</span><span class="p">(</span><span class="sh">"</span><span class="s">double</span><span class="sh">"</span><span class="p">)</span>
+                <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">optimized_df</span>
+    
+    <span class="k">def</span> <span class="nf">calculate_memory_usage</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Calculate memory usage</span><span class="sh">"""</span>
+        <span class="c1"># Estimate DataFrame size
+</span>        <span class="n">num_rows</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+        <span class="n">num_cols</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">df</span><span class="p">.</span><span class="n">columns</span><span class="p">)</span>
+        
+        <span class="c1"># Estimate type size by column
+</span>        <span class="n">type_sizes</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">string</span><span class="sh">'</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>  <span class="c1"># Average string length
+</span>            <span class="sh">'</span><span class="s">int</span><span class="sh">'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">bigint</span><span class="sh">'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">double</span><span class="sh">'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">float</span><span class="sh">'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">boolean</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">date</span><span class="sh">'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="mi">8</span>
+        <span class="p">}</span>
+        
+        <span class="n">estimated_size</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">df</span><span class="p">.</span><span class="n">schema</span><span class="p">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="n">field_type</span> <span class="o">=</span> <span class="nf">str</span><span class="p">(</span><span class="n">field</span><span class="p">.</span><span class="n">dataType</span><span class="p">)</span>
+            <span class="n">base_type</span> <span class="o">=</span> <span class="n">field_type</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sh">'</span><span class="s">(</span><span class="sh">'</span><span class="p">)[</span><span class="mi">0</span><span class="p">].</span><span class="nf">lower</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="n">base_type</span> <span class="ow">in</span> <span class="n">type_sizes</span><span class="p">:</span>
+                <span class="n">estimated_size</span> <span class="o">+=</span> <span class="n">type_sizes</span><span class="p">[</span><span class="n">base_type</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">estimated_size</span> <span class="o">+=</span> <span class="mi">8</span>  <span class="c1"># Default value
+</span>        
+        <span class="n">total_estimated_size</span> <span class="o">=</span> <span class="n">num_rows</span> <span class="o">*</span> <span class="n">num_cols</span> <span class="o">*</span> <span class="n">estimated_size</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">num_rows</span><span class="sh">'</span><span class="p">:</span> <span class="n">num_rows</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">num_cols</span><span class="sh">'</span><span class="p">:</span> <span class="n">num_cols</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">estimated_size_bytes</span><span class="sh">'</span><span class="p">:</span> <span class="n">total_estimated_size</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">estimated_size_mb</span><span class="sh">'</span><span class="p">:</span> <span class="n">total_estimated_size</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">)</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_caching_strategy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">access_pattern</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Optimize caching strategy</span><span class="sh">"""</span>
+        <span class="kn">from</span> <span class="n">pyspark</span> <span class="kn">import</span> <span class="n">StorageLevel</span>
+        
+        <span class="n">memory_stats</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">calculate_memory_usage</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">size_mb</span> <span class="o">=</span> <span class="n">memory_stats</span><span class="p">[</span><span class="sh">'</span><span class="s">estimated_size_mb</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="n">recommendations</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="n">access_pattern</span><span class="p">[</span><span class="sh">'</span><span class="s">frequency</span><span class="sh">'</span><span class="p">]</span> <span class="o">==</span> <span class="sh">'</span><span class="s">high</span><span class="sh">'</span> <span class="ow">and</span> <span class="n">size_mb</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">strategy</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">MEMORY_ONLY</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">reason</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Frequently used and small data</span><span class="sh">'</span>
+            <span class="p">})</span>
+        <span class="k">elif</span> <span class="n">access_pattern</span><span class="p">[</span><span class="sh">'</span><span class="s">frequency</span><span class="sh">'</span><span class="p">]</span> <span class="o">==</span> <span class="sh">'</span><span class="s">high</span><span class="sh">'</span> <span class="ow">and</span> <span class="n">size_mb</span> <span class="o">&gt;=</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">strategy</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">MEMORY_AND_DISK_SER</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">reason</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Frequently used but large data</span><span class="sh">'</span>
+            <span class="p">})</span>
+        <span class="k">elif</span> <span class="n">access_pattern</span><span class="p">[</span><span class="sh">'</span><span class="s">frequency</span><span class="sh">'</span><span class="p">]</span> <span class="o">==</span> <span class="sh">'</span><span class="s">medium</span><span class="sh">'</span><span class="p">:</span>
+            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">strategy</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">DISK_ONLY</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">reason</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Medium frequency usage data</span><span class="sh">'</span>
+            <span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">strategy</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">NO_CACHING</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">reason</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Low frequency usage data</span><span class="sh">'</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">data_size_mb</span><span class="sh">'</span><span class="p">:</span> <span class="n">size_mb</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">access_frequency</span><span class="sh">'</span><span class="p">:</span> <span class="n">access_pattern</span><span class="p">[</span><span class="sh">'</span><span class="s">frequency</span><span class="sh">'</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">recommendations</span><span class="sh">'</span><span class="p">:</span> <span class="n">recommendations</span>
+        <span class="p">}</span>
+
+<span class="c1"># Memory optimization example
+</span><span class="k">def</span> <span class="nf">memory_optimization_example</span><span class="p">():</span>
+    <span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">MemoryOptimization</span><span class="sh">"</span><span class="p">).</span><span class="nf">getOrCreate</span><span class="p">()</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="nc">MemoryOptimizer</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
+    
+    <span class="c1"># Create sample data
+</span>    <span class="n">data</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="sh">"</span><span class="s">user_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">100000</span><span class="p">)]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="nf">createDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">score</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">is_active</span><span class="sh">"</span><span class="p">])</span>
+    
+    <span class="c1"># Memory optimization
+</span>    <span class="n">optimized_df</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">.</span><span class="nf">optimize_dataframe_memory</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    
+    <span class="c1"># Calculate memory usage
+</span>    <span class="n">original_memory</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">.</span><span class="nf">calculate_memory_usage</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">optimized_memory</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">.</span><span class="nf">calculate_memory_usage</span><span class="p">(</span><span class="n">optimized_df</span><span class="p">)</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Original Memory Usage:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">original_memory</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">Optimized Memory Usage:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">optimized_memory</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="c1"># Optimize caching strategy
+</span>    <span class="n">access_pattern</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">frequency</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">high</span><span class="sh">'</span><span class="p">}</span>
+    <span class="n">caching_strategy</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">.</span><span class="nf">optimize_caching_strategy</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">access_pattern</span><span class="p">)</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">Caching Strategy:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">caching_strategy</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h2 id="️-cluster-tuning-and-scalability">⚙️ Cluster Tuning and Scalability</h2>
+
+<h3 id="cluster-resource-optimization">Cluster Resource Optimization</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Cluster tuning tools
+</span><span class="k">class</span> <span class="nc">ClusterTuner</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">spark_session</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">spark</span> <span class="o">=</span> <span class="n">spark_session</span>
+        
+    <span class="k">def</span> <span class="nf">analyze_cluster_resources</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Analyze cluster resources</span><span class="sh">"""</span>
+        <span class="n">status_tracker</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">spark</span><span class="p">.</span><span class="n">sparkContext</span><span class="p">.</span><span class="nf">statusTracker</span><span class="p">()</span>
+        <span class="n">executor_infos</span> <span class="o">=</span> <span class="n">status_tracker</span><span class="p">.</span><span class="nf">getExecutorInfos</span><span class="p">()</span>
+        
+        <span class="n">cluster_analysis</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">total_executors</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">executor_infos</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">total_cores</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">totalCores</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">total_memory</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">maxMemory</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">memory_utilization</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">cpu_utilization</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">resource_recommendations</span><span class="sh">'</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+        
+        <span class="n">total_memory_used</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">memoryUsed</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cluster_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">total_memory</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">cluster_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">memory_utilization</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_memory_used</span> <span class="o">/</span> <span class="n">cluster_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">total_memory</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="c1"># Resource optimization recommendations
+</span>        <span class="k">if</span> <span class="n">cluster_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">memory_utilization</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.8</span><span class="p">:</span>
+            <span class="n">cluster_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">resource_recommendations</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span>
+                <span class="sh">"</span><span class="s">High memory usage. Consider allocating more memory</span><span class="sh">"</span>
+            <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">cluster_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">total_executors</span><span class="sh">'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">cluster_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">resource_recommendations</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span>
+                <span class="sh">"</span><span class="s">Low number of executors. Consider more executors for scalability</span><span class="sh">"</span>
+            <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">cluster_analysis</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_spark_config</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">workload_type</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Optimize Spark configuration by workload type</span><span class="sh">"""</span>
+        <span class="n">config_recommendations</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">if</span> <span class="n">workload_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">batch</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">config_recommendations</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">spark.sql.adaptive.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">spark.sql.adaptive.coalescePartitions.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">spark.sql.adaptive.advisoryPartitionSizeInBytes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">128MB</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">spark.serializer</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.spark.serializer.KryoSerializer</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">spark.sql.execution.arrow.pyspark.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="k">elif</span> <span class="n">workload_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">streaming</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">config_recommendations</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">spark.sql.streaming.checkpointLocation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/tmp/checkpoint</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">spark.sql.streaming.stateStore.providerClass</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.spark.sql.execution.streaming.state.HDFSBackedStateStoreProvider</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">spark.sql.streaming.minBatchesToRetain</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">spark.sql.streaming.stateStore.maintenanceInterval</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">60s</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="k">elif</span> <span class="n">workload_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">ml</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">config_recommendations</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">spark.sql.execution.arrow.maxRecordsPerBatch</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10000</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">spark.serializer</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.spark.serializer.KryoSerializer</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">spark.sql.adaptive.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">spark.sql.adaptive.coalescePartitions.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span>
+            <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">config_recommendations</span>
+    
+    <span class="k">def</span> <span class="nf">calculate_optimal_partitions</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_size_gb</span><span class="p">,</span> <span class="n">executor_cores</span><span class="p">,</span> <span class="n">num_executors</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Calculate optimal number of partitions</span><span class="sh">"""</span>
+        <span class="n">total_cores</span> <span class="o">=</span> <span class="n">executor_cores</span> <span class="o">*</span> <span class="n">num_executors</span>
+        
+        <span class="c1"># General recommendation: 2-3 partitions per core
+</span>        <span class="n">min_partitions</span> <span class="o">=</span> <span class="n">total_cores</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">max_partitions</span> <span class="o">=</span> <span class="n">total_cores</span> <span class="o">*</span> <span class="mi">3</span>
+        
+        <span class="c1"># Adjust based on data size
+</span>        <span class="n">target_partition_size_mb</span> <span class="o">=</span> <span class="mi">128</span>
+        <span class="n">size_based_partitions</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">data_size_gb</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">/</span> <span class="n">target_partition_size_mb</span><span class="p">)</span>
+        
+        <span class="n">optimal_partitions</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">min_partitions</span><span class="p">,</span> <span class="nf">min</span><span class="p">(</span><span class="n">max_partitions</span><span class="p">,</span> <span class="n">size_based_partitions</span><span class="p">))</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">total_cores</span><span class="sh">'</span><span class="p">:</span> <span class="n">total_cores</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">min_partitions</span><span class="sh">'</span><span class="p">:</span> <span class="n">min_partitions</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">max_partitions</span><span class="sh">'</span><span class="p">:</span> <span class="n">max_partitions</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">size_based_partitions</span><span class="sh">'</span><span class="p">:</span> <span class="n">size_based_partitions</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">optimal_partitions</span><span class="sh">'</span><span class="p">:</span> <span class="n">optimal_partitions</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">recommendation</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Recommended partitions: </span><span class="si">{</span><span class="n">optimal_partitions</span><span class="si">}</span><span class="sh">"</span>
+        <span class="p">}</span>
+
+<span class="c1"># Cluster tuning example
+</span><span class="k">def</span> <span class="nf">cluster_tuning_example</span><span class="p">():</span>
+    <span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">ClusterTuning</span><span class="sh">"</span><span class="p">).</span><span class="nf">getOrCreate</span><span class="p">()</span>
+    <span class="n">tuner</span> <span class="o">=</span> <span class="nc">ClusterTuner</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
+    
+    <span class="c1"># Analyze cluster resources
+</span>    <span class="n">cluster_analysis</span> <span class="o">=</span> <span class="n">tuner</span><span class="p">.</span><span class="nf">analyze_cluster_resources</span><span class="p">()</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Cluster Resource Analysis:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">cluster_analysis</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="c1"># Optimize configuration by workload
+</span>    <span class="n">batch_config</span> <span class="o">=</span> <span class="n">tuner</span><span class="p">.</span><span class="nf">optimize_spark_config</span><span class="p">(</span><span class="sh">"</span><span class="s">batch</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">Batch Workload Configuration:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">batch_config</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="c1"># Calculate optimal partitions
+</span>    <span class="n">partition_analysis</span> <span class="o">=</span> <span class="n">tuner</span><span class="p">.</span><span class="nf">calculate_optimal_partitions</span><span class="p">(</span>
+        <span class="n">data_size_gb</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">executor_cores</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">num_executors</span><span class="o">=</span><span class="mi">5</span>
+    <span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">Partition Analysis:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">partition_analysis</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h2 id="️-real-world-project-performance-optimization-system">🛠️ Real-world Project: Performance Optimization System</h2>
+
+<h3 id="performance-monitoring-system">Performance Monitoring System</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Performance monitoring system
+</span><span class="k">class</span> <span class="nc">PerformanceMonitoringSystem</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">spark_session</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">spark</span> <span class="o">=</span> <span class="n">spark_session</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">alerts</span> <span class="o">=</span> <span class="p">[]</span>
+        
+    <span class="k">def</span> <span class="nf">collect_comprehensive_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Collect comprehensive metrics</span><span class="sh">"""</span>
+        <span class="n">status_tracker</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">spark</span><span class="p">.</span><span class="n">sparkContext</span><span class="p">.</span><span class="nf">statusTracker</span><span class="p">()</span>
+        
+        <span class="c1"># Basic metrics
+</span>        <span class="n">executor_infos</span> <span class="o">=</span> <span class="n">status_tracker</span><span class="p">.</span><span class="nf">getExecutorInfos</span><span class="p">()</span>
+        <span class="n">active_jobs</span> <span class="o">=</span> <span class="n">status_tracker</span><span class="p">.</span><span class="nf">getActiveJobIds</span><span class="p">()</span>
+        <span class="n">active_stages</span> <span class="o">=</span> <span class="n">status_tracker</span><span class="p">.</span><span class="nf">getActiveStageIds</span><span class="p">()</span>
+        
+        <span class="c1"># System metrics
+</span>        <span class="n">system_metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">active_jobs_count</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">active_jobs</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">active_stages_count</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">active_stages</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">total_executors</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">executor_infos</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">total_cores</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">totalCores</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">total_memory</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">maxMemory</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">used_memory</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">memoryUsed</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">total_gc_time</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">totalGCTime</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">total_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">completedTasks</span> <span class="o">+</span> <span class="n">info</span><span class="p">.</span><span class="n">failedTasks</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">failed_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">failedTasks</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Add to metrics history
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">system_metrics</span><span class="p">)</span>
+        
+        <span class="c1"># Keep only recent 100
+</span>        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">[</span><span class="o">-</span><span class="mi">100</span><span class="p">:]</span>
+        
+        <span class="k">return</span> <span class="n">system_metrics</span>
+    
+    <span class="k">def</span> <span class="nf">analyze_performance_trends</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Analyze performance trends</span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Insufficient data</span><span class="sh">"</span><span class="p">}</span>
+        
+        <span class="n">recent_metrics</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">:]</span>  <span class="c1"># Recent 10
+</span>        
+        <span class="c1"># Calculate trends
+</span>        <span class="n">memory_trend</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_trend</span><span class="p">([</span><span class="n">m</span><span class="p">[</span><span class="sh">'</span><span class="s">used_memory</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">recent_metrics</span><span class="p">])</span>
+        <span class="n">gc_trend</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_trend</span><span class="p">([</span><span class="n">m</span><span class="p">[</span><span class="sh">'</span><span class="s">total_gc_time</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">recent_metrics</span><span class="p">])</span>
+        <span class="n">failure_trend</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_trend</span><span class="p">([</span><span class="n">m</span><span class="p">[</span><span class="sh">'</span><span class="s">failed_tasks</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">recent_metrics</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">memory_trend</span><span class="sh">'</span><span class="p">:</span> <span class="n">memory_trend</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">gc_trend</span><span class="sh">'</span><span class="p">:</span> <span class="n">gc_trend</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">failure_trend</span><span class="sh">'</span><span class="p">:</span> <span class="n">failure_trend</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">analysis_period</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">recent_metrics</span><span class="p">)</span><span class="si">}</span><span class="s"> samples</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">recommendations</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_generate_recommendations</span><span class="p">(</span><span class="n">memory_trend</span><span class="p">,</span> <span class="n">gc_trend</span><span class="p">,</span> <span class="n">failure_trend</span><span class="p">)</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">_calculate_trend</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Calculate trend (linear regression based)</span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sh">"</span><span class="s">insufficient_data</span><span class="sh">"</span>
+        
+        <span class="c1"># Simple trend calculation
+</span>        <span class="n">first_half</span> <span class="o">=</span> <span class="n">values</span><span class="p">[:</span><span class="nf">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">second_half</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="nf">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">:]</span>
+        
+        <span class="n">first_avg</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">first_half</span><span class="p">)</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">first_half</span><span class="p">)</span>
+        <span class="n">second_avg</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">second_half</span><span class="p">)</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">second_half</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">second_avg</span> <span class="o">&gt;</span> <span class="n">first_avg</span> <span class="o">*</span> <span class="mf">1.1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sh">"</span><span class="s">increasing</span><span class="sh">"</span>
+        <span class="k">elif</span> <span class="n">second_avg</span> <span class="o">&lt;</span> <span class="n">first_avg</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sh">"</span><span class="s">decreasing</span><span class="sh">"</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sh">"</span><span class="s">stable</span><span class="sh">"</span>
+    
+    <span class="k">def</span> <span class="nf">_generate_recommendations</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">memory_trend</span><span class="p">,</span> <span class="n">gc_trend</span><span class="p">,</span> <span class="n">failure_trend</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate recommendations</span><span class="sh">"""</span>
+        <span class="n">recommendations</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="n">memory_trend</span> <span class="o">==</span> <span class="sh">"</span><span class="s">increasing</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sh">"</span><span class="s">Memory usage is increasing. Consider memory optimization</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">gc_trend</span> <span class="o">==</span> <span class="sh">"</span><span class="s">increasing</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sh">"</span><span class="s">GC time is increasing. Consider JVM tuning</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">failure_trend</span> <span class="o">==</span> <span class="sh">"</span><span class="s">increasing</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sh">"</span><span class="s">Task failures are increasing. Check resource allocation</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">recommendations</span>
+    
+    <span class="k">def</span> <span class="nf">check_alerts</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">current_metrics</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Check alerts</span><span class="sh">"""</span>
+        <span class="n">alerts</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># Memory usage alert
+</span>        <span class="n">memory_utilization</span> <span class="o">=</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">used_memory</span><span class="sh">'</span><span class="p">]</span> <span class="o">/</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">total_memory</span><span class="sh">'</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">memory_utilization</span> <span class="o">&gt;</span> <span class="mf">0.9</span><span class="p">:</span>
+            <span class="n">alerts</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">warning</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">'</span><span class="s">High memory usage: </span><span class="si">{</span><span class="n">memory_utilization</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="o">%</span><span class="si">}</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Task failure rate alert
+</span>        <span class="n">total_tasks</span> <span class="o">=</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">total_tasks</span><span class="sh">'</span><span class="p">]</span>
+        <span class="n">failed_tasks</span> <span class="o">=</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">failed_tasks</span><span class="sh">'</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">total_tasks</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">failed_tasks</span> <span class="o">/</span> <span class="n">total_tasks</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">:</span>
+            <span class="n">alerts</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">error</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">'</span><span class="s">High task failure rate: </span><span class="si">{</span><span class="n">failed_tasks</span><span class="o">/</span><span class="n">total_tasks</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="o">%</span><span class="si">}</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># GC time alert
+</span>        <span class="k">if</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">total_gc_time</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">30000</span><span class="p">:</span>  <span class="c1"># 30 seconds
+</span>            <span class="n">alerts</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">warning</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">'</span><span class="s">Long GC time: </span><span class="si">{</span><span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">total_gc_time</span><span class="sh">"</span><span class="p">]</span><span class="si">}</span><span class="s">ms</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">})</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">alerts</span><span class="p">.</span><span class="nf">extend</span><span class="p">(</span><span class="n">alerts</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">alerts</span>
+
+<span class="c1"># Performance monitoring system example
+</span><span class="k">def</span> <span class="nf">performance_monitoring_example</span><span class="p">():</span>
+    <span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">PerformanceMonitoring</span><span class="sh">"</span><span class="p">).</span><span class="nf">getOrCreate</span><span class="p">()</span>
+    <span class="n">monitoring_system</span> <span class="o">=</span> <span class="nc">PerformanceMonitoringSystem</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
+    
+    <span class="c1"># Execute sample workload
+</span>    <span class="n">data</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="sh">"</span><span class="s">category_</span><span class="si">{</span><span class="n">i</span> <span class="o">%</span> <span class="mi">100</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">50000</span><span class="p">)]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="nf">createDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">])</span>
+    
+    <span class="c1"># Collect metrics
+</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="n">monitoring_system</span><span class="p">.</span><span class="nf">collect_comprehensive_metrics</span><span class="p">()</span>
+        <span class="n">alerts</span> <span class="o">=</span> <span class="n">monitoring_system</span><span class="p">.</span><span class="nf">check_alerts</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">=== Metrics Collection </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s"> ===</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Memory Usage: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">used_memory</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="s"> / </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">total_memory</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Active Jobs: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">active_jobs_count</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed Tasks: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">failed_tasks</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">alerts</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Alerts:</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">alerts</span><span class="p">:</span>
+                <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">  [</span><span class="si">{</span><span class="n">alert</span><span class="p">[</span><span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">].</span><span class="nf">upper</span><span class="p">()</span><span class="si">}</span><span class="s">] </span><span class="si">{</span><span class="n">alert</span><span class="p">[</span><span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="c1"># Analyze performance trends
+</span>    <span class="n">trend_analysis</span> <span class="o">=</span> <span class="n">monitoring_system</span><span class="p">.</span><span class="nf">analyze_performance_trends</span><span class="p">()</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">=== Performance Trend Analysis ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">trend_analysis</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h2 id="-production-environment-setup">🏭 Production Environment Setup</h2>
+
+<h3 id="production-configuration-template">Production Configuration Template</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># production-spark-config.yaml</span>
+<span class="na">spark</span><span class="pi">:</span>
+  <span class="c1"># Application settings</span>
+  <span class="na">app</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">production-spark-app"</span>
+    <span class="na">master</span><span class="pi">:</span> <span class="s2">"</span><span class="s">yarn"</span>
+    
+  <span class="c1"># Memory settings</span>
+  <span class="na">executor</span><span class="pi">:</span>
+    <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">8g"</span>
+    <span class="na">memoryFraction</span><span class="pi">:</span> <span class="s2">"</span><span class="s">0.8"</span>
+    <span class="na">cores</span><span class="pi">:</span> <span class="s2">"</span><span class="s">4"</span>
+    <span class="na">instances</span><span class="pi">:</span> <span class="s2">"</span><span class="s">10"</span>
+    
+  <span class="c1"># Driver settings</span>
+  <span class="na">driver</span><span class="pi">:</span>
+    <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">4g"</span>
+    <span class="na">maxResultSize</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2g"</span>
+    
+  <span class="c1"># SQL settings</span>
+  <span class="na">sql</span><span class="pi">:</span>
+    <span class="na">adaptive</span><span class="pi">:</span>
+      <span class="na">enabled</span><span class="pi">:</span> <span class="s2">"</span><span class="s">true"</span>
+      <span class="na">coalescePartitions</span><span class="pi">:</span>
+        <span class="na">enabled</span><span class="pi">:</span> <span class="s2">"</span><span class="s">true"</span>
+      <span class="na">advisoryPartitionSizeInBytes</span><span class="pi">:</span> <span class="s2">"</span><span class="s">128MB"</span>
+      <span class="na">skewJoin</span><span class="pi">:</span>
+        <span class="na">enabled</span><span class="pi">:</span> <span class="s2">"</span><span class="s">true"</span>
+        <span class="na">skewedPartitionFactor</span><span class="pi">:</span> <span class="s2">"</span><span class="s">5"</span>
+        <span class="na">skewedPartitionThresholdInBytes</span><span class="pi">:</span> <span class="s2">"</span><span class="s">256MB"</span>
+    
+  <span class="c1"># Serialization settings</span>
+  <span class="na">serializer</span><span class="pi">:</span> <span class="s2">"</span><span class="s">org.apache.spark.serializer.KryoSerializer"</span>
+  
+  <span class="c1"># Network settings</span>
+  <span class="na">network</span><span class="pi">:</span>
+    <span class="na">timeout</span><span class="pi">:</span> <span class="s2">"</span><span class="s">800s"</span>
+    
+  <span class="c1"># Checkpoint settings</span>
+  <span class="na">checkpoint</span><span class="pi">:</span>
+    <span class="na">enabled</span><span class="pi">:</span> <span class="s2">"</span><span class="s">true"</span>
+    <span class="na">directory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">hdfs://namenode:9000/spark-checkpoints"</span>
+    
+  <span class="c1"># Logging settings</span>
+  <span class="na">log</span><span class="pi">:</span>
+    <span class="na">level</span><span class="pi">:</span> <span class="s2">"</span><span class="s">WARN"</span>
+    <span class="na">console</span><span class="pi">:</span> <span class="s2">"</span><span class="s">false"</span>
+    
+  <span class="c1"># Security settings</span>
+  <span class="na">security</span><span class="pi">:</span>
+    <span class="na">authentication</span><span class="pi">:</span> <span class="s2">"</span><span class="s">true"</span>
+    <span class="na">encryption</span><span class="pi">:</span> <span class="s2">"</span><span class="s">true"</span>
+</code></pre></div></div>
+
+<h3 id="monitoring-dashboard">Monitoring Dashboard</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Production monitoring dashboard
+</span><span class="k">class</span> <span class="nc">ProductionDashboard</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">spark_session</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">spark</span> <span class="o">=</span> <span class="n">spark_session</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">alert_thresholds</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">memory_usage</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.85</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">gc_time</span><span class="sh">'</span><span class="p">:</span> <span class="mi">30000</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">failed_tasks_ratio</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">execution_time</span><span class="sh">'</span><span class="p">:</span> <span class="mi">3600</span>
+        <span class="p">}</span>
+        
+    <span class="k">def</span> <span class="nf">generate_health_report</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate system health report</span><span class="sh">"""</span>
+        <span class="n">status_tracker</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">spark</span><span class="p">.</span><span class="n">sparkContext</span><span class="p">.</span><span class="nf">statusTracker</span><span class="p">()</span>
+        <span class="n">executor_infos</span> <span class="o">=</span> <span class="n">status_tracker</span><span class="p">.</span><span class="nf">getExecutorInfos</span><span class="p">()</span>
+        
+        <span class="c1"># Collect basic metrics
+</span>        <span class="n">total_memory</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">maxMemory</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">)</span>
+        <span class="n">used_memory</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">memoryUsed</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">)</span>
+        <span class="n">total_gc_time</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">totalGCTime</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">)</span>
+        <span class="n">total_tasks</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">completedTasks</span> <span class="o">+</span> <span class="n">info</span><span class="p">.</span><span class="n">failedTasks</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">)</span>
+        <span class="n">failed_tasks</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">failedTasks</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">executor_infos</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate health scores
+</span>        <span class="n">memory_score</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">-</span> <span class="p">(</span><span class="n">used_memory</span> <span class="o">/</span> <span class="n">total_memory</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="k">if</span> <span class="n">total_memory</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">100</span>
+        <span class="n">gc_score</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span> <span class="o">-</span> <span class="p">(</span><span class="n">total_gc_time</span> <span class="o">/</span> <span class="mi">60000</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span>  <span class="c1"># GC time per minute
+</span>        <span class="n">reliability_score</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">-</span> <span class="p">(</span><span class="n">failed_tasks</span> <span class="o">/</span> <span class="n">total_tasks</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="k">if</span> <span class="n">total_tasks</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">100</span>
+        
+        <span class="n">overall_health</span> <span class="o">=</span> <span class="p">(</span><span class="n">memory_score</span> <span class="o">+</span> <span class="n">gc_score</span> <span class="o">+</span> <span class="n">reliability_score</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">overall_health_score</span><span class="sh">'</span><span class="p">:</span> <span class="n">overall_health</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">memory_health</span><span class="sh">'</span><span class="p">:</span> <span class="n">memory_score</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">gc_health</span><span class="sh">'</span><span class="p">:</span> <span class="n">gc_score</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">reliability_health</span><span class="sh">'</span><span class="p">:</span> <span class="n">reliability_score</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">alerts</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_check_production_alerts</span><span class="p">(</span>
+                <span class="n">used_memory</span><span class="p">,</span> <span class="n">total_memory</span><span class="p">,</span> <span class="n">total_gc_time</span><span class="p">,</span> <span class="n">failed_tasks</span><span class="p">,</span> <span class="n">total_tasks</span>
+            <span class="p">),</span>
+            <span class="sh">'</span><span class="s">recommendations</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_generate_production_recommendations</span><span class="p">(</span>
+                <span class="n">memory_score</span><span class="p">,</span> <span class="n">gc_score</span><span class="p">,</span> <span class="n">reliability_score</span>
+            <span class="p">)</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">_check_production_alerts</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">used_memory</span><span class="p">,</span> <span class="n">total_memory</span><span class="p">,</span> <span class="n">gc_time</span><span class="p">,</span> <span class="n">failed_tasks</span><span class="p">,</span> <span class="n">total_tasks</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Check production alerts</span><span class="sh">"""</span>
+        <span class="n">alerts</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># Memory usage alert
+</span>        <span class="n">memory_ratio</span> <span class="o">=</span> <span class="n">used_memory</span> <span class="o">/</span> <span class="n">total_memory</span> <span class="k">if</span> <span class="n">total_memory</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">memory_ratio</span> <span class="o">&gt;</span> <span class="n">self</span><span class="p">.</span><span class="n">alert_thresholds</span><span class="p">[</span><span class="sh">'</span><span class="s">memory_usage</span><span class="sh">'</span><span class="p">]:</span>
+            <span class="n">alerts</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">level</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">critical</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">memory_usage</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">'</span><span class="s">Memory usage exceeded threshold: </span><span class="si">{</span><span class="n">memory_ratio</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="o">%</span><span class="si">}</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">:</span> <span class="n">memory_ratio</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">threshold</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">alert_thresholds</span><span class="p">[</span><span class="sh">'</span><span class="s">memory_usage</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># GC time alert
+</span>        <span class="k">if</span> <span class="n">gc_time</span> <span class="o">&gt;</span> <span class="n">self</span><span class="p">.</span><span class="n">alert_thresholds</span><span class="p">[</span><span class="sh">'</span><span class="s">gc_time</span><span class="sh">'</span><span class="p">]:</span>
+            <span class="n">alerts</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">level</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">warning</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">gc_time</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">'</span><span class="s">GC time exceeded threshold: </span><span class="si">{</span><span class="n">gc_time</span><span class="si">}</span><span class="s">ms</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">:</span> <span class="n">gc_time</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">threshold</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">alert_thresholds</span><span class="p">[</span><span class="sh">'</span><span class="s">gc_time</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Task failure rate alert
+</span>        <span class="n">failure_ratio</span> <span class="o">=</span> <span class="n">failed_tasks</span> <span class="o">/</span> <span class="n">total_tasks</span> <span class="k">if</span> <span class="n">total_tasks</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">failure_ratio</span> <span class="o">&gt;</span> <span class="n">self</span><span class="p">.</span><span class="n">alert_thresholds</span><span class="p">[</span><span class="sh">'</span><span class="s">failed_tasks_ratio</span><span class="sh">'</span><span class="p">]:</span>
+            <span class="n">alerts</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">level</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">critical</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">task_failure</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">'</span><span class="s">Task failure rate exceeded threshold: </span><span class="si">{</span><span class="n">failure_ratio</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="o">%</span><span class="si">}</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">:</span> <span class="n">failure_ratio</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">threshold</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">alert_thresholds</span><span class="p">[</span><span class="sh">'</span><span class="s">failed_tasks_ratio</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">alerts</span>
+    
+    <span class="k">def</span> <span class="nf">_generate_production_recommendations</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">memory_score</span><span class="p">,</span> <span class="n">gc_score</span><span class="p">,</span> <span class="n">reliability_score</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate production recommendations</span><span class="sh">"""</span>
+        <span class="n">recommendations</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="n">memory_score</span> <span class="o">&lt;</span> <span class="mi">70</span><span class="p">:</span>
+            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">category</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">memory</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">priority</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">high</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">action</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Increase memory allocation or optimize memory usage</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">details</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Adjust executor-memory or executor-memoryFraction settings</span><span class="sh">'</span>
+            <span class="p">})</span>
+        
+        <span class="k">if</span> <span class="n">gc_score</span> <span class="o">&lt;</span> <span class="mi">70</span><span class="p">:</span>
+            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">category</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">gc</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">priority</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">medium</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">action</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Optimize JVM GC settings</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">details</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Consider -XX:+UseG1GC, -XX:MaxGCPauseMillis settings</span><span class="sh">'</span>
+            <span class="p">})</span>
+        
+        <span class="k">if</span> <span class="n">reliability_score</span> <span class="o">&lt;</span> <span class="mi">90</span><span class="p">:</span>
+            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">category</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">reliability</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">priority</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">high</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">action</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Analyze and resolve task failure causes</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">details</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Log analysis and resource allocation check required</span><span class="sh">'</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">recommendations</span>
+    
+    <span class="k">def</span> <span class="nf">export_metrics_to_external_system</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">health_report</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Export metrics to external system</span><span class="sh">"""</span>
+        <span class="c1"># Send metrics to Prometheus, InfluxDB, Elasticsearch, etc.
+</span>        <span class="n">metrics_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">spark_health_score</span><span class="sh">'</span><span class="p">:</span> <span class="n">health_report</span><span class="p">[</span><span class="sh">'</span><span class="s">overall_health_score</span><span class="sh">'</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">memory_health</span><span class="sh">'</span><span class="p">:</span> <span class="n">health_report</span><span class="p">[</span><span class="sh">'</span><span class="s">memory_health</span><span class="sh">'</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">gc_health</span><span class="sh">'</span><span class="p">:</span> <span class="n">health_report</span><span class="p">[</span><span class="sh">'</span><span class="s">gc_health</span><span class="sh">'</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">reliability_health</span><span class="sh">'</span><span class="p">:</span> <span class="n">health_report</span><span class="p">[</span><span class="sh">'</span><span class="s">reliability_health</span><span class="sh">'</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">health_report</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">]</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># In real environment, implement HTTP request or database storage logic
+</span>        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Metrics exported to external system:</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">metrics_data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+        
+        <span class="k">return</span> <span class="bp">True</span>
+
+<span class="c1"># Production dashboard example
+</span><span class="k">def</span> <span class="nf">production_dashboard_example</span><span class="p">():</span>
+    <span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">ProductionDashboard</span><span class="sh">"</span><span class="p">).</span><span class="nf">getOrCreate</span><span class="p">()</span>
+    <span class="n">dashboard</span> <span class="o">=</span> <span class="nc">ProductionDashboard</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
+    
+    <span class="c1"># Generate system health report
+</span>    <span class="n">health_report</span> <span class="o">=</span> <span class="n">dashboard</span><span class="p">.</span><span class="nf">generate_health_report</span><span class="p">()</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== Production Health Report ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Overall Health Score: </span><span class="si">{</span><span class="n">health_report</span><span class="p">[</span><span class="sh">'</span><span class="s">overall_health_score</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">1</span><span class="n">f</span><span class="si">}</span><span class="s">/100</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Memory Health: </span><span class="si">{</span><span class="n">health_report</span><span class="p">[</span><span class="sh">'</span><span class="s">memory_health</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">1</span><span class="n">f</span><span class="si">}</span><span class="s">/100</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">GC Health: </span><span class="si">{</span><span class="n">health_report</span><span class="p">[</span><span class="sh">'</span><span class="s">gc_health</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">1</span><span class="n">f</span><span class="si">}</span><span class="s">/100</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Reliability Health: </span><span class="si">{</span><span class="n">health_report</span><span class="p">[</span><span class="sh">'</span><span class="s">reliability_health</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">1</span><span class="n">f</span><span class="si">}</span><span class="s">/100</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># Check alerts
+</span>    <span class="k">if</span> <span class="n">health_report</span><span class="p">[</span><span class="sh">'</span><span class="s">alerts</span><span class="sh">'</span><span class="p">]:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">=== Alerts ===</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">health_report</span><span class="p">[</span><span class="sh">'</span><span class="s">alerts</span><span class="sh">'</span><span class="p">]:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">[</span><span class="si">{</span><span class="n">alert</span><span class="p">[</span><span class="sh">'</span><span class="s">level</span><span class="sh">'</span><span class="p">].</span><span class="nf">upper</span><span class="p">()</span><span class="si">}</span><span class="s">] </span><span class="si">{</span><span class="n">alert</span><span class="p">[</span><span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># Check recommendations
+</span>    <span class="k">if</span> <span class="n">health_report</span><span class="p">[</span><span class="sh">'</span><span class="s">recommendations</span><span class="sh">'</span><span class="p">]:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">=== Recommendations ===</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">health_report</span><span class="p">[</span><span class="sh">'</span><span class="s">recommendations</span><span class="sh">'</span><span class="p">]:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">[</span><span class="si">{</span><span class="n">rec</span><span class="p">[</span><span class="sh">'</span><span class="s">priority</span><span class="sh">'</span><span class="p">].</span><span class="nf">upper</span><span class="p">()</span><span class="si">}</span><span class="s">] </span><span class="si">{</span><span class="n">rec</span><span class="p">[</span><span class="sh">'</span><span class="s">action</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">  Details: </span><span class="si">{</span><span class="n">rec</span><span class="p">[</span><span class="sh">'</span><span class="s">details</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># Export metrics
+</span>    <span class="n">dashboard</span><span class="p">.</span><span class="nf">export_metrics_to_external_system</span><span class="p">(</span><span class="n">health_report</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">health_report</span>
+</code></pre></div></div>
+
+<h2 id="-learning-summary">📚 Learning Summary</h2>
+
+<h3 id="what-we-learned-in-this-part">What We Learned in This Part</h3>
+
+<ol>
+  <li><strong>Spark UI and Metrics Analysis</strong>
+    <ul>
+      <li>Core functionality and usage of Spark UI</li>
+      <li>Metrics collection and analysis tools</li>
+      <li>Real-time monitoring systems</li>
+    </ul>
+  </li>
+  <li><strong>Performance Monitoring and Profiling</strong>
+    <ul>
+      <li>Performance profiling tools</li>
+      <li>Data skew analysis</li>
+      <li>Memory usage monitoring</li>
+    </ul>
+  </li>
+  <li><strong>Memory Optimization and Caching Strategies</strong>
+    <ul>
+      <li>DataFrame memory optimization</li>
+      <li>Intelligent caching strategies</li>
+      <li>Advanced cache management</li>
+    </ul>
+  </li>
+  <li><strong>Cluster Tuning and Scalability</strong>
+    <ul>
+      <li>Cluster resource optimization</li>
+      <li>Dynamic resource allocation</li>
+      <li>Workload-specific configuration optimization</li>
+    </ul>
+  </li>
+  <li><strong>Real-world Project: Performance Optimization System</strong>
+    <ul>
+      <li>Comprehensive performance monitoring</li>
+      <li>Automated performance tuning</li>
+      <li>Performance trend analysis</li>
+    </ul>
+  </li>
+  <li><strong>Production Environment Setup</strong>
+    <ul>
+      <li>Production configuration templates</li>
+      <li>Monitoring dashboards</li>
+      <li>Alert and recommendation systems</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="core-technology-stack">Core Technology Stack</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Technology</th>
+      <th>Purpose</th>
+      <th>Importance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Spark UI</strong></td>
+      <td>Performance monitoring</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Metrics Collection</strong></td>
+      <td>Real-time analysis</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Memory Optimization</strong></td>
+      <td>Performance improvement</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Cluster Tuning</strong></td>
+      <td>Scalability</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Automation</strong></td>
+      <td>Operational efficiency</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="apache-spark-series-complete-">Apache Spark Series Complete! 🎉</h3>
+
+<p>The <strong>Complete Apache Spark Mastery Series</strong> is now finished:</p>
+
+<ol>
+  <li><strong>Part 1</strong>: Spark Basics and Core Concepts (RDD, DataFrame, Spark SQL)</li>
+  <li><strong>Part 2</strong>: Large-scale Batch Processing and UDF Usage (Real-world Project)</li>
+  <li><strong>Part 3</strong>: Real-time Streaming Processing and Kafka Integration (Real-time System)</li>
+  <li><strong>Part 4</strong>: Monitoring and Performance Tuning (Production Environment)</li>
+</ol>
+
+<h3 id="practical-application-capabilities">Practical Application Capabilities</h3>
+
+<p>Through this series, you’ve acquired the following capabilities:</p>
+
+<p>✅ <strong>Technical Skills</strong></p>
+<ul>
+  <li>Complete understanding of Spark architecture</li>
+  <li>Master of batch/streaming processing</li>
+  <li>Performance optimization expert</li>
+  <li>Production environment setup</li>
+</ul>
+
+<p>✅ <strong>Practical Application</strong></p>
+<ul>
+  <li>Build large-scale data processing systems</li>
+  <li>Develop real-time analysis pipelines</li>
+  <li>Operate performance monitoring systems</li>
+  <li>Cluster management and tuning</li>
+</ul>
+
+<hr />
+
+<p><strong>Series Complete</strong>: <a href="/en/data-engineering/2025/09/10/apache-spark-series-overview.html">View Complete Apache Spark Mastery Series</a></p>
+
+<hr />
+
+<p><em>Congratulations! You have now mastered everything about Apache Spark and become a big data processing expert!</em> 🚀✨</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+      
+      
+      
+      
+        
+        
+        <a href="/data-engineering/2025/09/13/apache-spark-monitoring-tuning.html" class="nav-link next">
+          다음: Part 4: Apache Spark 모니터링과 성능 튜닝 - 프로덕션 환경 완성 →
+        </a>
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

@@ -19,7 +19,7 @@
 <!-- Open Graph -->
 <meta property="og:title" content="Part 2: Apache Spark 대용량 배치 처리와 UDF 활용 - 실무 프로젝트">
 <meta property="og:description" content="Apache Spark의 고급 배치 처리 기법, UDF 작성, 그리고 Docker와 Kubernetes를 활용한 프로덕션 환경 구축까지 다룹니다.">
-<meta property="og:url" content="http://localhost:4000/data-engineering/2025/09/12/apache-spark-batch-processing.html">
+<meta property="og:url" content="http://0.0.0.0:4000/data-engineering/2025/09/12/apache-spark-batch-processing.html">
 <meta property="og:type" content="website">
 
 <!-- Twitter Card -->
@@ -980,6 +980,531 @@ kubectl <span class="nb">cp </span>kubernetes/airflow-dag.py airflow-web-0:/opt/
 <span class="nb">echo</span> <span class="s2">"Deployment completed!"</span>
 </code></pre></div></div>
 
+<h2 id="-배치-처리-처리량-최적화">⚡ 배치 처리 처리량 최적화</h2>
+
+<h3 id="처리량-분석-도구">처리량 분석 도구</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 배치 처리량 분석 및 최적화 도구
+</span><span class="k">class</span> <span class="nc">BatchThroughputOptimizer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">spark_session</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">spark</span> <span class="o">=</span> <span class="n">spark_session</span>
+        
+    <span class="k">def</span> <span class="nf">analyze_throughput</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">operation_name</span><span class="o">=</span><span class="sh">"</span><span class="s">batch_operation</span><span class="sh">"</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">처리량 분석</span><span class="sh">"""</span>
+        <span class="kn">import</span> <span class="n">time</span>
+        <span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">count</span>
+        
+        <span class="c1"># 데이터 크기 측정
+</span>        <span class="n">row_count</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+        <span class="n">num_partitions</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="n">rdd</span><span class="p">.</span><span class="nf">getNumPartitions</span><span class="p">()</span>
+        
+        <span class="c1"># 처리 시간 측정
+</span>        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+        
+        <span class="c1"># 샘플 작업 실행 (실제 작업으로 대체)
+</span>        <span class="n">result</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="nf">count</span><span class="p">(</span><span class="sh">"</span><span class="s">*</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">total_count</span><span class="sh">"</span><span class="p">)).</span><span class="nf">collect</span><span class="p">()</span>
+        
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+        <span class="n">processing_time</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+        
+        <span class="c1"># 처리량 계산
+</span>        <span class="n">throughput_records_per_second</span> <span class="o">=</span> <span class="n">row_count</span> <span class="o">/</span> <span class="n">processing_time</span> <span class="k">if</span> <span class="n">processing_time</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">operation_name</span><span class="sh">'</span><span class="p">:</span> <span class="n">operation_name</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">total_records</span><span class="sh">'</span><span class="p">:</span> <span class="n">row_count</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">num_partitions</span><span class="sh">'</span><span class="p">:</span> <span class="n">num_partitions</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">processing_time_seconds</span><span class="sh">'</span><span class="p">:</span> <span class="n">processing_time</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">throughput_records_per_second</span><span class="sh">'</span><span class="p">:</span> <span class="n">throughput_records_per_second</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">throughput_records_per_minute</span><span class="sh">'</span><span class="p">:</span> <span class="n">throughput_records_per_second</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">avg_records_per_partition</span><span class="sh">'</span><span class="p">:</span> <span class="n">row_count</span> <span class="o">/</span> <span class="n">num_partitions</span> <span class="k">if</span> <span class="n">num_partitions</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_partitioning_for_throughput</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">target_records_per_partition</span><span class="o">=</span><span class="mi">100000</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">처리량을 위한 파티셔닝 최적화</span><span class="sh">"""</span>
+        <span class="n">current_partitions</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="n">rdd</span><span class="p">.</span><span class="nf">getNumPartitions</span><span class="p">()</span>
+        <span class="n">row_count</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+        
+        <span class="c1"># 최적 파티션 수 계산
+</span>        <span class="n">optimal_partitions</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">row_count</span> <span class="o">//</span> <span class="n">target_records_per_partition</span><span class="p">)</span>
+        
+        <span class="c1"># 파티션 크기 기반 조정
+</span>        <span class="k">if</span> <span class="n">optimal_partitions</span> <span class="o">&gt;</span> <span class="n">current_partitions</span><span class="p">:</span>
+            <span class="c1"># 파티션 수 증가
+</span>            <span class="n">optimized_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">repartition</span><span class="p">(</span><span class="n">optimal_partitions</span><span class="p">)</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">repartitioned from </span><span class="si">{</span><span class="n">current_partitions</span><span class="si">}</span><span class="s"> to </span><span class="si">{</span><span class="n">optimal_partitions</span><span class="si">}</span><span class="s"> partitions</span><span class="sh">"</span>
+        <span class="k">elif</span> <span class="n">optimal_partitions</span> <span class="o">&lt;</span> <span class="n">current_partitions</span><span class="p">:</span>
+            <span class="c1"># 파티션 수 감소
+</span>            <span class="n">optimized_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">coalesce</span><span class="p">(</span><span class="n">optimal_partitions</span><span class="p">)</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">coalesced from </span><span class="si">{</span><span class="n">current_partitions</span><span class="si">}</span><span class="s"> to </span><span class="si">{</span><span class="n">optimal_partitions</span><span class="si">}</span><span class="s"> partitions</span><span class="sh">"</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">optimized_df</span> <span class="o">=</span> <span class="n">df</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="sh">"</span><span class="s">no partitioning change needed</span><span class="sh">"</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">optimized_dataframe</span><span class="sh">'</span><span class="p">:</span> <span class="n">optimized_df</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">original_partitions</span><span class="sh">'</span><span class="p">:</span> <span class="n">current_partitions</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">optimized_partitions</span><span class="sh">'</span><span class="p">:</span> <span class="n">optimal_partitions</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">action_taken</span><span class="sh">'</span><span class="p">:</span> <span class="n">action</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">target_records_per_partition</span><span class="sh">'</span><span class="p">:</span> <span class="n">target_records_per_partition</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_memory_for_throughput</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">spark_session</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">처리량을 위한 메모리 최적화</span><span class="sh">"""</span>
+        <span class="n">memory_configs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="c1"># 메모리 관련 설정
+</span>            <span class="sh">'</span><span class="s">spark.sql.adaptive.enabled</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">true</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">spark.sql.adaptive.coalescePartitions.enabled</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">true</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">spark.sql.adaptive.advisoryPartitionSizeInBytes</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">128MB</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">spark.sql.adaptive.skewJoin.enabled</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">true</span><span class="sh">'</span><span class="p">,</span>
+            
+            <span class="c1"># 직렬화 최적화
+</span>            <span class="sh">'</span><span class="s">spark.serializer</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">org.apache.spark.serializer.KryoSerializer</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">spark.sql.execution.arrow.pyspark.enabled</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">true</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">spark.sql.execution.arrow.maxRecordsPerBatch</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">10000</span><span class="sh">'</span><span class="p">,</span>
+            
+            <span class="c1"># 캐싱 최적화
+</span>            <span class="sh">'</span><span class="s">spark.sql.execution.arrow.pyspark.fallback.enabled</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">true</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">spark.sql.adaptive.localShuffleReader.enabled</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">true</span><span class="sh">'</span><span class="p">,</span>
+            
+            <span class="c1"># 조인 최적화
+</span>            <span class="sh">'</span><span class="s">spark.sql.adaptive.skewJoin.skewedPartitionFactor</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">5</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">256MB</span><span class="sh">'</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">memory_configs</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="n">spark_session</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">memory_configs</span>
+    
+    <span class="k">def</span> <span class="nf">implement_parallel_processing</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">parallelism_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">병렬 처리 구현</span><span class="sh">"""</span>
+        <span class="n">current_partitions</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="n">rdd</span><span class="p">.</span><span class="nf">getNumPartitions</span><span class="p">()</span>
+        <span class="n">optimized_partitions</span> <span class="o">=</span> <span class="n">current_partitions</span> <span class="o">*</span> <span class="n">parallelism_factor</span>
+        
+        <span class="k">return</span> <span class="n">df</span><span class="p">.</span><span class="nf">repartition</span><span class="p">(</span><span class="n">optimized_partitions</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_data_loading</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">format_type</span><span class="o">=</span><span class="sh">"</span><span class="s">parquet</span><span class="sh">"</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">데이터 로딩 최적화</span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="n">format_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">parquet</span><span class="sh">"</span><span class="p">:</span>
+            <span class="c1"># Parquet 파일 최적화
+</span>            <span class="n">df</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+            
+            <span class="c1"># 파티션 프루닝 활성화
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.optimizer.metadataOnly</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.filterPushdown</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.mergeSchema</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">)</span>
+            
+        <span class="k">elif</span> <span class="n">format_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">csv</span><span class="sh">"</span><span class="p">:</span>
+            <span class="c1"># CSV 파일 최적화
+</span>            <span class="n">df</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">header</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">).</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">inferSchema</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">).</span><span class="nf">csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+            
+            <span class="c1"># 병렬 로딩을 위한 파티셔닝
+</span>            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">repartition</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+            
+        <span class="k">return</span> <span class="n">df</span>
+
+<span class="c1"># 처리량 최적화 예제
+</span><span class="k">def</span> <span class="nf">batch_throughput_optimization_example</span><span class="p">():</span>
+    <span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">BatchThroughputOptimization</span><span class="sh">"</span><span class="p">).</span><span class="nf">getOrCreate</span><span class="p">()</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="nc">BatchThroughputOptimizer</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
+    
+    <span class="c1"># 샘플 데이터 생성
+</span>    <span class="n">data</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="sh">"</span><span class="s">product_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mf">10.5</span><span class="p">,</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="nf">createDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">price</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">])</span>
+    
+    <span class="c1"># 처리량 분석
+</span>    <span class="n">throughput_analysis</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">.</span><span class="nf">analyze_throughput</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="sh">"</span><span class="s">sample_analysis</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== Batch Throughput Analysis ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Total Records: </span><span class="si">{</span><span class="n">throughput_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">total_records</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Processing Time: </span><span class="si">{</span><span class="n">throughput_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">processing_time_seconds</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">s</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Throughput: </span><span class="si">{</span><span class="n">throughput_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">throughput_records_per_second</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s"> records/sec</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Partitions: </span><span class="si">{</span><span class="n">throughput_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">num_partitions</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 파티셔닝 최적화
+</span>    <span class="n">partitioning_result</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">.</span><span class="nf">optimize_partitioning_for_throughput</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">Partitioning Optimization: </span><span class="si">{</span><span class="n">partitioning_result</span><span class="p">[</span><span class="sh">'</span><span class="s">action_taken</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 메모리 최적화
+</span>    <span class="n">memory_configs</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">.</span><span class="nf">optimize_memory_for_throughput</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">=== Memory Optimization Configs ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">memory_configs</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 병렬 처리 최적화
+</span>    <span class="n">parallel_df</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">.</span><span class="nf">implement_parallel_processing</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">Parallel Processing: </span><span class="si">{</span><span class="n">parallel_df</span><span class="p">.</span><span class="n">rdd</span><span class="p">.</span><span class="nf">getNumPartitions</span><span class="p">()</span><span class="si">}</span><span class="s"> partitions</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">optimizer</span>
+</code></pre></div></div>
+
+<h3 id="고급-처리량-최적화-기법">고급 처리량 최적화 기법</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 고급 처리량 최적화 클래스
+</span><span class="k">class</span> <span class="nc">AdvancedThroughputOptimizer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">spark_session</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">spark</span> <span class="o">=</span> <span class="n">spark_session</span>
+    
+    <span class="k">def</span> <span class="nf">implement_columnar_processing</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">컬럼형 처리 최적화</span><span class="sh">"""</span>
+        <span class="c1"># Parquet 형식으로 저장하여 컬럼형 처리 활성화
+</span>        <span class="n">temp_path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">/tmp/optimized_data</span><span class="sh">"</span>
+        
+        <span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">).</span><span class="nf">parquet</span><span class="p">(</span><span class="n">temp_path</span><span class="p">)</span>
+        
+        <span class="c1"># 최적화된 설정으로 다시 읽기
+</span>        <span class="n">optimized_configs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">spark.sql.parquet.filterPushdown</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">true</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">spark.sql.parquet.mergeSchema</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">false</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">spark.sql.parquet.enableVectorizedReader</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">true</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">spark.sql.parquet.columnarReaderBatchSize</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">4096</span><span class="sh">'</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">optimized_configs</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="n">temp_path</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_joins_for_throughput</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">df1</span><span class="p">,</span> <span class="n">df2</span><span class="p">,</span> <span class="n">join_key</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">조인 최적화</span><span class="sh">"""</span>
+        <span class="c1"># 브로드캐스트 조인 힌트 적용 (작은 테이블의 경우)
+</span>        <span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">broadcast</span>
+        
+        <span class="c1"># 테이블 크기 비교
+</span>        <span class="n">size1</span> <span class="o">=</span> <span class="n">df1</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+        <span class="n">size2</span> <span class="o">=</span> <span class="n">df2</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">size1</span> <span class="o">&lt;</span> <span class="n">size2</span> <span class="ow">and</span> <span class="n">size1</span> <span class="o">&lt;</span> <span class="mi">100000</span><span class="p">:</span>  <span class="c1"># 10만 레코드 미만
+</span>            <span class="n">optimized_df1</span> <span class="o">=</span> <span class="nf">broadcast</span><span class="p">(</span><span class="n">df1</span><span class="p">)</span>
+            <span class="n">optimized_df2</span> <span class="o">=</span> <span class="n">df2</span>
+        <span class="k">elif</span> <span class="n">size2</span> <span class="o">&lt;</span> <span class="mi">100000</span><span class="p">:</span>
+            <span class="n">optimized_df1</span> <span class="o">=</span> <span class="n">df1</span>
+            <span class="n">optimized_df2</span> <span class="o">=</span> <span class="nf">broadcast</span><span class="p">(</span><span class="n">df2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">optimized_df1</span> <span class="o">=</span> <span class="n">df1</span>
+            <span class="n">optimized_df2</span> <span class="o">=</span> <span class="n">df2</span>
+        
+        <span class="c1"># 조인 실행
+</span>        <span class="n">result</span> <span class="o">=</span> <span class="n">optimized_df1</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">optimized_df2</span><span class="p">,</span> <span class="n">join_key</span><span class="p">,</span> <span class="sh">"</span><span class="s">inner</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">result</span>
+    
+    <span class="k">def</span> <span class="nf">implement_bucketing_strategy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">bucket_columns</span><span class="p">,</span> <span class="n">num_buckets</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">버킷팅 전략 구현</span><span class="sh">"""</span>
+        <span class="c1"># 버킷팅을 위한 임시 테이블 생성
+</span>        <span class="n">temp_table_name</span> <span class="o">=</span> <span class="sh">"</span><span class="s">temp_bucketed_table</span><span class="sh">"</span>
+        
+        <span class="c1"># 버킷팅 설정
+</span>        <span class="n">bucketing_configs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">spark.sql.sources.bucketing.enabled</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">true</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">spark.sql.sources.bucketing.autoBucketedScan.enabled</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">true</span><span class="sh">'</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">bucketing_configs</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        
+        <span class="c1"># 버킷팅된 테이블로 저장
+</span>        <span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+            <span class="p">.</span><span class="nf">bucketBy</span><span class="p">(</span><span class="n">num_buckets</span><span class="p">,</span> <span class="o">*</span><span class="n">bucket_columns</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">saveAsTable</span><span class="p">(</span><span class="n">temp_table_name</span><span class="p">)</span>
+        
+        <span class="c1"># 버킷팅된 테이블 읽기
+</span>        <span class="n">bucketed_df</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">spark</span><span class="p">.</span><span class="nf">table</span><span class="p">(</span><span class="n">temp_table_name</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">bucketed_df</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_aggregations</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">group_columns</span><span class="p">,</span> <span class="n">agg_columns</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">집계 최적화</span><span class="sh">"""</span>
+        <span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="nb">sum</span> <span class="k">as</span> <span class="n">spark_sum</span><span class="p">,</span> <span class="n">avg</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="nb">max</span> <span class="k">as</span> <span class="n">spark_max</span>
+        
+        <span class="c1"># 집계 전 파티셔닝 최적화
+</span>        <span class="n">optimized_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">repartition</span><span class="p">(</span><span class="o">*</span><span class="n">group_columns</span><span class="p">)</span>
+        
+        <span class="c1"># 집계 실행
+</span>        <span class="n">aggregation_result</span> <span class="o">=</span> <span class="n">optimized_df</span><span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="o">*</span><span class="n">group_columns</span><span class="p">).</span><span class="nf">agg</span><span class="p">(</span>
+            <span class="nf">count</span><span class="p">(</span><span class="sh">"</span><span class="s">*</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">record_count</span><span class="sh">"</span><span class="p">),</span>
+            <span class="nf">spark_sum</span><span class="p">(</span><span class="n">agg_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]).</span><span class="nf">alias</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">total_</span><span class="si">{</span><span class="n">agg_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">),</span>
+            <span class="nf">avg</span><span class="p">(</span><span class="n">agg_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]).</span><span class="nf">alias</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">avg_</span><span class="si">{</span><span class="n">agg_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">),</span>
+            <span class="nf">spark_max</span><span class="p">(</span><span class="n">agg_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]).</span><span class="nf">alias</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">max_</span><span class="si">{</span><span class="n">agg_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">aggregation_result</span>
+    
+    <span class="k">def</span> <span class="nf">implement_caching_strategy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">access_frequency</span><span class="o">=</span><span class="sh">"</span><span class="s">high</span><span class="sh">"</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">캐싱 전략 구현</span><span class="sh">"""</span>
+        <span class="kn">from</span> <span class="n">pyspark</span> <span class="kn">import</span> <span class="n">StorageLevel</span>
+        
+        <span class="k">if</span> <span class="n">access_frequency</span> <span class="o">==</span> <span class="sh">"</span><span class="s">high</span><span class="sh">"</span><span class="p">:</span>
+            <span class="c1"># 자주 사용되는 데이터는 메모리에 캐싱
+</span>            <span class="n">cached_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">persist</span><span class="p">(</span><span class="n">StorageLevel</span><span class="p">.</span><span class="n">MEMORY_ONLY</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">access_frequency</span> <span class="o">==</span> <span class="sh">"</span><span class="s">medium</span><span class="sh">"</span><span class="p">:</span>
+            <span class="c1"># 중간 빈도는 메모리+디스크 캐싱
+</span>            <span class="n">cached_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">persist</span><span class="p">(</span><span class="n">StorageLevel</span><span class="p">.</span><span class="n">MEMORY_AND_DISK_SER</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># 낮은 빈도는 디스크 캐싱
+</span>            <span class="n">cached_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">persist</span><span class="p">(</span><span class="n">StorageLevel</span><span class="p">.</span><span class="n">DISK_ONLY</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">cached_df</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_file_formats</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">format_type</span><span class="o">=</span><span class="sh">"</span><span class="s">parquet</span><span class="sh">"</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">파일 형식 최적화</span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="n">format_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">parquet</span><span class="sh">"</span><span class="p">:</span>
+            <span class="c1"># Parquet 최적화 설정
+</span>            <span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+                <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">)</span> \
+                <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">compression</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">snappy</span><span class="sh">"</span><span class="p">)</span> \
+                <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">parquet.block.size</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">134217728</span><span class="sh">"</span><span class="p">)</span> \
+                <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">parquet.page.size</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1048576</span><span class="sh">"</span><span class="p">)</span> \
+                <span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+                
+        <span class="k">elif</span> <span class="n">format_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">orc</span><span class="sh">"</span><span class="p">:</span>
+            <span class="c1"># ORC 최적화 설정
+</span>            <span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+                <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">)</span> \
+                <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">compression</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">zlib</span><span class="sh">"</span><span class="p">)</span> \
+                <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">orc.stripe.size</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">67108864</span><span class="sh">"</span><span class="p">)</span> \
+                <span class="p">.</span><span class="nf">orc</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+                
+        <span class="k">elif</span> <span class="n">format_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">:</span>
+            <span class="c1"># Delta Lake 최적화 설정
+</span>            <span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+                <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">)</span> \
+                <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">)</span> \
+                <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">delta.autoOptimize.optimizeWrite</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span> \
+                <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">delta.autoOptimize.autoCompact</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span> \
+                <span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Data saved to </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s"> in </span><span class="si">{</span><span class="n">format_type</span><span class="si">}</span><span class="s"> format</span><span class="sh">"</span>
+
+<span class="c1"># 고급 처리량 최적화 예제
+</span><span class="k">def</span> <span class="nf">advanced_throughput_optimization_example</span><span class="p">():</span>
+    <span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">AdvancedThroughputOptimization</span><span class="sh">"</span><span class="p">).</span><span class="nf">getOrCreate</span><span class="p">()</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="nc">AdvancedThroughputOptimizer</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
+    
+    <span class="c1"># 샘플 데이터 생성
+</span>    <span class="n">data1</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="sh">"</span><span class="s">product_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mf">10.5</span><span class="p">,</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">100</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">500000</span><span class="p">)]</span>
+    <span class="n">df1</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="nf">createDataFrame</span><span class="p">(</span><span class="n">data1</span><span class="p">,</span> <span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">price</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">category_id</span><span class="sh">"</span><span class="p">])</span>
+    
+    <span class="n">data2</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="sh">"</span><span class="s">category_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)]</span>
+    <span class="n">df2</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="nf">createDataFrame</span><span class="p">(</span><span class="n">data2</span><span class="p">,</span> <span class="p">[</span><span class="sh">"</span><span class="s">category_id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">category_name</span><span class="sh">"</span><span class="p">])</span>
+    
+    <span class="c1"># 컬럼형 처리 최적화
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== Implementing Columnar Processing ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">columnar_df</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">.</span><span class="nf">implement_columnar_processing</span><span class="p">(</span><span class="n">df1</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Columnar processing implemented: </span><span class="si">{</span><span class="n">columnar_df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span><span class="si">}</span><span class="s"> records</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 조인 최적화
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">=== Optimizing Joins ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">joined_df</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">.</span><span class="nf">optimize_joins_for_throughput</span><span class="p">(</span><span class="n">df1</span><span class="p">,</span> <span class="n">df2</span><span class="p">,</span> <span class="sh">"</span><span class="s">category_id</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Join optimization completed: </span><span class="si">{</span><span class="n">joined_df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span><span class="si">}</span><span class="s"> records</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 집계 최적화
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">=== Optimizing Aggregations ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">aggregated_df</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">.</span><span class="nf">optimize_aggregations</span><span class="p">(</span><span class="n">joined_df</span><span class="p">,</span> <span class="p">[</span><span class="sh">"</span><span class="s">category_name</span><span class="sh">"</span><span class="p">],</span> <span class="p">[</span><span class="sh">"</span><span class="s">price</span><span class="sh">"</span><span class="p">])</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Aggregation optimization completed: </span><span class="si">{</span><span class="n">aggregated_df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span><span class="si">}</span><span class="s"> groups</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 파일 형식 최적화
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">=== Optimizing File Formats ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">output_result</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">.</span><span class="nf">optimize_file_formats</span><span class="p">(</span><span class="n">aggregated_df</span><span class="p">,</span> <span class="sh">"</span><span class="s">/tmp/optimized_output</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">parquet</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">output_result</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">optimizer</span>
+</code></pre></div></div>
+
+<h3 id="처리량-모니터링-시스템">처리량 모니터링 시스템</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 처리량 모니터링 시스템
+</span><span class="k">class</span> <span class="nc">ThroughputMonitoringSystem</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">spark_session</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">spark</span> <span class="o">=</span> <span class="n">spark_session</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">def</span> <span class="nf">monitor_batch_throughput</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">operation_name</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100000</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">배치 처리량 모니터링</span><span class="sh">"""</span>
+        <span class="kn">import</span> <span class="n">time</span>
+        
+        <span class="n">total_records</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+        <span class="n">num_batches</span> <span class="o">=</span> <span class="p">(</span><span class="n">total_records</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
+        
+        <span class="n">batch_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">batch_idx</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_batches</span><span class="p">):</span>
+            <span class="n">start_idx</span> <span class="o">=</span> <span class="n">batch_idx</span> <span class="o">*</span> <span class="n">batch_size</span>
+            <span class="n">end_idx</span> <span class="o">=</span> <span class="nf">min</span><span class="p">((</span><span class="n">batch_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">total_records</span><span class="p">)</span>
+            
+            <span class="c1"># 배치 데이터 추출
+</span>            <span class="n">batch_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">limit</span><span class="p">(</span><span class="n">end_idx</span><span class="p">).</span><span class="nf">subtract</span><span class="p">(</span><span class="n">df</span><span class="p">.</span><span class="nf">limit</span><span class="p">(</span><span class="n">start_idx</span><span class="p">))</span>
+            
+            <span class="c1"># 배치 처리 시간 측정
+</span>            <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+            <span class="n">batch_count</span> <span class="o">=</span> <span class="n">batch_df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+            
+            <span class="n">processing_time</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+            <span class="n">throughput</span> <span class="o">=</span> <span class="n">batch_count</span> <span class="o">/</span> <span class="n">processing_time</span> <span class="k">if</span> <span class="n">processing_time</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+            
+            <span class="n">batch_metric</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">operation_name</span><span class="sh">'</span><span class="p">:</span> <span class="n">operation_name</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">batch_idx</span><span class="sh">'</span><span class="p">:</span> <span class="n">batch_idx</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">batch_size</span><span class="sh">'</span><span class="p">:</span> <span class="n">batch_count</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">processing_time</span><span class="sh">'</span><span class="p">:</span> <span class="n">processing_time</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">throughput_records_per_second</span><span class="sh">'</span><span class="p">:</span> <span class="n">throughput</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+            <span class="p">}</span>
+            
+            <span class="n">batch_metrics</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">batch_metric</span><span class="p">)</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Batch </span><span class="si">{</span><span class="n">batch_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">num_batches</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">throughput</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s"> records/sec</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># 전체 통계 계산
+</span>        <span class="n">total_time</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="sh">'</span><span class="s">processing_time</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">batch_metrics</span><span class="p">)</span>
+        <span class="n">avg_throughput</span> <span class="o">=</span> <span class="n">total_records</span> <span class="o">/</span> <span class="n">total_time</span> <span class="k">if</span> <span class="n">total_time</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        
+        <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">operation_name</span><span class="sh">'</span><span class="p">:</span> <span class="n">operation_name</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">total_records</span><span class="sh">'</span><span class="p">:</span> <span class="n">total_records</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">total_batches</span><span class="sh">'</span><span class="p">:</span> <span class="n">num_batches</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">total_processing_time</span><span class="sh">'</span><span class="p">:</span> <span class="n">total_time</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">average_throughput</span><span class="sh">'</span><span class="p">:</span> <span class="n">avg_throughput</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">batch_metrics</span><span class="sh">'</span><span class="p">:</span> <span class="n">batch_metrics</span>
+        <span class="p">}</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">summary</span>
+    
+    <span class="k">def</span> <span class="nf">generate_throughput_report</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">처리량 보고서 생성</span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">No metrics available</span><span class="sh">"</span><span class="p">}</span>
+        
+        <span class="c1"># 전체 통계 계산
+</span>        <span class="n">total_operations</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">)</span>
+        <span class="n">total_records</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="sh">'</span><span class="s">total_records</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">)</span>
+        <span class="n">total_time</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="sh">'</span><span class="s">total_processing_time</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">)</span>
+        <span class="n">overall_throughput</span> <span class="o">=</span> <span class="n">total_records</span> <span class="o">/</span> <span class="n">total_time</span> <span class="k">if</span> <span class="n">total_time</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        
+        <span class="c1"># 최고/최저 처리량 찾기
+</span>        <span class="n">max_throughput</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="sh">'</span><span class="s">average_throughput</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">)</span>
+        <span class="n">min_throughput</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="sh">'</span><span class="s">average_throughput</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">)</span>
+        
+        <span class="n">report</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">summary</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">total_operations</span><span class="sh">'</span><span class="p">:</span> <span class="n">total_operations</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">total_records_processed</span><span class="sh">'</span><span class="p">:</span> <span class="n">total_records</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">total_processing_time</span><span class="sh">'</span><span class="p">:</span> <span class="n">total_time</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">overall_throughput</span><span class="sh">'</span><span class="p">:</span> <span class="n">overall_throughput</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">max_throughput</span><span class="sh">'</span><span class="p">:</span> <span class="n">max_throughput</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">min_throughput</span><span class="sh">'</span><span class="p">:</span> <span class="n">min_throughput</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">operation_details</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">recommendations</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_generate_throughput_recommendations</span><span class="p">()</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">report</span>
+    
+    <span class="k">def</span> <span class="nf">_generate_throughput_recommendations</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">처리량 개선 권장사항 생성</span><span class="sh">"""</span>
+        <span class="n">recommendations</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">recommendations</span>
+        
+        <span class="c1"># 평균 처리량 계산
+</span>        <span class="n">avg_throughput</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="sh">'</span><span class="s">average_throughput</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">)</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">)</span>
+        
+        <span class="c1"># 처리량이 낮은 경우 권장사항
+</span>        <span class="k">if</span> <span class="n">avg_throughput</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">:</span>  <span class="c1"># 10,000 records/sec 미만
+</span>            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">priority</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">high</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">category</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">partitioning</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">action</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">파티션 수를 증가시켜 병렬 처리를 향상시키세요</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">details</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">repartition() 또는 coalesce() 사용 고려</span><span class="sh">'</span>
+            <span class="p">})</span>
+            
+            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">priority</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">medium</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">category</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">caching</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">action</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">자주 사용되는 데이터를 캐싱하세요</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">details</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">cache() 또는 persist() 사용</span><span class="sh">'</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># 처리량 변동이 큰 경우
+</span>        <span class="n">throughputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="sh">'</span><span class="s">average_throughput</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics_history</span><span class="p">]</span>
+        <span class="n">throughput_variance</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">throughputs</span><span class="p">)</span> <span class="o">-</span> <span class="nf">min</span><span class="p">(</span><span class="n">throughputs</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">throughput_variance</span> <span class="o">&gt;</span> <span class="n">avg_throughput</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">:</span>  <span class="c1"># 변동이 평균의 50% 이상
+</span>            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">priority</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">medium</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">category</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">stability</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">action</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">처리량 안정성을 위해 데이터 분포를 개선하세요</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">details</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">데이터 스큐 문제 확인 및 해결</span><span class="sh">'</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">recommendations</span>
+    
+    <span class="k">def</span> <span class="nf">export_metrics_to_monitoring_system</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">report</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">모니터링 시스템으로 메트릭 내보내기</span><span class="sh">"""</span>
+        <span class="kn">import</span> <span class="n">requests</span>
+        <span class="kn">import</span> <span class="n">json</span>
+        
+        <span class="c1"># Prometheus 형식으로 메트릭 변환
+</span>        <span class="n">prometheus_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">operation</span> <span class="ow">in</span> <span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">operation_details</span><span class="sh">'</span><span class="p">]:</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">metric_name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">spark_batch_throughput</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">labels</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">operation</span><span class="sh">'</span><span class="p">:</span> <span class="n">operation</span><span class="p">[</span><span class="sh">'</span><span class="s">operation_name</span><span class="sh">'</span><span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">:</span> <span class="n">operation</span><span class="p">[</span><span class="sh">'</span><span class="s">average_throughput</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">operation</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">,</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">())</span>
+            <span class="p">}</span>
+            <span class="n">prometheus_metrics</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+        
+        <span class="c1"># 실제 환경에서는 Prometheus Pushgateway로 전송
+</span>        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== Exported Metrics to Monitoring System ===</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">prometheus_metrics</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">metric</span><span class="p">[</span><span class="sh">'</span><span class="s">metric_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s"> </span><span class="si">{</span><span class="n">metric</span><span class="p">[</span><span class="sh">'</span><span class="s">labels</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s"> = </span><span class="si">{</span><span class="n">metric</span><span class="p">[</span><span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 처리량 모니터링 예제
+</span><span class="k">def</span> <span class="nf">throughput_monitoring_example</span><span class="p">():</span>
+    <span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">ThroughputMonitoring</span><span class="sh">"</span><span class="p">).</span><span class="nf">getOrCreate</span><span class="p">()</span>
+    <span class="n">monitor</span> <span class="o">=</span> <span class="nc">ThroughputMonitoringSystem</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
+    
+    <span class="c1"># 샘플 데이터 생성
+</span>    <span class="n">data</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="sh">"</span><span class="s">data_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="nf">createDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">score</span><span class="sh">"</span><span class="p">])</span>
+    
+    <span class="c1"># 처리량 모니터링
+</span>    <span class="n">throughput_summary</span> <span class="o">=</span> <span class="n">monitor</span><span class="p">.</span><span class="nf">monitor_batch_throughput</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="sh">"</span><span class="s">sample_processing</span><span class="sh">"</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">=== Throughput Summary ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Total Records: </span><span class="si">{</span><span class="n">throughput_summary</span><span class="p">[</span><span class="sh">'</span><span class="s">total_records</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Average Throughput: </span><span class="si">{</span><span class="n">throughput_summary</span><span class="p">[</span><span class="sh">'</span><span class="s">average_throughput</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s"> records/sec</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Total Processing Time: </span><span class="si">{</span><span class="n">throughput_summary</span><span class="p">[</span><span class="sh">'</span><span class="s">total_processing_time</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">s</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 보고서 생성
+</span>    <span class="n">report</span> <span class="o">=</span> <span class="n">monitor</span><span class="p">.</span><span class="nf">generate_throughput_report</span><span class="p">()</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">=== Throughput Report ===</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Overall Throughput: </span><span class="si">{</span><span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">summary</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">overall_throughput</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s"> records/sec</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Max Throughput: </span><span class="si">{</span><span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">summary</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">max_throughput</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s"> records/sec</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Min Throughput: </span><span class="si">{</span><span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">summary</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">min_throughput</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s"> records/sec</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 권장사항 출력
+</span>    <span class="k">if</span> <span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">recommendations</span><span class="sh">'</span><span class="p">]:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">=== Recommendations ===</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">recommendations</span><span class="sh">'</span><span class="p">]:</span>
+            <span class="n">priority_icon</span> <span class="o">=</span> <span class="sh">"</span><span class="s">🔴</span><span class="sh">"</span> <span class="k">if</span> <span class="n">rec</span><span class="p">[</span><span class="sh">'</span><span class="s">priority</span><span class="sh">'</span><span class="p">]</span> <span class="o">==</span> <span class="sh">'</span><span class="s">high</span><span class="sh">'</span> <span class="k">else</span> <span class="sh">"</span><span class="s">🟡</span><span class="sh">"</span> <span class="k">if</span> <span class="n">rec</span><span class="p">[</span><span class="sh">'</span><span class="s">priority</span><span class="sh">'</span><span class="p">]</span> <span class="o">==</span> <span class="sh">'</span><span class="s">medium</span><span class="sh">'</span> <span class="k">else</span> <span class="sh">"</span><span class="s">🟢</span><span class="sh">"</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">priority_icon</span><span class="si">}</span><span class="s"> [</span><span class="si">{</span><span class="n">rec</span><span class="p">[</span><span class="sh">'</span><span class="s">priority</span><span class="sh">'</span><span class="p">].</span><span class="nf">upper</span><span class="p">()</span><span class="si">}</span><span class="s">] </span><span class="si">{</span><span class="n">rec</span><span class="p">[</span><span class="sh">'</span><span class="s">action</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">   Details: </span><span class="si">{</span><span class="n">rec</span><span class="p">[</span><span class="sh">'</span><span class="s">details</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 메트릭 내보내기
+</span>    <span class="n">monitor</span><span class="p">.</span><span class="nf">export_metrics_to_monitoring_system</span><span class="p">(</span><span class="n">report</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">monitor</span>
+</code></pre></div></div>
+
 <h2 id="-학습-요약">📚 학습 요약</h2>
 
 <h3 id="이번-파트에서-학습한-내용">이번 파트에서 학습한 내용</h3>
@@ -1018,6 +1543,13 @@ kubectl <span class="nb">cp </span>kubernetes/airflow-dag.py airflow-web-0:/opt/
       <li>Docker 컨테이너화</li>
       <li>Kubernetes Job 배포</li>
       <li>Airflow 스케줄링</li>
+    </ul>
+  </li>
+  <li><strong>배치 처리 처리량 최적화</strong>
+    <ul>
+      <li>처리량 분석 도구</li>
+      <li>고급 처리량 최적화 기법</li>
+      <li>처리량 모니터링 시스템</li>
     </ul>
   </li>
 </ol>
