@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Apache Flink의 고급 상태 관리, 체크포인팅, 세이브포인트, 복잡한 시간 처리 전략을 학습하고 실무에 바로 적용할 수 있는 고급 패턴들을 구현합니다.">
+
+
+
+<title>Part 2: Apache Flink 고급 스트리밍 처리와 상태 관리 - 프로덕션급 실시간 시스템 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 2: Apache Flink 고급 스트리밍 처리와 상태 관리 - 프로덕션급 실시간 시스템">
+<meta property="og:description" content="Apache Flink의 고급 상태 관리, 체크포인팅, 세이브포인트, 복잡한 시간 처리 전략을 학습하고 실무에 바로 적용할 수 있는 고급 패턴들을 구현합니다.">
+<meta property="og:url" content="http://0.0.0.0:4000/data-engineering/2025/09/16/apache-flink-advanced-streaming.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 2: Apache Flink 고급 스트리밍 처리와 상태 관리 - 프로덕션급 실시간 시스템">
+<meta name="twitter:description" content="Apache Flink의 고급 상태 관리, 체크포인팅, 세이브포인트, 복잡한 시간 처리 전략을 학습하고 실무에 바로 적용할 수 있는 고급 패턴들을 구현합니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2025/09/16/apache-flink-advanced-streaming.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2025-09-16-apache-flink-advanced-streaming.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 16일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 2: Apache Flink 고급 스트리밍 처리와 상태 관리 - 프로덕션급 실시간 시스템</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Flink</span>
+      
+        <span class="tag">고급상태관리</span>
+      
+        <span class="tag">체크포인팅</span>
+      
+        <span class="tag">세이브포인트</span>
+      
+        <span class="tag">시간처리</span>
+      
+        <span class="tag">스트리밍최적화</span>
+      
+        <span class="tag">Python</span>
+      
+        <span class="tag">PyFlink</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Apache flink complete guide 시리즈</span>
+      <span class="series-order">Part 3</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 40분</span>
+      
+      
+        <span class="difficulty">📊 고급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-2-apache-flink-고급-스트리밍-처리와-상태-관리---프로덕션급-실시간-시스템">Part 2: Apache Flink 고급 스트리밍 처리와 상태 관리 - 프로덕션급 실시간 시스템</h1>
+
+<blockquote>
+  <p>Apache Flink의 고급 상태 관리, 체크포인팅, 세이브포인트, 복잡한 시간 처리 전략을 학습하고 실무에 바로 적용할 수 있는 고급 패턴들을 구현합니다.</p>
+</blockquote>
+
+<h2 id="-목차">📋 목차</h2>
+
+<ol>
+  <li><a href="#고급-상태-관리-패턴">고급 상태 관리 패턴</a></li>
+  <li><a href="#체크포인팅과-세이브포인트-심화">체크포인팅과 세이브포인트 심화</a></li>
+  <li><a href="#복잡한-시간-처리-전략">복잡한 시간 처리 전략</a></li>
+  <li><a href="#성능-최적화-기법">성능 최적화 기법</a></li>
+  <li><a href="#실무-프로젝트-실시간-추천-시스템">실무 프로젝트: 실시간 추천 시스템</a></li>
+  <li><a href="#학습-요약">학습 요약</a></li>
+</ol>
+
+<h2 id="️-고급-상태-관리-패턴">🗃️ 고급 상태 관리 패턴</h2>
+
+<h3 id="상태-백엔드-state-backend">상태 백엔드 (State Backend)</h3>
+
+<p>Flink는 다양한 상태 백엔드를 제공하여 다양한 성능과 내구성 요구사항을 충족합니다.</p>
+
+<h4 id="1-memorystatebackend"><strong>1. MemoryStateBackend</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream.state</span> <span class="kn">import</span> <span class="n">MemoryStateBackend</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+
+<span class="c1"># 메모리 상태 백엔드 설정 (개발/테스트용)
+</span><span class="n">env</span><span class="p">.</span><span class="nf">set_state_backend</span><span class="p">(</span><span class="nc">MemoryStateBackend</span><span class="p">())</span>
+
+<span class="c1"># 설정 옵션
+</span><span class="n">backend</span> <span class="o">=</span> <span class="nc">MemoryStateBackend</span><span class="p">(</span>
+    <span class="n">max_state_size</span><span class="o">=</span><span class="mi">5</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># 5MB
+</span>    <span class="n">asynchronous_snapshots</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span>
+<span class="n">env</span><span class="p">.</span><span class="nf">set_state_backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="2-fsstatebackend"><strong>2. FsStateBackend</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.state</span> <span class="kn">import</span> <span class="n">FsStateBackend</span>
+
+<span class="c1"># 파일 시스템 상태 백엔드 설정
+</span><span class="n">backend</span> <span class="o">=</span> <span class="nc">FsStateBackend</span><span class="p">(</span>
+    <span class="n">checkpoint_data_uri</span><span class="o">=</span><span class="sh">"</span><span class="s">file:///tmp/flink-checkpoints</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">savepoint_data_uri</span><span class="o">=</span><span class="sh">"</span><span class="s">file:///tmp/flink-savepoints</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">asynchronous_snapshots</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span>
+<span class="n">env</span><span class="p">.</span><span class="nf">set_state_backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="3-rocksdbstatebackend"><strong>3. RocksDBStateBackend</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.state</span> <span class="kn">import</span> <span class="n">RocksDBStateBackend</span>
+
+<span class="c1"># RocksDB 상태 백엔드 설정 (프로덕션 권장)
+</span><span class="n">backend</span> <span class="o">=</span> <span class="nc">RocksDBStateBackend</span><span class="p">(</span>
+    <span class="n">checkpoint_data_uri</span><span class="o">=</span><span class="sh">"</span><span class="s">file:///tmp/flink-checkpoints</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">savepoint_data_uri</span><span class="o">=</span><span class="sh">"</span><span class="s">file:///tmp/flink-savepoints</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">enable_incremental_checkpointing</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span>
+<span class="n">env</span><span class="p">.</span><span class="nf">set_state_backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+
+<span class="c1"># RocksDB 최적화 설정
+</span><span class="n">backend</span><span class="p">.</span><span class="nf">set_predefined_options</span><span class="p">(</span><span class="n">RocksDBConfigurableOptions</span><span class="p">.</span><span class="n">PREDEFINED_OPTION_DEFAULT</span><span class="p">)</span>
+<span class="n">backend</span><span class="p">.</span><span class="nf">set_rocksdb_options</span><span class="p">(</span><span class="n">RocksDBConfigurableOptions</span><span class="p">.</span><span class="n">ROCKSDB_OPTIONS_FILE</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="고급-상태-관리-패턴">고급 상태 관리 패턴</h3>
+
+<h4 id="1-상태-ttl-time-to-live"><strong>1. 상태 TTL (Time-To-Live)</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.state</span> <span class="kn">import</span> <span class="n">StateTtlConfig</span><span class="p">,</span> <span class="n">ValueStateDescriptor</span>
+<span class="kn">from</span> <span class="n">pyflink.common.time</span> <span class="kn">import</span> <span class="n">Time</span>
+<span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+
+<span class="k">class</span> <span class="nc">TTLStateExample</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">user_session_state</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+        <span class="c1"># TTL 설정
+</span>        <span class="n">ttl_config</span> <span class="o">=</span> <span class="n">StateTtlConfig</span><span class="p">.</span><span class="nf">new_builder</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">hours</span><span class="p">(</span><span class="mi">24</span><span class="p">))</span> \
+            <span class="p">.</span><span class="nf">set_update_type</span><span class="p">(</span><span class="n">StateTtlConfig</span><span class="p">.</span><span class="n">UpdateType</span><span class="p">.</span><span class="n">OnCreateAndWrite</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">set_state_visibility</span><span class="p">(</span><span class="n">StateTtlConfig</span><span class="p">.</span><span class="n">StateVisibility</span><span class="p">.</span><span class="n">NeverReturnExpired</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">cleanup_full_snapshot</span><span class="p">()</span> \
+            <span class="p">.</span><span class="nf">build</span><span class="p">()</span>
+        
+        <span class="c1"># TTL이 적용된 상태 디스크립터
+</span>        <span class="n">state_descriptor</span> <span class="o">=</span> <span class="nc">ValueStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">user_session</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">())</span>
+        <span class="n">state_descriptor</span><span class="p">.</span><span class="nf">enable_time_to_live</span><span class="p">(</span><span class="n">ttl_config</span><span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">user_session_state</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_state</span><span class="p">(</span><span class="n">state_descriptor</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="c1"># 상태 사용
+</span>        <span class="n">current_session</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">user_session_state</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">current_session</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># 새로운 세션 생성
+</span>            <span class="n">new_session</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">session_</span><span class="si">{</span><span class="n">ctx</span><span class="p">.</span><span class="nf">timestamp</span><span class="p">()</span><span class="si">}</span><span class="sh">"</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">user_session_state</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">new_session</span><span class="p">)</span>
+            <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">New session created: </span><span class="si">{</span><span class="n">new_session</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Existing session: </span><span class="si">{</span><span class="n">current_session</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="2-상태-스냅샷과-복원"><strong>2. 상태 스냅샷과 복원</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.state</span> <span class="kn">import</span> <span class="n">CheckpointedFunction</span><span class="p">,</span> <span class="n">ListState</span>
+
+<span class="k">class</span> <span class="nc">StatefulFunction</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">,</span> <span class="n">CheckpointedFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">buffered_elements</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">buffered_elements_state</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+        <span class="c1"># 상태 초기화는 checkpointed_function에서 수행
+</span>        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">initialize_state</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">체크포인트에서 상태 초기화</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">buffered_elements_state</span> <span class="o">=</span> <span class="n">context</span><span class="p">.</span><span class="nf">get_operator_state</span><span class="p">(</span>
+            <span class="nc">ListStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">buffered-elements</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">())</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># 이전 상태 복원
+</span>        <span class="k">if</span> <span class="n">context</span><span class="p">.</span><span class="nf">is_restored</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">buffered_elements_state</span><span class="p">.</span><span class="nf">get</span><span class="p">():</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">buffered_elements</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">snapshot_state</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">상태 스냅샷 생성</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">buffered_elements_state</span><span class="p">.</span><span class="nf">clear</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">buffered_elements</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">buffered_elements_state</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="c1"># 버퍼에 요소 추가
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">buffered_elements</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        
+        <span class="c1"># 조건에 따라 처리
+</span>        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">buffered_elements</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="c1"># 배치 처리
+</span>            <span class="n">result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">process_batch</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">buffered_elements</span><span class="p">)</span>
+            <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">buffered_elements</span><span class="p">.</span><span class="nf">clear</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">process_batch</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Processed batch of </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span><span class="si">}</span><span class="s"> elements</span><span class="sh">"</span>
+</code></pre></div></div>
+
+<h4 id="3-상태-분할과-병합"><strong>3. 상태 분할과 병합</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">PartitionableStateFunction</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">,</span> <span class="n">CheckpointedFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">partitioned_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">partitioned_state</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">initialize_state</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">분할 가능한 상태 초기화</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">partitioned_state</span> <span class="o">=</span> <span class="n">context</span><span class="p">.</span><span class="nf">get_union_list_state</span><span class="p">(</span>
+            <span class="nc">ListStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">partitioned-data</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">())</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># 상태 복원
+</span>        <span class="k">if</span> <span class="n">context</span><span class="p">.</span><span class="nf">is_restored</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">partitioned_state</span><span class="p">.</span><span class="nf">get</span><span class="p">():</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">partitioned_data</span><span class="p">[</span><span class="n">data</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+    
+    <span class="k">def</span> <span class="nf">snapshot_state</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">상태 스냅샷</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">partitioned_state</span><span class="p">.</span><span class="nf">clear</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">partitioned_data</span><span class="p">.</span><span class="nf">values</span><span class="p">():</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">partitioned_state</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="c1"># 분할된 데이터 처리
+</span>        <span class="n">partition_key</span> <span class="o">=</span> <span class="n">value</span> <span class="o">%</span> <span class="mi">4</span>  <span class="c1"># 4개 파티션으로 분할
+</span>        
+        <span class="k">if</span> <span class="n">partition_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">partitioned_data</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">partitioned_data</span><span class="p">[</span><span class="n">partition_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">partitioned_data</span><span class="p">[</span><span class="n">partition_key</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        
+        <span class="c1"># 파티션별 집계
+</span>        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">partitioned_data</span><span class="p">[</span><span class="n">partition_key</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">partitioned_data</span><span class="p">[</span><span class="n">partition_key</span><span class="p">])</span>
+            <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Partition </span><span class="si">{</span><span class="n">partition_key</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">partitioned_data</span><span class="p">[</span><span class="n">partition_key</span><span class="p">].</span><span class="nf">clear</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="-체크포인팅과-세이브포인트-심화">🔄 체크포인팅과 세이브포인트 심화</h2>
+
+<h3 id="고급-체크포인팅-설정">고급 체크포인팅 설정</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.checkpointing</span> <span class="kn">import</span> <span class="n">CheckpointingMode</span><span class="p">,</span> <span class="n">ExternalizedCheckpointCleanup</span>
+<span class="kn">from</span> <span class="n">pyflink.common.time</span> <span class="kn">import</span> <span class="n">Time</span>
+
+<span class="k">class</span> <span class="nc">AdvancedCheckpointingSetup</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+        <span class="n">self</span><span class="p">.</span><span class="nf">setup_checkpointing</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">setup_checkpointing</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">checkpoint_config</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">()</span>
+        
+        <span class="c1"># 기본 체크포인팅 활성화
+</span>        <span class="n">checkpoint_config</span><span class="p">.</span><span class="nf">enable_checkpointing</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>  <span class="c1"># 1초마다
+</span>        
+        <span class="c1"># Exactly-once 모드 설정
+</span>        <span class="n">checkpoint_config</span><span class="p">.</span><span class="nf">set_checkpointing_mode</span><span class="p">(</span><span class="n">CheckpointingMode</span><span class="p">.</span><span class="n">EXACTLY_ONCE</span><span class="p">)</span>
+        
+        <span class="c1"># 외부화된 체크포인트 설정 (작업 취소 후에도 유지)
+</span>        <span class="n">checkpoint_config</span><span class="p">.</span><span class="nf">enable_externalized_checkpoints</span><span class="p">(</span>
+            <span class="n">ExternalizedCheckpointCleanup</span><span class="p">.</span><span class="n">RETAIN_ON_CANCELLATION</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># 최대 동시 체크포인트 수
+</span>        <span class="n">checkpoint_config</span><span class="p">.</span><span class="nf">set_max_concurrent_checkpoints</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c1"># 체크포인트 간 최소 대기 시간
+</span>        <span class="n">checkpoint_config</span><span class="p">.</span><span class="nf">set_min_pause_between_checkpoints</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+        
+        <span class="c1"># 체크포인트 타임아웃
+</span>        <span class="n">checkpoint_config</span><span class="p">.</span><span class="nf">set_checkpoint_timeout</span><span class="p">(</span><span class="mi">60000</span><span class="p">)</span>  <span class="c1"># 60초
+</span>        
+        <span class="c1"># 실패 허용 횟수
+</span>        <span class="n">checkpoint_config</span><span class="p">.</span><span class="nf">set_tolerable_checkpoint_failure_number</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        
+        <span class="c1"># 지연 가능한 체크포인트 설정
+</span>        <span class="n">checkpoint_config</span><span class="p">.</span><span class="nf">set_unaligned_checkpoints</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">checkpoint_config</span><span class="p">.</span><span class="nf">set_unaligned_checkpoints_enabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="세이브포인트-관리">세이브포인트 관리</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">requests</span>
+<span class="kn">import</span> <span class="n">json</span>
+
+<span class="k">class</span> <span class="nc">SavepointManager</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">flink_rest_url</span><span class="o">=</span><span class="sh">"</span><span class="s">http://localhost:8081</span><span class="sh">"</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">rest_url</span> <span class="o">=</span> <span class="n">flink_rest_url</span>
+    
+    <span class="k">def</span> <span class="nf">create_savepoint</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">,</span> <span class="n">savepoint_path</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">세이브포인트 생성</span><span class="sh">"""</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">rest_url</span><span class="si">}</span><span class="s">/jobs/</span><span class="si">{</span><span class="n">job_id</span><span class="si">}</span><span class="s">/savepoints</span><span class="sh">"</span>
+        
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">target-directory</span><span class="sh">"</span><span class="p">:</span> <span class="n">savepoint_path</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">cancel-job</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span>
+        <span class="p">}</span>
+        
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">202</span><span class="p">:</span>
+            <span class="n">trigger_id</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()[</span><span class="sh">"</span><span class="s">request-id</span><span class="sh">"</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">wait_for_completion</span><span class="p">(</span><span class="n">trigger_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">Exception</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed to create savepoint: </span><span class="si">{</span><span class="n">response</span><span class="p">.</span><span class="n">text</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">wait_for_completion</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">trigger_id</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">세이브포인트 완료 대기</span><span class="sh">"""</span>
+        <span class="kn">import</span> <span class="n">time</span>
+        
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span> <span class="o">&lt;</span> <span class="n">max_wait_time</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">rest_url</span><span class="si">}</span><span class="s">/jobs/savepoints/</span><span class="si">{</span><span class="n">trigger_id</span><span class="si">}</span><span class="sh">"</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">][</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">COMPLETED</span><span class="sh">"</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="sh">"</span><span class="s">operation</span><span class="sh">"</span><span class="p">][</span><span class="sh">"</span><span class="s">location</span><span class="sh">"</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">result</span><span class="p">[</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">][</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">FAILED</span><span class="sh">"</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="nc">Exception</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Savepoint failed: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            
+            <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        
+        <span class="k">raise</span> <span class="nc">Exception</span><span class="p">(</span><span class="sh">"</span><span class="s">Savepoint creation timeout</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">restore_from_savepoint</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">savepoint_path</span><span class="p">,</span> <span class="n">jar_path</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">세이브포인트에서 복원</span><span class="sh">"""</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">rest_url</span><span class="si">}</span><span class="s">/jars/upload</span><span class="sh">"</span>
+        
+        <span class="c1"># JAR 파일 업로드
+</span>        <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">jar_path</span><span class="p">,</span> <span class="sh">'</span><span class="s">rb</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">jarfile</span><span class="sh">'</span><span class="p">:</span> <span class="n">f</span><span class="p">}</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="n">jar_id</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()[</span><span class="sh">"</span><span class="s">filename</span><span class="sh">"</span><span class="p">].</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            
+            <span class="c1"># 세이브포인트에서 작업 시작
+</span>            <span class="n">start_url</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">rest_url</span><span class="si">}</span><span class="s">/jars/</span><span class="si">{</span><span class="n">jar_id</span><span class="si">}</span><span class="s">/run</span><span class="sh">"</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">savepointPath</span><span class="sh">"</span><span class="p">:</span> <span class="n">savepoint_path</span>
+            <span class="p">}</span>
+            
+            <span class="n">start_response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="n">start_url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">start_response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">Exception</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed to upload JAR: </span><span class="si">{</span><span class="n">response</span><span class="p">.</span><span class="n">text</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">list_savepoints</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">세이브포인트 목록 조회</span><span class="sh">"""</span>
+        <span class="c1"># 실제 구현에서는 파일 시스템을 스캔하거나 메타데이터 저장소를 조회
+</span>        <span class="k">return</span> <span class="p">[]</span>
+
+<span class="c1"># 사용 예제
+</span><span class="k">def</span> <span class="nf">manage_savepoints_example</span><span class="p">():</span>
+    <span class="n">manager</span> <span class="o">=</span> <span class="nc">SavepointManager</span><span class="p">()</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># 세이브포인트 생성
+</span>        <span class="n">savepoint_location</span> <span class="o">=</span> <span class="n">manager</span><span class="p">.</span><span class="nf">create_savepoint</span><span class="p">(</span>
+            <span class="sh">"</span><span class="s">job-id-123</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">file:///tmp/flink-savepoints/</span><span class="sh">"</span>
+        <span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Savepoint created: </span><span class="si">{</span><span class="n">savepoint_location</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># 세이브포인트에서 복원
+</span>        <span class="n">success</span> <span class="o">=</span> <span class="n">manager</span><span class="p">.</span><span class="nf">restore_from_savepoint</span><span class="p">(</span>
+            <span class="n">savepoint_location</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">/path/to/job.jar</span><span class="sh">"</span>
+        <span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Restore success: </span><span class="si">{</span><span class="n">success</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+    <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="체크포인트-모니터링">체크포인트 모니터링</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CheckpointMonitor</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">flink_rest_url</span><span class="o">=</span><span class="sh">"</span><span class="s">http://localhost:8081</span><span class="sh">"</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">rest_url</span> <span class="o">=</span> <span class="n">flink_rest_url</span>
+    
+    <span class="k">def</span> <span class="nf">get_checkpoint_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">체크포인트 메트릭 조회</span><span class="sh">"""</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">rest_url</span><span class="si">}</span><span class="s">/jobs/</span><span class="si">{</span><span class="n">job_id</span><span class="si">}</span><span class="s">/checkpoints</span><span class="sh">"</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">Exception</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed to get checkpoint metrics: </span><span class="si">{</span><span class="n">response</span><span class="p">.</span><span class="n">text</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">analyze_checkpoint_performance</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">체크포인트 성능 분석</span><span class="sh">"""</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_checkpoint_metrics</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+        
+        <span class="n">checkpoints</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">latest</span><span class="sh">"</span><span class="p">,</span> <span class="p">{}).</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">completed</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">checkpoints</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">No completed checkpoints found</span><span class="sh">"</span><span class="p">}</span>
+        
+        <span class="c1"># 성능 분석
+</span>        <span class="n">durations</span> <span class="o">=</span> <span class="p">[</span><span class="n">cp</span><span class="p">[</span><span class="sh">"</span><span class="s">duration</span><span class="sh">"</span><span class="p">]</span> <span class="k">for</span> <span class="n">cp</span> <span class="ow">in</span> <span class="n">checkpoints</span><span class="p">]</span>
+        <span class="n">sizes</span> <span class="o">=</span> <span class="p">[</span><span class="n">cp</span><span class="p">[</span><span class="sh">"</span><span class="s">size</span><span class="sh">"</span><span class="p">]</span> <span class="k">for</span> <span class="n">cp</span> <span class="ow">in</span> <span class="n">checkpoints</span><span class="p">]</span>
+        
+        <span class="n">analysis</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">total_checkpoints</span><span class="sh">"</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">checkpoints</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">avg_duration_ms</span><span class="sh">"</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">durations</span><span class="p">)</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">durations</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">max_duration_ms</span><span class="sh">"</span><span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="n">durations</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">min_duration_ms</span><span class="sh">"</span><span class="p">:</span> <span class="nf">min</span><span class="p">(</span><span class="n">durations</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">avg_size_bytes</span><span class="sh">"</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">sizes</span><span class="p">)</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">sizes</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">max_size_bytes</span><span class="sh">"</span><span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="n">sizes</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">min_size_bytes</span><span class="sh">"</span><span class="p">:</span> <span class="nf">min</span><span class="p">(</span><span class="n">sizes</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># 성능 권장사항
+</span>        <span class="n">recommendations</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="n">analysis</span><span class="p">[</span><span class="sh">"</span><span class="s">avg_duration_ms</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">10000</span><span class="p">:</span>  <span class="c1"># 10초 이상
+</span>            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">performance</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">체크포인트 시간이 길어서 성능에 영향을 줄 수 있습니다. 상태 크기를 줄이거나 백엔드를 최적화하세요.</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="k">if</span> <span class="n">analysis</span><span class="p">[</span><span class="sh">"</span><span class="s">avg_size_bytes</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">100</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">:</span>  <span class="c1"># 100MB 이상
+</span>            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">storage</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">체크포인트 크기가 큽니다. 불필요한 상태를 정리하거나 TTL을 설정하세요.</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="n">analysis</span><span class="p">[</span><span class="sh">"</span><span class="s">recommendations</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">recommendations</span>
+        
+        <span class="k">return</span> <span class="n">analysis</span>
+
+<span class="c1"># 모니터링 예제
+</span><span class="k">def</span> <span class="nf">checkpoint_monitoring_example</span><span class="p">():</span>
+    <span class="n">monitor</span> <span class="o">=</span> <span class="nc">CheckpointMonitor</span><span class="p">()</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">analysis</span> <span class="o">=</span> <span class="n">monitor</span><span class="p">.</span><span class="nf">analyze_checkpoint_performance</span><span class="p">(</span><span class="sh">"</span><span class="s">job-id-123</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=== Checkpoint Performance Analysis ===</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">analysis</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-복잡한-시간-처리-전략">⏰ 복잡한 시간 처리 전략</h2>
+
+<h3 id="다중-시간-윈도우-처리">다중 시간 윈도우 처리</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.window</span> <span class="kn">import</span> <span class="n">TumblingEventTimeWindows</span><span class="p">,</span> <span class="n">SlidingEventTimeWindows</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream.functions</span> <span class="kn">import</span> <span class="n">AllWindowFunction</span>
+<span class="kn">from</span> <span class="n">pyflink.common.time</span> <span class="kn">import</span> <span class="n">Time</span>
+<span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+
+<span class="k">class</span> <span class="nc">MultiTimeWindowProcessor</span><span class="p">(</span><span class="n">AllWindowFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">window_results</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">out</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">다중 시간 윈도우에서 데이터 처리</span><span class="sh">"""</span>
+        <span class="n">window_start</span> <span class="o">=</span> <span class="n">window</span><span class="p">.</span><span class="n">start</span>
+        <span class="n">window_end</span> <span class="o">=</span> <span class="n">window</span><span class="p">.</span><span class="n">end</span>
+        
+        <span class="c1"># 윈도우별 집계
+</span>        <span class="n">window_key</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">window_start</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">window_end</span><span class="si">}</span><span class="sh">"</span>
+        
+        <span class="k">if</span> <span class="n">window_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">window_results</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">window_results</span><span class="p">[</span><span class="n">window_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">sum</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">min</span><span class="sh">"</span><span class="p">:</span> <span class="nf">float</span><span class="p">(</span><span class="sh">'</span><span class="s">inf</span><span class="sh">'</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">max</span><span class="sh">"</span><span class="p">:</span> <span class="nf">float</span><span class="p">(</span><span class="sh">'</span><span class="s">-inf</span><span class="sh">'</span><span class="p">)</span>
+            <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># (timestamp, value) 형태 가정
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">window_results</span><span class="p">[</span><span class="n">window_key</span><span class="p">][</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">window_results</span><span class="p">[</span><span class="n">window_key</span><span class="p">][</span><span class="sh">"</span><span class="s">sum</span><span class="sh">"</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">window_results</span><span class="p">[</span><span class="n">window_key</span><span class="p">][</span><span class="sh">"</span><span class="s">min</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">window_results</span><span class="p">[</span><span class="n">window_key</span><span class="p">][</span><span class="sh">"</span><span class="s">min</span><span class="sh">"</span><span class="p">],</span> <span class="n">value</span>
+            <span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">window_results</span><span class="p">[</span><span class="n">window_key</span><span class="p">][</span><span class="sh">"</span><span class="s">max</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">window_results</span><span class="p">[</span><span class="n">window_key</span><span class="p">][</span><span class="sh">"</span><span class="s">max</span><span class="sh">"</span><span class="p">],</span> <span class="n">value</span>
+            <span class="p">)</span>
+        
+        <span class="c1"># 결과 출력
+</span>        <span class="n">result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">window_results</span><span class="p">[</span><span class="n">window_key</span><span class="p">].</span><span class="nf">copy</span><span class="p">()</span>
+        <span class="n">result</span><span class="p">[</span><span class="sh">"</span><span class="s">window_start</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">window_start</span>
+        <span class="n">result</span><span class="p">[</span><span class="sh">"</span><span class="s">window_end</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">window_end</span>
+        <span class="n">out</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">AdvancedTimeProcessing</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+    
+    <span class="k">def</span> <span class="nf">setup_multi_window_processing</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">다중 윈도우 처리 설정</span><span class="sh">"""</span>
+        <span class="c1"># 1분 윈도우
+</span>        <span class="n">one_minute_window</span> <span class="o">=</span> <span class="n">data_stream</span><span class="p">.</span><span class="nf">window_all</span><span class="p">(</span>
+            <span class="n">TumblingEventTimeWindows</span><span class="p">.</span><span class="nf">of</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">minutes</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="p">).</span><span class="nf">apply</span><span class="p">(</span><span class="nc">MultiTimeWindowProcessor</span><span class="p">(),</span> <span class="n">output_type</span><span class="o">=</span><span class="n">Types</span><span class="p">.</span><span class="nc">PICKLED_BYTE_ARRAY</span><span class="p">())</span>
+        
+        <span class="c1"># 5분 윈도우
+</span>        <span class="n">five_minute_window</span> <span class="o">=</span> <span class="n">data_stream</span><span class="p">.</span><span class="nf">window_all</span><span class="p">(</span>
+            <span class="n">TumblingEventTimeWindows</span><span class="p">.</span><span class="nf">of</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">minutes</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+        <span class="p">).</span><span class="nf">apply</span><span class="p">(</span><span class="nc">MultiTimeWindowProcessor</span><span class="p">(),</span> <span class="n">output_type</span><span class="o">=</span><span class="n">Types</span><span class="p">.</span><span class="nc">PICKLED_BYTE_ARRAY</span><span class="p">())</span>
+        
+        <span class="c1"># 1분 슬라이딩 윈도우 (30초 슬라이드)
+</span>        <span class="n">sliding_window</span> <span class="o">=</span> <span class="n">data_stream</span><span class="p">.</span><span class="nf">window_all</span><span class="p">(</span>
+            <span class="n">SlidingEventTimeWindows</span><span class="p">.</span><span class="nf">of</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">minutes</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">30</span><span class="p">))</span>
+        <span class="p">).</span><span class="nf">apply</span><span class="p">(</span><span class="nc">MultiTimeWindowProcessor</span><span class="p">(),</span> <span class="n">output_type</span><span class="o">=</span><span class="n">Types</span><span class="p">.</span><span class="nc">PICKLED_BYTE_ARRAY</span><span class="p">())</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">one_minute</span><span class="sh">"</span><span class="p">:</span> <span class="n">one_minute_window</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">five_minute</span><span class="sh">"</span><span class="p">:</span> <span class="n">five_minute_window</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">sliding</span><span class="sh">"</span><span class="p">:</span> <span class="n">sliding_window</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="동적-워터마크-생성">동적 워터마크 생성</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.functions</span> <span class="kn">import</span> <span class="n">ProcessFunction</span>
+<span class="kn">from</span> <span class="n">pyflink.common.time</span> <span class="kn">import</span> <span class="n">Time</span>
+
+<span class="k">class</span> <span class="nc">DynamicWatermarkGenerator</span><span class="p">(</span><span class="n">ProcessFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">max_delay_seconds</span><span class="o">=</span><span class="mi">60</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">max_delay_seconds</span> <span class="o">=</span> <span class="n">max_delay_seconds</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">current_watermark</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">element_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">delay_statistics</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">동적 워터마크 생성</span><span class="sh">"""</span>
+        <span class="n">event_time</span> <span class="o">=</span> <span class="n">element</span><span class="p">.</span><span class="n">timestamp</span>
+        <span class="n">processing_time</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="nf">timer_service</span><span class="p">().</span><span class="nf">current_processing_time</span><span class="p">()</span>
+        
+        <span class="c1"># 지연 시간 계산
+</span>        <span class="n">delay</span> <span class="o">=</span> <span class="n">processing_time</span> <span class="o">-</span> <span class="n">event_time</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">delay_statistics</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
+        
+        <span class="c1"># 최근 100개 요소의 평균 지연 시간으로 워터마크 조정
+</span>        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">delay_statistics</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">delay_statistics</span><span class="p">.</span><span class="nf">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">delay_statistics</span><span class="p">:</span>
+            <span class="n">avg_delay</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">delay_statistics</span><span class="p">)</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">delay_statistics</span><span class="p">)</span>
+            <span class="n">dynamic_delay</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">avg_delay</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">max_delay_seconds</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+            
+            <span class="c1"># 동적 워터마크 생성
+</span>            <span class="n">new_watermark</span> <span class="o">=</span> <span class="n">event_time</span> <span class="o">-</span> <span class="n">dynamic_delay</span>
+            <span class="k">if</span> <span class="n">new_watermark</span> <span class="o">&gt;</span> <span class="n">self</span><span class="p">.</span><span class="n">current_watermark</span><span class="p">:</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">current_watermark</span> <span class="o">=</span> <span class="n">new_watermark</span>
+                <span class="n">ctx</span><span class="p">.</span><span class="nf">timer_service</span><span class="p">().</span><span class="nf">register_event_time_timer</span><span class="p">(</span><span class="n">new_watermark</span><span class="p">)</span>
+        
+        <span class="c1"># 요소 처리
+</span>        <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">on_timer</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">out</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">타이머 기반 워터마크 생성</span><span class="sh">"""</span>
+        <span class="c1"># 주기적으로 워터마크 생성
+</span>        <span class="n">current_time</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="nf">timer_service</span><span class="p">().</span><span class="nf">current_processing_time</span><span class="p">()</span>
+        <span class="n">next_watermark</span> <span class="o">=</span> <span class="n">current_time</span> <span class="o">-</span> <span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">max_delay_seconds</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">next_watermark</span> <span class="o">&gt;</span> <span class="n">self</span><span class="p">.</span><span class="n">current_watermark</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">current_watermark</span> <span class="o">=</span> <span class="n">next_watermark</span>
+            <span class="n">ctx</span><span class="p">.</span><span class="nf">timer_service</span><span class="p">().</span><span class="nf">register_processing_time_timer</span><span class="p">(</span><span class="n">current_time</span> <span class="o">+</span> <span class="mi">1000</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="시간-기반-상태-관리">시간 기반 상태 관리</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.state</span> <span class="kn">import</span> <span class="n">ValueStateDescriptor</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream.functions</span> <span class="kn">import</span> <span class="n">KeyedProcessFunction</span>
+
+<span class="k">class</span> <span class="nc">TimeBasedStateManager</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">user_activity_state</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">last_activity_time</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">session_timeout_ms</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">1000</span>  <span class="c1"># 30분
+</span>    
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">user_activity_state</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_state</span><span class="p">(</span>
+            <span class="nc">ValueStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">user_activity</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">last_activity_time</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_state</span><span class="p">(</span>
+            <span class="nc">ValueStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">last_activity_time</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">LONG</span><span class="p">())</span>
+        <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">시간 기반 상태 관리</span><span class="sh">"""</span>
+        <span class="n">current_time</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="nf">timestamp</span><span class="p">()</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="n">element</span><span class="p">.</span><span class="n">user_id</span>
+        
+        <span class="c1"># 이전 활동 시간 확인
+</span>        <span class="n">last_time</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">last_activity_time</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">last_time</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">current_time</span> <span class="o">-</span> <span class="n">last_time</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">self</span><span class="p">.</span><span class="n">session_timeout_ms</span><span class="p">:</span>
+            <span class="c1"># 새로운 세션 시작
+</span>            <span class="n">new_session</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">session_</span><span class="si">{</span><span class="n">current_time</span><span class="si">}</span><span class="sh">"</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">user_activity_state</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">new_session</span><span class="p">)</span>
+            
+            <span class="c1"># 세션 타임아웃 타이머 등록
+</span>            <span class="n">timeout_timer</span> <span class="o">=</span> <span class="n">current_time</span> <span class="o">+</span> <span class="n">self</span><span class="p">.</span><span class="n">session_timeout_ms</span>
+            <span class="n">ctx</span><span class="p">.</span><span class="nf">timer_service</span><span class="p">().</span><span class="nf">register_event_time_timer</span><span class="p">(</span><span class="n">timeout_timer</span><span class="p">)</span>
+            
+            <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">New session started for user </span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">new_session</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># 기존 세션 업데이트
+</span>            <span class="n">current_session</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">user_activity_state</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span>
+            <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Activity in existing session: </span><span class="si">{</span><span class="n">current_session</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># 마지막 활동 시간 업데이트
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">last_activity_time</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">current_time</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">on_timer</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">out</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">세션 타임아웃 처리</span><span class="sh">"""</span>
+        <span class="c1"># 세션 종료 처리
+</span>        <span class="n">session</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">user_activity_state</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">session</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Session timeout: </span><span class="si">{</span><span class="n">session</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">user_activity_state</span><span class="p">.</span><span class="nf">clear</span><span class="p">()</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">last_activity_time</span><span class="p">.</span><span class="nf">clear</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="-성능-최적화-기법">⚡ 성능 최적화 기법</h2>
+
+<h3 id="병렬성-최적화">병렬성 최적화</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream.connectors</span> <span class="kn">import</span> <span class="n">FlinkKafkaConsumer</span>
+<span class="kn">from</span> <span class="n">pyflink.common.serialization</span> <span class="kn">import</span> <span class="n">SimpleStringSchema</span>
+
+<span class="k">class</span> <span class="nc">ParallelismOptimizer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_kafka_parallelism</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">bootstrap_servers</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Kafka 병렬성 최적화</span><span class="sh">"""</span>
+        <span class="n">kafka_properties</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">bootstrap.servers</span><span class="sh">'</span><span class="p">:</span> <span class="n">bootstrap_servers</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">group.id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">optimized-consumer-group</span><span class="sh">'</span>
+        <span class="p">}</span>
+        
+        <span class="n">kafka_source</span> <span class="o">=</span> <span class="nc">FlinkKafkaConsumer</span><span class="p">(</span>
+            <span class="n">topic</span><span class="p">,</span>
+            <span class="nc">SimpleStringSchema</span><span class="p">(),</span>
+            <span class="n">kafka_properties</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># 파티션 수에 맞춰 병렬성 설정
+</span>        <span class="n">kafka_source</span><span class="p">.</span><span class="nf">set_parallelism</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>  <span class="c1"># Kafka 파티션 수와 동일하게 설정
+</span>        
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">add_source</span><span class="p">(</span><span class="n">kafka_source</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_processing_parallelism</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">처리 병렬성 최적화</span><span class="sh">"""</span>
+        <span class="c1"># 키별 병렬성 설정
+</span>        <span class="n">keyed_stream</span> <span class="o">=</span> <span class="n">data_stream</span><span class="p">.</span><span class="nf">key_by</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># 첫 번째 필드로 키 지정
+</span>        
+        <span class="c1"># 병렬 처리 설정
+</span>        <span class="n">optimized_stream</span> <span class="o">=</span> <span class="n">keyed_stream</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">expensive_operation</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+            <span class="n">output_type</span><span class="o">=</span><span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">()</span>
+        <span class="p">).</span><span class="nf">set_parallelism</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>  <span class="c1"># 높은 병렬성으로 설정
+</span>        
+        <span class="k">return</span> <span class="n">optimized_stream</span>
+    
+    <span class="k">def</span> <span class="nf">expensive_operation</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">비용이 큰 연산 시뮬레이션</span><span class="sh">"""</span>
+        <span class="kn">import</span> <span class="n">time</span>
+        <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>  <span class="c1"># 10ms 처리 시간
+</span>        <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">processed_</span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="sh">"</span>
+
+<span class="k">class</span> <span class="nc">MemoryOptimizer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+    
+    <span class="k">def</span> <span class="nf">setup_memory_optimization</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메모리 최적화 설정</span><span class="sh">"""</span>
+        <span class="c1"># JVM 힙 메모리 설정
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">get_config</span><span class="p">().</span><span class="nf">set_global_job_parameters</span><span class="p">({</span>
+            <span class="sh">"</span><span class="s">taskmanager.memory.process.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2048m</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">taskmanager.memory.managed.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1024m</span><span class="sh">"</span>
+        <span class="p">})</span>
+        
+        <span class="c1"># 네트워크 버퍼 설정
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">get_config</span><span class="p">().</span><span class="nf">set_global_job_parameters</span><span class="p">({</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.memory.fraction</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0.2</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.memory.min</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">128mb</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.memory.max</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1gb</span><span class="sh">"</span>
+        <span class="p">})</span>
+        
+        <span class="c1"># 상태 백엔드 최적화
+</span>        <span class="kn">from</span> <span class="n">pyflink.datastream.state</span> <span class="kn">import</span> <span class="n">RocksDBStateBackend</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="nc">RocksDBStateBackend</span><span class="p">(</span>
+            <span class="n">checkpoint_data_uri</span><span class="o">=</span><span class="sh">"</span><span class="s">file:///tmp/flink-checkpoints</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">enable_incremental_checkpointing</span><span class="o">=</span><span class="bp">True</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># RocksDB 메모리 설정
+</span>        <span class="n">backend</span><span class="p">.</span><span class="nf">set_rocksdb_options</span><span class="p">({</span>
+            <span class="sh">"</span><span class="s">write_buffer_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">64MB</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">max_write_buffer_number</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">3</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">block_cache_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">256MB</span><span class="sh">"</span>
+        <span class="p">})</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">set_state_backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_data_serialization</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">데이터 직렬화 최적화</span><span class="sh">"""</span>
+        <span class="c1"># Kryo 직렬화 설정
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">get_config</span><span class="p">().</span><span class="nf">set_global_job_parameters</span><span class="p">({</span>
+            <span class="sh">"</span><span class="s">taskmanager.runtime.kryo.default.serializers</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span>
+        <span class="p">})</span>
+        
+        <span class="c1"># Arrow 기반 직렬화 사용
+</span>        <span class="n">optimized_stream</span> <span class="o">=</span> <span class="n">data_stream</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>  <span class="c1"># 변환 없음
+</span>            <span class="n">output_type</span><span class="o">=</span><span class="n">Types</span><span class="p">.</span><span class="nc">PICKLED_BYTE_ARRAY</span><span class="p">()</span>  <span class="c1"># 최적화된 타입
+</span>        <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">optimized_stream</span>
+</code></pre></div></div>
+
+<h3 id="네트워크-최적화">네트워크 최적화</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">NetworkOptimizer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+    
+    <span class="k">def</span> <span class="nf">setup_network_optimization</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">네트워크 최적화 설정</span><span class="sh">"""</span>
+        <span class="c1"># 네트워크 스택 최적화
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">get_config</span><span class="p">().</span><span class="nf">set_global_job_parameters</span><span class="p">({</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.netty.num-arenas</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.netty.server.numThreads</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.netty.client.numThreads</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.netty.server.backlog</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0</span><span class="sh">"</span>
+        <span class="p">})</span>
+        
+        <span class="c1"># 버퍼 크기 최적화
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">get_config</span><span class="p">().</span><span class="nf">set_global_job_parameters</span><span class="p">({</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.memory.buffers-per-channel</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.memory.floating-buffers-per-gate</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8</span><span class="sh">"</span>
+        <span class="p">})</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_shuffle_network</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Shuffle 네트워크 최적화</span><span class="sh">"""</span>
+        <span class="c1"># 데이터 파티셔닝 최적화
+</span>        <span class="n">optimized_stream</span> <span class="o">=</span> <span class="n">data_stream</span><span class="p">.</span><span class="nf">partition_custom</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">key</span><span class="p">,</span> <span class="n">num_partitions</span><span class="p">:</span> <span class="nf">hash</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">%</span> <span class="n">num_partitions</span><span class="p">,</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># 키 추출 함수
+</span>        <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">optimized_stream</span>
+
+<span class="k">class</span> <span class="nc">LatencyOptimizer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+    
+    <span class="k">def</span> <span class="nf">setup_low_latency_config</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">저지연 설정</span><span class="sh">"""</span>
+        <span class="c1"># 버퍼 타임아웃 최소화
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">get_config</span><span class="p">().</span><span class="nf">set_global_job_parameters</span><span class="p">({</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.netty.server.backlog</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.netty.client.connectTimeoutSec</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10</span><span class="sh">"</span>
+        <span class="p">})</span>
+        
+        <span class="c1"># 체크포인팅 간격 조정
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">enable_checkpointing</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>  <span class="c1"># 100ms
+</span>        
+        <span class="c1"># 지연 가능한 체크포인트 활성화
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">set_unaligned_checkpoints</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_processing_latency</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">처리 지연시간 최적화</span><span class="sh">"""</span>
+        <span class="c1"># 스트리밍 모드 설정
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">set_buffer_timeout</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># 1ms 버퍼 타임아웃
+</span>        
+        <span class="c1"># 즉시 처리 설정
+</span>        <span class="n">optimized_stream</span> <span class="o">=</span> <span class="n">data_stream</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+            <span class="n">output_type</span><span class="o">=</span><span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">()</span>
+        <span class="p">).</span><span class="nf">set_buffer_timeout</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># 버퍼링 없이 즉시 처리
+</span>        
+        <span class="k">return</span> <span class="n">optimized_stream</span>
+</code></pre></div></div>
+
+<h2 id="-실무-프로젝트-실시간-추천-시스템">🚀 실무 프로젝트: 실시간 추천 시스템</h2>
+
+<h3 id="프로젝트-개요">프로젝트 개요</h3>
+
+<p>사용자 행동 데이터를 실시간으로 분석하여 개인화된 추천을 제공하는 시스템을 구축합니다.</p>
+
+<h3 id="1-데이터-모델-정의">1. 데이터 모델 정의</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="n">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="n">json</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">UserEvent</span><span class="p">:</span>
+    <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">item_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">event_type</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># view, click, purchase, like
+</span>    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span>
+    
+    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">({</span>
+            <span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">item_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">item_id</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">event_type</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">event_type</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">session_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">session_id</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">metadata</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">metadata</span>
+        <span class="p">})</span>
+    
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">json_str</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">json_str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nf">cls</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">UserProfile</span><span class="p">:</span>
+    <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">interests</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>  <span class="c1"># 카테고리별 관심도
+</span>    <span class="n">behavior_patterns</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>  <span class="c1"># 행동 패턴
+</span>    <span class="n">last_updated</span><span class="p">:</span> <span class="nb">int</span>
+    
+    <span class="k">def</span> <span class="nf">update_interest</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">관심도 업데이트</span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="n">category</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">interests</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">interests</span><span class="p">[</span><span class="n">category</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        
+        <span class="c1"># 지수 이동 평균으로 업데이트
+</span>        <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">interests</span><span class="p">[</span><span class="n">category</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">self</span><span class="p">.</span><span class="n">interests</span><span class="p">[</span><span class="n">category</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">weight</span>
+    
+    <span class="k">def</span> <span class="nf">get_top_interests</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">상위 관심사 반환</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="nf">sorted</span><span class="p">(</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">interests</span><span class="p">.</span><span class="nf">items</span><span class="p">(),</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span>
+        <span class="p">)[:</span><span class="n">top_k</span><span class="p">]</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Recommendation</span><span class="p">:</span>
+    <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">item_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">score</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">int</span>
+</code></pre></div></div>
+
+<h3 id="2-실시간-사용자-프로파일링">2. 실시간 사용자 프로파일링</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.functions</span> <span class="kn">import</span> <span class="n">KeyedProcessFunction</span>
+<span class="kn">from</span> <span class="n">pyflink.common.state</span> <span class="kn">import</span> <span class="n">ValueStateDescriptor</span><span class="p">,</span> <span class="n">MapStateDescriptor</span>
+<span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+
+<span class="k">class</span> <span class="nc">RealTimeUserProfiler</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">user_profile_state</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">item_categories</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># 아이템-카테고리 매핑
+</span>    
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">user_profile_state</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_state</span><span class="p">(</span>
+            <span class="nc">ValueStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">user_profile</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">())</span>
+        <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">user_event</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">실시간 사용자 프로파일 업데이트</span><span class="sh">"""</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="n">user_event</span><span class="p">.</span><span class="n">user_id</span>
+        
+        <span class="c1"># 현재 프로파일 로드
+</span>        <span class="n">profile_json</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">user_profile_state</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">profile_json</span><span class="p">:</span>
+            <span class="n">profile</span> <span class="o">=</span> <span class="n">UserProfile</span><span class="p">.</span><span class="nf">from_json</span><span class="p">(</span><span class="n">profile_json</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">profile</span> <span class="o">=</span> <span class="nc">UserProfile</span><span class="p">(</span>
+                <span class="n">user_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span>
+                <span class="n">interests</span><span class="o">=</span><span class="p">{},</span>
+                <span class="n">behavior_patterns</span><span class="o">=</span><span class="p">{},</span>
+                <span class="n">last_updated</span><span class="o">=</span><span class="n">user_event</span><span class="p">.</span><span class="n">timestamp</span>
+            <span class="p">)</span>
+        
+        <span class="c1"># 이벤트 타입별 처리
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">update_profile_from_event</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">user_event</span><span class="p">)</span>
+        
+        <span class="c1"># 프로파일 저장
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">user_profile_state</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">profile</span><span class="p">.</span><span class="nf">to_json</span><span class="p">())</span>
+        
+        <span class="c1"># 업데이트된 프로파일 출력
+</span>        <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">update_profile_from_event</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">profile</span><span class="p">:</span> <span class="n">UserProfile</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">UserEvent</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">이벤트 기반 프로파일 업데이트</span><span class="sh">"""</span>
+        <span class="c1"># 아이템 카테고리 가져오기 (실제로는 별도 서비스에서 조회)
+</span>        <span class="n">category</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_item_category</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">item_id</span><span class="p">)</span>
+        
+        <span class="c1"># 이벤트 타입별 가중치
+</span>        <span class="n">event_weights</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">view</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">click</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">like</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">purchase</span><span class="sh">'</span><span class="p">:</span> <span class="mf">1.0</span>
+        <span class="p">}</span>
+        
+        <span class="n">weight</span> <span class="o">=</span> <span class="n">event_weights</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">event_type</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+        
+        <span class="c1"># 관심도 업데이트
+</span>        <span class="n">profile</span><span class="p">.</span><span class="nf">update_interest</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span>
+        
+        <span class="c1"># 행동 패턴 업데이트
+</span>        <span class="n">pattern_key</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">event</span><span class="p">.</span><span class="n">event_type</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="sh">"</span>
+        <span class="n">profile</span><span class="p">.</span><span class="n">behavior_patterns</span><span class="p">[</span><span class="n">pattern_key</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">profile</span><span class="p">.</span><span class="n">behavior_patterns</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">pattern_key</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        
+        <span class="n">profile</span><span class="p">.</span><span class="n">last_updated</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">timestamp</span>
+    
+    <span class="k">def</span> <span class="nf">get_item_category</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sh">"""</span><span class="s">아이템 카테고리 조회</span><span class="sh">"""</span>
+        <span class="c1"># 실제로는 데이터베이스나 캐시에서 조회
+</span>        <span class="n">categories</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s">electronics</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">books</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">clothing</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">home</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">sports</span><span class="sh">'</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">categories</span><span class="p">[</span><span class="nf">hash</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span> <span class="o">%</span> <span class="nf">len</span><span class="p">(</span><span class="n">categories</span><span class="p">)]</span>
+    
+    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">({</span>
+            <span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">interests</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">interests</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">behavior_patterns</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">behavior_patterns</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">last_updated</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">last_updated</span>
+        <span class="p">})</span>
+    
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">json_str</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">json_str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nf">cls</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-협업-필터링-기반-추천-엔진">3. 협업 필터링 기반 추천 엔진</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CollaborativeFilteringEngine</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">user_item_matrix</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">item_item_similarity</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">user_similarity</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">user_item_matrix</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_map_state</span><span class="p">(</span>
+            <span class="nc">MapStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">user_item_matrix</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">(),</span> <span class="n">Types</span><span class="p">.</span><span class="nc">FLOAT</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">item_item_similarity</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_map_state</span><span class="p">(</span>
+            <span class="nc">MapStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">item_similarity</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">(),</span> <span class="n">Types</span><span class="p">.</span><span class="nc">FLOAT</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">user_similarity</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_map_state</span><span class="p">(</span>
+            <span class="nc">MapStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">user_similarity</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">(),</span> <span class="n">Types</span><span class="p">.</span><span class="nc">FLOAT</span><span class="p">())</span>
+        <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">user_event</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">협업 필터링 기반 추천 생성</span><span class="sh">"""</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="n">user_event</span><span class="p">.</span><span class="n">user_id</span>
+        <span class="n">item_id</span> <span class="o">=</span> <span class="n">user_event</span><span class="p">.</span><span class="n">item_id</span>
+        
+        <span class="c1"># 사용자-아이템 행렬 업데이트
+</span>        <span class="n">matrix_key</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s">:</span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="sh">"</span>
+        <span class="n">current_rating</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">user_item_matrix</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">matrix_key</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">0.0</span>
+        
+        <span class="c1"># 이벤트 기반 평점 계산
+</span>        <span class="n">event_rating</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">calculate_rating_from_event</span><span class="p">(</span><span class="n">user_event</span><span class="p">)</span>
+        <span class="n">new_rating</span> <span class="o">=</span> <span class="p">(</span><span class="n">current_rating</span> <span class="o">+</span> <span class="n">event_rating</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">user_item_matrix</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="n">matrix_key</span><span class="p">,</span> <span class="n">new_rating</span><span class="p">)</span>
+        
+        <span class="c1"># 아이템 기반 추천 생성
+</span>        <span class="n">item_recommendations</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">generate_item_based_recommendations</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">item_id</span><span class="p">)</span>
+        
+        <span class="c1"># 사용자 기반 추천 생성
+</span>        <span class="n">user_recommendations</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">generate_user_based_recommendations</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+        
+        <span class="c1"># 추천 결과 통합
+</span>        <span class="n">final_recommendations</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">combine_recommendations</span><span class="p">(</span>
+            <span class="n">item_recommendations</span><span class="p">,</span> <span class="n">user_recommendations</span>
+        <span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">final_recommendations</span><span class="p">:</span>
+            <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">calculate_rating_from_event</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">UserEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sh">"""</span><span class="s">이벤트 기반 평점 계산</span><span class="sh">"""</span>
+        <span class="n">rating_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">view</span><span class="sh">'</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">click</span><span class="sh">'</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">like</span><span class="sh">'</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">purchase</span><span class="sh">'</span><span class="p">:</span> <span class="mf">5.0</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">rating_map</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">event_type</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">generate_item_based_recommendations</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">아이템 기반 추천 생성</span><span class="sh">"""</span>
+        <span class="c1"># 유사한 아이템 찾기
+</span>        <span class="n">similar_items</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">find_similar_items</span><span class="p">(</span><span class="n">item_id</span><span class="p">,</span> <span class="n">top_k</span><span class="p">)</span>
+        
+        <span class="n">recommendations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">similar_item</span><span class="p">,</span> <span class="n">similarity</span> <span class="ow">in</span> <span class="n">similar_items</span><span class="p">:</span>
+            <span class="c1"># 사용자가 아직 상호작용하지 않은 아이템만 추천
+</span>            <span class="n">matrix_key</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s">:</span><span class="si">{</span><span class="n">similar_item</span><span class="si">}</span><span class="sh">"</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">self</span><span class="p">.</span><span class="n">user_item_matrix</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">matrix_key</span><span class="p">):</span>
+                <span class="n">score</span> <span class="o">=</span> <span class="n">similarity</span> <span class="o">*</span> <span class="mf">0.8</span>  <span class="c1"># 아이템 기반 가중치
+</span>                <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="nc">Recommendation</span><span class="p">(</span>
+                    <span class="n">user_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span>
+                    <span class="n">item_id</span><span class="o">=</span><span class="n">similar_item</span><span class="p">,</span>
+                    <span class="n">score</span><span class="o">=</span><span class="n">score</span><span class="p">,</span>
+                    <span class="n">reason</span><span class="o">=</span><span class="sh">"</span><span class="s">Similar to items you liked</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="n">timestamp</span><span class="o">=</span><span class="nf">int</span><span class="p">(</span><span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">())</span>
+                <span class="p">))</span>
+        
+        <span class="k">return</span> <span class="nf">sorted</span><span class="p">(</span><span class="n">recommendations</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">.</span><span class="n">score</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)[:</span><span class="n">top_k</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">generate_user_based_recommendations</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">사용자 기반 추천 생성</span><span class="sh">"""</span>
+        <span class="c1"># 유사한 사용자 찾기
+</span>        <span class="n">similar_users</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">find_similar_users</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">top_k</span><span class="p">)</span>
+        
+        <span class="n">recommendations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">similar_user</span><span class="p">,</span> <span class="n">similarity</span> <span class="ow">in</span> <span class="n">similar_users</span><span class="p">:</span>
+            <span class="c1"># 유사한 사용자가 좋아한 아이템 중 현재 사용자가 아직 상호작용하지 않은 것
+</span>            <span class="n">user_items</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_user_items</span><span class="p">(</span><span class="n">similar_user</span><span class="p">)</span>
+            <span class="n">current_user_items</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_user_items</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+            
+            <span class="k">for</span> <span class="n">item_id</span> <span class="ow">in</span> <span class="n">user_items</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">item_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">current_user_items</span><span class="p">:</span>
+                    <span class="n">score</span> <span class="o">=</span> <span class="n">similarity</span> <span class="o">*</span> <span class="mf">0.6</span>  <span class="c1"># 사용자 기반 가중치
+</span>                    <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="nc">Recommendation</span><span class="p">(</span>
+                        <span class="n">user_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span>
+                        <span class="n">item_id</span><span class="o">=</span><span class="n">item_id</span><span class="p">,</span>
+                        <span class="n">score</span><span class="o">=</span><span class="n">score</span><span class="p">,</span>
+                        <span class="n">reason</span><span class="o">=</span><span class="sh">"</span><span class="s">Users with similar tastes liked this</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="n">timestamp</span><span class="o">=</span><span class="nf">int</span><span class="p">(</span><span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">())</span>
+                    <span class="p">))</span>
+        
+        <span class="k">return</span> <span class="nf">sorted</span><span class="p">(</span><span class="n">recommendations</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">.</span><span class="n">score</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)[:</span><span class="n">top_k</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">find_similar_items</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">유사한 아이템 찾기</span><span class="sh">"""</span>
+        <span class="c1"># 실제로는 더 정교한 유사도 계산 알고리즘 사용
+</span>        <span class="n">similar_items</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># 모든 아이템과의 유사도 계산 (간단한 예시)
+</span>        <span class="k">for</span> <span class="n">other_item</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_all_items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">other_item</span> <span class="o">!=</span> <span class="n">item_id</span><span class="p">:</span>
+                <span class="n">similarity</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">calculate_item_similarity</span><span class="p">(</span><span class="n">item_id</span><span class="p">,</span> <span class="n">other_item</span><span class="p">)</span>
+                <span class="n">similar_items</span><span class="p">.</span><span class="nf">append</span><span class="p">((</span><span class="n">other_item</span><span class="p">,</span> <span class="n">similarity</span><span class="p">))</span>
+        
+        <span class="k">return</span> <span class="nf">sorted</span><span class="p">(</span><span class="n">similar_items</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)[:</span><span class="n">top_k</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">calculate_item_similarity</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">item1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">item2</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sh">"""</span><span class="s">아이템 유사도 계산 (코사인 유사도)</span><span class="sh">"""</span>
+        <span class="c1"># 실제로는 사용자-아이템 행렬을 기반으로 계산
+</span>        <span class="k">return</span> <span class="nf">abs</span><span class="p">(</span><span class="nf">hash</span><span class="p">(</span><span class="n">item1</span><span class="p">)</span> <span class="o">-</span> <span class="nf">hash</span><span class="p">(</span><span class="n">item2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="nf">hash</span><span class="p">(</span><span class="n">item1</span><span class="p">)</span> <span class="o">+</span> <span class="nf">hash</span><span class="p">(</span><span class="n">item2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get_all_items</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">모든 아이템 목록 반환</span><span class="sh">"""</span>
+        <span class="c1"># 실제로는 데이터베이스에서 조회
+</span>        <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="sh">"</span><span class="s">item_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">)]</span>
+    
+    <span class="k">def</span> <span class="nf">get_user_items</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">사용자가 상호작용한 아이템 목록 반환</span><span class="sh">"""</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">user_item_matrix</span><span class="p">.</span><span class="nf">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span><span class="p">.</span><span class="nf">startswith</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s">:</span><span class="sh">"</span><span class="p">):</span>
+                <span class="n">item_id</span> <span class="o">=</span> <span class="n">key</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s">:</span><span class="sh">"</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">items</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">items</span>
+    
+    <span class="k">def</span> <span class="nf">combine_recommendations</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">item_recs</span><span class="p">,</span> <span class="n">user_recs</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">추천 결과 통합</span><span class="sh">"""</span>
+        <span class="n">combined</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c1"># 아이템 기반 추천 추가
+</span>        <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">item_recs</span><span class="p">:</span>
+            <span class="n">combined</span><span class="p">[</span><span class="n">rec</span><span class="p">.</span><span class="n">item_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">rec</span>
+        
+        <span class="c1"># 사용자 기반 추천 추가 (점수 조정)
+</span>        <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">user_recs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rec</span><span class="p">.</span><span class="n">item_id</span> <span class="ow">in</span> <span class="n">combined</span><span class="p">:</span>
+                <span class="c1"># 이미 있는 경우 점수 평균
+</span>                <span class="n">combined</span><span class="p">[</span><span class="n">rec</span><span class="p">.</span><span class="n">item_id</span><span class="p">].</span><span class="n">score</span> <span class="o">=</span> <span class="p">(</span><span class="n">combined</span><span class="p">[</span><span class="n">rec</span><span class="p">.</span><span class="n">item_id</span><span class="p">].</span><span class="n">score</span> <span class="o">+</span> <span class="n">rec</span><span class="p">.</span><span class="n">score</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">combined</span><span class="p">[</span><span class="n">rec</span><span class="p">.</span><span class="n">item_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">rec</span>
+        
+        <span class="k">return</span> <span class="nf">list</span><span class="p">(</span><span class="n">combined</span><span class="p">.</span><span class="nf">values</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h3 id="4-실시간-추천-시스템-통합">4. 실시간 추천 시스템 통합</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">RealTimeRecommendationSystem</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="nf">setup_environment</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">setup_environment</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">환경 설정</span><span class="sh">"""</span>
+        <span class="c1"># 체크포인팅 활성화
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">enable_checkpointing</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+        
+        <span class="c1"># 상태 백엔드 설정
+</span>        <span class="kn">from</span> <span class="n">pyflink.datastream.state</span> <span class="kn">import</span> <span class="n">RocksDBStateBackend</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="nc">RocksDBStateBackend</span><span class="p">(</span>
+            <span class="n">checkpoint_data_uri</span><span class="o">=</span><span class="sh">"</span><span class="s">file:///tmp/recommendation-checkpoints</span><span class="sh">"</span>
+        <span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">set_state_backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">create_kafka_source</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">bootstrap_servers</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Kafka 소스 생성</span><span class="sh">"""</span>
+        <span class="kn">from</span> <span class="n">pyflink.datastream.connectors</span> <span class="kn">import</span> <span class="n">FlinkKafkaConsumer</span>
+        <span class="kn">from</span> <span class="n">pyflink.common.serialization</span> <span class="kn">import</span> <span class="n">SimpleStringSchema</span>
+        
+        <span class="n">kafka_properties</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">bootstrap.servers</span><span class="sh">'</span><span class="p">:</span> <span class="n">bootstrap_servers</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">group.id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">recommendation-system</span><span class="sh">'</span>
+        <span class="p">}</span>
+        
+        <span class="n">kafka_source</span> <span class="o">=</span> <span class="nc">FlinkKafkaConsumer</span><span class="p">(</span>
+            <span class="n">topic</span><span class="p">,</span>
+            <span class="nc">SimpleStringSchema</span><span class="p">(),</span>
+            <span class="n">kafka_properties</span>
+        <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">add_source</span><span class="p">(</span><span class="n">kafka_source</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">parse_user_events</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">event_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">사용자 이벤트 파싱</span><span class="sh">"""</span>
+        <span class="k">def</span> <span class="nf">parse_event</span><span class="p">(</span><span class="n">event_str</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">UserEvent</span><span class="p">.</span><span class="nf">from_json</span><span class="p">(</span><span class="n">event_str</span><span class="p">)</span>
+            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed to parse event: </span><span class="si">{</span><span class="n">event_str</span><span class="si">}</span><span class="s">, Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">None</span>
+        
+        <span class="k">return</span> <span class="n">event_stream</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="n">parse_event</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="n">Types</span><span class="p">.</span><span class="nc">PICKLED_BYTE_ARRAY</span><span class="p">())</span> \
+                          <span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">run_recommendation_system</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">추천 시스템 실행</span><span class="sh">"""</span>
+        <span class="c1"># Kafka에서 사용자 이벤트 읽기
+</span>        <span class="n">event_stream</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">create_kafka_source</span><span class="p">(</span><span class="sh">"</span><span class="s">user-events</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># 이벤트 파싱
+</span>        <span class="n">parsed_events</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">parse_user_events</span><span class="p">(</span><span class="n">event_stream</span><span class="p">)</span>
+        
+        <span class="c1"># 타임스탬프와 워터마크 할당
+</span>        <span class="kn">from</span> <span class="n">pyflink.datastream.functions</span> <span class="kn">import</span> <span class="n">BoundedOutOfOrdernessTimestampExtractor</span>
+        <span class="kn">from</span> <span class="n">pyflink.common.time</span> <span class="kn">import</span> <span class="n">Time</span>
+        
+        <span class="k">class</span> <span class="nc">EventTimestampExtractor</span><span class="p">(</span><span class="n">BoundedOutOfOrdernessTimestampExtractor</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+                <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+            
+            <span class="k">def</span> <span class="nf">extract_timestamp</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">previous_timestamp</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">element</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">*</span> <span class="mi">1000</span>
+        
+        <span class="n">watermarked_events</span> <span class="o">=</span> <span class="n">parsed_events</span><span class="p">.</span><span class="nf">assign_timestamps_and_watermarks</span><span class="p">(</span>
+            <span class="nc">EventTimestampExtractor</span><span class="p">()</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># 실시간 사용자 프로파일링
+</span>        <span class="n">user_profiles</span> <span class="o">=</span> <span class="n">watermarked_events</span><span class="p">.</span><span class="nf">key_by</span><span class="p">(</span><span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="n">event</span><span class="p">.</span><span class="n">user_id</span><span class="p">)</span> \
+                                        <span class="p">.</span><span class="nf">process</span><span class="p">(</span><span class="nc">RealTimeUserProfiler</span><span class="p">())</span>
+        
+        <span class="c1"># 협업 필터링 기반 추천
+</span>        <span class="n">recommendations</span> <span class="o">=</span> <span class="n">watermarked_events</span><span class="p">.</span><span class="nf">key_by</span><span class="p">(</span><span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="n">event</span><span class="p">.</span><span class="n">user_id</span><span class="p">)</span> \
+                                          <span class="p">.</span><span class="nf">process</span><span class="p">(</span><span class="nc">CollaborativeFilteringEngine</span><span class="p">())</span>
+        
+        <span class="c1"># 결과 출력
+</span>        <span class="n">user_profiles</span><span class="p">.</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">User Profiles</span><span class="sh">"</span><span class="p">)</span>
+        <span class="n">recommendations</span><span class="p">.</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Recommendations</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># 실행
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"</span><span class="s">Real-time Recommendation System</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 시스템 실행
+</span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="nc">RealTimeRecommendationSystem</span><span class="p">()</span>
+    <span class="n">system</span><span class="p">.</span><span class="nf">run_recommendation_system</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="-학습-요약">📚 학습 요약</h2>
+
+<h3 id="이번-파트에서-학습한-내용">이번 파트에서 학습한 내용</h3>
+
+<ol>
+  <li><strong>고급 상태 관리 패턴</strong>
+    <ul>
+      <li>상태 백엔드 (Memory, Fs, RocksDB)</li>
+      <li>상태 TTL과 자동 정리</li>
+      <li>상태 스냅샷과 복원</li>
+      <li>상태 분할과 병합</li>
+    </ul>
+  </li>
+  <li><strong>체크포인팅과 세이브포인트</strong>
+    <ul>
+      <li>고급 체크포인팅 설정</li>
+      <li>세이브포인트 생성과 복원</li>
+      <li>체크포인트 성능 모니터링</li>
+      <li>장애 복구 전략</li>
+    </ul>
+  </li>
+  <li><strong>복잡한 시간 처리</strong>
+    <ul>
+      <li>다중 시간 윈도우 처리</li>
+      <li>동적 워터마크 생성</li>
+      <li>시간 기반 상태 관리</li>
+      <li>지연 데이터 처리</li>
+    </ul>
+  </li>
+  <li><strong>성능 최적화</strong>
+    <ul>
+      <li>병렬성 최적화</li>
+      <li>메모리 최적화</li>
+      <li>네트워크 최적화</li>
+      <li>지연시간 최적화</li>
+    </ul>
+  </li>
+  <li><strong>실무 프로젝트</strong>
+    <ul>
+      <li>실시간 추천 시스템</li>
+      <li>사용자 프로파일링</li>
+      <li>협업 필터링</li>
+      <li>개인화 추천</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="핵심-기술-스택">핵심 기술 스택</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>기술</th>
+      <th>용도</th>
+      <th>중요도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>고급 상태 관리</strong></td>
+      <td>복잡한 상태 처리</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>체크포인팅</strong></td>
+      <td>장애 복구와 안정성</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>시간 처리</strong></td>
+      <td>정확한 시간 기반 분석</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>성능 최적화</strong></td>
+      <td>프로덕션 환경 최적화</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>실시간 추천</strong></td>
+      <td>개인화 서비스</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="다음-파트-미리보기">다음 파트 미리보기</h3>
+
+<p><strong>Part 3: 실시간 분석과 CEP (Complex Event Processing)</strong>에서는 다음 내용을 다룹니다:</p>
+<ul>
+  <li>복잡한 이벤트 처리 패턴</li>
+  <li>실시간 집계와 윈도우 함수</li>
+  <li>CEP 패턴 매칭</li>
+  <li>실시간 대시보드 구축</li>
+</ul>
+
+<hr />
+
+<p><strong>다음 파트</strong>: <a href="/data-engineering/2025/09/17/apache-flink-real-time-analytics.html">Part 3: 실시간 분석과 CEP</a></p>
+
+<hr />
+
+<p><em>이제 Flink의 고급 기능들을 마스터했습니다! 다음 파트에서는 복잡한 이벤트 처리의 세계로 들어가겠습니다.</em> 🚀</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+          
+          
+      
+      
+        
+        
+        <a href="/data-engineering/2025/09/15/apache-flink-basics.html" class="nav-link prev">
+          ← 이전: Part 1: Apache Flink 기초와 핵심 개념 - 진정한 스트리밍 처리의 시작
+        </a>
+      
+      
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
