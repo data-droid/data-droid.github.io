@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Learn Apache Flink's basic structure and core concepts including DataStream API, state management, and time processing through hands-on practice.">
+
+
+
+<title>Part 1: Apache Flink Basics and Core Concepts - The Beginning of True Streaming Processing - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 1: Apache Flink Basics and Core Concepts - The Beginning of True Streaming Processing">
+<meta property="og:description" content="Learn Apache Flink's basic structure and core concepts including DataStream API, state management, and time processing through hands-on practice.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2025-09-15-apache-flink-basics.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 1: Apache Flink Basics and Core Concepts - The Beginning of True Streaming Processing">
+<meta name="twitter:description" content="Learn Apache Flink's basic structure and core concepts including DataStream API, state management, and time processing through hands-on practice.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2025/09/15/apache-flink-basics.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2025-09-15-apache-flink-basics.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 15일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 1: Apache Flink Basics and Core Concepts - The Beginning of True Streaming Processing</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Flink</span>
+      
+        <span class="tag">DataStream-API</span>
+      
+        <span class="tag">State-Management</span>
+      
+        <span class="tag">Time-Processing</span>
+      
+        <span class="tag">Streaming-Processing</span>
+      
+        <span class="tag">Python</span>
+      
+        <span class="tag">PyFlink</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Apache flink complete guide 시리즈</span>
+      <span class="series-order">Part 2</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 35 min</span>
+      
+      
+        <span class="difficulty">📊 Intermediate</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-1-apache-flink-basics-and-core-concepts---the-beginning-of-true-streaming-processing">Part 1: Apache Flink Basics and Core Concepts - The Beginning of True Streaming Processing</h1>
+
+<blockquote>
+  <p>Learn Apache Flink’s basic structure and core concepts including DataStream API, state management, and time processing through hands-on practice.</p>
+</blockquote>
+
+<h2 id="-table-of-contents">📋 Table of Contents</h2>
+
+<ol>
+  <li><a href="#what-is-apache-flink">What is Apache Flink?</a></li>
+  <li><a href="#flink-architecture-and-core-concepts">Flink Architecture and Core Concepts</a></li>
+  <li><a href="#datastream-api-basics">DataStream API Basics</a></li>
+  <li><a href="#time-processing-and-watermarking">Time Processing and Watermarking</a></li>
+  <li><a href="#state-management-basics">State Management Basics</a></li>
+  <li><a href="#real-world-project-real-time-log-analysis">Real-world Project: Real-time Log Analysis</a></li>
+  <li><a href="#learning-summary">Learning Summary</a></li>
+</ol>
+
+<h2 id="-what-is-apache-flink">🚀 What is Apache Flink?</h2>
+
+<h3 id="flinks-origins">Flink’s Origins</h3>
+
+<p>Apache Flink started from the <strong>Stratosphere project</strong> at TU Berlin in 2009. It became a Top-level project of the Apache Software Foundation in 2014, designed with the goal of <strong>true streaming processing</strong>.</p>
+
+<h4 id="core-design-philosophy"><strong>Core Design Philosophy</strong></h4>
+
+<ol>
+  <li><strong>True Streaming</strong>: True streaming processing, not micro-batch</li>
+  <li><strong>Low Latency</strong>: Achieving millisecond-level latency</li>
+  <li><strong>High Throughput</strong>: Maintaining high processing throughput</li>
+  <li><strong>Exactly-Once</strong>: Guaranteeing exactly-once processing</li>
+  <li><strong>Fault Tolerance</strong>: Strong failure recovery capabilities</li>
+</ol>
+
+<h3 id="fundamental-differences-from-spark">Fundamental Differences from Spark</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark: Micro-batch approach
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="n">pyspark.streaming</span> <span class="kn">import</span> <span class="n">StreamingContext</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">SparkStreaming</span><span class="sh">"</span><span class="p">).</span><span class="nf">getOrCreate</span><span class="p">()</span>
+<span class="n">ssc</span> <span class="o">=</span> <span class="nc">StreamingContext</span><span class="p">(</span><span class="n">spark</span><span class="p">.</span><span class="n">sparkContext</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># 5-second batch interval
+</span>
+<span class="c1"># Flink: True streaming approach
+</span><span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+<span class="c1"># No batch interval - processes events immediately upon arrival
+</span></code></pre></div></div>
+
+<h2 id="️-flink-architecture-and-core-concepts">🏗️ Flink Architecture and Core Concepts</h2>
+
+<h3 id="cluster-architecture">Cluster Architecture</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────────────────┐
+│                    Flink Cluster                           │
+├─────────────────────────────────────────────────────────────┤
+│  JobManager (Master)                                       │
+│  ┌─────────────────┐  ┌─────────────────┐                │
+│  │   Dispatcher    │  │  ResourceManager│                │
+│  └─────────────────┘  └─────────────────┘                │
+│  ┌─────────────────┐  ┌─────────────────┐                │
+│  │   JobMaster     │  │  CheckpointCoord│                │
+│  └─────────────────┘  └─────────────────┘                │
+├─────────────────────────────────────────────────────────────┤
+│  TaskManager (Worker)                                      │
+│  ┌─────────────────┐  ┌─────────────────┐                │
+│  │     Task 1      │  │     Task 2      │                │
+│  └─────────────────┘  └─────────────────┘                │
+│  ┌─────────────────┐  ┌─────────────────┐                │
+│  │     Task 3      │  │     Task 4      │                │
+│  └─────────────────┘  └─────────────────┘                │
+└─────────────────────────────────────────────────────────────┘
+</code></pre></div></div>
+
+<h3 id="core-components">Core Components</h3>
+
+<h4 id="1-jobmanager"><strong>1. JobManager</strong></h4>
+<ul>
+  <li><strong>Role</strong>: Job scheduling and resource management</li>
+  <li><strong>Components</strong>:
+    <ul>
+      <li>Dispatcher: Job submission interface</li>
+      <li>ResourceManager: Resource allocation management</li>
+      <li>JobMaster: Individual job management</li>
+      <li>CheckpointCoordinator: Checkpoint coordination</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="2-taskmanager"><strong>2. TaskManager</strong></h4>
+<ul>
+  <li><strong>Role</strong>: Actual data processing execution</li>
+  <li><strong>Features</strong>:
+    <ul>
+      <li>Parallel processing through Task Slots</li>
+      <li>State storage provision</li>
+      <li>Network communication handling</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="flink-program-structure">Flink Program Structure</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
+<span class="kn">from</span> <span class="n">pyflink.table</span> <span class="kn">import</span> <span class="n">StreamTableEnvironment</span>
+
+<span class="c1"># 1. Create execution environment
+</span><span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+
+<span class="c1"># 2. Create data source
+</span><span class="n">data_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+
+<span class="c1"># 3. Apply transformation operations
+</span><span class="n">result_stream</span> <span class="o">=</span> <span class="n">data_stream</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># 4. Specify data sink
+</span><span class="n">result_stream</span><span class="p">.</span><span class="nf">print</span><span class="p">()</span>
+
+<span class="c1"># 5. Execute program
+</span><span class="n">env</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"</span><span class="s">Basic Flink Program</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-datastream-api-basics">📊 DataStream API Basics</h2>
+
+<h3 id="basic-data-types">Basic Data Types</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+
+<span class="c1"># Basic data types
+</span><span class="n">basic_types</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sh">"</span><span class="s">Hello</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">World</span><span class="sh">"</span><span class="p">,</span> <span class="mi">123</span><span class="p">,</span> <span class="mf">45.67</span><span class="p">,</span> <span class="bp">True</span>
+<span class="p">]</span>
+
+<span class="n">data_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">(</span><span class="n">basic_types</span><span class="p">)</span>
+
+<span class="c1"># Explicit type information specification
+</span><span class="n">typed_stream</span> <span class="o">=</span> <span class="n">data_stream</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="n">x</span><span class="p">).</span><span class="nf">upper</span><span class="p">(),</span>
+    <span class="n">output_type</span><span class="o">=</span><span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="core-transformation-operations">Core Transformation Operations</h3>
+
+<h4 id="1-map-operation"><strong>1. Map Operation</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Single element transformation
+</span><span class="k">def</span> <span class="nf">multiply_by_two</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span>
+
+<span class="n">data_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">data_stream</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="n">multiply_by_two</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="2-filter-operation"><strong>2. Filter Operation</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Filtering based on conditions
+</span><span class="k">def</span> <span class="nf">is_even</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span>
+
+<span class="n">numbers</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="n">even_numbers</span> <span class="o">=</span> <span class="n">numbers</span><span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="n">is_even</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="3-flatmap-operation"><strong>3. FlatMap Operation</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 1:N transformation
+</span><span class="k">def</span> <span class="nf">split_words</span><span class="p">(</span><span class="n">sentence</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">sentence</span><span class="p">.</span><span class="nf">split</span><span class="p">()</span>
+
+<span class="n">text_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">([</span>
+    <span class="sh">"</span><span class="s">Hello World</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">Apache Flink</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">Stream Processing</span><span class="sh">"</span>
+<span class="p">])</span>
+
+<span class="n">words</span> <span class="o">=</span> <span class="n">text_stream</span><span class="p">.</span><span class="nf">flat_map</span><span class="p">(</span><span class="n">split_words</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="4-keyby-operation"><strong>4. KeyBy Operation</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+
+<span class="c1"># Grouping by key
+</span><span class="k">class</span> <span class="nc">LogEntry</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">user_id</span> <span class="o">=</span> <span class="n">user_id</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">action</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+
+<span class="c1"># Sample log data
+</span><span class="n">log_entries</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nc">LogEntry</span><span class="p">(</span><span class="sh">"</span><span class="s">user1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">login</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">2025-01-01 10:00:00</span><span class="sh">"</span><span class="p">),</span>
+    <span class="nc">LogEntry</span><span class="p">(</span><span class="sh">"</span><span class="s">user2</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">view</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">2025-01-01 10:01:00</span><span class="sh">"</span><span class="p">),</span>
+    <span class="nc">LogEntry</span><span class="p">(</span><span class="sh">"</span><span class="s">user1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">logout</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">2025-01-01 10:02:00</span><span class="sh">"</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="n">log_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">(</span><span class="n">log_entries</span><span class="p">)</span>
+<span class="n">keyed_stream</span> <span class="o">=</span> <span class="n">log_stream</span><span class="p">.</span><span class="nf">key_by</span><span class="p">(</span><span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="n">log</span><span class="p">.</span><span class="n">user_id</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="window-operations">Window Operations</h3>
+
+<h4 id="1-tumbling-window"><strong>1. Tumbling Window</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.window</span> <span class="kn">import</span> <span class="n">TumblingProcessingTimeWindows</span>
+<span class="kn">from</span> <span class="n">pyflink.common.time</span> <span class="kn">import</span> <span class="n">Time</span>
+
+<span class="c1"># Fixed-size window
+</span><span class="n">windowed_stream</span> <span class="o">=</span> <span class="n">keyed_stream</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span>
+    <span class="n">TumblingProcessingTimeWindows</span><span class="p">.</span><span class="nf">of</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="p">).</span><span class="nf">sum</span><span class="p">(</span><span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Calculate event count in each window
+</span></code></pre></div></div>
+
+<h4 id="2-sliding-window"><strong>2. Sliding Window</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.window</span> <span class="kn">import</span> <span class="n">SlidingProcessingTimeWindows</span>
+
+<span class="c1"># Sliding window (10-second size, 5-second slide)
+</span><span class="n">sliding_window</span> <span class="o">=</span> <span class="n">keyed_stream</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span>
+    <span class="n">SlidingProcessingTimeWindows</span><span class="p">.</span><span class="nf">of</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="p">).</span><span class="nf">sum</span><span class="p">(</span><span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="3-session-window"><strong>3. Session Window</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.window</span> <span class="kn">import</span> <span class="n">ProcessingTimeSessionWindows</span>
+
+<span class="c1"># Session window (5-second inactivity time)
+</span><span class="n">session_window</span> <span class="o">=</span> <span class="n">keyed_stream</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span>
+    <span class="n">ProcessingTimeSessionWindows</span><span class="p">.</span><span class="nf">with_gap</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="p">).</span><span class="nf">sum</span><span class="p">(</span><span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-time-processing-and-watermarking">⏰ Time Processing and Watermarking</h2>
+
+<h3 id="types-of-time">Types of Time</h3>
+
+<h4 id="1-event-time"><strong>1. Event Time</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.time</span> <span class="kn">import</span> <span class="n">Time</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
+<span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+
+<span class="c1"># Event time-based processing configuration
+</span><span class="n">env</span><span class="p">.</span><span class="nf">set_stream_time_characteristic</span><span class="p">(</span><span class="n">TimeCharacteristic</span><span class="p">.</span><span class="n">EventTime</span><span class="p">)</span>
+
+<span class="c1"># Timestamp and watermark assignment
+</span><span class="k">class</span> <span class="nc">TimestampedEvent</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+
+<span class="c1"># Watermark generator definition
+</span><span class="k">class</span> <span class="nc">TimestampExtractor</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">extract_timestamp</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">previous_timestamp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">element</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">*</span> <span class="mi">1000</span>  <span class="c1"># Convert to milliseconds
+</span>
+<span class="n">events</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">([</span>
+    <span class="nc">TimestampedEvent</span><span class="p">(</span><span class="sh">"</span><span class="s">event1</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1640995200</span><span class="p">),</span>  <span class="c1"># 2022-01-01 00:00:00
+</span>    <span class="nc">TimestampedEvent</span><span class="p">(</span><span class="sh">"</span><span class="s">event2</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1640995260</span><span class="p">),</span>  <span class="c1"># 2022-01-01 00:01:00
+</span>    <span class="nc">TimestampedEvent</span><span class="p">(</span><span class="sh">"</span><span class="s">event3</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1640995320</span><span class="p">),</span>  <span class="c1"># 2022-01-01 00:02:00
+</span><span class="p">])</span>
+
+<span class="c1"># Watermark assignment
+</span><span class="n">watermarked_stream</span> <span class="o">=</span> <span class="n">events</span><span class="p">.</span><span class="nf">assign_timestamps_and_watermarks</span><span class="p">(</span>
+    <span class="nc">TimestampExtractor</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="2-processing-time"><strong>2. Processing Time</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Processing time-based processing configuration
+</span><span class="n">env</span><span class="p">.</span><span class="nf">set_stream_time_characteristic</span><span class="p">(</span><span class="n">TimeCharacteristic</span><span class="p">.</span><span class="n">ProcessingTime</span><span class="p">)</span>
+
+<span class="c1"># Processing time is automatically assigned
+</span><span class="n">processing_time_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+</code></pre></div></div>
+
+<h4 id="3-ingestion-time"><strong>3. Ingestion Time</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Ingestion time-based processing configuration
+</span><span class="n">env</span><span class="p">.</span><span class="nf">set_stream_time_characteristic</span><span class="p">(</span><span class="n">TimeCharacteristic</span><span class="p">.</span><span class="n">IngestionTime</span><span class="p">)</span>
+
+<span class="c1"># Ingestion time is assigned when data arrives at Flink
+</span><span class="n">ingestion_time_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+</code></pre></div></div>
+
+<h3 id="watermarking-strategies">Watermarking Strategies</h3>
+
+<h4 id="1-ascending-timestamps"><strong>1. Ascending Timestamps</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.functions</span> <span class="kn">import</span> <span class="n">AscendingTimestampExtractor</span>
+
+<span class="k">class</span> <span class="nc">AscendingWatermarkExtractor</span><span class="p">(</span><span class="n">AscendingTimestampExtractor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">extract_timestamp</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">previous_timestamp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">element</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">*</span> <span class="mi">1000</span>
+
+<span class="n">ascending_watermark</span> <span class="o">=</span> <span class="n">events</span><span class="p">.</span><span class="nf">assign_timestamps_and_watermarks</span><span class="p">(</span>
+    <span class="nc">AscendingWatermarkExtractor</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="2-bounded-out-of-orderness"><strong>2. Bounded Out-of-Orderness</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.functions</span> <span class="kn">import</span> <span class="n">BoundedOutOfOrdernessTimestampExtractor</span>
+<span class="kn">from</span> <span class="n">pyflink.common.time</span> <span class="kn">import</span> <span class="n">Time</span>
+
+<span class="k">class</span> <span class="nc">BoundedWatermarkExtractor</span><span class="p">(</span><span class="n">BoundedOutOfOrdernessTimestampExtractor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>  <span class="c1"># Allow 10-second delay
+</span>    
+    <span class="k">def</span> <span class="nf">extract_timestamp</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">previous_timestamp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">element</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">*</span> <span class="mi">1000</span>
+
+<span class="n">bounded_watermark</span> <span class="o">=</span> <span class="n">events</span><span class="p">.</span><span class="nf">assign_timestamps_and_watermarks</span><span class="p">(</span>
+    <span class="nc">BoundedWatermarkExtractor</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="️-state-management-basics">🗃️ State Management Basics</h2>
+
+<h3 id="types-of-state">Types of State</h3>
+
+<h4 id="1-valuestate"><strong>1. ValueState</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.state</span> <span class="kn">import</span> <span class="n">ValueStateDescriptor</span>
+<span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">KeyedProcessFunction</span>
+
+<span class="k">class</span> <span class="nc">CounterFunction</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">count_state</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+        <span class="c1"># Initialize ValueState
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">count_state</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_state</span><span class="p">(</span>
+            <span class="nc">ValueStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">INT</span><span class="p">())</span>
+        <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="c1"># Get current state value
+</span>        <span class="n">current_count</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">count_state</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span>
+        
+        <span class="c1"># Update state
+</span>        <span class="n">new_count</span> <span class="o">=</span> <span class="n">current_count</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">count_state</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">new_count</span><span class="p">)</span>
+        
+        <span class="c1"># Output result
+</span>        <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Key: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s">, Count: </span><span class="si">{</span><span class="n">new_count</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Usage example
+</span><span class="n">counter_stream</span> <span class="o">=</span> <span class="n">keyed_stream</span><span class="p">.</span><span class="nf">process</span><span class="p">(</span><span class="nc">CounterFunction</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h4 id="2-liststate"><strong>2. ListState</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.state</span> <span class="kn">import</span> <span class="n">ListStateDescriptor</span>
+
+<span class="k">class</span> <span class="nc">ListCollector</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">list_state</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">list_state</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_list_state</span><span class="p">(</span>
+            <span class="nc">ListStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">items</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">())</span>
+        <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="c1"># Add value to list
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">list_state</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        
+        <span class="c1"># Collect list contents
+</span>        <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">list_state</span><span class="p">.</span><span class="nf">get</span><span class="p">():</span>
+            <span class="n">items</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        
+        <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Collected items: </span><span class="si">{</span><span class="n">items</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">list_stream</span> <span class="o">=</span> <span class="n">keyed_stream</span><span class="p">.</span><span class="nf">process</span><span class="p">(</span><span class="nc">ListCollector</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h4 id="3-mapstate"><strong>3. MapState</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.state</span> <span class="kn">import</span> <span class="n">MapStateDescriptor</span>
+
+<span class="k">class</span> <span class="nc">MapAggregator</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">map_state</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">map_state</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_map_state</span><span class="p">(</span>
+            <span class="nc">MapStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">counts</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">(),</span> <span class="n">Types</span><span class="p">.</span><span class="nc">INT</span><span class="p">())</span>
+        <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="c1"># Get current count from map
+</span>        <span class="n">current_count</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">map_state</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
+        
+        <span class="c1"># Increment count
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">map_state</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">current_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c1"># Output result
+</span>        <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Value: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s">, Count: </span><span class="si">{</span><span class="n">current_count</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">map_stream</span> <span class="o">=</span> <span class="n">keyed_stream</span><span class="p">.</span><span class="nf">process</span><span class="p">(</span><span class="nc">MapAggregator</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h3 id="checkpointing">Checkpointing</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common</span> <span class="kn">import</span> <span class="n">Configuration</span>
+<span class="kn">from</span> <span class="n">pyflink.common.checkpointing</span> <span class="kn">import</span> <span class="n">CheckpointingMode</span>
+
+<span class="c1"># Checkpointing configuration
+</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">enable_checkpointing</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>  <span class="c1"># Checkpoint every 1 second
+</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">set_checkpointing_mode</span><span class="p">(</span><span class="n">CheckpointingMode</span><span class="p">.</span><span class="n">EXACTLY_ONCE</span><span class="p">)</span>
+
+<span class="c1"># Checkpoint directory configuration
+</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">set_checkpoint_storage_dir</span><span class="p">(</span><span class="sh">"</span><span class="s">file:///tmp/flink-checkpoints</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Maximum concurrent checkpoints
+</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">set_max_concurrent_checkpoints</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Minimum checkpoint interval
+</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">set_min_pause_between_checkpoints</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-real-world-project-real-time-log-analysis">🚀 Real-world Project: Real-time Log Analysis</h2>
+
+<h3 id="project-overview">Project Overview</h3>
+
+<p>Build a real-time log analysis system that implements the following features:</p>
+<ul>
+  <li>Real-time log collection</li>
+  <li>User activity analysis</li>
+  <li>Anomaly pattern detection</li>
+  <li>Real-time alerts</li>
+</ul>
+
+<h3 id="1-log-data-modeling">1. Log Data Modeling</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="n">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="n">json</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">LogEvent</span><span class="p">:</span>
+    <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">action</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">ip_address</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">user_agent</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">({</span>
+            <span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">session_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">session_id</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">action</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">action</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">ip_address</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">ip_address</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">user_agent</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">user_agent</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">metadata</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">metadata</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="p">})</span>
+    
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">json_str</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">json_str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nf">cls</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-real-time-log-analysis-system">2. Real-time Log Analysis System</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
+<span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+<span class="kn">from</span> <span class="n">pyflink.common.state</span> <span class="kn">import</span> <span class="n">ValueStateDescriptor</span><span class="p">,</span> <span class="n">ListStateDescriptor</span>
+<span class="kn">from</span> <span class="n">pyflink.common.time</span> <span class="kn">import</span> <span class="n">Time</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream.functions</span> <span class="kn">import</span> <span class="n">KeyedProcessFunction</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream.window</span> <span class="kn">import</span> <span class="n">TumblingEventTimeWindows</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream.connectors</span> <span class="kn">import</span> <span class="n">FlinkKafkaConsumer</span>
+<span class="kn">from</span> <span class="n">pyflink.common.serialization</span> <span class="kn">import</span> <span class="n">SimpleStringSchema</span>
+<span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+
+<span class="k">class</span> <span class="nc">LogAnalyzer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="nf">setup_environment</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">setup_environment</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="c1"># Enable checkpointing
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">enable_checkpointing</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+        
+        <span class="c1"># Set event time
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">set_stream_time_characteristic</span><span class="p">(</span><span class="n">TimeCharacteristic</span><span class="p">.</span><span class="n">EventTime</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">create_kafka_source</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">bootstrap_servers</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Create Kafka source</span><span class="sh">"""</span>
+        <span class="n">kafka_properties</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">bootstrap.servers</span><span class="sh">'</span><span class="p">:</span> <span class="n">bootstrap_servers</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">group.id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">log-analyzer-group</span><span class="sh">'</span>
+        <span class="p">}</span>
+        
+        <span class="n">kafka_source</span> <span class="o">=</span> <span class="nc">FlinkKafkaConsumer</span><span class="p">(</span>
+            <span class="n">topic</span><span class="p">,</span>
+            <span class="nc">SimpleStringSchema</span><span class="p">(),</span>
+            <span class="n">kafka_properties</span>
+        <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">add_source</span><span class="p">(</span><span class="n">kafka_source</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">parse_log_events</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Parse log events</span><span class="sh">"""</span>
+        <span class="k">def</span> <span class="nf">parse_log</span><span class="p">(</span><span class="n">log_str</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">LogEvent</span><span class="p">.</span><span class="nf">from_json</span><span class="p">(</span><span class="n">log_str</span><span class="p">)</span>
+            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed to parse log: </span><span class="si">{</span><span class="n">log_str</span><span class="si">}</span><span class="s">, Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">None</span>
+        
+        <span class="k">return</span> <span class="n">log_stream</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="n">parse_log</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="n">Types</span><span class="p">.</span><span class="nc">PICKLED_BYTE_ARRAY</span><span class="p">())</span> \
+                        <span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">detect_anomalies</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Anomaly pattern detection</span><span class="sh">"""</span>
+        <span class="k">class</span> <span class="nc">AnomalyDetector</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">failed_login_count</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">last_login_time</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">suspicious_actions</span> <span class="o">=</span> <span class="bp">None</span>
+            
+            <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">failed_login_count</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_state</span><span class="p">(</span>
+                    <span class="nc">ValueStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">failed_logins</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">INT</span><span class="p">())</span>
+                <span class="p">)</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">last_login_time</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_state</span><span class="p">(</span>
+                    <span class="nc">ValueStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">last_login</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">LONG</span><span class="p">())</span>
+                <span class="p">)</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">suspicious_actions</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_list_state</span><span class="p">(</span>
+                    <span class="nc">ListStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">suspicious</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">())</span>
+                <span class="p">)</span>
+            
+            <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_event</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+                <span class="n">current_time</span> <span class="o">=</span> <span class="n">log_event</span><span class="p">.</span><span class="n">timestamp</span>
+                
+                <span class="c1"># Track failed login attempts
+</span>                <span class="k">if</span> <span class="n">log_event</span><span class="p">.</span><span class="n">action</span> <span class="o">==</span> <span class="sh">"</span><span class="s">login_failed</span><span class="sh">"</span><span class="p">:</span>
+                    <span class="n">current_count</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">failed_login_count</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span>
+                    <span class="n">self</span><span class="p">.</span><span class="n">failed_login_count</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">current_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    
+                    <span class="c1"># Alert if 5 or more failures within 5 minutes
+</span>                    <span class="k">if</span> <span class="n">current_count</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>  <span class="c1"># Starting from 0, so 4 means 5th
+</span>                        <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">({</span>
+                            <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">security_alert</span><span class="sh">'</span><span class="p">,</span>
+                            <span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">log_event</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+                            <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">'</span><span class="s">Multiple failed login attempts: </span><span class="si">{</span><span class="n">current_count</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="sh">'</span><span class="p">,</span>
+                            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">current_time</span>
+                        <span class="p">})</span>
+                        <span class="n">self</span><span class="p">.</span><span class="n">failed_login_count</span><span class="p">.</span><span class="nf">clear</span><span class="p">()</span>
+                
+                <span class="c1"># Clear failure count on successful login
+</span>                <span class="k">elif</span> <span class="n">log_event</span><span class="p">.</span><span class="n">action</span> <span class="o">==</span> <span class="sh">"</span><span class="s">login_success</span><span class="sh">"</span><span class="p">:</span>
+                    <span class="n">self</span><span class="p">.</span><span class="n">failed_login_count</span><span class="p">.</span><span class="nf">clear</span><span class="p">()</span>
+                    <span class="n">self</span><span class="p">.</span><span class="n">last_login_time</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">current_time</span><span class="p">)</span>
+                
+                <span class="c1"># Detect abnormal time activity
+</span>                <span class="k">elif</span> <span class="n">log_event</span><span class="p">.</span><span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="sh">"</span><span class="s">view</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">purchase</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">download</span><span class="sh">"</span><span class="p">]:</span>
+                    <span class="n">last_login</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">last_login_time</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">last_login</span> <span class="ow">and</span> <span class="p">(</span><span class="n">current_time</span> <span class="o">-</span> <span class="n">last_login</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">86400</span><span class="p">:</span>  <span class="c1"># 24 hours
+</span>                        <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">({</span>
+                            <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">anomaly_alert</span><span class="sh">'</span><span class="p">,</span>
+                            <span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">log_event</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+                            <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">'</span><span class="s">Activity after long inactivity: </span><span class="si">{</span><span class="n">log_event</span><span class="p">.</span><span class="n">action</span><span class="si">}</span><span class="sh">'</span><span class="p">,</span>
+                            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">current_time</span>
+                        <span class="p">})</span>
+        
+        <span class="c1"># Key by user and detect anomalies
+</span>        <span class="k">return</span> <span class="n">log_stream</span><span class="p">.</span><span class="nf">key_by</span><span class="p">(</span><span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="n">log</span><span class="p">.</span><span class="n">user_id</span><span class="p">)</span> \
+                        <span class="p">.</span><span class="nf">process</span><span class="p">(</span><span class="nc">AnomalyDetector</span><span class="p">())</span>
+    
+    <span class="k">def</span> <span class="nf">calculate_user_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Calculate user metrics</span><span class="sh">"""</span>
+        <span class="k">class</span> <span class="nc">UserMetricsCalculator</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">action_counts</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">session_duration</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">last_action_time</span> <span class="o">=</span> <span class="bp">None</span>
+            
+            <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">action_counts</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_map_state</span><span class="p">(</span>
+                    <span class="nc">MapStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">action_counts</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">(),</span> <span class="n">Types</span><span class="p">.</span><span class="nc">INT</span><span class="p">())</span>
+                <span class="p">)</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">session_duration</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_state</span><span class="p">(</span>
+                    <span class="nc">ValueStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">session_duration</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">LONG</span><span class="p">())</span>
+                <span class="p">)</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">last_action_time</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_state</span><span class="p">(</span>
+                    <span class="nc">ValueStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">last_action_time</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">LONG</span><span class="p">())</span>
+                <span class="p">)</span>
+            
+            <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_event</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+                <span class="n">current_time</span> <span class="o">=</span> <span class="n">log_event</span><span class="p">.</span><span class="n">timestamp</span>
+                
+                <span class="c1"># Update action counts
+</span>                <span class="n">current_count</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">action_counts</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">log_event</span><span class="p">.</span><span class="n">action</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">action_counts</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="n">log_event</span><span class="p">.</span><span class="n">action</span><span class="p">,</span> <span class="n">current_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                
+                <span class="c1"># Calculate session duration
+</span>                <span class="n">last_time</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">last_action_time</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">last_time</span><span class="p">:</span>
+                    <span class="n">duration</span> <span class="o">=</span> <span class="n">current_time</span> <span class="o">-</span> <span class="n">last_time</span>
+                    <span class="n">current_duration</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">session_duration</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span>
+                    <span class="n">self</span><span class="p">.</span><span class="n">session_duration</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">current_duration</span> <span class="o">+</span> <span class="n">duration</span><span class="p">)</span>
+                
+                <span class="n">self</span><span class="p">.</span><span class="n">last_action_time</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">current_time</span><span class="p">)</span>
+                
+                <span class="c1"># Output metrics every minute
+</span>                <span class="k">if</span> <span class="n">current_time</span> <span class="o">%</span> <span class="mi">60</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">log_event</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+                        <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">current_time</span><span class="p">,</span>
+                        <span class="sh">'</span><span class="s">session_duration</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">session_duration</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="sh">'</span><span class="s">action_counts</span><span class="sh">'</span><span class="p">:</span> <span class="nf">dict</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">action_counts</span><span class="p">.</span><span class="nf">items</span><span class="p">())</span>
+                    <span class="p">}</span>
+                    <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">log_stream</span><span class="p">.</span><span class="nf">key_by</span><span class="p">(</span><span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="n">log</span><span class="p">.</span><span class="n">user_id</span><span class="p">)</span> \
+                        <span class="p">.</span><span class="nf">process</span><span class="p">(</span><span class="nc">UserMetricsCalculator</span><span class="p">())</span>
+    
+    <span class="k">def</span> <span class="nf">run_analysis</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Run analysis pipeline</span><span class="sh">"""</span>
+        <span class="c1"># Read logs from Kafka
+</span>        <span class="n">log_stream</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">create_kafka_source</span><span class="p">(</span><span class="sh">"</span><span class="s">user-logs</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># Parse logs
+</span>        <span class="n">parsed_logs</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">parse_log_events</span><span class="p">(</span><span class="n">log_stream</span><span class="p">)</span>
+        
+        <span class="c1"># Assign timestamps and watermarks
+</span>        <span class="n">watermarked_logs</span> <span class="o">=</span> <span class="n">parsed_logs</span><span class="p">.</span><span class="nf">assign_timestamps_and_watermarks</span><span class="p">(</span>
+            <span class="nc">TimestampExtractor</span><span class="p">()</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Detect anomalies
+</span>        <span class="n">anomalies</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">detect_anomalies</span><span class="p">(</span><span class="n">watermarked_logs</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate user metrics
+</span>        <span class="n">metrics</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">calculate_user_metrics</span><span class="p">(</span><span class="n">watermarked_logs</span><span class="p">)</span>
+        
+        <span class="c1"># Output results
+</span>        <span class="n">anomalies</span><span class="p">.</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Security Alerts</span><span class="sh">"</span><span class="p">)</span>
+        <span class="n">metrics</span><span class="p">.</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">User Metrics</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># Execute
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"</span><span class="s">Real-time Log Analysis</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Watermark extractor
+</span><span class="k">class</span> <span class="nc">TimestampExtractor</span><span class="p">(</span><span class="n">BoundedOutOfOrdernessTimestampExtractor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>  <span class="c1"># Allow 10-second delay
+</span>    
+    <span class="k">def</span> <span class="nf">extract_timestamp</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">previous_timestamp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">element</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">*</span> <span class="mi">1000</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">analyzer</span> <span class="o">=</span> <span class="nc">LogAnalyzer</span><span class="p">()</span>
+    <span class="n">analyzer</span><span class="p">.</span><span class="nf">run_analysis</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="3-execution-and-testing">3. Execution and Testing</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Test data generator
+</span><span class="k">class</span> <span class="nc">LogGenerator</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="n">random</span>
+        <span class="kn">import</span> <span class="n">time</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">users</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">user1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user2</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user3</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user4</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user5</span><span class="sh">"</span><span class="p">]</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">login</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">logout</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">view</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">purchase</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">download</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">login_failed</span><span class="sh">"</span><span class="p">]</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">ip_addresses</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">192.168.1.1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">192.168.1.2</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10.0.0.1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10.0.0.2</span><span class="sh">"</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">generate_log</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="n">random</span>
+        <span class="kn">import</span> <span class="n">time</span>
+        
+        <span class="k">return</span> <span class="nc">LogEvent</span><span class="p">(</span>
+            <span class="n">user_id</span><span class="o">=</span><span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">users</span><span class="p">),</span>
+            <span class="n">session_id</span><span class="o">=</span><span class="sa">f</span><span class="sh">"</span><span class="s">session_</span><span class="si">{</span><span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">9999</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">actions</span><span class="p">),</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="nf">int</span><span class="p">(</span><span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()),</span>
+            <span class="n">ip_address</span><span class="o">=</span><span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">ip_addresses</span><span class="p">),</span>
+            <span class="n">user_agent</span><span class="o">=</span><span class="sh">"</span><span class="s">Mozilla/5.0 (Test Browser)</span><span class="sh">"</span>
+        <span class="p">).</span><span class="nf">to_json</span><span class="p">()</span>
+
+<span class="c1"># Test execution
+</span><span class="k">def</span> <span class="nf">test_log_analysis</span><span class="p">():</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+    
+    <span class="c1"># Generate test data
+</span>    <span class="n">generator</span> <span class="o">=</span> <span class="nc">LogGenerator</span><span class="p">()</span>
+    <span class="n">test_logs</span> <span class="o">=</span> <span class="p">[</span><span class="n">generator</span><span class="p">.</span><span class="nf">generate_log</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)]</span>
+    
+    <span class="n">log_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">(</span><span class="n">test_logs</span><span class="p">)</span>
+    
+    <span class="c1"># Parse logs
+</span>    <span class="n">parsed_logs</span> <span class="o">=</span> <span class="n">log_stream</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">LogEvent</span><span class="p">.</span><span class="nf">from_json</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+        <span class="n">output_type</span><span class="o">=</span><span class="n">Types</span><span class="p">.</span><span class="nc">PICKLED_BYTE_ARRAY</span><span class="p">()</span>
+    <span class="p">).</span><span class="nf">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+    
+    <span class="c1"># Calculate simple statistics
+</span>    <span class="n">user_actions</span> <span class="o">=</span> <span class="n">parsed_logs</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="p">(</span><span class="n">log</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span> <span class="n">log</span><span class="p">.</span><span class="n">action</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">).</span><span class="nf">key_by</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> \
+     <span class="p">.</span><span class="nf">window</span><span class="p">(</span><span class="n">TumblingProcessingTimeWindows</span><span class="p">.</span><span class="nf">of</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">5</span><span class="p">)))</span> \
+     <span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="n">user_actions</span><span class="p">.</span><span class="nf">print</span><span class="p">()</span>
+    
+    <span class="n">env</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"</span><span class="s">Log Analysis Test</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Test execution
+</span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="nf">test_log_analysis</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="-learning-summary">📚 Learning Summary</h2>
+
+<h3 id="what-we-learned-in-this-part">What We Learned in This Part</h3>
+
+<ol>
+  <li><strong>Apache Flink Introduction</strong>
+    <ul>
+      <li>Flink’s origins and design philosophy</li>
+      <li>Fundamental differences from Spark</li>
+      <li>Concept of true streaming processing</li>
+    </ul>
+  </li>
+  <li><strong>Flink Architecture</strong>
+    <ul>
+      <li>Roles of JobManager and TaskManager</li>
+      <li>Cluster configuration and resource management</li>
+      <li>Program execution structure</li>
+    </ul>
+  </li>
+  <li><strong>DataStream API</strong>
+    <ul>
+      <li>Basic data types and transformation operations</li>
+      <li>Map, Filter, FlatMap, KeyBy operations</li>
+      <li>Window operations (Tumbling, Sliding, Session)</li>
+    </ul>
+  </li>
+  <li><strong>Time Processing</strong>
+    <ul>
+      <li>Event Time, Processing Time, Ingestion Time</li>
+      <li>Watermarking strategies and late data processing</li>
+      <li>Timestamp assignment methods</li>
+    </ul>
+  </li>
+  <li><strong>State Management</strong>
+    <ul>
+      <li>ValueState, ListState, MapState</li>
+      <li>Checkpointing and failure recovery</li>
+      <li>State-based processing logic</li>
+    </ul>
+  </li>
+  <li><strong>Real-world Project</strong>
+    <ul>
+      <li>Real-time log analysis system</li>
+      <li>Anomaly pattern detection</li>
+      <li>User metrics calculation</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="core-technology-stack">Core Technology Stack</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Technology</th>
+      <th>Purpose</th>
+      <th>Importance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>DataStream API</strong></td>
+      <td>Streaming data processing</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>State Management</strong></td>
+      <td>State-based processing</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Time Processing</strong></td>
+      <td>Event time-based analysis</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Window Operations</strong></td>
+      <td>Time-based aggregation</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Checkpointing</strong></td>
+      <td>Failure recovery</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="next-part-preview">Next Part Preview</h3>
+
+<p><strong>Part 2: Advanced Streaming Processing and State Management</strong> will cover:</p>
+<ul>
+  <li>Advanced state management patterns</li>
+  <li>Deep dive into checkpointing and savepoints</li>
+  <li>Complex time processing strategies</li>
+  <li>Performance optimization techniques</li>
+</ul>
+
+<hr />
+
+<p><strong>Next Part</strong>: <a href="/en/data-engineering/2025/09/16/apache-flink-advanced-streaming.html">Part 2: Advanced Streaming Processing and State Management</a></p>
+
+<hr />
+
+<p><em>Now you’ve mastered the basics of Flink! In the next part, we’ll explore more advanced features.</em> 🚀</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+      
+      
+      
+      
+        
+        
+        <a href="/data-engineering/2025/09/15/apache-flink-basics.html" class="nav-link next">
+          다음: Part 1: Apache Flink 기초와 핵심 개념 - 진정한 스트리밍 처리의 시작 →
+        </a>
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Apache Flink의 기본 구조와 핵심 개념인 DataStream API, 상태 관리, 시간 처리 등을 학습하고 실습해봅니다.">
+
+
+
+<title>Part 1: Apache Flink 기초와 핵심 개념 - 진정한 스트리밍 처리의 시작 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 1: Apache Flink 기초와 핵심 개념 - 진정한 스트리밍 처리의 시작">
+<meta property="og:description" content="Apache Flink의 기본 구조와 핵심 개념인 DataStream API, 상태 관리, 시간 처리 등을 학습하고 실습해봅니다.">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2025/09/15/apache-flink-basics.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 1: Apache Flink 기초와 핵심 개념 - 진정한 스트리밍 처리의 시작">
+<meta name="twitter:description" content="Apache Flink의 기본 구조와 핵심 개념인 DataStream API, 상태 관리, 시간 처리 등을 학습하고 실습해봅니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2025/09/15/apache-flink-basics.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2025-09-15-apache-flink-basics.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 15일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 1: Apache Flink 기초와 핵심 개념 - 진정한 스트리밍 처리의 시작</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Flink</span>
+      
+        <span class="tag">DataStream-API</span>
+      
+        <span class="tag">상태관리</span>
+      
+        <span class="tag">시간처리</span>
+      
+        <span class="tag">스트리밍처리</span>
+      
+        <span class="tag">Python</span>
+      
+        <span class="tag">PyFlink</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Apache flink complete guide 시리즈</span>
+      <span class="series-order">Part 2</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 35분</span>
+      
+      
+        <span class="difficulty">📊 중급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-1-apache-flink-기초와-핵심-개념---진정한-스트리밍-처리의-시작">Part 1: Apache Flink 기초와 핵심 개념 - 진정한 스트리밍 처리의 시작</h1>
+
+<blockquote>
+  <p>Apache Flink의 기본 구조와 핵심 개념인 DataStream API, 상태 관리, 시간 처리 등을 학습하고 실습해봅니다.</p>
+</blockquote>
+
+<h2 id="-목차">📋 목차</h2>
+
+<ol>
+  <li><a href="#apache-flink란-무엇인가">Apache Flink란 무엇인가?</a></li>
+  <li><a href="#flink-아키텍처와-핵심-개념">Flink 아키텍처와 핵심 개념</a></li>
+  <li><a href="#datastream-api-기초">DataStream API 기초</a></li>
+  <li><a href="#시간-처리와-워터마킹">시간 처리와 워터마킹</a></li>
+  <li><a href="#상태-관리-기초">상태 관리 기초</a></li>
+  <li><a href="#실무-프로젝트-실시간-로그-분석">실무 프로젝트: 실시간 로그 분석</a></li>
+  <li><a href="#학습-요약">학습 요약</a></li>
+</ol>
+
+<h2 id="-apache-flink란-무엇인가">🚀 Apache Flink란 무엇인가?</h2>
+
+<h3 id="flink의-탄생-배경">Flink의 탄생 배경</h3>
+
+<p>Apache Flink는 2009년 독일의 TU Berlin에서 시작된 <strong>Stratosphere 프로젝트</strong>에서 출발했습니다. 2014년 Apache Software Foundation의 Top-level 프로젝트가 되었으며, <strong>진정한 스트리밍 처리</strong>를 목표로 설계되었습니다.</p>
+
+<h4 id="핵심-설계-철학"><strong>핵심 설계 철학</strong></h4>
+
+<ol>
+  <li><strong>True Streaming</strong>: 마이크로배치가 아닌 진정한 스트리밍 처리</li>
+  <li><strong>Low Latency</strong>: 밀리초 단위의 지연시간 달성</li>
+  <li><strong>High Throughput</strong>: 높은 처리량 유지</li>
+  <li><strong>Exactly-Once</strong>: 정확히 한 번 처리 보장</li>
+  <li><strong>Fault Tolerance</strong>: 강력한 장애 복구 능력</li>
+</ol>
+
+<h3 id="spark와의-근본적-차이점">Spark와의 근본적 차이점</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark: 마이크로배치 방식
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="n">pyspark.streaming</span> <span class="kn">import</span> <span class="n">StreamingContext</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">SparkStreaming</span><span class="sh">"</span><span class="p">).</span><span class="nf">getOrCreate</span><span class="p">()</span>
+<span class="n">ssc</span> <span class="o">=</span> <span class="nc">StreamingContext</span><span class="p">(</span><span class="n">spark</span><span class="p">.</span><span class="n">sparkContext</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># 5초 배치 간격
+</span>
+<span class="c1"># Flink: 진정한 스트리밍 방식
+</span><span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+<span class="c1"># 배치 간격 없음 - 이벤트 도착 즉시 처리
+</span></code></pre></div></div>
+
+<h2 id="️-flink-아키텍처와-핵심-개념">🏗️ Flink 아키텍처와 핵심 개념</h2>
+
+<h3 id="클러스터-아키텍처">클러스터 아키텍처</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────────────────┐
+│                    Flink Cluster                           │
+├─────────────────────────────────────────────────────────────┤
+│  JobManager (Master)                                       │
+│  ┌─────────────────┐  ┌─────────────────┐                │
+│  │   Dispatcher    │  │  ResourceManager│                │
+│  └─────────────────┘  └─────────────────┘                │
+│  ┌─────────────────┐  ┌─────────────────┐                │
+│  │   JobMaster     │  │  CheckpointCoord│                │
+│  └─────────────────┘  └─────────────────┘                │
+├─────────────────────────────────────────────────────────────┤
+│  TaskManager (Worker)                                      │
+│  ┌─────────────────┐  ┌─────────────────┐                │
+│  │     Task 1      │  │     Task 2      │                │
+│  └─────────────────┘  └─────────────────┘                │
+│  ┌─────────────────┐  ┌─────────────────┐                │
+│  │     Task 3      │  │     Task 4      │                │
+│  └─────────────────┘  └─────────────────┘                │
+└─────────────────────────────────────────────────────────────┘
+</code></pre></div></div>
+
+<h3 id="핵심-컴포넌트">핵심 컴포넌트</h3>
+
+<h4 id="1-jobmanager"><strong>1. JobManager</strong></h4>
+<ul>
+  <li><strong>역할</strong>: 작업 스케줄링과 리소스 관리</li>
+  <li><strong>구성요소</strong>:
+    <ul>
+      <li>Dispatcher: 작업 제출 인터페이스</li>
+      <li>ResourceManager: 리소스 할당 관리</li>
+      <li>JobMaster: 개별 작업 관리</li>
+      <li>CheckpointCoordinator: 체크포인트 조정</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="2-taskmanager"><strong>2. TaskManager</strong></h4>
+<ul>
+  <li><strong>역할</strong>: 실제 데이터 처리 실행</li>
+  <li><strong>특징</strong>:
+    <ul>
+      <li>Task Slot을 통한 병렬 처리</li>
+      <li>상태 저장소 제공</li>
+      <li>네트워크 통신 담당</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="flink-프로그램-구조">Flink 프로그램 구조</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
+<span class="kn">from</span> <span class="n">pyflink.table</span> <span class="kn">import</span> <span class="n">StreamTableEnvironment</span>
+
+<span class="c1"># 1. 실행 환경 생성
+</span><span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+
+<span class="c1"># 2. 데이터 소스 생성
+</span><span class="n">data_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+
+<span class="c1"># 3. 변환 연산 적용
+</span><span class="n">result_stream</span> <span class="o">=</span> <span class="n">data_stream</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># 4. 데이터 싱크 지정
+</span><span class="n">result_stream</span><span class="p">.</span><span class="nf">print</span><span class="p">()</span>
+
+<span class="c1"># 5. 프로그램 실행
+</span><span class="n">env</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"</span><span class="s">Basic Flink Program</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-datastream-api-기초">📊 DataStream API 기초</h2>
+
+<h3 id="기본-데이터-타입">기본 데이터 타입</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+
+<span class="c1"># 기본 데이터 타입들
+</span><span class="n">basic_types</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sh">"</span><span class="s">Hello</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">World</span><span class="sh">"</span><span class="p">,</span> <span class="mi">123</span><span class="p">,</span> <span class="mf">45.67</span><span class="p">,</span> <span class="bp">True</span>
+<span class="p">]</span>
+
+<span class="n">data_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">(</span><span class="n">basic_types</span><span class="p">)</span>
+
+<span class="c1"># 타입 정보 명시적 지정
+</span><span class="n">typed_stream</span> <span class="o">=</span> <span class="n">data_stream</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="n">x</span><span class="p">).</span><span class="nf">upper</span><span class="p">(),</span>
+    <span class="n">output_type</span><span class="o">=</span><span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="핵심-변환-연산">핵심 변환 연산</h3>
+
+<h4 id="1-map-연산"><strong>1. Map 연산</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 단일 요소 변환
+</span><span class="k">def</span> <span class="nf">multiply_by_two</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span>
+
+<span class="n">data_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">data_stream</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="n">multiply_by_two</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="2-filter-연산"><strong>2. Filter 연산</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 조건에 따른 필터링
+</span><span class="k">def</span> <span class="nf">is_even</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span>
+
+<span class="n">numbers</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="n">even_numbers</span> <span class="o">=</span> <span class="n">numbers</span><span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="n">is_even</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="3-flatmap-연산"><strong>3. FlatMap 연산</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 1:N 변환
+</span><span class="k">def</span> <span class="nf">split_words</span><span class="p">(</span><span class="n">sentence</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">sentence</span><span class="p">.</span><span class="nf">split</span><span class="p">()</span>
+
+<span class="n">text_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">([</span>
+    <span class="sh">"</span><span class="s">Hello World</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">Apache Flink</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">Stream Processing</span><span class="sh">"</span>
+<span class="p">])</span>
+
+<span class="n">words</span> <span class="o">=</span> <span class="n">text_stream</span><span class="p">.</span><span class="nf">flat_map</span><span class="p">(</span><span class="n">split_words</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="4-keyby-연산"><strong>4. KeyBy 연산</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+
+<span class="c1"># 키별 그룹화
+</span><span class="k">class</span> <span class="nc">LogEntry</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">user_id</span> <span class="o">=</span> <span class="n">user_id</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">action</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+
+<span class="c1"># 샘플 로그 데이터
+</span><span class="n">log_entries</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nc">LogEntry</span><span class="p">(</span><span class="sh">"</span><span class="s">user1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">login</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">2025-01-01 10:00:00</span><span class="sh">"</span><span class="p">),</span>
+    <span class="nc">LogEntry</span><span class="p">(</span><span class="sh">"</span><span class="s">user2</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">view</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">2025-01-01 10:01:00</span><span class="sh">"</span><span class="p">),</span>
+    <span class="nc">LogEntry</span><span class="p">(</span><span class="sh">"</span><span class="s">user1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">logout</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">2025-01-01 10:02:00</span><span class="sh">"</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="n">log_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">(</span><span class="n">log_entries</span><span class="p">)</span>
+<span class="n">keyed_stream</span> <span class="o">=</span> <span class="n">log_stream</span><span class="p">.</span><span class="nf">key_by</span><span class="p">(</span><span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="n">log</span><span class="p">.</span><span class="n">user_id</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="윈도우-연산">윈도우 연산</h3>
+
+<h4 id="1-tumbling-window"><strong>1. Tumbling Window</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.window</span> <span class="kn">import</span> <span class="n">TumblingProcessingTimeWindows</span>
+<span class="kn">from</span> <span class="n">pyflink.common.time</span> <span class="kn">import</span> <span class="n">Time</span>
+
+<span class="c1"># 고정 크기 윈도우
+</span><span class="n">windowed_stream</span> <span class="o">=</span> <span class="n">keyed_stream</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span>
+    <span class="n">TumblingProcessingTimeWindows</span><span class="p">.</span><span class="nf">of</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="p">).</span><span class="nf">sum</span><span class="p">(</span><span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># 각 윈도우에서의 이벤트 수 계산
+</span></code></pre></div></div>
+
+<h4 id="2-sliding-window"><strong>2. Sliding Window</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.window</span> <span class="kn">import</span> <span class="n">SlidingProcessingTimeWindows</span>
+
+<span class="c1"># 슬라이딩 윈도우 (10초 크기, 5초 슬라이드)
+</span><span class="n">sliding_window</span> <span class="o">=</span> <span class="n">keyed_stream</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span>
+    <span class="n">SlidingProcessingTimeWindows</span><span class="p">.</span><span class="nf">of</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="p">).</span><span class="nf">sum</span><span class="p">(</span><span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="3-session-window"><strong>3. Session Window</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.window</span> <span class="kn">import</span> <span class="n">ProcessingTimeSessionWindows</span>
+
+<span class="c1"># 세션 윈도우 (5초 비활성 시간)
+</span><span class="n">session_window</span> <span class="o">=</span> <span class="n">keyed_stream</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span>
+    <span class="n">ProcessingTimeSessionWindows</span><span class="p">.</span><span class="nf">with_gap</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="p">).</span><span class="nf">sum</span><span class="p">(</span><span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-시간-처리와-워터마킹">⏰ 시간 처리와 워터마킹</h2>
+
+<h3 id="시간의-종류">시간의 종류</h3>
+
+<h4 id="1-event-time"><strong>1. Event Time</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.time</span> <span class="kn">import</span> <span class="n">Time</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
+<span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+
+<span class="c1"># 이벤트 시간 기반 처리 설정
+</span><span class="n">env</span><span class="p">.</span><span class="nf">set_stream_time_characteristic</span><span class="p">(</span><span class="n">TimeCharacteristic</span><span class="p">.</span><span class="n">EventTime</span><span class="p">)</span>
+
+<span class="c1"># 타임스탬프와 워터마크 설정
+</span><span class="k">class</span> <span class="nc">TimestampedEvent</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+
+<span class="c1"># 워터마크 생성자 정의
+</span><span class="k">class</span> <span class="nc">TimestampExtractor</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">extract_timestamp</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">previous_timestamp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">element</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">*</span> <span class="mi">1000</span>  <span class="c1"># 밀리초로 변환
+</span>
+<span class="n">events</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">([</span>
+    <span class="nc">TimestampedEvent</span><span class="p">(</span><span class="sh">"</span><span class="s">event1</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1640995200</span><span class="p">),</span>  <span class="c1"># 2022-01-01 00:00:00
+</span>    <span class="nc">TimestampedEvent</span><span class="p">(</span><span class="sh">"</span><span class="s">event2</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1640995260</span><span class="p">),</span>  <span class="c1"># 2022-01-01 00:01:00
+</span>    <span class="nc">TimestampedEvent</span><span class="p">(</span><span class="sh">"</span><span class="s">event3</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1640995320</span><span class="p">),</span>  <span class="c1"># 2022-01-01 00:02:00
+</span><span class="p">])</span>
+
+<span class="c1"># 워터마크 할당
+</span><span class="n">watermarked_stream</span> <span class="o">=</span> <span class="n">events</span><span class="p">.</span><span class="nf">assign_timestamps_and_watermarks</span><span class="p">(</span>
+    <span class="nc">TimestampExtractor</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="2-processing-time"><strong>2. Processing Time</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 처리 시간 기반 처리 설정
+</span><span class="n">env</span><span class="p">.</span><span class="nf">set_stream_time_characteristic</span><span class="p">(</span><span class="n">TimeCharacteristic</span><span class="p">.</span><span class="n">ProcessingTime</span><span class="p">)</span>
+
+<span class="c1"># 처리 시간은 자동으로 할당됨
+</span><span class="n">processing_time_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+</code></pre></div></div>
+
+<h4 id="3-ingestion-time"><strong>3. Ingestion Time</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 수집 시간 기반 처리 설정
+</span><span class="n">env</span><span class="p">.</span><span class="nf">set_stream_time_characteristic</span><span class="p">(</span><span class="n">TimeCharacteristic</span><span class="p">.</span><span class="n">IngestionTime</span><span class="p">)</span>
+
+<span class="c1"># 수집 시간은 데이터가 Flink에 도착할 때 할당됨
+</span><span class="n">ingestion_time_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+</code></pre></div></div>
+
+<h3 id="워터마킹-전략">워터마킹 전략</h3>
+
+<h4 id="1-ascending-timestamps"><strong>1. Ascending Timestamps</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.functions</span> <span class="kn">import</span> <span class="n">AscendingTimestampExtractor</span>
+
+<span class="k">class</span> <span class="nc">AscendingWatermarkExtractor</span><span class="p">(</span><span class="n">AscendingTimestampExtractor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">extract_timestamp</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">previous_timestamp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">element</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">*</span> <span class="mi">1000</span>
+
+<span class="n">ascending_watermark</span> <span class="o">=</span> <span class="n">events</span><span class="p">.</span><span class="nf">assign_timestamps_and_watermarks</span><span class="p">(</span>
+    <span class="nc">AscendingWatermarkExtractor</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="2-bounded-out-of-orderness"><strong>2. Bounded Out-of-Orderness</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream.functions</span> <span class="kn">import</span> <span class="n">BoundedOutOfOrdernessTimestampExtractor</span>
+<span class="kn">from</span> <span class="n">pyflink.common.time</span> <span class="kn">import</span> <span class="n">Time</span>
+
+<span class="k">class</span> <span class="nc">BoundedWatermarkExtractor</span><span class="p">(</span><span class="n">BoundedOutOfOrdernessTimestampExtractor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>  <span class="c1"># 10초 지연 허용
+</span>    
+    <span class="k">def</span> <span class="nf">extract_timestamp</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">previous_timestamp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">element</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">*</span> <span class="mi">1000</span>
+
+<span class="n">bounded_watermark</span> <span class="o">=</span> <span class="n">events</span><span class="p">.</span><span class="nf">assign_timestamps_and_watermarks</span><span class="p">(</span>
+    <span class="nc">BoundedWatermarkExtractor</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="️-상태-관리-기초">🗃️ 상태 관리 기초</h2>
+
+<h3 id="상태의-종류">상태의 종류</h3>
+
+<h4 id="1-valuestate"><strong>1. ValueState</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.state</span> <span class="kn">import</span> <span class="n">ValueStateDescriptor</span>
+<span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">KeyedProcessFunction</span>
+
+<span class="k">class</span> <span class="nc">CounterFunction</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">count_state</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+        <span class="c1"># ValueState 초기화
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">count_state</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_state</span><span class="p">(</span>
+            <span class="nc">ValueStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">INT</span><span class="p">())</span>
+        <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="c1"># 현재 상태 값 가져오기
+</span>        <span class="n">current_count</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">count_state</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span>
+        
+        <span class="c1"># 상태 업데이트
+</span>        <span class="n">new_count</span> <span class="o">=</span> <span class="n">current_count</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">count_state</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">new_count</span><span class="p">)</span>
+        
+        <span class="c1"># 결과 출력
+</span>        <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Key: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s">, Count: </span><span class="si">{</span><span class="n">new_count</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 사용 예제
+</span><span class="n">counter_stream</span> <span class="o">=</span> <span class="n">keyed_stream</span><span class="p">.</span><span class="nf">process</span><span class="p">(</span><span class="nc">CounterFunction</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h4 id="2-liststate"><strong>2. ListState</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.state</span> <span class="kn">import</span> <span class="n">ListStateDescriptor</span>
+
+<span class="k">class</span> <span class="nc">ListCollector</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">list_state</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">list_state</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_list_state</span><span class="p">(</span>
+            <span class="nc">ListStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">items</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">())</span>
+        <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="c1"># 리스트에 값 추가
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">list_state</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        
+        <span class="c1"># 리스트 내용 수집
+</span>        <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">list_state</span><span class="p">.</span><span class="nf">get</span><span class="p">():</span>
+            <span class="n">items</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        
+        <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Collected items: </span><span class="si">{</span><span class="n">items</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">list_stream</span> <span class="o">=</span> <span class="n">keyed_stream</span><span class="p">.</span><span class="nf">process</span><span class="p">(</span><span class="nc">ListCollector</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h4 id="3-mapstate"><strong>3. MapState</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common.state</span> <span class="kn">import</span> <span class="n">MapStateDescriptor</span>
+
+<span class="k">class</span> <span class="nc">MapAggregator</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">map_state</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">map_state</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_map_state</span><span class="p">(</span>
+            <span class="nc">MapStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">counts</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">(),</span> <span class="n">Types</span><span class="p">.</span><span class="nc">INT</span><span class="p">())</span>
+        <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="c1"># 맵에서 현재 카운트 가져오기
+</span>        <span class="n">current_count</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">map_state</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
+        
+        <span class="c1"># 카운트 증가
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">map_state</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">current_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c1"># 결과 출력
+</span>        <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Value: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s">, Count: </span><span class="si">{</span><span class="n">current_count</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">map_stream</span> <span class="o">=</span> <span class="n">keyed_stream</span><span class="p">.</span><span class="nf">process</span><span class="p">(</span><span class="nc">MapAggregator</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h3 id="체크포인팅">체크포인팅</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.common</span> <span class="kn">import</span> <span class="n">Configuration</span>
+<span class="kn">from</span> <span class="n">pyflink.common.checkpointing</span> <span class="kn">import</span> <span class="n">CheckpointingMode</span>
+
+<span class="c1"># 체크포인팅 설정
+</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">enable_checkpointing</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>  <span class="c1"># 1초마다 체크포인트
+</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">set_checkpointing_mode</span><span class="p">(</span><span class="n">CheckpointingMode</span><span class="p">.</span><span class="n">EXACTLY_ONCE</span><span class="p">)</span>
+
+<span class="c1"># 체크포인트 디렉토리 설정
+</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">set_checkpoint_storage_dir</span><span class="p">(</span><span class="sh">"</span><span class="s">file:///tmp/flink-checkpoints</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 최대 동시 체크포인트 수
+</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">set_max_concurrent_checkpoints</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># 최소 체크포인트 간격
+</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">set_min_pause_between_checkpoints</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="-실무-프로젝트-실시간-로그-분석">🚀 실무 프로젝트: 실시간 로그 분석</h2>
+
+<h3 id="프로젝트-개요">프로젝트 개요</h3>
+
+<p>실시간 로그 분석 시스템을 구축하여 다음 기능들을 구현합니다:</p>
+<ul>
+  <li>실시간 로그 수집</li>
+  <li>사용자별 활동 분석</li>
+  <li>이상 패턴 탐지</li>
+  <li>실시간 알림</li>
+</ul>
+
+<h3 id="1-로그-데이터-모델링">1. 로그 데이터 모델링</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="n">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="n">json</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">LogEvent</span><span class="p">:</span>
+    <span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">action</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">ip_address</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">user_agent</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">({</span>
+            <span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">session_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">session_id</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">action</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">action</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">ip_address</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">ip_address</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">user_agent</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">user_agent</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">metadata</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">metadata</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="p">})</span>
+    
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">json_str</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">json_str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nf">cls</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-실시간-로그-분석-시스템">2. 실시간 로그 분석 시스템</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
+<span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+<span class="kn">from</span> <span class="n">pyflink.common.state</span> <span class="kn">import</span> <span class="n">ValueStateDescriptor</span><span class="p">,</span> <span class="n">ListStateDescriptor</span>
+<span class="kn">from</span> <span class="n">pyflink.common.time</span> <span class="kn">import</span> <span class="n">Time</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream.functions</span> <span class="kn">import</span> <span class="n">KeyedProcessFunction</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream.window</span> <span class="kn">import</span> <span class="n">TumblingEventTimeWindows</span>
+<span class="kn">from</span> <span class="n">pyflink.datastream.connectors</span> <span class="kn">import</span> <span class="n">FlinkKafkaConsumer</span>
+<span class="kn">from</span> <span class="n">pyflink.common.serialization</span> <span class="kn">import</span> <span class="n">SimpleStringSchema</span>
+<span class="kn">from</span> <span class="n">pyflink.common.typeinfo</span> <span class="kn">import</span> <span class="n">Types</span>
+
+<span class="k">class</span> <span class="nc">LogAnalyzer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="nf">setup_environment</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">setup_environment</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="c1"># 체크포인팅 활성화
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">get_checkpoint_config</span><span class="p">().</span><span class="nf">enable_checkpointing</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+        
+        <span class="c1"># 이벤트 시간 설정
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">set_stream_time_characteristic</span><span class="p">(</span><span class="n">TimeCharacteristic</span><span class="p">.</span><span class="n">EventTime</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">create_kafka_source</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">bootstrap_servers</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Kafka 소스 생성</span><span class="sh">"""</span>
+        <span class="n">kafka_properties</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">bootstrap.servers</span><span class="sh">'</span><span class="p">:</span> <span class="n">bootstrap_servers</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">group.id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">log-analyzer-group</span><span class="sh">'</span>
+        <span class="p">}</span>
+        
+        <span class="n">kafka_source</span> <span class="o">=</span> <span class="nc">FlinkKafkaConsumer</span><span class="p">(</span>
+            <span class="n">topic</span><span class="p">,</span>
+            <span class="nc">SimpleStringSchema</span><span class="p">(),</span>
+            <span class="n">kafka_properties</span>
+        <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">add_source</span><span class="p">(</span><span class="n">kafka_source</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">parse_log_events</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">로그 이벤트 파싱</span><span class="sh">"""</span>
+        <span class="k">def</span> <span class="nf">parse_log</span><span class="p">(</span><span class="n">log_str</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">LogEvent</span><span class="p">.</span><span class="nf">from_json</span><span class="p">(</span><span class="n">log_str</span><span class="p">)</span>
+            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed to parse log: </span><span class="si">{</span><span class="n">log_str</span><span class="si">}</span><span class="s">, Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">None</span>
+        
+        <span class="k">return</span> <span class="n">log_stream</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="n">parse_log</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="n">Types</span><span class="p">.</span><span class="nc">PICKLED_BYTE_ARRAY</span><span class="p">())</span> \
+                        <span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">detect_anomalies</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">이상 패턴 탐지</span><span class="sh">"""</span>
+        <span class="k">class</span> <span class="nc">AnomalyDetector</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">failed_login_count</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">last_login_time</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">suspicious_actions</span> <span class="o">=</span> <span class="bp">None</span>
+            
+            <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">failed_login_count</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_state</span><span class="p">(</span>
+                    <span class="nc">ValueStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">failed_logins</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">INT</span><span class="p">())</span>
+                <span class="p">)</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">last_login_time</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_state</span><span class="p">(</span>
+                    <span class="nc">ValueStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">last_login</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">LONG</span><span class="p">())</span>
+                <span class="p">)</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">suspicious_actions</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_list_state</span><span class="p">(</span>
+                    <span class="nc">ListStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">suspicious</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">())</span>
+                <span class="p">)</span>
+            
+            <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_event</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+                <span class="n">current_time</span> <span class="o">=</span> <span class="n">log_event</span><span class="p">.</span><span class="n">timestamp</span>
+                
+                <span class="c1"># 실패한 로그인 시도 추적
+</span>                <span class="k">if</span> <span class="n">log_event</span><span class="p">.</span><span class="n">action</span> <span class="o">==</span> <span class="sh">"</span><span class="s">login_failed</span><span class="sh">"</span><span class="p">:</span>
+                    <span class="n">current_count</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">failed_login_count</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span>
+                    <span class="n">self</span><span class="p">.</span><span class="n">failed_login_count</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">current_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    
+                    <span class="c1"># 5분 내 5회 이상 실패 시 알림
+</span>                    <span class="k">if</span> <span class="n">current_count</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>  <span class="c1"># 0부터 시작하므로 4면 5번째
+</span>                        <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">({</span>
+                            <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">security_alert</span><span class="sh">'</span><span class="p">,</span>
+                            <span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">log_event</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+                            <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">'</span><span class="s">Multiple failed login attempts: </span><span class="si">{</span><span class="n">current_count</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="sh">'</span><span class="p">,</span>
+                            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">current_time</span>
+                        <span class="p">})</span>
+                        <span class="n">self</span><span class="p">.</span><span class="n">failed_login_count</span><span class="p">.</span><span class="nf">clear</span><span class="p">()</span>
+                
+                <span class="c1"># 성공한 로그인 시 실패 카운트 초기화
+</span>                <span class="k">elif</span> <span class="n">log_event</span><span class="p">.</span><span class="n">action</span> <span class="o">==</span> <span class="sh">"</span><span class="s">login_success</span><span class="sh">"</span><span class="p">:</span>
+                    <span class="n">self</span><span class="p">.</span><span class="n">failed_login_count</span><span class="p">.</span><span class="nf">clear</span><span class="p">()</span>
+                    <span class="n">self</span><span class="p">.</span><span class="n">last_login_time</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">current_time</span><span class="p">)</span>
+                
+                <span class="c1"># 비정상적인 시간대 활동 감지
+</span>                <span class="k">elif</span> <span class="n">log_event</span><span class="p">.</span><span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="sh">"</span><span class="s">view</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">purchase</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">download</span><span class="sh">"</span><span class="p">]:</span>
+                    <span class="n">last_login</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">last_login_time</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">last_login</span> <span class="ow">and</span> <span class="p">(</span><span class="n">current_time</span> <span class="o">-</span> <span class="n">last_login</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">86400</span><span class="p">:</span>  <span class="c1"># 24시간
+</span>                        <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">({</span>
+                            <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">anomaly_alert</span><span class="sh">'</span><span class="p">,</span>
+                            <span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">log_event</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+                            <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">'</span><span class="s">Activity after long inactivity: </span><span class="si">{</span><span class="n">log_event</span><span class="p">.</span><span class="n">action</span><span class="si">}</span><span class="sh">'</span><span class="p">,</span>
+                            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">current_time</span>
+                        <span class="p">})</span>
+        
+        <span class="c1"># 사용자별로 키 지정하고 이상 탐지
+</span>        <span class="k">return</span> <span class="n">log_stream</span><span class="p">.</span><span class="nf">key_by</span><span class="p">(</span><span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="n">log</span><span class="p">.</span><span class="n">user_id</span><span class="p">)</span> \
+                        <span class="p">.</span><span class="nf">process</span><span class="p">(</span><span class="nc">AnomalyDetector</span><span class="p">())</span>
+    
+    <span class="k">def</span> <span class="nf">calculate_user_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">사용자별 메트릭 계산</span><span class="sh">"""</span>
+        <span class="k">class</span> <span class="nc">UserMetricsCalculator</span><span class="p">(</span><span class="n">KeyedProcessFunction</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">action_counts</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">session_duration</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">last_action_time</span> <span class="o">=</span> <span class="bp">None</span>
+            
+            <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">runtime_context</span><span class="p">):</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">action_counts</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_map_state</span><span class="p">(</span>
+                    <span class="nc">MapStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">action_counts</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">STRING</span><span class="p">(),</span> <span class="n">Types</span><span class="p">.</span><span class="nc">INT</span><span class="p">())</span>
+                <span class="p">)</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">session_duration</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_state</span><span class="p">(</span>
+                    <span class="nc">ValueStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">session_duration</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">LONG</span><span class="p">())</span>
+                <span class="p">)</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">last_action_time</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="p">.</span><span class="nf">get_state</span><span class="p">(</span>
+                    <span class="nc">ValueStateDescriptor</span><span class="p">(</span><span class="sh">"</span><span class="s">last_action_time</span><span class="sh">"</span><span class="p">,</span> <span class="n">Types</span><span class="p">.</span><span class="nc">LONG</span><span class="p">())</span>
+                <span class="p">)</span>
+            
+            <span class="k">def</span> <span class="nf">process_element</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_event</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+                <span class="n">current_time</span> <span class="o">=</span> <span class="n">log_event</span><span class="p">.</span><span class="n">timestamp</span>
+                
+                <span class="c1"># 액션별 카운트 업데이트
+</span>                <span class="n">current_count</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">action_counts</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">log_event</span><span class="p">.</span><span class="n">action</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">action_counts</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="n">log_event</span><span class="p">.</span><span class="n">action</span><span class="p">,</span> <span class="n">current_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                
+                <span class="c1"># 세션 지속 시간 계산
+</span>                <span class="n">last_time</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">last_action_time</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">last_time</span><span class="p">:</span>
+                    <span class="n">duration</span> <span class="o">=</span> <span class="n">current_time</span> <span class="o">-</span> <span class="n">last_time</span>
+                    <span class="n">current_duration</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">session_duration</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span>
+                    <span class="n">self</span><span class="p">.</span><span class="n">session_duration</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">current_duration</span> <span class="o">+</span> <span class="n">duration</span><span class="p">)</span>
+                
+                <span class="n">self</span><span class="p">.</span><span class="n">last_action_time</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">current_time</span><span class="p">)</span>
+                
+                <span class="c1"># 1분마다 메트릭 출력
+</span>                <span class="k">if</span> <span class="n">current_time</span> <span class="o">%</span> <span class="mi">60</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">log_event</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+                        <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">current_time</span><span class="p">,</span>
+                        <span class="sh">'</span><span class="s">session_duration</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">session_duration</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="sh">'</span><span class="s">action_counts</span><span class="sh">'</span><span class="p">:</span> <span class="nf">dict</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">action_counts</span><span class="p">.</span><span class="nf">items</span><span class="p">())</span>
+                    <span class="p">}</span>
+                    <span class="n">ctx</span><span class="p">.</span><span class="nf">collect</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">log_stream</span><span class="p">.</span><span class="nf">key_by</span><span class="p">(</span><span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="n">log</span><span class="p">.</span><span class="n">user_id</span><span class="p">)</span> \
+                        <span class="p">.</span><span class="nf">process</span><span class="p">(</span><span class="nc">UserMetricsCalculator</span><span class="p">())</span>
+    
+    <span class="k">def</span> <span class="nf">run_analysis</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">분석 파이프라인 실행</span><span class="sh">"""</span>
+        <span class="c1"># Kafka에서 로그 읽기
+</span>        <span class="n">log_stream</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">create_kafka_source</span><span class="p">(</span><span class="sh">"</span><span class="s">user-logs</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># 로그 파싱
+</span>        <span class="n">parsed_logs</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">parse_log_events</span><span class="p">(</span><span class="n">log_stream</span><span class="p">)</span>
+        
+        <span class="c1"># 타임스탬프와 워터마크 할당
+</span>        <span class="n">watermarked_logs</span> <span class="o">=</span> <span class="n">parsed_logs</span><span class="p">.</span><span class="nf">assign_timestamps_and_watermarks</span><span class="p">(</span>
+            <span class="nc">TimestampExtractor</span><span class="p">()</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># 이상 탐지
+</span>        <span class="n">anomalies</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">detect_anomalies</span><span class="p">(</span><span class="n">watermarked_logs</span><span class="p">)</span>
+        
+        <span class="c1"># 사용자 메트릭 계산
+</span>        <span class="n">metrics</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">calculate_user_metrics</span><span class="p">(</span><span class="n">watermarked_logs</span><span class="p">)</span>
+        
+        <span class="c1"># 결과 출력
+</span>        <span class="n">anomalies</span><span class="p">.</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Security Alerts</span><span class="sh">"</span><span class="p">)</span>
+        <span class="n">metrics</span><span class="p">.</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">User Metrics</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># 실행
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"</span><span class="s">Real-time Log Analysis</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 워터마크 추출기
+</span><span class="k">class</span> <span class="nc">TimestampExtractor</span><span class="p">(</span><span class="n">BoundedOutOfOrdernessTimestampExtractor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>  <span class="c1"># 10초 지연 허용
+</span>    
+    <span class="k">def</span> <span class="nf">extract_timestamp</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">previous_timestamp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">element</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">*</span> <span class="mi">1000</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">analyzer</span> <span class="o">=</span> <span class="nc">LogAnalyzer</span><span class="p">()</span>
+    <span class="n">analyzer</span><span class="p">.</span><span class="nf">run_analysis</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="3-실행-및-테스트">3. 실행 및 테스트</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 테스트 데이터 생성기
+</span><span class="k">class</span> <span class="nc">LogGenerator</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="n">random</span>
+        <span class="kn">import</span> <span class="n">time</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">users</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">user1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user2</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user3</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user4</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user5</span><span class="sh">"</span><span class="p">]</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">login</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">logout</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">view</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">purchase</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">download</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">login_failed</span><span class="sh">"</span><span class="p">]</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">ip_addresses</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">192.168.1.1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">192.168.1.2</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10.0.0.1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10.0.0.2</span><span class="sh">"</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">generate_log</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="n">random</span>
+        <span class="kn">import</span> <span class="n">time</span>
+        
+        <span class="k">return</span> <span class="nc">LogEvent</span><span class="p">(</span>
+            <span class="n">user_id</span><span class="o">=</span><span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">users</span><span class="p">),</span>
+            <span class="n">session_id</span><span class="o">=</span><span class="sa">f</span><span class="sh">"</span><span class="s">session_</span><span class="si">{</span><span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">9999</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">actions</span><span class="p">),</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="nf">int</span><span class="p">(</span><span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()),</span>
+            <span class="n">ip_address</span><span class="o">=</span><span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">ip_addresses</span><span class="p">),</span>
+            <span class="n">user_agent</span><span class="o">=</span><span class="sh">"</span><span class="s">Mozilla/5.0 (Test Browser)</span><span class="sh">"</span>
+        <span class="p">).</span><span class="nf">to_json</span><span class="p">()</span>
+
+<span class="c1"># 테스트 실행
+</span><span class="k">def</span> <span class="nf">test_log_analysis</span><span class="p">():</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+    
+    <span class="c1"># 테스트 데이터 생성
+</span>    <span class="n">generator</span> <span class="o">=</span> <span class="nc">LogGenerator</span><span class="p">()</span>
+    <span class="n">test_logs</span> <span class="o">=</span> <span class="p">[</span><span class="n">generator</span><span class="p">.</span><span class="nf">generate_log</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)]</span>
+    
+    <span class="n">log_stream</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="nf">from_collection</span><span class="p">(</span><span class="n">test_logs</span><span class="p">)</span>
+    
+    <span class="c1"># 로그 파싱
+</span>    <span class="n">parsed_logs</span> <span class="o">=</span> <span class="n">log_stream</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">LogEvent</span><span class="p">.</span><span class="nf">from_json</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+        <span class="n">output_type</span><span class="o">=</span><span class="n">Types</span><span class="p">.</span><span class="nc">PICKLED_BYTE_ARRAY</span><span class="p">()</span>
+    <span class="p">).</span><span class="nf">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+    
+    <span class="c1"># 간단한 통계 계산
+</span>    <span class="n">user_actions</span> <span class="o">=</span> <span class="n">parsed_logs</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="p">(</span><span class="n">log</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span> <span class="n">log</span><span class="p">.</span><span class="n">action</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">).</span><span class="nf">key_by</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> \
+     <span class="p">.</span><span class="nf">window</span><span class="p">(</span><span class="n">TumblingProcessingTimeWindows</span><span class="p">.</span><span class="nf">of</span><span class="p">(</span><span class="n">Time</span><span class="p">.</span><span class="nf">seconds</span><span class="p">(</span><span class="mi">5</span><span class="p">)))</span> \
+     <span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="n">user_actions</span><span class="p">.</span><span class="nf">print</span><span class="p">()</span>
+    
+    <span class="n">env</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"</span><span class="s">Log Analysis Test</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 테스트 실행
+</span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="nf">test_log_analysis</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="-학습-요약">📚 학습 요약</h2>
+
+<h3 id="이번-파트에서-학습한-내용">이번 파트에서 학습한 내용</h3>
+
+<ol>
+  <li><strong>Apache Flink 소개</strong>
+    <ul>
+      <li>Flink의 탄생 배경과 설계 철학</li>
+      <li>Spark와의 근본적 차이점</li>
+      <li>진정한 스트리밍 처리의 개념</li>
+    </ul>
+  </li>
+  <li><strong>Flink 아키텍처</strong>
+    <ul>
+      <li>JobManager와 TaskManager의 역할</li>
+      <li>클러스터 구성과 리소스 관리</li>
+      <li>프로그램 실행 구조</li>
+    </ul>
+  </li>
+  <li><strong>DataStream API</strong>
+    <ul>
+      <li>기본 데이터 타입과 변환 연산</li>
+      <li>Map, Filter, FlatMap, KeyBy 연산</li>
+      <li>윈도우 연산 (Tumbling, Sliding, Session)</li>
+    </ul>
+  </li>
+  <li><strong>시간 처리</strong>
+    <ul>
+      <li>Event Time, Processing Time, Ingestion Time</li>
+      <li>워터마킹 전략과 지연 데이터 처리</li>
+      <li>타임스탬프 할당 방법</li>
+    </ul>
+  </li>
+  <li><strong>상태 관리</strong>
+    <ul>
+      <li>ValueState, ListState, MapState</li>
+      <li>체크포인팅과 장애 복구</li>
+      <li>상태 기반 처리 로직</li>
+    </ul>
+  </li>
+  <li><strong>실무 프로젝트</strong>
+    <ul>
+      <li>실시간 로그 분석 시스템</li>
+      <li>이상 패턴 탐지</li>
+      <li>사용자 메트릭 계산</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="핵심-기술-스택">핵심 기술 스택</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>기술</th>
+      <th>용도</th>
+      <th>중요도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>DataStream API</strong></td>
+      <td>스트리밍 데이터 처리</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>상태 관리</strong></td>
+      <td>상태 기반 처리</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>시간 처리</strong></td>
+      <td>이벤트 시간 기반 분석</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>윈도우 연산</strong></td>
+      <td>시간 기반 집계</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>체크포인팅</strong></td>
+      <td>장애 복구</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="다음-파트-미리보기">다음 파트 미리보기</h3>
+
+<p><strong>Part 2: 고급 스트리밍 처리와 상태 관리</strong>에서는 다음 내용을 다룹니다:</p>
+<ul>
+  <li>고급 상태 관리 패턴</li>
+  <li>체크포인팅과 세이브포인트 심화</li>
+  <li>복잡한 시간 처리 전략</li>
+  <li>성능 최적화 기법</li>
+</ul>
+
+<hr />
+
+<p><strong>다음 파트</strong>: <a href="/data-engineering/2025/09/16/apache-flink-advanced-streaming.html">Part 2: 고급 스트리밍 처리와 상태 관리</a></p>
+
+<hr />
+
+<p><em>이제 Flink의 기초를 마스터했습니다! 다음 파트에서는 더 고급 기능들을 다뤄보겠습니다.</em> 🚀</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+          
+          
+      
+      
+      
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
