@@ -18,10 +18,24 @@ description: Explore all technical posts by year, month, and category with searc
     </div>
     
     <div class="search-tags" style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; align-items: center;">
-      {% assign all_tags = site.en_posts | map: "tags" | uniq | sort %}
-      {% for tag in all_tags %}
-        <span class="tag-label" onclick="filterByTag('{{ tag }}')" style="background: rgba(255,255,255,0.9); color: #2c3e50; padding: 0.3rem 0.8rem; border-radius: 15px; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.5); cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">{{ tag }}</span>
+      {% comment %} Show only main tags (hierarchical structure) {% endcomment %}
+      {% assign main_tags = "Apache-Spark,Apache-Flink,Apache-Kafka,Time-Series,Kubernetes,Data-Engineering,Python,Machine-Learning,AI,Big-Data" | split: "," %}
+      {% for main_tag in main_tags %}
+        <span class="tag-label main-tag" onclick="filterByTag('{{ main_tag }}')" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 0.4rem 1rem; border-radius: 20px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: all 0.3s ease; cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.15); border: none;">{{ main_tag }}</span>
       {% endfor %}
+      
+      <div style="width: 100%; text-align: center; margin-top: 1rem;">
+        <button id="showMoreTags" onclick="toggleMoreTags()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 0.5rem 1rem; border-radius: 15px; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;">Show More Tags</button>
+      </div>
+      
+      <div id="moreTags" style="display: none; width: 100%; margin-top: 1rem;">
+        {% assign all_tags = site.en_posts | map: "tags" | uniq | sort %}
+        {% for tag in all_tags %}
+          {% unless main_tags contains tag %}
+            <span class="tag-label sub-tag" onclick="filterByTag('{{ tag }}')" style="background: rgba(255,255,255,0.9); color: #2c3e50; padding: 0.3rem 0.8rem; border-radius: 15px; text-decoration: none; font-size: 0.8rem; font-weight: 500; transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.5); cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 0.2rem;">{{ tag }}</span>
+          {% endunless %}
+        {% endfor %}
+      </div>
     </div>
   </div>
 
@@ -151,6 +165,21 @@ function filterByYear(year) {
     const postDate = post.getAttribute('data-date');
     post.style.display = postDate.startsWith(year) ? 'block' : 'none';
   });
+}
+
+function toggleMoreTags() {
+  const moreTags = document.getElementById('moreTags');
+  const showMoreBtn = document.getElementById('showMoreTags');
+  
+  if (moreTags.style.display === 'none') {
+    moreTags.style.display = 'flex';
+    moreTags.style.flexWrap = 'wrap';
+    moreTags.style.justifyContent = 'center';
+    showMoreBtn.textContent = 'Hide Tags';
+  } else {
+    moreTags.style.display = 'none';
+    showMoreBtn.textContent = 'Show More Tags';
+  }
 }
 
 function sortPosts(sortBy) {
