@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Complete guide to deploying Apache Flink on Kubernetes in production environments, optimizing performance, and implementing monitoring and disaster recovery strategies.">
+
+
+
+<title>Part 4: Apache Flink Production Deployment and Performance Optimization - Enterprise Operations Mastery - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 4: Apache Flink Production Deployment and Performance Optimization - Enterprise Operations Mastery">
+<meta property="og:description" content="Complete guide to deploying Apache Flink on Kubernetes in production environments, optimizing performance, and implementing monitoring and disaster recovery strategies.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2025-09-18-apache-flink-production-deployment.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 4: Apache Flink Production Deployment and Performance Optimization - Enterprise Operations Mastery">
+<meta name="twitter:description" content="Complete guide to deploying Apache Flink on Kubernetes in production environments, optimizing performance, and implementing monitoring and disaster recovery strategies.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2025/09/18/apache-flink-production-deployment.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2025-09-18-apache-flink-production-deployment.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 18일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 4: Apache Flink Production Deployment and Performance Optimization - Enterprise Operations Mastery</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Flink</span>
+      
+        <span class="tag">Kubernetes</span>
+      
+        <span class="tag">Production-Deployment</span>
+      
+        <span class="tag">Performance-Optimization</span>
+      
+        <span class="tag">Monitoring</span>
+      
+        <span class="tag">Disaster-Recovery</span>
+      
+        <span class="tag">DevOps</span>
+      
+        <span class="tag">CI/CD</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Apache flink complete guide 시리즈</span>
+      <span class="series-order">Part 5</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 50 minutes</span>
+      
+      
+        <span class="difficulty">📊 Advanced</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-4-apache-flink-production-deployment-and-performance-optimization---enterprise-operations-mastery">Part 4: Apache Flink Production Deployment and Performance Optimization - Enterprise Operations Mastery</h1>
+
+<blockquote>
+  <p>Complete guide to deploying Apache Flink on Kubernetes in production environments, optimizing performance, and implementing monitoring and disaster recovery strategies.</p>
+</blockquote>
+
+<h2 id="-table-of-contents">📋 Table of Contents</h2>
+
+<ol>
+  <li><a href="#flink-cluster-deployment-with-kubernetes">Flink Cluster Deployment with Kubernetes</a></li>
+  <li><a href="#performance-tuning-and-optimization">Performance Tuning and Optimization</a></li>
+  <li><a href="#monitoring-and-alerting-systems">Monitoring and Alerting Systems</a></li>
+  <li><a href="#disaster-recovery-and-operations-strategy">Disaster Recovery and Operations Strategy</a></li>
+  <li><a href="#practical-project-enterprise-flink-platform">Practical Project: Enterprise Flink Platform</a></li>
+  <li><a href="#learning-summary">Learning Summary</a></li>
+</ol>
+
+<h2 id="-flink-cluster-deployment-with-kubernetes">🚀 Flink Cluster Deployment with Kubernetes</h2>
+
+<h3 id="flink-on-kubernetes-architecture">Flink on Kubernetes Architecture</h3>
+
+<p>Running Flink on Kubernetes provides the following benefits:</p>
+<ul>
+  <li><strong>Auto-scaling</strong>: Automatic resource adjustment based on workload</li>
+  <li><strong>High Availability</strong>: Automatic recovery from pod failures</li>
+  <li><strong>Resource Management</strong>: Efficient memory and CPU usage</li>
+  <li><strong>Service Discovery</strong>: Built-in networking and load balancing</li>
+</ul>
+
+<h3 id="1-flink-operator-installation">1. Flink Operator Installation</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># flink-operator-install.yaml</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Namespace</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">flink-operator</span>
+<span class="nn">---</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">apps/v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Deployment</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">flink-operator</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">flink-operator</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">replicas</span><span class="pi">:</span> <span class="m">1</span>
+  <span class="na">selector</span><span class="pi">:</span>
+    <span class="na">matchLabels</span><span class="pi">:</span>
+      <span class="na">app</span><span class="pi">:</span> <span class="s">flink-operator</span>
+  <span class="na">template</span><span class="pi">:</span>
+    <span class="na">metadata</span><span class="pi">:</span>
+      <span class="na">labels</span><span class="pi">:</span>
+        <span class="na">app</span><span class="pi">:</span> <span class="s">flink-operator</span>
+    <span class="na">spec</span><span class="pi">:</span>
+      <span class="na">serviceAccountName</span><span class="pi">:</span> <span class="s">flink-operator</span>
+      <span class="na">containers</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">flink-operator</span>
+        <span class="na">image</span><span class="pi">:</span> <span class="s">apache/flink-kubernetes-operator:1.7.0</span>
+        <span class="na">ports</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">8080</span>
+        <span class="na">env</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">OPERATOR_NAME</span>
+          <span class="na">value</span><span class="pi">:</span> <span class="s2">"</span><span class="s">flink-operator"</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">WATCH_NAMESPACE</span>
+          <span class="na">value</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+        <span class="na">resources</span><span class="pi">:</span>
+          <span class="na">requests</span><span class="pi">:</span>
+            <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">256Mi"</span>
+            <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">100m"</span>
+          <span class="na">limits</span><span class="pi">:</span>
+            <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">512Mi"</span>
+            <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">500m"</span>
+<span class="nn">---</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">ServiceAccount</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">flink-operator</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">flink-operator</span>
+<span class="nn">---</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">rbac.authorization.k8s.io/v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">ClusterRole</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">flink-operator</span>
+<span class="na">rules</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="na">apiGroups</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">apps"</span><span class="pi">]</span>
+  <span class="na">resources</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">deployments"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">statefulsets"</span><span class="pi">]</span>
+  <span class="na">verbs</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">get"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">list"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">watch"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">create"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">update"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">patch"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">delete"</span><span class="pi">]</span>
+<span class="pi">-</span> <span class="na">apiGroups</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">"</span><span class="pi">]</span>
+  <span class="na">resources</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">pods"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">services"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">configmaps"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">secrets"</span><span class="pi">]</span>
+  <span class="na">verbs</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">get"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">list"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">watch"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">create"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">update"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">patch"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">delete"</span><span class="pi">]</span>
+<span class="nn">---</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">rbac.authorization.k8s.io/v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">ClusterRoleBinding</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">flink-operator</span>
+<span class="na">roleRef</span><span class="pi">:</span>
+  <span class="na">apiGroup</span><span class="pi">:</span> <span class="s">rbac.authorization.k8s.io</span>
+  <span class="na">kind</span><span class="pi">:</span> <span class="s">ClusterRole</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">flink-operator</span>
+<span class="na">subjects</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="na">kind</span><span class="pi">:</span> <span class="s">ServiceAccount</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">flink-operator</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">flink-operator</span>
+</code></pre></div></div>
+
+<h3 id="2-flink-application-deployment">2. Flink Application Deployment</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># flink-application.yaml</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">flink.apache.org/v1beta1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">FlinkDeployment</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">real-time-analytics</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">flink-production</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">image</span><span class="pi">:</span> <span class="s">flink:1.18-scala_2.12-java11</span>
+  <span class="na">flinkVersion</span><span class="pi">:</span> <span class="s2">"</span><span class="s">1.18"</span>
+  <span class="na">flinkConfiguration</span><span class="pi">:</span>
+    <span class="na">taskmanager.numberOfTaskSlots</span><span class="pi">:</span> <span class="s2">"</span><span class="s">4"</span>
+    <span class="na">parallelism.default</span><span class="pi">:</span> <span class="s2">"</span><span class="s">4"</span>
+    <span class="na">state.backend</span><span class="pi">:</span> <span class="s2">"</span><span class="s">rocksdb"</span>
+    <span class="na">state.checkpoints.dir</span><span class="pi">:</span> <span class="s2">"</span><span class="s">s3://flink-checkpoints/checkpoints"</span>
+    <span class="na">state.savepoints.dir</span><span class="pi">:</span> <span class="s2">"</span><span class="s">s3://flink-savepoints/savepoints"</span>
+    <span class="na">execution.checkpointing.interval</span><span class="pi">:</span> <span class="s2">"</span><span class="s">60s"</span>
+    <span class="na">execution.checkpointing.mode</span><span class="pi">:</span> <span class="s2">"</span><span class="s">EXACTLY_ONCE"</span>
+    <span class="na">execution.checkpointing.timeout</span><span class="pi">:</span> <span class="s2">"</span><span class="s">600s"</span>
+    <span class="na">execution.checkpointing.min-pause</span><span class="pi">:</span> <span class="s2">"</span><span class="s">60s"</span>
+    <span class="na">execution.checkpointing.max-concurrent-checkpoints</span><span class="pi">:</span> <span class="s2">"</span><span class="s">1"</span>
+    <span class="na">restart-strategy</span><span class="pi">:</span> <span class="s2">"</span><span class="s">fixed-delay"</span>
+    <span class="na">restart-strategy.fixed-delay.attempts</span><span class="pi">:</span> <span class="s2">"</span><span class="s">3"</span>
+    <span class="na">restart-strategy.fixed-delay.delay</span><span class="pi">:</span> <span class="s2">"</span><span class="s">10s"</span>
+    <span class="na">high-availability</span><span class="pi">:</span> <span class="s2">"</span><span class="s">kubernetes"</span>
+    <span class="na">high-availability.storageDir</span><span class="pi">:</span> <span class="s2">"</span><span class="s">s3://flink-ha/ha"</span>
+  <span class="na">serviceAccount</span><span class="pi">:</span> <span class="s">flink-service-account</span>
+  <span class="na">jobManager</span><span class="pi">:</span>
+    <span class="na">replicas</span><span class="pi">:</span> <span class="m">1</span>
+    <span class="na">resource</span><span class="pi">:</span>
+      <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2048m"</span>
+      <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">1000m"</span>
+    <span class="na">podTemplate</span><span class="pi">:</span>
+      <span class="na">spec</span><span class="pi">:</span>
+        <span class="na">containers</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">flink-main-container</span>
+          <span class="na">env</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">JAVA_OPTS</span>
+            <span class="na">value</span><span class="pi">:</span> <span class="s2">"</span><span class="s">-Xmx1536m"</span>
+          <span class="na">resources</span><span class="pi">:</span>
+            <span class="na">requests</span><span class="pi">:</span>
+              <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2048m"</span>
+              <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">1000m"</span>
+            <span class="na">limits</span><span class="pi">:</span>
+              <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2048m"</span>
+              <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">1000m"</span>
+  <span class="na">taskManager</span><span class="pi">:</span>
+    <span class="na">replicas</span><span class="pi">:</span> <span class="m">3</span>
+    <span class="na">resource</span><span class="pi">:</span>
+      <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">4096m"</span>
+      <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2000m"</span>
+    <span class="na">podTemplate</span><span class="pi">:</span>
+      <span class="na">spec</span><span class="pi">:</span>
+        <span class="na">containers</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">flink-main-container</span>
+          <span class="na">env</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">JAVA_OPTS</span>
+            <span class="na">value</span><span class="pi">:</span> <span class="s2">"</span><span class="s">-Xmx3072m"</span>
+          <span class="na">resources</span><span class="pi">:</span>
+            <span class="na">requests</span><span class="pi">:</span>
+              <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">4096m"</span>
+              <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2000m"</span>
+            <span class="na">limits</span><span class="pi">:</span>
+              <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">4096m"</span>
+              <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2000m"</span>
+  <span class="na">job</span><span class="pi">:</span>
+    <span class="na">jarURI</span><span class="pi">:</span> <span class="s2">"</span><span class="s">s3://flink-jobs/real-time-analytics.jar"</span>
+    <span class="na">parallelism</span><span class="pi">:</span> <span class="m">8</span>
+    <span class="na">upgradeMode</span><span class="pi">:</span> <span class="s2">"</span><span class="s">stateless"</span>
+    <span class="na">allowNonRestoredState</span><span class="pi">:</span> <span class="kc">false</span>
+</code></pre></div></div>
+
+<h3 id="3-high-availability-configuration">3. High Availability Configuration</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># flink-ha-config.yaml</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">ConfigMap</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">flink-ha-config</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">flink-production</span>
+<span class="na">data</span><span class="pi">:</span>
+  <span class="na">flink-conf.yaml</span><span class="pi">:</span> <span class="pi">|</span>
+    <span class="s"># High availability configuration</span>
+    <span class="s">high-availability: kubernetes</span>
+    <span class="s">high-availability.cluster-id: flink-cluster</span>
+    <span class="s">high-availability.storageDir: s3://flink-ha/ha</span>
+    
+    <span class="s"># ZooKeeper configuration (optional)</span>
+    <span class="s"># high-availability.zookeeper.quorum: zookeeper-service:2181</span>
+    <span class="s"># high-availability.zookeeper.path.root: /flink</span>
+    
+    <span class="s"># Kubernetes leader election</span>
+    <span class="s">kubernetes.operator.leader.election.lease-duration: 15s</span>
+    <span class="s">kubernetes.operator.leader.election.renew-deadline: 10s</span>
+    <span class="s">kubernetes.operator.leader.election.retry-period: 2s</span>
+    
+    <span class="s"># Checkpoint configuration</span>
+    <span class="s">state.backend: rocksdb</span>
+    <span class="s">state.backend.incremental: true</span>
+    <span class="s">state.checkpoints.dir: s3://flink-checkpoints/checkpoints</span>
+    <span class="s">state.savepoints.dir: s3://flink-savepoints/savepoints</span>
+    <span class="s">execution.checkpointing.interval: 60s</span>
+    <span class="s">execution.checkpointing.mode: EXACTLY_ONCE</span>
+    <span class="s">execution.checkpointing.timeout: 600s</span>
+    <span class="s">execution.checkpointing.min-pause: 60s</span>
+    <span class="s">execution.checkpointing.max-concurrent-checkpoints: 1</span>
+    
+    <span class="s"># Restart strategy</span>
+    <span class="s">restart-strategy: fixed-delay</span>
+    <span class="s">restart-strategy.fixed-delay.attempts: 3</span>
+    <span class="s">restart-strategy.fixed-delay.delay: 10s</span>
+    
+    <span class="s"># Metrics configuration</span>
+    <span class="s">metrics.reporter.prom.class: org.apache.flink.metrics.prometheus.PrometheusReporter</span>
+    <span class="s">metrics.reporter.prom.port: 9249</span>
+    <span class="s">metrics.system-resource: true</span>
+    <span class="s">metrics.system-resource-probing-interval: 5000</span>
+</code></pre></div></div>
+
+<h2 id="-performance-tuning-and-optimization">⚡ Performance Tuning and Optimization</h2>
+
+<h3 id="1-memory-optimization">1. Memory Optimization</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">FlinkMemoryOptimizer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">memory_configs</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">generate_optimized_config</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">workload_type</span><span class="p">,</span> <span class="n">data_volume</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate memory configuration optimized for workload type</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="n">workload_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">streaming</span><span class="sh">"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_streaming_memory_config</span><span class="p">(</span><span class="n">data_volume</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">workload_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">batch</span><span class="sh">"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_batch_memory_config</span><span class="p">(</span><span class="n">data_volume</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">workload_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">machine_learning</span><span class="sh">"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_ml_memory_config</span><span class="p">(</span><span class="n">data_volume</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_default_memory_config</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">get_streaming_memory_config</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_volume</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Memory configuration for streaming workloads</span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="n">data_volume</span> <span class="o">==</span> <span class="sh">"</span><span class="s">low</span><span class="sh">"</span><span class="p">:</span>  <span class="c1"># &lt; 1GB/min
+</span>            <span class="k">return</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.process.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2g</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.managed.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">512m</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.jvm-metaspace.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">256m</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.jvm-overhead.fraction</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0.1</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.network.fraction</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0.2</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="k">elif</span> <span class="n">data_volume</span> <span class="o">==</span> <span class="sh">"</span><span class="s">medium</span><span class="sh">"</span><span class="p">:</span>  <span class="c1"># 1-10GB/min
+</span>            <span class="k">return</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.process.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4g</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.managed.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1g</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.jvm-metaspace.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">512m</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.jvm-overhead.fraction</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0.1</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.network.fraction</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0.2</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># &gt; 10GB/min
+</span>            <span class="k">return</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.process.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8g</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.managed.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2g</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.jvm-metaspace.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1g</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.jvm-overhead.fraction</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0.1</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.memory.network.fraction</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0.2</span><span class="sh">"</span>
+            <span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="2-network-optimization">2. Network Optimization</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">NetworkOptimizer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">network_configs</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_network_performance</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">cluster_size</span><span class="p">,</span> <span class="n">data_throughput</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Optimize network performance</span><span class="sh">"""</span>
+        
+        <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="c1"># Network buffer settings
+</span>            <span class="sh">"</span><span class="s">taskmanager.network.memory.fraction</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0.2</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.memory.min</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">128mb</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.memory.max</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1gb</span><span class="sh">"</span><span class="p">,</span>
+            
+            <span class="c1"># Network thread settings
+</span>            <span class="sh">"</span><span class="s">taskmanager.network.netty.num-arenas</span><span class="sh">"</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="nf">min</span><span class="p">(</span><span class="n">cluster_size</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.netty.server.numThreads</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.netty.client.numThreads</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4</span><span class="sh">"</span><span class="p">,</span>
+            
+            <span class="c1"># Connection settings
+</span>            <span class="sh">"</span><span class="s">taskmanager.network.netty.server.backlog</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.netty.client.connectTimeoutSec</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10</span><span class="sh">"</span><span class="p">,</span>
+            
+            <span class="c1"># Buffer settings
+</span>            <span class="sh">"</span><span class="s">taskmanager.network.memory.buffers-per-channel</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">taskmanager.network.memory.floating-buffers-per-gate</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8</span><span class="sh">"</span><span class="p">,</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Additional optimization based on data throughput
+</span>        <span class="k">if</span> <span class="n">data_throughput</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>  <span class="c1"># MB/s
+</span>            <span class="n">config</span><span class="p">.</span><span class="nf">update</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">taskmanager.network.memory.fraction</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0.3</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.network.memory.max</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2gb</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.network.memory.buffers-per-channel</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">taskmanager.network.memory.floating-buffers-per-gate</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">16</span><span class="sh">"</span><span class="p">,</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">config</span>
+</code></pre></div></div>
+
+<h3 id="3-state-backend-optimization">3. State Backend Optimization</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">StateBackendOptimizer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">rocksdb_configs</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_rocksdb_backend</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">state_size</span><span class="p">,</span> <span class="n">access_pattern</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Optimize RocksDB backend</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="n">access_pattern</span> <span class="o">==</span> <span class="sh">"</span><span class="s">read_heavy</span><span class="sh">"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_read_optimized_config</span><span class="p">(</span><span class="n">state_size</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">access_pattern</span> <span class="o">==</span> <span class="sh">"</span><span class="s">write_heavy</span><span class="sh">"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_write_optimized_config</span><span class="p">(</span><span class="n">state_size</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">access_pattern</span> <span class="o">==</span> <span class="sh">"</span><span class="s">mixed</span><span class="sh">"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_balanced_config</span><span class="p">(</span><span class="n">state_size</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_default_config</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">get_read_optimized_config</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">state_size</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Read-optimized configuration</span><span class="sh">"""</span>
+        <span class="n">block_cache_size</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span><span class="n">state_size</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">)</span>  <span class="c1"># 512MB max
+</span>        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="c1"># Block cache optimization
+</span>            <span class="sh">"</span><span class="s">state.backend.rocksdb.block.cache-size</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">block_cache_size</span><span class="si">}</span><span class="s">b</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">state.backend.rocksdb.block.cache-size-per-column-family</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">block_cache_size</span> <span class="o">//</span> <span class="mi">4</span><span class="si">}</span><span class="s">b</span><span class="sh">"</span><span class="p">,</span>
+            
+            <span class="c1"># Block size optimization
+</span>            <span class="sh">"</span><span class="s">state.backend.rocksdb.block.blocksize</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">16kb</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">state.backend.rocksdb.block.bloom-filter-bits-per-key</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10</span><span class="sh">"</span><span class="p">,</span>
+            
+            <span class="c1"># Compression settings
+</span>            <span class="sh">"</span><span class="s">state.backend.rocksdb.compaction.level0-file-num-compaction-trigger</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">state.backend.rocksdb.compaction.level0-slowdown-writes-trigger</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">20</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">state.backend.rocksdb.compaction.level0-stop-writes-trigger</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">36</span><span class="sh">"</span><span class="p">,</span>
+            
+            <span class="c1"># Read optimization
+</span>            <span class="sh">"</span><span class="s">state.backend.rocksdb.readoptions.async-io</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">state.backend.rocksdb.readoptions.cache-index-and-filter-blocks</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="-monitoring-and-alerting-systems">📊 Monitoring and Alerting Systems</h2>
+
+<h3 id="1-prometheus-metrics-configuration">1. Prometheus Metrics Configuration</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># prometheus-config.yaml</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">ConfigMap</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">prometheus-config</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">monitoring</span>
+<span class="na">data</span><span class="pi">:</span>
+  <span class="na">prometheus.yml</span><span class="pi">:</span> <span class="pi">|</span>
+    <span class="s">global:</span>
+      <span class="s">scrape_interval: 15s</span>
+      <span class="s">evaluation_interval: 15s</span>
+    
+    <span class="s">rule_files:</span>
+      <span class="s">- "flink_rules.yml"</span>
+    
+    <span class="s">alerting:</span>
+      <span class="s">alertmanagers:</span>
+        <span class="s">- static_configs:</span>
+            <span class="s">- targets:</span>
+              <span class="s">- alertmanager:9093</span>
+    
+    <span class="s">scrape_configs:</span>
+      <span class="s">- job_name: 'flink-jobmanager'</span>
+        <span class="s">static_configs:</span>
+          <span class="s">- targets: ['flink-jobmanager:9249']</span>
+        <span class="s">scrape_interval: 10s</span>
+        <span class="s">metrics_path: /metrics</span>
+    <span class="no">    </span>
+      <span class="s">- job_name: 'flink-taskmanager'</span>
+        <span class="s">kubernetes_sd_configs:</span>
+          <span class="s">- role: pod</span>
+            <span class="s">namespaces:</span>
+              <span class="s">names:</span>
+                <span class="s">- flink-production</span>
+        <span class="s">relabel_configs:</span>
+          <span class="s">- source_labels: [__meta_kubernetes_pod_label_app]</span>
+            <span class="s">action: keep</span>
+            <span class="s">regex: flink-taskmanager</span>
+          <span class="s">- source_labels: [__meta_kubernetes_pod_container_port_name]</span>
+            <span class="s">action: keep</span>
+            <span class="s">regex: metrics</span>
+          <span class="s">- source_labels: [__meta_kubernetes_pod_name]</span>
+            <span class="s">target_label: instance</span>
+        <span class="s">scrape_interval: 10s</span>
+        <span class="s">metrics_path: /metrics</span>
+</code></pre></div></div>
+
+<h3 id="2-grafana-dashboard-configuration">2. Grafana Dashboard Configuration</h3>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"dashboard"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Apache Flink Production Dashboard"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"panels"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Job Status"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"stat"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"targets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"expr"</span><span class="p">:</span><span class="w"> </span><span class="s2">"flink_jobmanager_numRunningJobs"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"refId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A"</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">],</span><span class="w">
+        </span><span class="nl">"fieldConfig"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"defaults"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"color"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"mode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"thresholds"</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="nl">"thresholds"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"steps"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="p">{</span><span class="nl">"color"</span><span class="p">:</span><span class="w"> </span><span class="s2">"green"</span><span class="p">,</span><span class="w"> </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="nl">"color"</span><span class="p">:</span><span class="w"> </span><span class="s2">"yellow"</span><span class="p">,</span><span class="w"> </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="nl">"color"</span><span class="p">:</span><span class="w"> </span><span class="s2">"red"</span><span class="p">,</span><span class="w"> </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">}</span><span class="w">
+              </span><span class="p">]</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Records Processed Per Second"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"timeseries"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"targets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"expr"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sum(rate(flink_taskmanager_job_task_operator_numRecordsInPerSecond[5m])) by (job_name)"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"refId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A"</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">],</span><span class="w">
+        </span><span class="nl">"yAxes"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Records/sec"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"min"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">]</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="3-alert-rules-configuration">3. Alert Rules Configuration</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># flink-alert-rules.yml</span>
+<span class="na">groups</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">flink-alerts</span>
+    <span class="na">rules</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">alert</span><span class="pi">:</span> <span class="s">FlinkJobFailed</span>
+        <span class="na">expr</span><span class="pi">:</span> <span class="s">flink_jobmanager_job_status == </span><span class="m">0</span>
+        <span class="na">for</span><span class="pi">:</span> <span class="s">1m</span>
+        <span class="na">labels</span><span class="pi">:</span>
+          <span class="na">severity</span><span class="pi">:</span> <span class="s">critical</span>
+        <span class="na">annotations</span><span class="pi">:</span>
+          <span class="na">summary</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Flink</span><span class="nv"> </span><span class="s">job</span><span class="nv"> </span><span class="s">has</span><span class="nv"> </span><span class="s">failed"</span>
+          <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Flink</span><span class="nv"> </span><span class="s">job</span><span class="nv"> </span><span class="s">has</span><span class="nv"> </span><span class="s">been</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">failed</span><span class="nv"> </span><span class="s">state</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">more</span><span class="nv"> </span><span class="s">than</span><span class="nv"> </span><span class="s">1</span><span class="nv"> </span><span class="s">minute"</span>
+      
+      <span class="pi">-</span> <span class="na">alert</span><span class="pi">:</span> <span class="s">HighCheckpointDuration</span>
+        <span class="na">expr</span><span class="pi">:</span> <span class="s">flink_jobmanager_job_lastCheckpointDuration &gt; </span><span class="m">60000</span>
+        <span class="na">for</span><span class="pi">:</span> <span class="s">5m</span>
+        <span class="na">labels</span><span class="pi">:</span>
+          <span class="na">severity</span><span class="pi">:</span> <span class="s">warning</span>
+        <span class="na">annotations</span><span class="pi">:</span>
+          <span class="na">summary</span><span class="pi">:</span> <span class="s2">"</span><span class="s">High</span><span class="nv"> </span><span class="s">checkpoint</span><span class="nv"> </span><span class="s">duration</span><span class="nv"> </span><span class="s">detected"</span>
+          <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Checkpoint</span><span class="nv"> </span><span class="s">duration</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">above</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">threshold"</span>
+      
+      <span class="pi">-</span> <span class="na">alert</span><span class="pi">:</span> <span class="s">HighBackpressure</span>
+        <span class="na">expr</span><span class="pi">:</span> <span class="s">flink_taskmanager_job_task_backPressuredTimeMsPerSecond &gt; </span><span class="m">1000</span>
+        <span class="na">for</span><span class="pi">:</span> <span class="s">2m</span>
+        <span class="na">labels</span><span class="pi">:</span>
+          <span class="na">severity</span><span class="pi">:</span> <span class="s">warning</span>
+        <span class="na">annotations</span><span class="pi">:</span>
+          <span class="na">summary</span><span class="pi">:</span> <span class="s2">"</span><span class="s">High</span><span class="nv"> </span><span class="s">backpressure</span><span class="nv"> </span><span class="s">detected"</span>
+          <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Task</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">experiencing</span><span class="nv"> </span><span class="s">high</span><span class="nv"> </span><span class="s">backpressure"</span>
+</code></pre></div></div>
+
+<h2 id="-disaster-recovery-and-operations-strategy">🔧 Disaster Recovery and Operations Strategy</h2>
+
+<h3 id="1-automatic-disaster-recovery-system">1. Automatic Disaster Recovery System</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">FlinkDisasterRecovery</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">kubernetes_client</span><span class="p">,</span> <span class="n">flink_client</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">k8s_client</span> <span class="o">=</span> <span class="n">kubernetes_client</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">flink_client</span> <span class="o">=</span> <span class="n">flink_client</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">recovery_strategies</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_disaster_recovery</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup disaster recovery system</span><span class="sh">"""</span>
+        
+        <span class="c1"># 1. Checkpoint monitoring
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">setup_checkpoint_monitoring</span><span class="p">()</span>
+        
+        <span class="c1"># 2. Automatic restart configuration
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">setup_auto_restart</span><span class="p">()</span>
+        
+        <span class="c1"># 3. Backup and restore system
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">setup_backup_system</span><span class="p">()</span>
+        
+        <span class="c1"># 4. Circuit breaker for failure isolation
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">setup_circuit_breaker</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">setup_checkpoint_monitoring</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup checkpoint monitoring</span><span class="sh">"""</span>
+        <span class="n">checkpoint_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">execution.checkpointing.interval</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">60s</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">execution.checkpointing.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">EXACTLY_ONCE</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">execution.checkpointing.timeout</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">600s</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">execution.checkpointing.min-pause</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">60s</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">execution.checkpointing.max-concurrent-checkpoints</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">execution.checkpointing.unaligned</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">execution.checkpointing.alignment-timeout</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0s</span><span class="sh">"</span><span class="p">,</span>
+            
+            <span class="c1"># Checkpoint storage
+</span>            <span class="sh">"</span><span class="s">state.backend</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">rocksdb</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">state.checkpoints.dir</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">s3://flink-checkpoints/checkpoints</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">state.savepoints.dir</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">s3://flink-savepoints/savepoints</span><span class="sh">"</span><span class="p">,</span>
+            
+            <span class="c1"># High availability
+</span>            <span class="sh">"</span><span class="s">high-availability</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kubernetes</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">high-availability.storageDir</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">s3://flink-ha/ha</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">high-availability.cluster-id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">flink-cluster</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">checkpoint_config</span>
+    
+    <span class="k">def</span> <span class="nf">execute_disaster_recovery</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">failure_type</span><span class="p">,</span> <span class="n">job_name</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Execute disaster recovery</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="n">failure_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">job_failure</span><span class="sh">"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">recover_from_job_failure</span><span class="p">(</span><span class="n">job_name</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">failure_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">cluster_failure</span><span class="sh">"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">recover_from_cluster_failure</span><span class="p">(</span><span class="n">job_name</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">failure_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">data_corruption</span><span class="sh">"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">recover_from_data_corruption</span><span class="p">(</span><span class="n">job_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">recover_from_unknown_failure</span><span class="p">(</span><span class="n">job_name</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">recover_from_job_failure</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">job_name</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Recover from job failure</span><span class="sh">"""</span>
+        <span class="n">recovery_steps</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sh">"</span><span class="s">1. Stop failed job</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">2. Check latest checkpoint</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">3. Validate state backend</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">4. Restart job</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">5. Monitor recovery status</span><span class="sh">"</span>
+        <span class="p">]</span>
+        
+        <span class="c1"># Actual recovery logic implementation
+</span>        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 1. Stop job
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">flink_client</span><span class="p">.</span><span class="nf">cancel_job</span><span class="p">(</span><span class="n">job_name</span><span class="p">)</span>
+            
+            <span class="c1"># 2. Check latest checkpoint
+</span>            <span class="n">latest_checkpoint</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_latest_checkpoint</span><span class="p">(</span><span class="n">job_name</span><span class="p">)</span>
+            
+            <span class="c1"># 3. Validate state
+</span>            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="nf">validate_checkpoint</span><span class="p">(</span><span class="n">latest_checkpoint</span><span class="p">):</span>
+                <span class="c1"># 4. Restart job
+</span>                <span class="n">self</span><span class="p">.</span><span class="n">flink_client</span><span class="p">.</span><span class="nf">restart_job</span><span class="p">(</span><span class="n">job_name</span><span class="p">,</span> <span class="n">latest_checkpoint</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">success</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Job recovered successfully</span><span class="sh">"</span><span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># 5. Try recovery from savepoint
+</span>                <span class="n">latest_savepoint</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_latest_savepoint</span><span class="p">(</span><span class="n">job_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">latest_savepoint</span><span class="p">:</span>
+                    <span class="n">self</span><span class="p">.</span><span class="n">flink_client</span><span class="p">.</span><span class="nf">restart_job</span><span class="p">(</span><span class="n">job_name</span><span class="p">,</span> <span class="n">latest_savepoint</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">success</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Job recovered from savepoint</span><span class="sh">"</span><span class="p">}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">failed</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">No valid checkpoint or savepoint found</span><span class="sh">"</span><span class="p">}</span>
+                    
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">error</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Recovery failed: </span><span class="si">{</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="-practical-project-enterprise-flink-platform">🚀 Practical Project: Enterprise Flink Platform</h2>
+
+<h3 id="project-overview">Project Overview</h3>
+
+<p>Build a complete platform for operating Apache Flink in large-scale enterprise environments. This platform includes automation, monitoring, disaster recovery, and performance optimization.</p>
+
+<h3 id="1-platform-architecture">1. Platform Architecture</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">EnterpriseFlinkPlatform</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">components</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">deployment</span><span class="sh">"</span><span class="p">:</span> <span class="nc">FlinkDeploymentManager</span><span class="p">(),</span>
+            <span class="sh">"</span><span class="s">monitoring</span><span class="sh">"</span><span class="p">:</span> <span class="nc">FlinkMonitoringSystem</span><span class="p">(),</span>
+            <span class="sh">"</span><span class="s">automation</span><span class="sh">"</span><span class="p">:</span> <span class="nc">FlinkOperationsAutomation</span><span class="p">(),</span>
+            <span class="sh">"</span><span class="s">recovery</span><span class="sh">"</span><span class="p">:</span> <span class="nc">FlinkDisasterRecovery</span><span class="p">(),</span>
+            <span class="sh">"</span><span class="s">optimization</span><span class="sh">"</span><span class="p">:</span> <span class="nc">FlinkPerformanceOptimizer</span><span class="p">()</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">deploy_enterprise_platform</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Deploy enterprise platform</span><span class="sh">"""</span>
+        
+        <span class="n">deployment_steps</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sh">"</span><span class="s">1. Setup namespaces and RBAC</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">2. Install Flink Operator</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">3. Deploy monitoring stack</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">4. Deploy Flink cluster</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">5. Setup automation rules</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">6. Configure alerting system</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">7. Setup backup system</span><span class="sh">"</span>
+        <span class="p">]</span>
+        
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">deployment_steps</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Executing: </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">execute_deployment_step</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get_production_cluster_config</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Production cluster configuration</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">flinkConfiguration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">taskmanager.numberOfTaskSlots</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">parallelism.default</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">16</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">state.backend</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">rocksdb</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">state.checkpoints.dir</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">s3://prod-flink-checkpoints/checkpoints</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">state.savepoints.dir</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">s3://prod-flink-savepoints/savepoints</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">execution.checkpointing.interval</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">60s</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">execution.checkpointing.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">EXACTLY_ONCE</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">high-availability</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kubernetes</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">high-availability.storageDir</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">s3://prod-flink-ha/ha</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">restart-strategy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">exponential-delay</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">restart-strategy.exponential-delay.initial-backoff</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10s</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">restart-strategy.exponential-delay.max-backoff</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2min</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">metrics.reporter.prom.class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.flink.metrics.prometheus.PrometheusReporter</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">metrics.reporter.prom.port</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">9249</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">jobManager</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">replicas</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">resource</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">memory</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4g</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">cpu</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2000m</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">taskManager</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">replicas</span><span class="sh">"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">resource</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">memory</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8g</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">cpu</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4000m</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+<span class="c1"># Platform deployment example
+</span><span class="k">def</span> <span class="nf">deploy_enterprise_flink_platform</span><span class="p">():</span>
+    <span class="sh">"""</span><span class="s">Deploy enterprise Flink platform</span><span class="sh">"""</span>
+    <span class="n">platform</span> <span class="o">=</span> <span class="nc">EnterpriseFlinkPlatform</span><span class="p">()</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">🚀 Starting Enterprise Flink Platform Deployment...</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 1. Deploy platform
+</span>    <span class="n">platform</span><span class="p">.</span><span class="nf">deploy_enterprise_platform</span><span class="p">()</span>
+    
+    <span class="c1"># 2. Create dashboard
+</span>    <span class="n">dashboard</span> <span class="o">=</span> <span class="n">platform</span><span class="p">.</span><span class="nf">create_comprehensive_dashboard</span><span class="p">()</span>
+    
+    <span class="c1"># 3. Run integration tests
+</span>    <span class="n">platform</span><span class="p">.</span><span class="nf">run_integration_tests</span><span class="p">()</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">✅ Enterprise Flink Platform deployed successfully!</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">platform</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">platform</span> <span class="o">=</span> <span class="nf">deploy_enterprise_flink_platform</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="-learning-summary">📚 Learning Summary</h2>
+
+<h3 id="what-you-learned-in-this-part">What You Learned in This Part</h3>
+
+<ol>
+  <li><strong>Flink Cluster Deployment with Kubernetes</strong>
+    <ul>
+      <li>Flink Operator installation and configuration</li>
+      <li>High availability cluster setup</li>
+      <li>Auto-scaling configuration</li>
+      <li>Environment-specific cluster management</li>
+    </ul>
+  </li>
+  <li><strong>Performance Tuning and Optimization</strong>
+    <ul>
+      <li>Memory optimization strategies</li>
+      <li>Network performance optimization</li>
+      <li>State backend optimization</li>
+      <li>Workload-specific performance tuning</li>
+    </ul>
+  </li>
+  <li><strong>Monitoring and Alerting Systems</strong>
+    <ul>
+      <li>Prometheus metrics collection</li>
+      <li>Grafana dashboard configuration</li>
+      <li>Alert rules setup</li>
+      <li>Comprehensive monitoring system</li>
+    </ul>
+  </li>
+  <li><strong>Disaster Recovery and Operations Strategy</strong>
+    <ul>
+      <li>Automatic disaster recovery system</li>
+      <li>Operations automation</li>
+      <li>Backup and restore strategies</li>
+      <li>Circuit breaker pattern</li>
+    </ul>
+  </li>
+  <li><strong>Practical Project</strong>
+    <ul>
+      <li>Enterprise-grade Flink platform</li>
+      <li>Fully automated operational environment</li>
+      <li>Multi-environment management</li>
+      <li>Comprehensive dashboard system</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="core-technology-stack">Core Technology Stack</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Technology</th>
+      <th>Purpose</th>
+      <th>Importance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Kubernetes</strong></td>
+      <td>Container orchestration</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Flink Operator</strong></td>
+      <td>Kubernetes-native management</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Prometheus/Grafana</strong></td>
+      <td>Monitoring and visualization</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Automation System</strong></td>
+      <td>Operational efficiency</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Disaster Recovery</strong></td>
+      <td>System stability</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="apache-flink-series-complete">Apache Flink Series Complete!</h3>
+
+<p>Congratulations! You have completed the entire Apache Flink mastery series! 🎉</p>
+
+<h4 id="complete-series-summary"><strong>Complete Series Summary:</strong></h4>
+
+<ul>
+  <li>✅ <strong>Part 1</strong>: Apache Flink Basics and Core Concepts</li>
+  <li>✅ <strong>Part 2</strong>: Advanced Streaming Processing and State Management</li>
+  <li>✅ <strong>Part 3</strong>: Real-time Analytics and CEP</li>
+  <li>✅ <strong>Part 4</strong>: Production Deployment and Performance Optimization</li>
+</ul>
+
+<h4 id="core-competencies-acquired"><strong>Core Competencies Acquired:</strong></h4>
+
+<ol>
+  <li><strong>Technical Competencies</strong>
+    <ul>
+      <li>Understanding of Apache Flink’s core architecture</li>
+      <li>Implementation of real-time processing using DataStream API</li>
+      <li>State management and checkpointing utilization</li>
+      <li>Complex Event Processing (CEP) implementation</li>
+      <li>Production environment deployment and operations</li>
+    </ul>
+  </li>
+  <li><strong>Practical Competencies</strong>
+    <ul>
+      <li>Real-time data pipeline construction</li>
+      <li>Microsecond-level latency achievement</li>
+      <li>Disaster recovery and operations automation</li>
+      <li>Performance optimization and monitoring</li>
+    </ul>
+  </li>
+  <li><strong>Enterprise Competencies</strong>
+    <ul>
+      <li>Kubernetes-based cluster management</li>
+      <li>Automated operational system construction</li>
+      <li>Comprehensive monitoring and alerting systems</li>
+      <li>Disaster recovery and backup strategies</li>
+    </ul>
+  </li>
+</ol>
+
+<p>You now have all the knowledge and experience needed to build enterprise-grade real-time streaming processing systems using Apache Flink! 🚀</p>
+
+<hr />
+
+<p><strong>Series Complete</strong>: <a href="/en/data-engineering/2025/09/14/apache-flink-series-overview.html">Apache Flink Complete Mastery Series</a></p>
+
+<hr />
+
+<p><em>Experience the true power of streaming processing in the world of Apache Flink!</em> 🎯</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+      
+        
+      
+        
+      
+      
+      
+      
+      
+        
+        
+        <a href="/data-engineering/2025/09/18/apache-flink-production-deployment.html" class="nav-link next">
+          다음: Part 4: Apache Flink 프로덕션 배포와 성능 최적화 - 엔터프라이즈급 운영의 완성 →
+        </a>
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

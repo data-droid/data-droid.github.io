@@ -756,7 +756,7 @@ groups:
           severity: warning
         annotations:
           summary: "High memory usage detected"
-          description: "TaskManager {{ $labels.instance }} memory usage is {{ $value | humanizePercentage }}"
+          description: "TaskManager memory usage is above threshold"
       
       - alert: LowThroughput
         expr: rate(flink_taskmanager_job_task_operator_numRecordsInPerSecond[5m]) < 100
@@ -765,7 +765,7 @@ groups:
           severity: warning
         annotations:
           summary: "Low throughput detected"
-          description: "Job {{ $labels.job_name }} throughput is {{ $value }} records/sec, which is below normal"
+          description: "Job throughput is below normal threshold"
 ```
 
 ## 🔧 장애 복구와 운영 전략
