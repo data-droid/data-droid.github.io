@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="From CDC core concepts to building real-time data synchronization systems with Debezium, a complete guide to event-driven architecture.">
+
+
+
+<title>Part 1: Change Data Capture and Debezium Practical Implementation - Complete Real-time Data Synchronization - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 1: Change Data Capture and Debezium Practical Implementation - Complete Real-time Data Synchronization">
+<meta property="og:description" content="From CDC core concepts to building real-time data synchronization systems with Debezium, a complete guide to event-driven architecture.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2025-09-19-change-data-capture-debezium-guide.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 1: Change Data Capture and Debezium Practical Implementation - Complete Real-time Data Synchronization">
+<meta name="twitter:description" content="From CDC core concepts to building real-time data synchronization systems with Debezium, a complete guide to event-driven architecture.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2025/09/19/change-data-capture-debezium-guide.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2025-09-19-change-data-capture-debezium-guide.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 19일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 1: Change Data Capture and Debezium Practical Implementation - Complete Real-time Data Synchronization</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Change-Data-Capture</span>
+      
+        <span class="tag">CDC</span>
+      
+        <span class="tag">Debezium</span>
+      
+        <span class="tag">Kafka</span>
+      
+        <span class="tag">Real-time-Sync</span>
+      
+        <span class="tag">Event-Driven</span>
+      
+        <span class="tag">Data-Pipeline</span>
+      
+        <span class="tag">Schema-Evolution</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Change data capture complete guide 시리즈</span>
+      <span class="series-order">Part 2</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 50 minutes</span>
+      
+      
+        <span class="difficulty">📊 Advanced</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-1-change-data-capture-and-debezium-practical-implementation---complete-real-time-data-synchronization">Part 1: Change Data Capture and Debezium Practical Implementation - Complete Real-time Data Synchronization</h1>
+
+<blockquote>
+  <p>From CDC core concepts to building real-time data synchronization systems with Debezium, a complete guide to event-driven architecture.</p>
+</blockquote>
+
+<h2 id="-table-of-contents">📋 Table of Contents</h2>
+
+<ol>
+  <li><a href="#change-data-capture-basic-concepts">Change Data Capture Basic Concepts</a></li>
+  <li><a href="#debezium-architecture-and-core-features">Debezium Architecture and Core Features</a></li>
+  <li><a href="#debezium-connector-configuration-and-operations">Debezium Connector Configuration and Operations</a></li>
+  <li><a href="#schema-evolution-and-schema-registry">Schema Evolution and Schema Registry</a></li>
+  <li><a href="#real-time-data-transformation-and-routing">Real-time Data Transformation and Routing</a></li>
+  <li><a href="#practical-project-real-time-data-synchronization-system">Practical Project: Real-time Data Synchronization System</a></li>
+  <li><a href="#learning-summary">Learning Summary</a></li>
+</ol>
+
+<h2 id="-change-data-capture-basic-concepts">🔄 Change Data Capture Basic Concepts</h2>
+
+<h3 id="what-is-cdc">What is CDC?</h3>
+
+<p>Change Data Capture (CDC) is a technology that detects and captures database changes in real-time and propagates them to other systems. It overcomes the limitations of traditional batch processing and enables real-time data synchronization.</p>
+
+<h3 id="traditional-batch-processing-vs-cdc">Traditional Batch Processing vs CDC</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Characteristics</th>
+      <th>Batch Processing</th>
+      <th>CDC Approach</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Latency</strong></td>
+      <td>High (hours/days)</td>
+      <td>Low (seconds/minutes)</td>
+    </tr>
+    <tr>
+      <td><strong>Throughput</strong></td>
+      <td>High (bulk processing)</td>
+      <td>Medium (real-time stream)</td>
+    </tr>
+    <tr>
+      <td><strong>Complexity</strong></td>
+      <td>Low</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td><strong>Consistency</strong></td>
+      <td>Eventually consistent</td>
+      <td>Strong consistency possible</td>
+    </tr>
+    <tr>
+      <td><strong>Resource Usage</strong></td>
+      <td>Periodically high</td>
+      <td>Continuously medium</td>
+    </tr>
+    <tr>
+      <td><strong>Real-time Processing</strong></td>
+      <td>Impossible</td>
+      <td>Possible</td>
+    </tr>
+    <tr>
+      <td><strong>Main Use Cases</strong></td>
+      <td>• ETL pipelines<br />• Data warehouse construction<br />• Daily/weekly reports<br />• Large-scale data migration</td>
+      <td>• Real-time analytics<br />• Event-driven architecture<br />• Data lake real-time sync<br />• Microservice data synchronization</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="cdc-adoption-roi-evaluation">CDC Adoption ROI Evaluation</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Evaluation Criteria</th>
+      <th>Score</th>
+      <th>Conditions</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Business Requirements</strong></td>
+      <td>9</td>
+      <td>Real-time data processing required</td>
+      <td>Essential for competitive advantage</td>
+    </tr>
+    <tr>
+      <td><strong>Technical Infrastructure</strong></td>
+      <td>8</td>
+      <td>Kafka ecosystem available</td>
+      <td>Strong foundation for implementation</td>
+    </tr>
+    <tr>
+      <td><strong>Team Expertise</strong></td>
+      <td>7</td>
+      <td>Experience with streaming technologies</td>
+      <td>Requires learning investment</td>
+    </tr>
+    <tr>
+      <td><strong>Data Volume</strong></td>
+      <td>9</td>
+      <td>High-frequency changes</td>
+      <td>CDC provides significant benefits</td>
+    </tr>
+    <tr>
+      <td><strong>Compliance Requirements</strong></td>
+      <td>8</td>
+      <td>Audit trail and data lineage needed</td>
+      <td>CDC ensures complete change tracking</td>
+    </tr>
+    <tr>
+      <td><strong>System Integration</strong></td>
+      <td>8</td>
+      <td>Multiple downstream systems</td>
+      <td>CDC reduces integration complexity</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="roi-recommendation">ROI Recommendation</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Total Score</th>
+      <th>Recommendation</th>
+      <th>Priority</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>49/60</strong></td>
+      <td><strong>Highly Recommended</strong></td>
+      <td><strong>High Priority</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="cdc-tool-selection-criteria">CDC Tool Selection Criteria</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Conditions</th>
+      <th>Recommended Tool</th>
+      <th>Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Open source preferred</strong></td>
+      <td>Debezium</td>
+      <td>Most mature open-source CDC solution</td>
+    </tr>
+    <tr>
+      <td><strong>Cloud-native required</strong></td>
+      <td>AWS DMS</td>
+      <td>Fully managed service</td>
+    </tr>
+    <tr>
+      <td><strong>High performance needed</strong></td>
+      <td>Maxwell</td>
+      <td>Optimized for MySQL</td>
+    </tr>
+    <tr>
+      <td><strong>Enterprise features required</strong></td>
+      <td>Confluent Platform</td>
+      <td>Comprehensive enterprise solution</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="selection-criteria-weights">Selection Criteria Weights</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Criteria</th>
+      <th>Weight</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Performance</strong></td>
+      <td>25%</td>
+    </tr>
+    <tr>
+      <td><strong>Reliability</strong></td>
+      <td>20%</td>
+    </tr>
+    <tr>
+      <td><strong>Community Support</strong></td>
+      <td>15%</td>
+    </tr>
+    <tr>
+      <td><strong>Documentation</strong></td>
+      <td>15%</td>
+    </tr>
+    <tr>
+      <td><strong>Cost</strong></td>
+      <td>10%</td>
+    </tr>
+    <tr>
+      <td><strong>Ease of Use</strong></td>
+      <td>10%</td>
+    </tr>
+    <tr>
+      <td><strong>Integration</strong></td>
+      <td>5%</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="️-debezium-architecture-and-core-features">🏗️ Debezium Architecture and Core Features</h2>
+
+<h3 id="debezium-architecture-overview">Debezium Architecture Overview</h3>
+
+<p>Debezium is built on Apache Kafka and Kafka Connect, providing a distributed platform for capturing database changes.</p>
+
+<h3 id="core-components">Core Components</h3>
+
+<p>Debezium consists of several key components that work together to provide reliable change data capture:</p>
+
+<ul>
+  <li><strong>Debezium Connectors</strong>: Database-specific connectors that capture changes</li>
+  <li><strong>Kafka Connect Framework</strong>: Provides the infrastructure for running connectors</li>
+  <li><strong>Schema Registry</strong>: Manages schema evolution and compatibility</li>
+  <li><strong>Kafka Brokers</strong>: Distribute change events across the cluster</li>
+  <li><strong>Consumer Applications</strong>: Process and react to change events</li>
+</ul>
+
+<h3 id="database-specific-change-detection-mechanisms">Database-Specific Change Detection Mechanisms</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Database</th>
+      <th>Mechanism</th>
+      <th>Advantages</th>
+      <th>Limitations</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>MySQL</strong></td>
+      <td>Binary Log (Binlog)</td>
+      <td>• High performance<br />• Complete change history<br />• Minimal impact on DB</td>
+      <td>• Requires binary logging enabled<br />• Binlog retention management</td>
+    </tr>
+    <tr>
+      <td><strong>PostgreSQL</strong></td>
+      <td>Write-Ahead Log (WAL)</td>
+      <td>• ACID compliance<br />• Logical replication<br />• Real-time streaming</td>
+      <td>• WAL segment management<br />• Replication slot monitoring</td>
+    </tr>
+    <tr>
+      <td><strong>MongoDB</strong></td>
+      <td>Oplog</td>
+      <td>• Native change stream<br />• Automatic failover<br />• Sharded cluster support</td>
+      <td>• Oplog size limitations<br />• Memory usage considerations</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="event-streaming-patterns">Event Streaming Patterns</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Pattern</th>
+      <th>Description</th>
+      <th>Use Case</th>
+      <th>Implementation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Event Sourcing</strong></td>
+      <td>Store all changes as events</td>
+      <td>Audit trails, replay capabilities</td>
+      <td>Event store with Kafka topics</td>
+    </tr>
+    <tr>
+      <td><strong>CQRS</strong></td>
+      <td>Separate read and write models</td>
+      <td>High-performance read operations</td>
+      <td>Write model via CDC, read model via projections</td>
+    </tr>
+    <tr>
+      <td><strong>Saga</strong></td>
+      <td>Distributed transaction management</td>
+      <td>Microservice coordination</td>
+      <td>Event-driven transaction coordination</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">EventStreamingPatterns</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">implement_event_sourcing_pattern</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Event Sourcing pattern implementation example</span><span class="sh">"""</span>
+        
+        <span class="c1"># Event store configuration
+</span>        <span class="n">event_store_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">kafka_topics</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">order_events</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">orders.ecommerce.orders</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">customer_events</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">orders.ecommerce.customers</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">product_events</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">orders.ecommerce.products</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">event_serialization</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Avro</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">snapshot_frequency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">every_1000_events</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">retention_policy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">7_days</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Event replay example
+</span>        <span class="k">def</span> <span class="nf">replay_events_for_state</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">):</span>
+            <span class="sh">"""</span><span class="s">Restore entity state by replaying events</span><span class="sh">"""</span>
+            <span class="n">events</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_events</span><span class="p">(</span><span class="n">entity_id</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">)</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">apply_event</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">state</span>
+        
+        <span class="k">return</span> <span class="n">event_store_config</span>
+    
+    <span class="k">def</span> <span class="nf">implement_cqrs_pattern</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">CQRS pattern implementation example</span><span class="sh">"""</span>
+        
+        <span class="c1"># Command side (Write Model)
+</span>        <span class="n">command_side_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">write_model</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">database</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">mysql_orders</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">orders</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">order_items</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">optimization</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">for_writes</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">event_publishing</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">debezium_connector</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">mysql-orders-connector</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">topics</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">orders.ecommerce.orders</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Query side (Read Model)
+</span>        <span class="n">query_side_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">read_models</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">elasticsearch</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">indexes</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">orders_read_model</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">customers_read_model</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">optimization</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">for_reads</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">projections</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">order_summary</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">customer_profile</span><span class="sh">"</span><span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">redis</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">caches</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">order_cache</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">customer_cache</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">ttl</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1_hour</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">command_side</span><span class="sh">"</span><span class="p">:</span> <span class="n">command_side_config</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">query_side</span><span class="sh">"</span><span class="p">:</span> <span class="n">query_side_config</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">implement_saga_pattern</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Saga pattern implementation example</span><span class="sh">"""</span>
+        
+        <span class="c1"># Choreography pattern
+</span>        <span class="n">choreography_saga</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">order_processing_saga</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">steps</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">service</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">order_service</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">create_order</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">compensation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">cancel_order</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">event</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">OrderCreated</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">service</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">inventory_service</span><span class="sh">"</span><span class="p">,</span> 
+                        <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">reserve_inventory</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">compensation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">release_inventory</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">event</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">InventoryReserved</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">service</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">payment_service</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">process_payment</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">compensation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">refund_payment</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">event</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">PaymentProcessed</span><span class="sh">"</span>
+                    <span class="p">}</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">compensation_strategy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">reverse_order</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Orchestration pattern
+</span>        <span class="n">orchestration_saga</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">saga_orchestrator</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">state_machine</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">states</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">STARTED</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">INVENTORY_RESERVED</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">PAYMENT_PROCESSED</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">COMPLETED</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">transitions</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">STARTED</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">INVENTORY_RESERVED</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">INVENTORY_RESERVED</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">PAYMENT_PROCESSED</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">PAYMENT_PROCESSED</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">COMPLETED</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">compensation_states</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">INVENTORY_RELEASED</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">PAYMENT_REFUNDED</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">CANCELLED</span><span class="sh">"</span><span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">choreography</span><span class="sh">"</span><span class="p">:</span> <span class="n">choreography_saga</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">orchestration</span><span class="sh">"</span><span class="p">:</span> <span class="n">orchestration_saga</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="️-debezium-connector-configuration-and-operations">⚙️ Debezium Connector Configuration and Operations</h2>
+
+<h3 id="mysql-connector-advanced-configuration">MySQL Connector Advanced Configuration</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DebeziumConnectorManager</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">kafka_connect_url</span> <span class="o">=</span> <span class="sh">"</span><span class="s">http://kafka-connect:8083</span><span class="sh">"</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">connector_configs</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">configure_mysql_connector</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">database_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Configure MySQL connector with advanced settings</span><span class="sh">"""</span>
+        
+        <span class="n">mysql_connector_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">mysql-</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">database_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">-connector</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">config</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">connector.class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.connector.mysql.MySqlConnector</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">database.hostname</span><span class="sh">"</span><span class="p">:</span> <span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">hostname</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.port</span><span class="sh">"</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">port</span><span class="sh">"</span><span class="p">]),</span>
+                <span class="sh">"</span><span class="s">database.user</span><span class="sh">"</span><span class="p">:</span> <span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">username</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.password</span><span class="sh">"</span><span class="p">:</span> <span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">password</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.server.id</span><span class="sh">"</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">server_id</span><span class="sh">"</span><span class="p">]),</span>
+                <span class="sh">"</span><span class="s">topic.prefix</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">database_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">.</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">schema_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># Table filtering
+</span>                <span class="sh">"</span><span class="s">table.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">include_tables</span><span class="sh">"</span><span class="p">]),</span>
+                <span class="sh">"</span><span class="s">database.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">database_name</span><span class="sh">"</span><span class="p">],</span>
+                
+                <span class="c1"># Performance optimization
+</span>                <span class="sh">"</span><span class="s">binlog.buffer.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">32768</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">max.batch.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4096</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">max.queue.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">16384</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">100</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># Schema management
+</span>                <span class="sh">"</span><span class="s">schema.history.internal.kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka:9092</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">schema.history.internal.kafka.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">schema-changes.</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">database_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">include.schema.changes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># Data transformation
+</span>                <span class="sh">"</span><span class="s">transforms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">unwrap,route,addTimestamp</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transforms.unwrap.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.transforms.ExtractNewRecordState</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transforms.unwrap.drop.tombstones</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transforms.unwrap.delete.handling.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">drop</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transforms.unwrap.add.fields</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">op,ts_ms,source.ts_ms,source.db,source.table</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># Topic routing
+</span>                <span class="sh">"</span><span class="s">transforms.route.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.RegexRouter</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transforms.route.regex</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">database_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="se">\\</span><span class="s">.</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">schema_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="se">\\</span><span class="s">.([^.]+)</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transforms.route.replacement</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">database_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">.$1</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># Field addition
+</span>                <span class="sh">"</span><span class="s">transforms.addTimestamp.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.InsertField$Value</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transforms.addTimestamp.static.field</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">processed_at</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transforms.addTimestamp.static.value</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">$(date:yyyy-MM-dd</span><span class="sh">'</span><span class="s">T</span><span class="sh">'</span><span class="s">HH:mm:ss</span><span class="sh">'</span><span class="s">Z</span><span class="sh">'</span><span class="s">)</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># Transaction metadata
+</span>                <span class="sh">"</span><span class="s">provide.transaction.metadata</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transaction.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">transactions.</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">database_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">mysql_connector_config</span>
+</code></pre></div></div>
+
+<h3 id="postgresql-connector-configuration">PostgreSQL Connector Configuration</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">configure_postgresql_connector</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">database_config</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Configure PostgreSQL connector with WAL settings</span><span class="sh">"""</span>
+    
+    <span class="n">postgresql_connector_config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">postgresql-</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">database_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">-connector</span><span class="sh">"</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">config</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">connector.class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.connector.postgresql.PostgresConnector</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">database.hostname</span><span class="sh">"</span><span class="p">:</span> <span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">hostname</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">database.port</span><span class="sh">"</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">port</span><span class="sh">"</span><span class="p">]),</span>
+            <span class="sh">"</span><span class="s">database.user</span><span class="sh">"</span><span class="p">:</span> <span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">username</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">database.password</span><span class="sh">"</span><span class="p">:</span> <span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">password</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">database.dbname</span><span class="sh">"</span><span class="p">:</span> <span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">database_name</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">database.server.name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">database_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">_server</span><span class="sh">"</span><span class="p">,</span>
+            
+            <span class="c1"># WAL configuration
+</span>            <span class="sh">"</span><span class="s">slot.name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">debezium_</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">database_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">publication.name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">debezium_publication_</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">database_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">plugin.name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">pgoutput</span><span class="sh">"</span><span class="p">,</span>
+            
+            <span class="c1"># Table filtering
+</span>            <span class="sh">"</span><span class="s">table.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">include_tables</span><span class="sh">"</span><span class="p">]),</span>
+            <span class="sh">"</span><span class="s">schema.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">schema_name</span><span class="sh">"</span><span class="p">],</span>
+            
+            <span class="c1"># Performance settings
+</span>            <span class="sh">"</span><span class="s">max.queue.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8192</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">max.batch.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2048</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1000</span><span class="sh">"</span><span class="p">,</span>
+            
+            <span class="c1"># Schema management
+</span>            <span class="sh">"</span><span class="s">schema.history.internal.kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka:9092</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">schema.history.internal.kafka.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">schema-changes.</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">database_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">include.schema.changes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    
+    <span class="k">return</span> <span class="n">postgresql_connector_config</span>
+</code></pre></div></div>
+
+<h3 id="mongodb-connector-configuration">MongoDB Connector Configuration</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">configure_mongodb_connector</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">database_config</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Configure MongoDB connector with replica set settings</span><span class="sh">"""</span>
+    
+    <span class="n">mongodb_connector_config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">mongodb-</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">database_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">-connector</span><span class="sh">"</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">config</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">connector.class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.connector.mongodb.MongoDbConnector</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">mongodb.hosts</span><span class="sh">"</span><span class="p">:</span> <span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">connection_string</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">mongodb.user</span><span class="sh">"</span><span class="p">:</span> <span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">username</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">mongodb.password</span><span class="sh">"</span><span class="p">:</span> <span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">password</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">mongodb.name</span><span class="sh">"</span><span class="p">:</span> <span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">database_name</span><span class="sh">"</span><span class="p">],</span>
+            
+            <span class="c1"># Collection filtering
+</span>            <span class="sh">"</span><span class="s">collection.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">include_collections</span><span class="sh">"</span><span class="p">]),</span>
+            <span class="sh">"</span><span class="s">database.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="n">database_config</span><span class="p">[</span><span class="sh">"</span><span class="s">database_name</span><span class="sh">"</span><span class="p">],</span>
+            
+            <span class="c1"># Oplog settings
+</span>            <span class="sh">"</span><span class="s">mongodb.poll.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1000</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">mongodb.connect.timeout.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30000</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">mongodb.socket.timeout.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30000</span><span class="sh">"</span><span class="p">,</span>
+            
+            <span class="c1"># Schema management
+</span>            <span class="sh">"</span><span class="s">schema.history.internal.kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka:9092</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">schema.history.internal.kafka.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">schema-changes.</span><span class="si">{</span><span class="n">database_config</span><span class="p">[</span><span class="sh">'</span><span class="s">database_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">include.schema.changes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    
+    <span class="k">return</span> <span class="n">mongodb_connector_config</span>
+</code></pre></div></div>
+
+<h3 id="connector-management-operations">Connector Management Operations</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ConnectorOperations</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">kafka_connect_url</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">kafka_connect_url</span> <span class="o">=</span> <span class="n">kafka_connect_url</span>
+    
+    <span class="k">def</span> <span class="nf">deploy_connector</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">connector_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Deploy a new connector</span><span class="sh">"""</span>
+        
+        <span class="kn">import</span> <span class="n">requests</span>
+        <span class="kn">import</span> <span class="n">json</span>
+        
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span>
+            <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">kafka_connect_url</span><span class="si">}</span><span class="s">/connectors</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">Content-Type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">application/json</span><span class="sh">"</span><span class="p">},</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">connector_config</span><span class="p">)</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✅ Connector </span><span class="sh">'</span><span class="si">{</span><span class="n">connector_config</span><span class="p">[</span><span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">'</span><span class="s"> deployed successfully</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">❌ Failed to deploy connector: </span><span class="si">{</span><span class="n">response</span><span class="p">.</span><span class="n">text</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">get_connector_status</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">connector_name</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Get connector status and health</span><span class="sh">"""</span>
+        
+        <span class="kn">import</span> <span class="n">requests</span>
+        
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">kafka_connect_url</span><span class="si">}</span><span class="s">/connectors/</span><span class="si">{</span><span class="n">connector_name</span><span class="si">}</span><span class="s">/status</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="n">status</span><span class="p">[</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">state</span><span class="sh">"</span><span class="p">:</span> <span class="n">status</span><span class="p">[</span><span class="sh">"</span><span class="s">connector</span><span class="sh">"</span><span class="p">][</span><span class="sh">"</span><span class="s">state</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">tasks</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">],</span>
+                        <span class="sh">"</span><span class="s">state</span><span class="sh">"</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="sh">"</span><span class="s">state</span><span class="sh">"</span><span class="p">],</span>
+                        <span class="sh">"</span><span class="s">worker_id</span><span class="sh">"</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="sh">"</span><span class="s">worker_id</span><span class="sh">"</span><span class="p">]</span>
+                    <span class="p">}</span>
+                    <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">status</span><span class="p">[</span><span class="sh">"</span><span class="s">tasks</span><span class="sh">"</span><span class="p">]</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">❌ Failed to get connector status: </span><span class="si">{</span><span class="n">response</span><span class="p">.</span><span class="n">text</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">restart_connector</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">connector_name</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Restart a connector</span><span class="sh">"""</span>
+        
+        <span class="kn">import</span> <span class="n">requests</span>
+        
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">kafka_connect_url</span><span class="si">}</span><span class="s">/connectors/</span><span class="si">{</span><span class="n">connector_name</span><span class="si">}</span><span class="s">/restart</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">204</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✅ Connector </span><span class="sh">'</span><span class="si">{</span><span class="n">connector_name</span><span class="si">}</span><span class="sh">'</span><span class="s"> restarted successfully</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">❌ Failed to restart connector: </span><span class="si">{</span><span class="n">response</span><span class="p">.</span><span class="n">text</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+</code></pre></div></div>
+
+<h2 id="-schema-evolution-and-schema-registry">📊 Schema Evolution and Schema Registry</h2>
+
+<h3 id="schema-evolution-concept">Schema Evolution Concept</h3>
+
+<p>Schema evolution is the ability to modify database schemas over time while maintaining backward and forward compatibility. This is crucial for long-running CDC systems where the source schema may change.</p>
+
+<h4 id="importance-of-schema-evolution">Importance of Schema Evolution</h4>
+
+<ul>
+  <li><strong>Backward Compatibility</strong>: New consumers can read data written by old producers</li>
+  <li><strong>Forward Compatibility</strong>: Old consumers can read data written by new producers</li>
+  <li><strong>Gradual Deployment</strong>: Allows phased rollout of schema changes</li>
+  <li><strong>Data Consistency</strong>: Ensures data integrity across schema versions</li>
+</ul>
+
+<h3 id="schema-registry-integration">Schema Registry Integration</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SchemaRegistryManager</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">registry_url</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">registry_url</span> <span class="o">=</span> <span class="n">registry_url</span>
+    
+    <span class="k">def</span> <span class="nf">configure_schema_registry</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">registry_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Configure Schema Registry for Debezium</span><span class="sh">"""</span>
+        
+        <span class="n">schema_registry_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">schema_registry_url</span><span class="sh">"</span><span class="p">:</span> <span class="n">registry_config</span><span class="p">[</span><span class="sh">"</span><span class="s">url</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">key.converter</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.confluent.connect.avro.AvroConverter</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">key.converter.schema.registry.url</span><span class="sh">"</span><span class="p">:</span> <span class="n">registry_config</span><span class="p">[</span><span class="sh">"</span><span class="s">url</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">value.converter</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.confluent.connect.avro.AvroConverter</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">value.converter.schema.registry.url</span><span class="sh">"</span><span class="p">:</span> <span class="n">registry_config</span><span class="p">[</span><span class="sh">"</span><span class="s">url</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">value.converter.auto.register.schemas</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">value.converter.use.latest.version</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">unwrap</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.transforms.ExtractNewRecordState</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.drop.tombstones</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.delete.handling.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">drop</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.add.fields</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">op,ts_ms,source.ts_ms,source.db,source.table</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">schema_registry_config</span>
+</code></pre></div></div>
+
+<h3 id="schema-evolution-scenarios">Schema Evolution Scenarios</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Scenario</th>
+      <th>Description</th>
+      <th>Compatibility</th>
+      <th>Handling</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Column Addition</strong></td>
+      <td>Add new column</td>
+      <td>FORWARD</td>
+      <td>New column handled as null or default value</td>
+      <td><code class="language-plaintext highlighter-rouge">ALTER TABLE users ADD COLUMN phone VARCHAR(20)</code></td>
+    </tr>
+    <tr>
+      <td><strong>Column Deletion</strong></td>
+      <td>Drop column</td>
+      <td>BACKWARD</td>
+      <td>Remove column from existing data</td>
+      <td><code class="language-plaintext highlighter-rouge">ALTER TABLE users DROP COLUMN old_field</code></td>
+    </tr>
+    <tr>
+      <td><strong>Column Rename</strong></td>
+      <td>Rename column</td>
+      <td>NONE</td>
+      <td>Add new column then remove old column</td>
+      <td><code class="language-plaintext highlighter-rouge">ALTER TABLE users RENAME COLUMN old_name TO new_name</code></td>
+    </tr>
+    <tr>
+      <td><strong>Column Type Change</strong></td>
+      <td>Change column type</td>
+      <td>FORWARD_TRANSITIVE</td>
+      <td>Convert after type compatibility check</td>
+      <td><code class="language-plaintext highlighter-rouge">ALTER TABLE users MODIFY COLUMN age INT</code></td>
+    </tr>
+    <tr>
+      <td><strong>Table Addition</strong></td>
+      <td>Add new table</td>
+      <td>FORWARD</td>
+      <td>Automatically create new topic</td>
+      <td><code class="language-plaintext highlighter-rouge">CREATE TABLE new_table (...)</code></td>
+    </tr>
+    <tr>
+      <td><strong>Table Deletion</strong></td>
+      <td>Drop table</td>
+      <td>BACKWARD</td>
+      <td>Keep existing topic but stop new events</td>
+      <td><code class="language-plaintext highlighter-rouge">DROP TABLE old_table</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="schema-compatibility-strategies">Schema Compatibility Strategies</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Strategy</th>
+      <th>Description</th>
+      <th>Use Case</th>
+      <th>Field Addition</th>
+      <th>Field Removal</th>
+      <th>Type Change</th>
+      <th>Safety</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Backward Compatibility</strong></td>
+      <td>Compatible with previous versions</td>
+      <td>Producer update before consumer update</td>
+      <td>✅ Optional fields only</td>
+      <td>❌ Prohibited</td>
+      <td>✅ Expandable types only</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td><strong>Forward Compatibility</strong></td>
+      <td>Compatible with future versions</td>
+      <td>Consumer update before producer update</td>
+      <td>❌ Prohibited</td>
+      <td>✅ Optional fields only</td>
+      <td>✅ Reducible types only</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td><strong>Full Compatibility</strong></td>
+      <td>Bidirectional compatibility</td>
+      <td>Safest strategy</td>
+      <td>✅ Optional fields only</td>
+      <td>✅ Optional fields only</td>
+      <td>✅ Compatible types only</td>
+      <td>Highest</td>
+    </tr>
+    <tr>
+      <td><strong>No Compatibility</strong></td>
+      <td>No compatibility</td>
+      <td>Development environment or migration</td>
+      <td>✅ All changes allowed</td>
+      <td>✅ All changes allowed</td>
+      <td>✅ All changes allowed</td>
+      <td>Low</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="schema-registry-compatibility-levels">Schema Registry Compatibility Levels</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Compatibility Level</th>
+      <th>Description</th>
+      <th>Usage</th>
+      <th>Update Order</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>BACKWARD</strong></td>
+      <td>Compatible with previous versions</td>
+      <td>Consumer update before producer update</td>
+      <td>Consumer → Producer</td>
+    </tr>
+    <tr>
+      <td><strong>FORWARD</strong></td>
+      <td>Compatible with future versions</td>
+      <td>Producer update before consumer update</td>
+      <td>Producer → Consumer</td>
+    </tr>
+    <tr>
+      <td><strong>FULL</strong></td>
+      <td>Bidirectional compatibility</td>
+      <td>Safest strategy</td>
+      <td>Order independent</td>
+    </tr>
+    <tr>
+      <td><strong>NONE</strong></td>
+      <td>No compatibility check</td>
+      <td>Development environment or migration</td>
+      <td>No restrictions</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="schema-validation-rules">Schema Validation Rules</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Rule</th>
+      <th>Description</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Field Addition</strong></td>
+      <td>New fields must be optional</td>
+      <td><code class="language-plaintext highlighter-rouge">"email": {"type": "string", "optional": true}</code></td>
+    </tr>
+    <tr>
+      <td><strong>Field Removal</strong></td>
+      <td>Check compatibility when removing existing fields</td>
+      <td>Mark as deprecated then remove gradually</td>
+    </tr>
+    <tr>
+      <td><strong>Type Changes</strong></td>
+      <td>Only allow compatible type changes</td>
+      <td>int32 → int64 (allowed), string → int (not allowed)</td>
+    </tr>
+    <tr>
+      <td><strong>Default Values</strong></td>
+      <td>Set appropriate default values for new fields</td>
+      <td><code class="language-plaintext highlighter-rouge">"default": null</code> or appropriate default value</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="schema-evolution-strategies">Schema Evolution Strategies</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Strategy Type</th>
+      <th>Description</th>
+      <th>Examples</th>
+      <th>Handling</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Additive Changes</strong></td>
+      <td>Safe changes (maintain compatibility)</td>
+      <td>• Add new optional fields<br />• Add new tables<br />• Add enum values</td>
+      <td>Can be applied immediately</td>
+    </tr>
+    <tr>
+      <td><strong>Breaking Changes</strong></td>
+      <td>Compatibility-breaking changes</td>
+      <td>• Add required fields<br />• Change field types<br />• Remove fields<br />• Remove enum values</td>
+      <td>Handle with new schema version</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SchemaCompatibilityStrategies</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">implement_schema_compatibility_strategies</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Implement schema compatibility strategies</span><span class="sh">"""</span>
+        
+        <span class="c1"># Schema Registry configuration
+</span>        <span class="n">schema_registry_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">url</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">http://schema-registry:8081</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">compatibility_levels</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">BACKWARD</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Compatible with previous versions (consumer update first)</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">FORWARD</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Compatible with future versions (producer update first)</span><span class="sh">"</span><span class="p">,</span> 
+                <span class="sh">"</span><span class="s">FULL</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Bidirectional compatibility (safest)</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">NONE</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">No compatibility check (development environment)</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">validation_rules</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">field_addition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">New fields must be optional</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">field_removal</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Check compatibility when removing existing fields</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">type_changes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Only allow compatible type changes</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">default_values</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Set appropriate default values for new fields</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">schema_registry_config</span>
+    
+    <span class="k">def</span> <span class="nf">validate_schema_compatibility</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">old_schema</span><span class="p">,</span> <span class="n">new_schema</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Validate schema compatibility</span><span class="sh">"""</span>
+        
+        <span class="n">compatibility_results</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">compatibility_level</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">UNKNOWN</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">issues</span><span class="sh">"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="sh">"</span><span class="s">recommendations</span><span class="sh">"</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Field change validation
+</span>        <span class="n">old_fields</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">old_schema</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">,</span> <span class="p">{}).</span><span class="nf">keys</span><span class="p">())</span>
+        <span class="n">new_fields</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">new_schema</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">,</span> <span class="p">{}).</span><span class="nf">keys</span><span class="p">())</span>
+        
+        <span class="c1"># Added field validation
+</span>        <span class="n">added_fields</span> <span class="o">=</span> <span class="n">new_fields</span> <span class="o">-</span> <span class="n">old_fields</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">added_fields</span><span class="p">:</span>
+            <span class="n">field_def</span> <span class="o">=</span> <span class="n">new_schema</span><span class="p">[</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">][</span><span class="n">field</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">field_def</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">optional</span><span class="sh">"</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+                <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">issues</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="sh">"</span><span class="s">New field </span><span class="sh">'</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="sh">'</span><span class="s"> is required. Change to optional.</span><span class="sh">"</span>
+                <span class="p">)</span>
+                <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="c1"># Removed field validation
+</span>        <span class="n">removed_fields</span> <span class="o">=</span> <span class="n">old_fields</span> <span class="o">-</span> <span class="n">new_fields</span>
+        <span class="k">if</span> <span class="n">removed_fields</span><span class="p">:</span>
+            <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">issues</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="sh">"</span><span class="s">Removed fields: </span><span class="si">{</span><span class="nf">list</span><span class="p">(</span><span class="n">removed_fields</span><span class="p">)</span><span class="si">}</span><span class="s">. This is a breaking change.</span><span class="sh">"</span>
+            <span class="p">)</span>
+            <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="c1"># Type change validation
+</span>        <span class="n">common_fields</span> <span class="o">=</span> <span class="n">old_fields</span> <span class="o">&amp;</span> <span class="n">new_fields</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">common_fields</span><span class="p">:</span>
+            <span class="n">old_type</span> <span class="o">=</span> <span class="n">old_schema</span><span class="p">[</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">][</span><span class="n">field</span><span class="p">].</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">)</span>
+            <span class="n">new_type</span> <span class="o">=</span> <span class="n">new_schema</span><span class="p">[</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">][</span><span class="n">field</span><span class="p">].</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">old_type</span> <span class="o">!=</span> <span class="n">new_type</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">self</span><span class="p">.</span><span class="nf">_is_type_compatible</span><span class="p">(</span><span class="n">old_type</span><span class="p">,</span> <span class="n">new_type</span><span class="p">):</span>
+                    <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">issues</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="sh">"</span><span class="s">Field </span><span class="sh">'</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="sh">'</span><span class="s"> type changed from </span><span class="si">{</span><span class="n">old_type</span><span class="si">}</span><span class="s"> to </span><span class="si">{</span><span class="n">new_type</span><span class="si">}</span><span class="sh">"</span>
+                    <span class="p">)</span>
+                    <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="c1"># Determine compatibility level
+</span>        <span class="k">if</span> <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">added_fields</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">removed_fields</span><span class="p">:</span>
+                <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">compatibility_level</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">BACKWARD</span><span class="sh">"</span>
+            <span class="k">elif</span> <span class="n">removed_fields</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">added_fields</span><span class="p">:</span>
+                <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">compatibility_level</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">FORWARD</span><span class="sh">"</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">added_fields</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">removed_fields</span><span class="p">:</span>
+                <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">compatibility_level</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">FULL</span><span class="sh">"</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">compatibility_level</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">NONE</span><span class="sh">"</span>
+        
+        <span class="c1"># Generate recommendations
+</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">]:</span>
+            <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">recommendations</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="sh">"</span><span class="s">Set new fields as optional</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">Consider marking as deprecated instead of removing fields</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">Convert to compatible types when changing field types</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">Create new schema version if necessary</span><span class="sh">"</span>
+            <span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">compatibility_results</span>
+    
+    <span class="k">def</span> <span class="nf">_is_type_compatible</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">old_type</span><span class="p">,</span> <span class="n">new_type</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Check type compatibility</span><span class="sh">"""</span>
+        <span class="n">compatible_types</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">int32</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">int64</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">float</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">double</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">int64</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">float</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">double</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">float</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">double</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">bytes</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">bytes</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">]</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">new_type</span> <span class="ow">in</span> <span class="n">compatible_types</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">old_type</span><span class="p">,</span> <span class="p">[])</span>
+    
+    <span class="k">def</span> <span class="nf">create_schema_evolution_plan</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">current_schema</span><span class="p">,</span> <span class="n">target_schema</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Create schema evolution plan</span><span class="sh">"""</span>
+        
+        <span class="n">evolution_plan</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">phases</span><span class="sh">"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="sh">"</span><span class="s">estimated_duration</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">unknown</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">risk_level</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">low</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Phase 1: Safe changes
+</span>        <span class="n">safe_changes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">old_fields</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">current_schema</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">,</span> <span class="p">{}).</span><span class="nf">keys</span><span class="p">())</span>
+        <span class="n">new_fields</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">target_schema</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">,</span> <span class="p">{}).</span><span class="nf">keys</span><span class="p">())</span>
+        
+        <span class="n">added_fields</span> <span class="o">=</span> <span class="n">new_fields</span> <span class="o">-</span> <span class="n">old_fields</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">added_fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">target_schema</span><span class="p">[</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">][</span><span class="n">field</span><span class="p">].</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">optional</span><span class="sh">"</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+                <span class="n">safe_changes</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Add field </span><span class="sh">'</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="sh">'</span><span class="s"> (optional)</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">safe_changes</span><span class="p">:</span>
+            <span class="n">evolution_plan</span><span class="p">[</span><span class="sh">"</span><span class="s">phases</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">phase</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">safe_changes</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Safe changes (maintain compatibility)</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">changes</span><span class="sh">"</span><span class="p">:</span> <span class="n">safe_changes</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">duration</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1-2 weeks</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Phase 2: Breaking Changes (if needed)
+</span>        <span class="n">breaking_changes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">removed_fields</span> <span class="o">=</span> <span class="n">old_fields</span> <span class="o">-</span> <span class="n">new_fields</span>
+        <span class="k">if</span> <span class="n">removed_fields</span><span class="p">:</span>
+            <span class="n">breaking_changes</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Remove fields: </span><span class="si">{</span><span class="nf">list</span><span class="p">(</span><span class="n">removed_fields</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="n">evolution_plan</span><span class="p">[</span><span class="sh">"</span><span class="s">risk_level</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">high</span><span class="sh">"</span>
+        
+        <span class="k">if</span> <span class="n">breaking_changes</span><span class="p">:</span>
+            <span class="n">evolution_plan</span><span class="p">[</span><span class="sh">"</span><span class="s">phases</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">phase</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">breaking_changes</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Breaking Changes (new version required)</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">changes</span><span class="sh">"</span><span class="p">:</span> <span class="n">breaking_changes</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">duration</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2-4 weeks</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">notes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Consumer update required</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">evolution_plan</span>
+</code></pre></div></div>
+
+<h2 id="-real-time-data-transformation-and-routing">🔄 Real-time Data Transformation and Routing</h2>
+
+<h3 id="data-transformation-pipeline">Data Transformation Pipeline</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DataTransformationPipeline</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">transformation_configs</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_single_message_transform</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">transform_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup Single Message Transform (SMT)</span><span class="sh">"""</span>
+        
+        <span class="n">smt_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">transforms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">transform_config</span><span class="p">[</span><span class="sh">"</span><span class="s">transforms</span><span class="sh">"</span><span class="p">]),</span>
+            
+            <span class="c1"># Record unwrapping
+</span>            <span class="sh">"</span><span class="s">transforms.unwrap.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.transforms.ExtractNewRecordState</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.drop.tombstones</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.delete.handling.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">drop</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.add.fields</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">op,ts_ms,source.ts_ms,source.db,source.table</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.add.headers</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">op,source.ts_ms</span><span class="sh">"</span><span class="p">,</span>
+            
+            <span class="c1"># Field name transformation
+</span>            <span class="sh">"</span><span class="s">transforms.rename.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.ReplaceField$Value</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.rename.renames</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">transform_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">field_renames</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+            
+            <span class="c1"># Topic routing
+</span>            <span class="sh">"</span><span class="s">transforms.route.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.RegexRouter</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.route.regex</span><span class="sh">"</span><span class="p">:</span> <span class="n">transform_config</span><span class="p">[</span><span class="sh">"</span><span class="s">topic_regex</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">transforms.route.replacement</span><span class="sh">"</span><span class="p">:</span> <span class="n">transform_config</span><span class="p">[</span><span class="sh">"</span><span class="s">topic_replacement</span><span class="sh">"</span><span class="p">],</span>
+            
+            <span class="c1"># Filtering
+</span>            <span class="sh">"</span><span class="s">transforms.filter.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.Filter</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.filter.condition</span><span class="sh">"</span><span class="p">:</span> <span class="n">transform_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">filter_condition</span><span class="sh">"</span><span class="p">,</span> <span class="sh">""</span><span class="p">),</span>
+            
+            <span class="c1"># Field addition
+</span>            <span class="sh">"</span><span class="s">transforms.addfield.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.InsertField$Value</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.addfield.static.field</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">processed_at</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.addfield.static.value</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">$(date:yyyy-MM-dd</span><span class="sh">'</span><span class="s">T</span><span class="sh">'</span><span class="s">HH:mm:ss</span><span class="sh">'</span><span class="s">Z</span><span class="sh">'</span><span class="s">)</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">smt_config</span>
+</code></pre></div></div>
+
+<h3 id="topic-routing-strategies">Topic Routing Strategies</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Strategy</th>
+      <th>Description</th>
+      <th>Use Case</th>
+      <th>Configuration</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Database-based</strong></td>
+      <td>Route by database name</td>
+      <td>Multi-tenant applications</td>
+      <td><code class="language-plaintext highlighter-rouge">transforms.route.regex: "([^.]+)\\.([^.]+)\\.([^.]+)"</code></td>
+    </tr>
+    <tr>
+      <td><strong>Table-based</strong></td>
+      <td>Route by table name</td>
+      <td>Service-specific topics</td>
+      <td><code class="language-plaintext highlighter-rouge">transforms.route.regex: "db\\.schema\\.([^.]+)"</code></td>
+    </tr>
+    <tr>
+      <td><strong>Operation-based</strong></td>
+      <td>Route by operation type</td>
+      <td>Separate INSERT/UPDATE/DELETE</td>
+      <td>Custom SMT implementation</td>
+    </tr>
+    <tr>
+      <td><strong>Conditional</strong></td>
+      <td>Route based on data conditions</td>
+      <td>Data classification</td>
+      <td>Filter + Router combination</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="data-enrichment-implementation">Data Enrichment Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DataEnrichmentProcessor</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">enrichment_configs</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_lookup_enrichment</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">lookup_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup lookup-based data enrichment</span><span class="sh">"""</span>
+        
+        <span class="n">enrichment_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">transforms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">lookup</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.lookup.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.Lookup</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.lookup.lookup.table</span><span class="sh">"</span><span class="p">:</span> <span class="n">lookup_config</span><span class="p">[</span><span class="sh">"</span><span class="s">lookup_table</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">transforms.lookup.lookup.key</span><span class="sh">"</span><span class="p">:</span> <span class="n">lookup_config</span><span class="p">[</span><span class="sh">"</span><span class="s">lookup_key</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">transforms.lookup.lookup.value</span><span class="sh">"</span><span class="p">:</span> <span class="n">lookup_config</span><span class="p">[</span><span class="sh">"</span><span class="s">lookup_value</span><span class="sh">"</span><span class="p">]</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">enrichment_config</span>
+    
+    <span class="k">def</span> <span class="nf">setup_calculation_enrichment</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">calc_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup calculation-based enrichment</span><span class="sh">"""</span>
+        
+        <span class="n">enrichment_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">transforms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">calculate</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.calculate.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.Calculate</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.calculate.expression</span><span class="sh">"</span><span class="p">:</span> <span class="n">calc_config</span><span class="p">[</span><span class="sh">"</span><span class="s">expression</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">transforms.calculate.target.field</span><span class="sh">"</span><span class="p">:</span> <span class="n">calc_config</span><span class="p">[</span><span class="sh">"</span><span class="s">target_field</span><span class="sh">"</span><span class="p">]</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">enrichment_config</span>
+</code></pre></div></div>
+
+<h2 id="-practical-project-real-time-data-synchronization-system">🚀 Practical Project: Real-time Data Synchronization System</h2>
+
+<h3 id="project-overview">Project Overview</h3>
+
+<p>Build a real-time data synchronization system for a large-scale e-commerce platform. Capture changes from MySQL order database in real-time and synchronize to Elasticsearch search engine, Redis cache, and data lake.</p>
+
+<h4 id="project-goals">Project Goals</h4>
+
+<ul>
+  <li><strong>Real-time Data Sync</strong>: Achieve sub-second latency for order data synchronization</li>
+  <li><strong>Multi-target Support</strong>: Synchronize to Elasticsearch, Redis, and S3 Data Lake</li>
+  <li><strong>High Availability</strong>: Ensure 99.9% uptime with automatic failover</li>
+  <li><strong>Scalability</strong>: Handle 100,000+ orders per day with horizontal scaling</li>
+</ul>
+
+<h4 id="technical-challenges">Technical Challenges</h4>
+
+<ul>
+  <li><strong>Schema Evolution</strong>: Handle frequent schema changes in order system</li>
+  <li><strong>Data Consistency</strong>: Ensure eventual consistency across all targets</li>
+  <li><strong>Performance</strong>: Optimize throughput for high-volume order processing</li>
+  <li><strong>Monitoring</strong>: Comprehensive monitoring and alerting system</li>
+</ul>
+
+<h3 id="system-architecture">System Architecture</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Technology</th>
+      <th>Purpose</th>
+      <th>Configuration</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Source Database</strong></td>
+      <td>MySQL 8.0</td>
+      <td>Order management system</td>
+      <td>• Binary logging enabled<br />• GTID enabled<br />• Read replicas configured</td>
+    </tr>
+    <tr>
+      <td><strong>Kafka Cluster</strong></td>
+      <td>Apache Kafka 3.0</td>
+      <td>Event streaming platform</td>
+      <td>• 3 brokers<br />• Replication factor: 3<br />• Retention: 7 days</td>
+    </tr>
+    <tr>
+      <td><strong>Target Systems</strong></td>
+      <td>Elasticsearch, Redis, S3</td>
+      <td>Search, cache, analytics</td>
+      <td>• Elasticsearch cluster: 3 nodes<br />• Redis cluster: 6 nodes<br />• S3 with Parquet format</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="1-system-configuration">1. System Configuration</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">RealTimeSyncSystem</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">system_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">source_database</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">mysql</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">hostname</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">mysql-orders-cluster</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">port</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3306</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">database</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ecommerce</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">username</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">debezium_user</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">password</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">secure_password</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">server_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">184054</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">kafka_cluster</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">bootstrap_servers</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka-1:9092,kafka-2:9092,kafka-3:9092</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">schema_registry_url</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">http://schema-registry:8081</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">replication_factor</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">partitions</span><span class="sh">"</span><span class="p">:</span> <span class="mi">12</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">target_systems</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">elasticsearch</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">hosts</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">es-1:9200</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">es-2:9200</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">es-3:9200</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">index_prefix</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">orders_</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">batch_size</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">redis</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">host</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">redis-cluster</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">port</span><span class="sh">"</span><span class="p">:</span> <span class="mi">6379</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">db</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">key_prefix</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">order:</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">s3</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">bucket</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ecommerce-data-lake</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">path_prefix</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">orders/</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">format</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">parquet</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">compression</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">snappy</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">design_system_architecture</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Design the complete system architecture</span><span class="sh">"""</span>
+        
+        <span class="n">architecture</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">source_database</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">mysql_orders</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">orders</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">order_items</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">customers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">products</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">binlog_format</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ROW</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">gtid_mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ON</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">read_replicas</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">kafka_cluster</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">topics</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">orders.ecommerce.orders</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">partitions</span><span class="sh">"</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="sh">"</span><span class="s">replication_factor</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+                    <span class="sh">"</span><span class="s">orders.ecommerce.order_items</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">partitions</span><span class="sh">"</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="sh">"</span><span class="s">replication_factor</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+                    <span class="sh">"</span><span class="s">orders.ecommerce.customers</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">partitions</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="sh">"</span><span class="s">replication_factor</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+                    <span class="sh">"</span><span class="s">orders.ecommerce.products</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">partitions</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="sh">"</span><span class="s">replication_factor</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">connectors</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">mysql_orders_connector</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">tasks_max</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">poll_interval_ms</span><span class="sh">"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">max_batch_size</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4096</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">target_systems</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">elasticsearch</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">indices</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">orders_read_model</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">shards</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="sh">"</span><span class="s">replicas</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+                        <span class="sh">"</span><span class="s">customers_read_model</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">shards</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="sh">"</span><span class="s">replicas</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">redis</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">keys</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">order_cache</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">ttl</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3600</span><span class="p">},</span>
+                        <span class="sh">"</span><span class="s">customer_cache</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">ttl</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1800</span><span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">s3</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">partitions</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">year</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">month</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">day</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">file_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">128MB</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">architecture</span>
+</code></pre></div></div>
+
+<h3 id="2-system-deployment-and-execution">2. System Deployment and Execution</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">deploy_realtime_sync_system</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Deploy the complete real-time synchronization system</span><span class="sh">"""</span>
+    
+    <span class="n">deployment_steps</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="sh">"</span><span class="s">step</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Deploy MySQL Connector</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Deploy Debezium MySQL connector for order database</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">configuration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">connector_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">mysql-orders-connector</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">database_hostname</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">mysql-orders-cluster</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">database_port</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3306</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">database_user</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">debezium_user</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">database_password</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">secure_password</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">database_server_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">184054</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">topic_prefix</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">orders.ecommerce</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">table_include_list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ecommerce.orders,ecommerce.order_items,ecommerce.customers</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transforms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">unwrap,route,addTimestamp</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">max_batch_size</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4096</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">poll_interval_ms</span><span class="sh">"</span><span class="p">:</span> <span class="mi">100</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="sh">"</span><span class="s">step</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Configure Elasticsearch Sink</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Configure Elasticsearch sink connector for search optimization</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">configuration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">connector_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">elasticsearch-sink-orders</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">topics</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">orders.ecommerce.orders,orders.ecommerce.order_items</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">connection_url</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">http://es-1:9200,http://es-2:9200,http://es-3:9200</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">type_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">_doc</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">key_ignore</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">schema_ignore</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">batch_size</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">flush_timeout_ms</span><span class="sh">"</span><span class="p">:</span> <span class="mi">5000</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="sh">"</span><span class="s">step</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Configure Redis Sink</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Configure Redis sink connector for caching</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">configuration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">connector_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">redis-sink-orders</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">topics</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">orders.ecommerce.orders</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">redis_host</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">redis-cluster</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">redis_port</span><span class="sh">"</span><span class="p">:</span> <span class="mi">6379</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">redis_database</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">key_prefix</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">order:</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">key_field</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">ttl</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3600</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="sh">"</span><span class="s">step</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Configure S3 Sink</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Configure S3 sink connector for data lake storage</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">configuration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">connector_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">s3-sink-orders</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">topics</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">orders.ecommerce.orders,orders.ecommerce.order_items</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">s3_bucket_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ecommerce-data-lake</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">s3_region</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">us-west-2</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">flush_size</span><span class="sh">"</span><span class="p">:</span> <span class="mi">10000</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">rotate_interval_ms</span><span class="sh">"</span><span class="p">:</span> <span class="mi">300000</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">format_class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.confluent.connect.s3.format.parquet.ParquetFormat</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">compression_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">snappy</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">partitioner_class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.confluent.connect.storage.partitioner.TimeBasedPartitioner</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">path_format</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"'</span><span class="s">year</span><span class="sh">'</span><span class="s">=YYYY/</span><span class="sh">'</span><span class="s">month</span><span class="sh">'</span><span class="s">=MM/</span><span class="sh">'</span><span class="s">day</span><span class="sh">'</span><span class="s">=dd/</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">deployment_steps</span>
+</code></pre></div></div>
+
+<h3 id="3-monitoring-and-alerting-configuration">3. Monitoring and Alerting Configuration</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MonitoringSystem</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">monitoring_config</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_monitoring_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup comprehensive monitoring metrics</span><span class="sh">"""</span>
+        
+        <span class="n">monitoring_metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">kafka_connect_metrics</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">connector_status</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">metric_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_connector_status</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">alert_condition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">status != </span><span class="sh">'</span><span class="s">RUNNING</span><span class="sh">'"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">severity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">critical</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">task_status</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">metric_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_task_status</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">alert_condition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">status != </span><span class="sh">'</span><span class="s">RUNNING</span><span class="sh">'"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">severity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">critical</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">throughput</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">metric_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_source_record_poll_rate</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">alert_condition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">rate &lt; 1000</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">severity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">warning</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">latency</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">metric_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_source_record_poll_total</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">alert_condition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">latency &gt; 5000ms</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">severity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">warning</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">debezium_metrics</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">binlog_position</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">metric_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">debezium_mysql_binlog_position</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">alert_condition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">position_lag &gt; 1000</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">severity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">warning</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">snapshot_progress</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">metric_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">debezium_mysql_snapshot_progress</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">alert_condition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">progress &lt; 100% for 30min</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">severity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">warning</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">transaction_metrics</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">metric_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">debezium_mysql_transaction_count</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">alert_condition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">count = 0 for 10min</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">severity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">critical</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">error_metrics</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">metric_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">debezium_mysql_error_count</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">alert_condition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">count &gt; 0</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">severity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">critical</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">monitoring_metrics</span>
+    
+    <span class="k">def</span> <span class="nf">setup_alerting_rules</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup alerting rules for the system</span><span class="sh">"""</span>
+        
+        <span class="n">alerting_rules</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">connector_failure</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">condition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_connector_status != </span><span class="sh">'</span><span class="s">RUNNING</span><span class="sh">'"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">severity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">critical</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">notification_channels</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">slack</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">email</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">pagerduty</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Kafka Connect connector is not running</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">high_latency</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">condition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_source_record_poll_latency &gt; 5000ms</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">severity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">warning</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">notification_channels</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">slack</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">High latency detected in data processing</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">low_throughput</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">condition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_source_record_poll_rate &lt; 1000 records/sec</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">severity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">warning</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">notification_channels</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">slack</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Low throughput detected in data processing</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">snapshot_stalled</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">condition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">debezium_mysql_snapshot_progress &lt; 100% for 30min</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">severity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">warning</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">notification_channels</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">slack</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">email</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Debezium snapshot appears to be stalled</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">alerting_rules</span>
+    
+    <span class="k">def</span> <span class="nf">setup_dashboard_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup dashboard metrics for monitoring</span><span class="sh">"""</span>
+        
+        <span class="n">dashboard_metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">system_overview</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">connector_health</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_connector_status</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">task_health</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_task_status</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">total_throughput</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_source_record_poll_rate</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">average_latency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_source_record_poll_latency</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">per_connector</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">records_processed</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_source_record_poll_total</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">records_failed</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_source_record_poll_errors</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">connector_uptime</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_connector_uptime</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">last_poll_time</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka_connect_source_record_poll_time</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">target_system_health</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">elasticsearch_indexing_rate</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">elasticsearch_documents_indexed_rate</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">redis_operations_rate</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">redis_commands_processed_rate</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">s3_upload_rate</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">s3_objects_uploaded_rate</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">dashboard_metrics</span>
+</code></pre></div></div>
+
+<h2 id="-learning-summary">📚 Learning Summary</h2>
+
+<h3 id="what-we-learned-in-this-part">What We Learned in This Part</h3>
+
+<ol>
+  <li><strong>Change Data Capture Fundamentals</strong>
+    <ul>
+      <li>CDC concepts and importance</li>
+      <li>Comparison with batch processing</li>
+      <li>ROI evaluation and tool selection</li>
+    </ul>
+  </li>
+  <li><strong>Debezium Architecture and Core Features</strong>
+    <ul>
+      <li>Debezium platform architecture</li>
+      <li>Database-specific change detection mechanisms</li>
+      <li>Event streaming patterns (Event Sourcing, CQRS, Saga)</li>
+    </ul>
+  </li>
+  <li><strong>Debezium Connector Configuration and Operations</strong>
+    <ul>
+      <li>MySQL, PostgreSQL, MongoDB connector setup</li>
+      <li>Advanced configuration for performance optimization</li>
+      <li>Connector management and monitoring</li>
+    </ul>
+  </li>
+  <li><strong>Schema Evolution and Schema Registry</strong>
+    <ul>
+      <li>Schema evolution concepts and importance</li>
+      <li>Schema Registry integration</li>
+      <li>Compatibility strategies and validation</li>
+    </ul>
+  </li>
+  <li><strong>Real-time Data Transformation and Routing</strong>
+    <ul>
+      <li>Single Message Transform (SMT) utilization</li>
+      <li>Custom transformation logic implementation</li>
+      <li>Topic routing strategies</li>
+    </ul>
+  </li>
+  <li><strong>Practical Project</strong>
+    <ul>
+      <li>Large-scale e-commerce platform real-time synchronization system</li>
+      <li>MySQL → Elasticsearch/Redis/Data Lake pipeline</li>
+      <li>Monitoring and alerting system</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="core-technology-stack">Core Technology Stack</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Technology</th>
+      <th>Purpose</th>
+      <th>Importance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Debezium</strong></td>
+      <td>CDC Platform</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Apache Kafka</strong></td>
+      <td>Event Streaming</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Kafka Connect</strong></td>
+      <td>Connector Framework</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Schema Registry</strong></td>
+      <td>Schema Management</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Elasticsearch</strong></td>
+      <td>Search Engine</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="next-part-preview">Next Part Preview</h3>
+
+<p><strong>Part 2: Kafka Connect and Production CDC Operations</strong> will cover:</p>
+<ul>
+  <li>Advanced Kafka Connect architecture and scalability</li>
+  <li>Custom connector development</li>
+  <li>Large-scale CDC pipeline operation strategies</li>
+  <li>Performance optimization and bottleneck resolution</li>
+  <li>Data consistency assurance and validation</li>
+  <li>Monitoring and disaster recovery strategies</li>
+  <li>Enterprise-grade CDC operation system construction</li>
+</ul>
+
+<hr />
+
+<p><strong>Series Progress</strong>: <a href="/en/data-engineering/2025/09/19/change-data-capture-debezium-guide.html">Change Data Capture Complete Guide Series</a></p>
+
+<hr />
+
+<p><em>Build modern event-driven architecture with the power of real-time data synchronization!</em> 🚀</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+      
+      
+      
+      
+        
+        
+        <a href="/data-engineering/2025/09/19/change-data-capture-debezium-guide.html" class="nav-link next">
+          다음: Part 1: Change Data Capture와 Debezium 실전 구현 - 실시간 데이터 동기화의 완성 →
+        </a>
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

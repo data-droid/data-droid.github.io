@@ -1,0 +1,2271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="CDC의 핵심 개념부터 Debezium을 활용한 실시간 데이터 동기화 시스템 구축까지, 이벤트 드리븐 아키텍처의 완전한 가이드입니다.">
+
+
+
+<title>Part 1: Change Data Capture와 Debezium 실전 구현 - 실시간 데이터 동기화의 완성 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 1: Change Data Capture와 Debezium 실전 구현 - 실시간 데이터 동기화의 완성">
+<meta property="og:description" content="CDC의 핵심 개념부터 Debezium을 활용한 실시간 데이터 동기화 시스템 구축까지, 이벤트 드리븐 아키텍처의 완전한 가이드입니다.">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2025/09/19/change-data-capture-debezium-guide.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 1: Change Data Capture와 Debezium 실전 구현 - 실시간 데이터 동기화의 완성">
+<meta name="twitter:description" content="CDC의 핵심 개념부터 Debezium을 활용한 실시간 데이터 동기화 시스템 구축까지, 이벤트 드리븐 아키텍처의 완전한 가이드입니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2025/09/19/change-data-capture-debezium-guide.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2025-09-19-change-data-capture-debezium-guide.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 19일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 1: Change Data Capture와 Debezium 실전 구현 - 실시간 데이터 동기화의 완성</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Change-Data-Capture</span>
+      
+        <span class="tag">CDC</span>
+      
+        <span class="tag">Debezium</span>
+      
+        <span class="tag">Kafka</span>
+      
+        <span class="tag">실시간동기화</span>
+      
+        <span class="tag">이벤트드리븐</span>
+      
+        <span class="tag">데이터파이프라인</span>
+      
+        <span class="tag">스키마진화</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Change data capture complete guide 시리즈</span>
+      <span class="series-order">Part 2</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 50분</span>
+      
+      
+        <span class="difficulty">📊 고급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-1-change-data-capture와-debezium-실전-구현---실시간-데이터-동기화의-완성">Part 1: Change Data Capture와 Debezium 실전 구현 - 실시간 데이터 동기화의 완성</h1>
+
+<blockquote>
+  <p>CDC의 핵심 개념부터 Debezium을 활용한 실시간 데이터 동기화 시스템 구축까지, 이벤트 드리븐 아키텍처의 완전한 가이드입니다.</p>
+</blockquote>
+
+<h2 id="-목차">📋 목차</h2>
+
+<ol>
+  <li><a href="#change-data-capture-기초-개념">Change Data Capture 기초 개념</a></li>
+  <li><a href="#debezium-아키텍처와-핵심-기능">Debezium 아키텍처와 핵심 기능</a></li>
+  <li><a href="#debezium-커넥터-설정과-운영">Debezium 커넥터 설정과 운영</a></li>
+  <li><a href="#스키마-진화와-스키마-레지스트리">스키마 진화와 스키마 레지스트리</a></li>
+  <li><a href="#실시간-데이터-변환과-라우팅">실시간 데이터 변환과 라우팅</a></li>
+  <li><a href="#실무-프로젝트-실시간-데이터-동기화-시스템">실무 프로젝트: 실시간 데이터 동기화 시스템</a></li>
+  <li><a href="#학습-요약">학습 요약</a></li>
+</ol>
+
+<h2 id="-change-data-capture-기초-개념">🔄 Change Data Capture 기초 개념</h2>
+
+<h3 id="cdc란-무엇인가">CDC란 무엇인가?</h3>
+
+<p>Change Data Capture(CDC)는 데이터베이스의 변경사항을 실시간으로 감지하고 캡처하여 다른 시스템으로 전파하는 기술입니다. 전통적인 배치 처리 방식의 한계를 극복하고 실시간 데이터 동기화를 가능하게 합니다.</p>
+
+<h3 id="전통적인-배치-처리-vs-cdc">전통적인 배치 처리 vs CDC</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>특성</th>
+      <th>배치 처리</th>
+      <th>CDC 방식</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>지연시간</strong></td>
+      <td>높음 (시간/일 단위)</td>
+      <td>낮음 (초/분 단위)</td>
+    </tr>
+    <tr>
+      <td><strong>처리량</strong></td>
+      <td>높음 (대용량 일괄 처리)</td>
+      <td>중간 (실시간 스트림)</td>
+    </tr>
+    <tr>
+      <td><strong>복잡성</strong></td>
+      <td>낮음</td>
+      <td>높음</td>
+    </tr>
+    <tr>
+      <td><strong>일관성</strong></td>
+      <td>최종 일관성</td>
+      <td>강한 일관성 가능</td>
+    </tr>
+    <tr>
+      <td><strong>리소스 사용</strong></td>
+      <td>주기적 높음</td>
+      <td>지속적 중간</td>
+    </tr>
+    <tr>
+      <td><strong>실시간 처리</strong></td>
+      <td>불가능</td>
+      <td>가능</td>
+    </tr>
+    <tr>
+      <td><strong>주요 사용 사례</strong></td>
+      <td>• ETL 파이프라인<br />• 데이터 웨어하우스 구축<br />• 일일/주간 리포트<br />• 대용량 데이터 마이그레이션</td>
+      <td>• 실시간 분석<br />• 이벤트 드리븐 아키텍처<br />• 데이터 레이크 실시간 동기화<br />• 마이크로서비스 간 데이터 동기화</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="cdc-도입-roi-평가">CDC 도입 ROI 평가</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>평가 기준</th>
+      <th>점수</th>
+      <th>조건</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>데이터 신선도</strong></td>
+      <td>40점</td>
+      <td>실시간/분 단위</td>
+      <td>즉시 처리 필요</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 신선도</strong></td>
+      <td>20점</td>
+      <td>시간 단위</td>
+      <td>빠른 처리 필요</td>
+    </tr>
+    <tr>
+      <td><strong>비즈니스 중요도</strong></td>
+      <td>30점</td>
+      <td>3개 이상 크리티컬 프로세스</td>
+      <td>핵심 비즈니스 영향</td>
+    </tr>
+    <tr>
+      <td><strong>컴플라이언스</strong></td>
+      <td>20점</td>
+      <td>규제 요구사항 있음</td>
+      <td>감사 추적 필요</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 볼륨</strong></td>
+      <td>10점</td>
+      <td>일일 1TB 이상</td>
+      <td>대용량 처리</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="roi-권장사항">ROI 권장사항</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>총점</th>
+      <th>권장사항</th>
+      <th>적용 시나리오</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>70점 이상</strong></td>
+      <td>강력 추천</td>
+      <td>실시간 분석, 금융 거래, IoT 데이터</td>
+    </tr>
+    <tr>
+      <td><strong>40-69점</strong></td>
+      <td>고려 권장</td>
+      <td>중간 수준의 실시간 요구사항</td>
+    </tr>
+    <tr>
+      <td><strong>40점 미만</strong></td>
+      <td>신중 검토</td>
+      <td>배치 처리로도 충분한 경우</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">BatchProcessingVsCDC</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">calculate_roi_score</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">requirements</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">CDC 도입 ROI 점수 계산</span><span class="sh">"""</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">requirements</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">max_latency</span><span class="sh">"</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="sh">"</span><span class="s">realtime</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">minutes</span><span class="sh">"</span><span class="p">]:</span>
+            <span class="n">score</span> <span class="o">+=</span> <span class="mi">40</span>
+        <span class="k">elif</span> <span class="n">requirements</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">max_latency</span><span class="sh">"</span><span class="p">)</span> <span class="o">==</span> <span class="sh">"</span><span class="s">hourly</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">score</span> <span class="o">+=</span> <span class="mi">20</span>
+        
+        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">requirements</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">critical_processes</span><span class="sh">"</span><span class="p">,</span> <span class="p">[]))</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">score</span> <span class="o">+=</span> <span class="mi">30</span>
+        
+        <span class="k">if</span> <span class="n">requirements</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">compliance</span><span class="sh">"</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="n">score</span> <span class="o">+=</span> <span class="mi">20</span>
+        
+        <span class="k">if</span> <span class="sh">"</span><span class="s">TB</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">requirements</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">daily_volume</span><span class="sh">"</span><span class="p">,</span> <span class="sh">""</span><span class="p">):</span>
+            <span class="n">score</span> <span class="o">+=</span> <span class="mi">10</span>
+        
+        <span class="k">return</span> <span class="n">score</span>
+</code></pre></div></div>
+
+<h3 id="주요-cdc-도구-비교">주요 CDC 도구 비교</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>도구</th>
+      <th>타입</th>
+      <th>지원 DB</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Debezium</strong></td>
+      <td>Open Source</td>
+      <td>MySQL, PostgreSQL, MongoDB, SQL Server, Oracle, DB2</td>
+    </tr>
+    <tr>
+      <td><strong>Kafka Connect</strong></td>
+      <td>Apache Kafka 생태계</td>
+      <td>JDBC 호환 모든 DB, Elasticsearch, HDFS, S3</td>
+    </tr>
+    <tr>
+      <td><strong>Maxwell</strong></td>
+      <td>Open Source</td>
+      <td>MySQL</td>
+    </tr>
+    <tr>
+      <td><strong>AWS DMS</strong></td>
+      <td>Managed Service</td>
+      <td>MySQL, PostgreSQL, Oracle, SQL Server, MongoDB</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="주요-장점-비교">주요 장점 비교</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>도구</th>
+      <th>주요 장점</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Debezium</strong></td>
+      <td>• 풍부한 DB 지원<br />• Kafka 생태계 통합<br />• 스키마 진화 지원<br />• 확장성과 안정성</td>
+    </tr>
+    <tr>
+      <td><strong>Kafka Connect</strong></td>
+      <td>• Kafka 네이티브 통합<br />• 풍부한 커넥터 생태계<br />• 확장 가능한 아키텍처</td>
+    </tr>
+    <tr>
+      <td><strong>Maxwell</strong></td>
+      <td>• 간단한 설정<br />• MySQL 특화 최적화<br />• 가벼운 리소스 사용</td>
+    </tr>
+    <tr>
+      <td><strong>AWS DMS</strong></td>
+      <td>• 완전 관리형 서비스<br />• AWS 생태계 통합<br />• 고가용성<br />• 모니터링 내장</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="주요-단점과-사용-사례">주요 단점과 사용 사례</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>도구</th>
+      <th>주요 단점</th>
+      <th>최적 사용 사례</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Debezium</strong></td>
+      <td>• 설정 복잡성<br />• Kafka 의존성<br />• 운영 오버헤드</td>
+      <td>• 대규모 이벤트 스트리밍<br />• 마이크로서비스 아키텍처<br />• 데이터 레이크 실시간 동기화</td>
+    </tr>
+    <tr>
+      <td><strong>Kafka Connect</strong></td>
+      <td>• JDBC 기반 지연시간<br />• 복잡한 설정<br />• 모니터링 복잡성</td>
+      <td>• Kafka 중심 아키텍처<br />• 다양한 시스템 통합<br />• 기존 ETL 파이프라인 현대화</td>
+    </tr>
+    <tr>
+      <td><strong>Maxwell</strong></td>
+      <td>• MySQL만 지원<br />• 제한된 확장성<br />• 작은 커뮤니티</td>
+      <td>• MySQL 전용 환경<br />• 간단한 CDC 요구사항<br />• 프로토타입 개발</td>
+    </tr>
+    <tr>
+      <td><strong>AWS DMS</strong></td>
+      <td>• AWS 벤더 락인<br />• 비용<br />• 커스터마이징 제한</td>
+      <td>• AWS 중심 아키텍처<br />• 관리 부담 최소화<br />• 엔터프라이즈 환경</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="cdc-도구-선택-기준">CDC 도구 선택 기준</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>조건</th>
+      <th>권장 도구</th>
+      <th>선택 이유</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>MySQL + 낮은 복잡성</strong></td>
+      <td>Maxwell</td>
+      <td>간단한 설정, MySQL 특화 최적화</td>
+    </tr>
+    <tr>
+      <td><strong>AWS 관리형 서비스</strong></td>
+      <td>AWS DMS</td>
+      <td>완전 관리형, AWS 생태계 통합</td>
+    </tr>
+    <tr>
+      <td><strong>대규모 + 고복잡성</strong></td>
+      <td>Debezium</td>
+      <td>풍부한 기능, 확장성, 스키마 진화</td>
+    </tr>
+    <tr>
+      <td><strong>기타 경우</strong></td>
+      <td>Kafka Connect</td>
+      <td>범용성, 커넥터 생태계</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="선택-기준별-가중치">선택 기준별 가중치</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>기준</th>
+      <th>가중치</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>데이터베이스 타입</strong></td>
+      <td>높음</td>
+      <td>지원 범위와 최적화 수준</td>
+    </tr>
+    <tr>
+      <td><strong>규모</strong></td>
+      <td>높음</td>
+      <td>처리량과 확장성 요구사항</td>
+    </tr>
+    <tr>
+      <td><strong>복잡성</strong></td>
+      <td>중간</td>
+      <td>설정과 운영의 복잡도</td>
+    </tr>
+    <tr>
+      <td><strong>예산</strong></td>
+      <td>중간</td>
+      <td>라이선스 비용과 관리 비용</td>
+    </tr>
+    <tr>
+      <td><strong>팀 전문성</strong></td>
+      <td>낮음</td>
+      <td>학습 곡선과 운영 능력</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CDCToolsComparison</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">select_optimal_tool</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">requirements</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">요구사항에 따른 최적 도구 선택</span><span class="sh">"""</span>
+        <span class="nf">if </span><span class="p">(</span><span class="n">requirements</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">database</span><span class="sh">"</span><span class="p">)</span> <span class="o">==</span> <span class="sh">"</span><span class="s">mysql</span><span class="sh">"</span> <span class="ow">and</span> 
+            <span class="n">requirements</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">complexity</span><span class="sh">"</span><span class="p">)</span> <span class="o">==</span> <span class="sh">"</span><span class="s">low</span><span class="sh">"</span><span class="p">):</span>
+            <span class="k">return</span> <span class="sh">"</span><span class="s">maxwell</span><span class="sh">"</span>
+        <span class="k">elif</span> <span class="n">requirements</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">budget</span><span class="sh">"</span><span class="p">)</span> <span class="o">==</span> <span class="sh">"</span><span class="s">aws_managed</span><span class="sh">"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sh">"</span><span class="s">aws_dms</span><span class="sh">"</span>
+        <span class="nf">elif </span><span class="p">(</span><span class="n">requirements</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">scale</span><span class="sh">"</span><span class="p">)</span> <span class="o">==</span> <span class="sh">"</span><span class="s">large</span><span class="sh">"</span> <span class="ow">and</span> 
+              <span class="n">requirements</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">complexity</span><span class="sh">"</span><span class="p">)</span> <span class="o">==</span> <span class="sh">"</span><span class="s">high</span><span class="sh">"</span><span class="p">):</span>
+            <span class="k">return</span> <span class="sh">"</span><span class="s">debezium</span><span class="sh">"</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sh">"</span><span class="s">kafka_connect</span><span class="sh">"</span>
+</code></pre></div></div>
+
+<h2 id="-debezium-아키텍처와-핵심-기능">🔧 Debezium 아키텍처와 핵심 기능</h2>
+
+<h3 id="debezium-아키텍처-개요">Debezium 아키텍처 개요</h3>
+
+<p>Debezium은 Apache Kafka Connect 프레임워크를 기반으로 구축된 오픈소스 CDC 플랫폼입니다. 다양한 데이터베이스의 변경사항을 실시간으로 캡처하여 Kafka 토픽으로 전송합니다.</p>
+
+<h3 id="핵심-컴포넌트">핵심 컴포넌트</h3>
+
+<p>Debezium의 핵심 컴포넌트는 다음과 같습니다:</p>
+
+<ul>
+  <li><strong>Debezium Connectors</strong>: 각 데이터베이스별로 특화된 커넥터</li>
+  <li><strong>Kafka Connect Framework</strong>: 커넥터 실행 및 관리 프레임워크</li>
+  <li><strong>Schema Registry</strong>: 스키마 진화 및 호환성 관리</li>
+  <li><strong>Change Data Capture Engine</strong>: 변경사항 감지 및 캡처 엔진</li>
+</ul>
+
+<h3 id="데이터베이스별-변경-감지-메커니즘">데이터베이스별 변경 감지 메커니즘</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>데이터베이스</th>
+      <th>변경 감지 방식</th>
+      <th>주요 기능</th>
+      <th>스냅샷 모드</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>MySQL</strong></td>
+      <td>바이너리 로그 (Binlog)</td>
+      <td>• GTID 지원<br />• 글로벌 트랜잭션 식별자</td>
+      <td>초기 스냅샷 + 증분 동기화</td>
+    </tr>
+    <tr>
+      <td><strong>PostgreSQL</strong></td>
+      <td>Write-Ahead Log (WAL)</td>
+      <td>• 논리적 복제 슬롯<br />• 네이티브 복제 프로토콜</td>
+      <td>초기 스냅샷 + 스트리밍</td>
+    </tr>
+    <tr>
+      <td><strong>MongoDB</strong></td>
+      <td>Operations Log (Oplog)</td>
+      <td>• Change Streams (3.6+)<br />• 재시작 지점 추적</td>
+      <td>초기 스냅샷 + Oplog 추적</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="kafka-connect-아키텍처">Kafka Connect 아키텍처</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>모드</th>
+      <th>설명</th>
+      <th>주요 특징</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Distributed Mode</strong></td>
+      <td>분산 모드</td>
+      <td>• 고가용성 보장<br />• 수평 확장 가능<br />• 장애 복구 자동화</td>
+    </tr>
+    <tr>
+      <td><strong>Standalone Mode</strong></td>
+      <td>단일 노드 모드</td>
+      <td>• 개발/테스트 환경<br />• 간단한 설정<br />• 단일 프로세스 실행</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="kafka-topics-구조">Kafka Topics 구조</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>토픽 타입</th>
+      <th>용도</th>
+      <th>주요 내용</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>change_events</strong></td>
+      <td>데이터베이스 변경 이벤트</td>
+      <td>실제 데이터 변경사항</td>
+    </tr>
+    <tr>
+      <td><strong>schema_changes</strong></td>
+      <td>스키마 변경 이벤트</td>
+      <td>테이블/컬럼 구조 변경</td>
+    </tr>
+    <tr>
+      <td><strong>heartbeat</strong></td>
+      <td>연결 상태 확인</td>
+      <td>커넥터 상태 모니터링</td>
+    </tr>
+    <tr>
+      <td><strong>transaction_metadata</strong></td>
+      <td>트랜잭션 메타데이터</td>
+      <td>트랜잭션 경계 정보</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DebeziumArchitecture</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">create_debezium_configuration</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">database_type</span><span class="p">,</span> <span class="n">connection_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Debezium 설정 생성</span><span class="sh">"""</span>
+        
+        <span class="n">base_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">database_type</span><span class="si">}</span><span class="s">-connector</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">config</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">connector.class</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">io.debezium.connector.</span><span class="si">{</span><span class="n">database_type</span><span class="p">.</span><span class="nf">title</span><span class="p">()</span><span class="si">}</span><span class="s">.MySqlConnector</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">tasks.max</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">database.hostname</span><span class="sh">"</span><span class="p">:</span> <span class="n">connection_config</span><span class="p">[</span><span class="sh">"</span><span class="s">host</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.port</span><span class="sh">"</span><span class="p">:</span> <span class="n">connection_config</span><span class="p">[</span><span class="sh">"</span><span class="s">port</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.user</span><span class="sh">"</span><span class="p">:</span> <span class="n">connection_config</span><span class="p">[</span><span class="sh">"</span><span class="s">user</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.password</span><span class="sh">"</span><span class="p">:</span> <span class="n">connection_config</span><span class="p">[</span><span class="sh">"</span><span class="s">password</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.server.id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">184054</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">topic.prefix</span><span class="sh">"</span><span class="p">:</span> <span class="n">connection_config</span><span class="p">[</span><span class="sh">"</span><span class="s">server_name</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">schema.history.internal.kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka:9092</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">schema.history.internal.kafka.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">schema-changes.</span><span class="si">{</span><span class="n">connection_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">include.schema.changes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">snapshot.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">initial</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">if</span> <span class="n">database_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">mysql</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">base_config</span><span class="p">[</span><span class="sh">"</span><span class="s">config</span><span class="sh">"</span><span class="p">].</span><span class="nf">update</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">connector.class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.connector.mysql.MySqlConnector</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">database.server.id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">184054</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">database.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">connection_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">databases</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                <span class="sh">"</span><span class="s">table.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">connection_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                <span class="sh">"</span><span class="s">binlog.buffer.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8192</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">max.batch.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2048</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">max.queue.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8192</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1000</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">snapshot.locking.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">minimal</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="k">elif</span> <span class="n">database_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">postgresql</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">base_config</span><span class="p">[</span><span class="sh">"</span><span class="s">config</span><span class="sh">"</span><span class="p">].</span><span class="nf">update</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">connector.class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.connector.postgresql.PostgresConnector</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">database.dbname</span><span class="sh">"</span><span class="p">:</span> <span class="n">connection_config</span><span class="p">[</span><span class="sh">"</span><span class="s">database</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.slot.name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">debezium_</span><span class="si">{</span><span class="n">connection_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">plugin.name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">pgoutput</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">publication.name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">debezium_publication_</span><span class="si">{</span><span class="n">connection_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">slot.drop.on.stop</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">publication.autocreate.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">filtered</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="k">elif</span> <span class="n">database_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">mongodb</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">base_config</span><span class="p">[</span><span class="sh">"</span><span class="s">config</span><span class="sh">"</span><span class="p">].</span><span class="nf">update</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">connector.class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.connector.mongodb.MongoDbConnector</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">mongodb.hosts</span><span class="sh">"</span><span class="p">:</span> <span class="n">connection_config</span><span class="p">[</span><span class="sh">"</span><span class="s">hosts</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">mongodb.name</span><span class="sh">"</span><span class="p">:</span> <span class="n">connection_config</span><span class="p">[</span><span class="sh">"</span><span class="s">server_name</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">collection.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">connection_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">collections</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                <span class="sh">"</span><span class="s">capture.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">change_streams_update_full</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">snapshot.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">initial</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">base_config</span>
+</code></pre></div></div>
+
+<h3 id="이벤트-스트리밍-패턴">이벤트 스트리밍 패턴</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>패턴</th>
+      <th>개념</th>
+      <th>주요 장점</th>
+      <th>구현 방식</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Event Sourcing</strong></td>
+      <td>모든 상태 변경을 이벤트로 저장</td>
+      <td>• 완전한 변경 이력 추적<br />• 시간 여행 가능<br />• 감사 로그 자동 생성<br />• 분산 시스템 간 일관성</td>
+      <td>• Kafka 토픽을 이벤트 스토어로 활용<br />• 주기적 스냅샷으로 성능 최적화<br />• 읽기 모델 생성<br />• 이벤트 재생으로 상태 복원</td>
+    </tr>
+    <tr>
+      <td><strong>CQRS</strong></td>
+      <td>명령과 조회의 책임 분리</td>
+      <td>• 독립적 스케일링<br />• 최적화된 읽기/쓰기 모델<br />• 복잡성 분리<br />• 성능 향상</td>
+      <td>• Debezium으로 명령 이벤트 캡처<br />• 읽기 전용 데이터베이스 구축<br />• 이벤트를 읽기 모델로 변환<br />• 최종 일관성 보장</td>
+    </tr>
+    <tr>
+      <td><strong>Saga</strong></td>
+      <td>분산 트랜잭션 관리</td>
+      <td>• 분산 환경에서 트랜잭션 처리<br />• 장애 복구 가능<br />• 확장성 보장</td>
+      <td>• 이벤트 기반 조율 (Choreography)<br />• 중앙 오케스트레이터 (Orchestration)<br />• 보상 트랜잭션 처리<br />• Saga 상태 관리</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">EventStreamingPatterns</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">implement_event_sourcing_pattern</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Event Sourcing 패턴 구현 예제</span><span class="sh">"""</span>
+        
+        <span class="c1"># 이벤트 스토어 설정
+</span>        <span class="n">event_store_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">kafka_topics</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">order_events</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">orders.ecommerce.orders</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">customer_events</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">orders.ecommerce.customers</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">product_events</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">orders.ecommerce.products</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">event_serialization</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Avro</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">snapshot_frequency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">every_1000_events</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">retention_policy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">7_days</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># 이벤트 재생 예제
+</span>        <span class="k">def</span> <span class="nf">replay_events_for_state</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">):</span>
+            <span class="sh">"""</span><span class="s">특정 엔티티의 상태를 이벤트 재생으로 복원</span><span class="sh">"""</span>
+            <span class="n">events</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_events</span><span class="p">(</span><span class="n">entity_id</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">)</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">apply_event</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">state</span>
+        
+        <span class="k">return</span> <span class="n">event_store_config</span>
+    
+    <span class="k">def</span> <span class="nf">implement_cqrs_pattern</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">CQRS 패턴 구현 예제</span><span class="sh">"""</span>
+        
+        <span class="c1"># 명령 측 (Command Side)
+</span>        <span class="n">command_side_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">write_model</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">database</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">mysql_orders</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">orders</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">order_items</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">optimization</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">for_writes</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">event_publishing</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">debezium_connector</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">mysql-orders-connector</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">topics</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">orders.ecommerce.orders</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># 조회 측 (Query Side)
+</span>        <span class="n">query_side_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">read_models</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">elasticsearch</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">indexes</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">orders_read_model</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">customers_read_model</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">optimization</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">for_reads</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">projections</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">order_summary</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">customer_profile</span><span class="sh">"</span><span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">redis</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">caches</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">order_cache</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">customer_cache</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">ttl</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1_hour</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">command_side</span><span class="sh">"</span><span class="p">:</span> <span class="n">command_side_config</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">query_side</span><span class="sh">"</span><span class="p">:</span> <span class="n">query_side_config</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">implement_saga_pattern</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Saga 패턴 구현 예제</span><span class="sh">"""</span>
+        
+        <span class="c1"># Choreography 패턴
+</span>        <span class="n">choreography_saga</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">order_processing_saga</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">steps</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">service</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">order_service</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">create_order</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">compensation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">cancel_order</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">event</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">OrderCreated</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">service</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">inventory_service</span><span class="sh">"</span><span class="p">,</span> 
+                        <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">reserve_inventory</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">compensation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">release_inventory</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">event</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">InventoryReserved</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">service</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">payment_service</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">process_payment</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">compensation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">refund_payment</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">event</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">PaymentProcessed</span><span class="sh">"</span>
+                    <span class="p">}</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">compensation_strategy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">reverse_order</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Orchestration 패턴
+</span>        <span class="n">orchestration_saga</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">saga_orchestrator</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">state_machine</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">states</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">STARTED</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">INVENTORY_RESERVED</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">PAYMENT_PROCESSED</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">COMPLETED</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">transitions</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">STARTED</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">INVENTORY_RESERVED</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">INVENTORY_RESERVED</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">PAYMENT_PROCESSED</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">PAYMENT_PROCESSED</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">COMPLETED</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">compensation_states</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">INVENTORY_RELEASED</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">PAYMENT_REFUNDED</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">CANCELLED</span><span class="sh">"</span><span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">choreography</span><span class="sh">"</span><span class="p">:</span> <span class="n">choreography_saga</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">orchestration</span><span class="sh">"</span><span class="p">:</span> <span class="n">orchestration_saga</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="️-debezium-커넥터-설정과-운영">⚙️ Debezium 커넥터 설정과 운영</h2>
+
+<h3 id="mysql-커넥터-설정">MySQL 커넥터 설정</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MySQLConnectorSetup</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config_templates</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_mysql_connector</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">environment_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">MySQL 커넥터 설정</span><span class="sh">"""</span>
+        
+        <span class="c1"># MySQL 서버 설정
+</span>        <span class="n">mysql_server_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">binlog_format</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ROW</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">binlog_row_image</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">FULL</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">log_bin</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">mysql-bin</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">server_id</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">server_id</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">gtid_mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ON</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">enforce_gtid_consistency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ON</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Debezium MySQL 커넥터 설정
+</span>        <span class="n">connector_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">mysql-connector-</span><span class="si">{</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">config</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">connector.class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.connector.mysql.MySqlConnector</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">database.hostname</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">mysql_host</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.port</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">mysql_port</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.user</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">mysql_user</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.password</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">mysql_password</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.server.id</span><span class="sh">"</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">server_id</span><span class="sh">"</span><span class="p">]),</span>
+                <span class="sh">"</span><span class="s">topic.prefix</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">server_name</span><span class="sh">"</span><span class="p">],</span>
+                
+                <span class="c1"># 데이터베이스 및 테이블 필터링
+</span>                <span class="sh">"</span><span class="s">database.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">included_databases</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                <span class="sh">"</span><span class="s">table.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">included_tables</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                <span class="sh">"</span><span class="s">database.exclude.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">excluded_databases</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                <span class="sh">"</span><span class="s">table.exclude.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">excluded_tables</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                
+                <span class="c1"># 성능 최적화 설정
+</span>                <span class="sh">"</span><span class="s">binlog.buffer.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">32768</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">max.batch.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4096</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">max.queue.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">16384</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">500</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">snapshot.locking.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">minimal</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">snapshot.fetch.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2048</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 스키마 및 메타데이터 설정
+</span>                <span class="sh">"</span><span class="s">schema.history.internal.kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">kafka_bootstrap_servers</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">schema.history.internal.kafka.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">schema-changes.</span><span class="si">{</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">include.schema.changes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">schema.name.adjustment.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">avro</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 스냅샷 설정
+</span>                <span class="sh">"</span><span class="s">snapshot.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">initial</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">snapshot.lock.timeout.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10000</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">snapshot.delay.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 트랜잭션 메타데이터
+</span>                <span class="sh">"</span><span class="s">provide.transaction.metadata</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transaction.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">transactions.</span><span class="si">{</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 하트비트 설정
+</span>                <span class="sh">"</span><span class="s">heartbeat.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30000</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">heartbeat.topics.prefix</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">heartbeats.</span><span class="si">{</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">mysql_server_config</span><span class="sh">"</span><span class="p">:</span> <span class="n">mysql_server_config</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">connector_config</span><span class="sh">"</span><span class="p">:</span> <span class="n">connector_config</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_advanced_mysql_config</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">high_performance_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">고성능 MySQL 커넥터 설정</span><span class="sh">"""</span>
+        
+        <span class="n">advanced_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">mysql-high-perf-connector-</span><span class="si">{</span><span class="n">high_performance_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">config</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">connector.class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.connector.mysql.MySqlConnector</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">database.hostname</span><span class="sh">"</span><span class="p">:</span> <span class="n">high_performance_config</span><span class="p">[</span><span class="sh">"</span><span class="s">mysql_host</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.port</span><span class="sh">"</span><span class="p">:</span> <span class="n">high_performance_config</span><span class="p">[</span><span class="sh">"</span><span class="s">mysql_port</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.user</span><span class="sh">"</span><span class="p">:</span> <span class="n">high_performance_config</span><span class="p">[</span><span class="sh">"</span><span class="s">mysql_user</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.password</span><span class="sh">"</span><span class="p">:</span> <span class="n">high_performance_config</span><span class="p">[</span><span class="sh">"</span><span class="s">mysql_password</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.server.id</span><span class="sh">"</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="n">high_performance_config</span><span class="p">[</span><span class="sh">"</span><span class="s">server_id</span><span class="sh">"</span><span class="p">]),</span>
+                <span class="sh">"</span><span class="s">topic.prefix</span><span class="sh">"</span><span class="p">:</span> <span class="n">high_performance_config</span><span class="p">[</span><span class="sh">"</span><span class="s">server_name</span><span class="sh">"</span><span class="p">],</span>
+                
+                <span class="c1"># 고성능 설정
+</span>                <span class="sh">"</span><span class="s">binlog.buffer.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">65536</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">max.batch.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8192</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">max.queue.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">32768</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">100</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">max.queue.size.in.bytes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">104857600</span><span class="sh">"</span><span class="p">,</span>  <span class="c1"># 100MB
+</span>                
+                <span class="c1"># 병렬 처리 설정
+</span>                <span class="sh">"</span><span class="s">tasks.max</span><span class="sh">"</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="n">high_performance_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">max_tasks</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+                <span class="sh">"</span><span class="s">database.connectionTimeZone</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">UTC</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 메모리 최적화
+</span>                <span class="sh">"</span><span class="s">binlog.read.buffered.bytes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1048576</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">inconsistent.schema.handling.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">warn</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 필터링 최적화
+</span>                <span class="sh">"</span><span class="s">database.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">high_performance_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">included_databases</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                <span class="sh">"</span><span class="s">table.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">high_performance_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">included_tables</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                
+                <span class="c1"># 스키마 설정
+</span>                <span class="sh">"</span><span class="s">schema.history.internal.kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">:</span> <span class="n">high_performance_config</span><span class="p">[</span><span class="sh">"</span><span class="s">kafka_bootstrap_servers</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">schema.history.internal.kafka.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">schema-changes.</span><span class="si">{</span><span class="n">high_performance_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">include.schema.changes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 트랜잭션 설정
+</span>                <span class="sh">"</span><span class="s">provide.transaction.metadata</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transaction.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">transactions.</span><span class="si">{</span><span class="n">high_performance_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 하트비트
+</span>                <span class="sh">"</span><span class="s">heartbeat.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10000</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">heartbeat.topics.prefix</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">heartbeats.</span><span class="si">{</span><span class="n">high_performance_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">advanced_config</span>
+</code></pre></div></div>
+
+<h3 id="postgresql-커넥터-설정">PostgreSQL 커넥터 설정</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">PostgreSQLConnectorSetup</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config_templates</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_postgresql_connector</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">environment_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">PostgreSQL 커넥터 설정</span><span class="sh">"""</span>
+        
+        <span class="c1"># PostgreSQL 서버 설정
+</span>        <span class="n">postgresql_server_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">wal_level</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">logical</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">max_wal_senders</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">max_replication_slots</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">hot_standby</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">on</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Debezium PostgreSQL 커넥터 설정
+</span>        <span class="n">connector_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">postgresql-connector-</span><span class="si">{</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">config</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">connector.class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.connector.postgresql.PostgresConnector</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">database.hostname</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">postgres_host</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.port</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">postgres_port</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.user</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">postgres_user</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.password</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">postgres_password</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.dbname</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">database_name</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.server.name</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">server_name</span><span class="sh">"</span><span class="p">],</span>
+                
+                <span class="c1"># 복제 슬롯 설정
+</span>                <span class="sh">"</span><span class="s">database.slot.name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">debezium_</span><span class="si">{</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">slot.drop.on.stop</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">slot.streaming.resume.lsn</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0/0</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># Publication 설정
+</span>                <span class="sh">"</span><span class="s">plugin.name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">pgoutput</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">publication.name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">debezium_publication_</span><span class="si">{</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">publication.autocreate.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">filtered</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 스키마 및 테이블 필터링
+</span>                <span class="sh">"</span><span class="s">schema.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">included_schemas</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                <span class="sh">"</span><span class="s">table.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">included_tables</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                <span class="sh">"</span><span class="s">schema.exclude.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">excluded_schemas</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                <span class="sh">"</span><span class="s">table.exclude.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">excluded_tables</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                
+                <span class="c1"># 성능 설정
+</span>                <span class="sh">"</span><span class="s">max.batch.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4096</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">max.queue.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">16384</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">500</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">status.update.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10000</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 스키마 히스토리
+</span>                <span class="sh">"</span><span class="s">schema.history.internal.kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">kafka_bootstrap_servers</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">schema.history.internal.kafka.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">schema-changes.</span><span class="si">{</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">include.schema.changes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 스냅샷 설정
+</span>                <span class="sh">"</span><span class="s">snapshot.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">initial</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">snapshot.lock.timeout.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10000</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">snapshot.delay.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">snapshot.include.collection.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">snapshot_tables</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                
+                <span class="c1"># 트랜잭션 메타데이터
+</span>                <span class="sh">"</span><span class="s">provide.transaction.metadata</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transaction.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">transactions.</span><span class="si">{</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 하트비트
+</span>                <span class="sh">"</span><span class="s">heartbeat.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30000</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">heartbeat.topics.prefix</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">heartbeats.</span><span class="si">{</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 데이터 타입 매핑
+</span>                <span class="sh">"</span><span class="s">decimal.handling.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">precise</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">time.precision.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">adaptive</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">binary.handling.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">base64</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">postgresql_server_config</span><span class="sh">"</span><span class="p">:</span> <span class="n">postgresql_server_config</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">connector_config</span><span class="sh">"</span><span class="p">:</span> <span class="n">connector_config</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="mongodb-커넥터-설정">MongoDB 커넥터 설정</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MongoDBConnectorSetup</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config_templates</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_mongodb_connector</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">environment_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">MongoDB 커넥터 설정</span><span class="sh">"""</span>
+        
+        <span class="c1"># MongoDB 서버 설정
+</span>        <span class="n">mongodb_server_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">replication</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">enabled</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">oplog_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1GB</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">enable_majority_read_concern</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Debezium MongoDB 커넥터 설정
+</span>        <span class="n">connector_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">mongodb-connector-</span><span class="si">{</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">config</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">connector.class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.connector.mongodb.MongoDbConnector</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">mongodb.hosts</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">mongodb_hosts</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">mongodb.name</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">server_name</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">mongodb.user</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">mongodb_user</span><span class="sh">"</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">mongodb.password</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">mongodb_password</span><span class="sh">"</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">mongodb.ssl.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">ssl_enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">),</span>
+                
+                <span class="c1"># 데이터베이스 및 컬렉션 필터링
+</span>                <span class="sh">"</span><span class="s">database.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">included_databases</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                <span class="sh">"</span><span class="s">collection.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">included_collections</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                <span class="sh">"</span><span class="s">database.exclude.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">excluded_databases</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                <span class="sh">"</span><span class="s">collection.exclude.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">excluded_collections</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                
+                <span class="c1"># 캡처 모드 설정
+</span>                <span class="sh">"</span><span class="s">capture.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">change_streams_update_full</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">capture.scope</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">deployment</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 성능 설정
+</span>                <span class="sh">"</span><span class="s">max.batch.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2048</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">max.queue.size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8192</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1000</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">max.queue.size.in.bytes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">52428800</span><span class="sh">"</span><span class="p">,</span>  <span class="c1"># 50MB
+</span>                
+                <span class="c1"># 스키마 히스토리
+</span>                <span class="sh">"</span><span class="s">schema.history.internal.kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">:</span> <span class="n">environment_config</span><span class="p">[</span><span class="sh">"</span><span class="s">kafka_bootstrap_servers</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">schema.history.internal.kafka.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">schema-changes.</span><span class="si">{</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">include.schema.changes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 스냅샷 설정
+</span>                <span class="sh">"</span><span class="s">snapshot.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">initial</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">snapshot.delay.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 하트비트
+</span>                <span class="sh">"</span><span class="s">heartbeat.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30000</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">heartbeat.topics.prefix</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">heartbeats.</span><span class="si">{</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># MongoDB 특화 설정
+</span>                <span class="sh">"</span><span class="s">connect.timeout.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30000</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">socket.timeout.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30000</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">server.selection.timeout.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30000</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">cursor.max.await.time.ms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1000</span><span class="sh">"</span><span class="p">,</span>
+                
+                <span class="c1"># 필드 설정
+</span>                <span class="sh">"</span><span class="s">field.renames</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">field_renames</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                <span class="sh">"</span><span class="s">field.exclude.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">environment_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">field_excludes</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+                
+                <span class="c1"># 트랜잭션 메타데이터
+</span>                <span class="sh">"</span><span class="s">provide.transaction.metadata</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transaction.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">transactions.</span><span class="si">{</span><span class="n">environment_config</span><span class="p">[</span><span class="sh">'</span><span class="s">server_name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">mongodb_server_config</span><span class="sh">"</span><span class="p">:</span> <span class="n">mongodb_server_config</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">connector_config</span><span class="sh">"</span><span class="p">:</span> <span class="n">connector_config</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="-스키마-진화와-스키마-레지스트리">📊 스키마 진화와 스키마 레지스트리</h2>
+
+<h3 id="스키마-진화-개념">스키마 진화 개념</h3>
+
+<p>스키마 진화는 데이터베이스 스키마가 시간에 따라 변경되면서도 기존 데이터와의 호환성을 유지하는 기능입니다. Debezium은 스키마 변경을 자동으로 감지하고 Kafka로 전파합니다.</p>
+
+<h4 id="스키마-진화의-중요성">스키마 진화의 중요성</h4>
+
+<ul>
+  <li><strong>하위 호환성</strong>: 기존 소비자가 새로운 스키마를 처리할 수 있음</li>
+  <li><strong>상위 호환성</strong>: 새로운 소비자가 기존 스키마를 처리할 수 있음</li>
+  <li><strong>점진적 배포</strong>: 서비스 중단 없이 스키마 변경 가능</li>
+  <li><strong>데이터 일관성</strong>: 변경 과정에서 데이터 손실 방지</li>
+</ul>
+
+<h3 id="스키마-레지스트리-통합">스키마 레지스트리 통합</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SchemaRegistryIntegration</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">schema_configs</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_confluent_schema_registry</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">registry_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Confluent Schema Registry 설정</span><span class="sh">"""</span>
+        
+        <span class="n">schema_registry_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">schema.registry.url</span><span class="sh">"</span><span class="p">:</span> <span class="n">registry_config</span><span class="p">[</span><span class="sh">"</span><span class="s">schema_registry_url</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">key.converter</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.confluent.connect.avro.AvroConverter</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">key.converter.schema.registry.url</span><span class="sh">"</span><span class="p">:</span> <span class="n">registry_config</span><span class="p">[</span><span class="sh">"</span><span class="s">schema_registry_url</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">value.converter</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.confluent.connect.avro.AvroConverter</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">value.converter.schema.registry.url</span><span class="sh">"</span><span class="p">:</span> <span class="n">registry_config</span><span class="p">[</span><span class="sh">"</span><span class="s">schema_registry_url</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">value.converter.auto.register.schemas</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">value.converter.use.latest.version</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">unwrap</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.transforms.ExtractNewRecordState</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.drop.tombstones</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.delete.handling.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">drop</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.add.fields</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">op,ts_ms,source.ts_ms,source.db,source.table</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">schema_registry_config</span>
+</code></pre></div></div>
+
+<h3 id="스키마-진화-시나리오">스키마 진화 시나리오</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>시나리오</th>
+      <th>설명</th>
+      <th>호환성</th>
+      <th>처리 방식</th>
+      <th>예시</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>컬럼 추가</strong></td>
+      <td>새로운 컬럼 추가</td>
+      <td>FORWARD</td>
+      <td>새로운 컬럼은 null 또는 기본값으로 처리</td>
+      <td><code class="language-plaintext highlighter-rouge">ALTER TABLE users ADD COLUMN phone VARCHAR(20)</code></td>
+    </tr>
+    <tr>
+      <td><strong>컬럼 삭제</strong></td>
+      <td>컬럼 삭제</td>
+      <td>BACKWARD</td>
+      <td>기존 데이터에서 해당 컬럼 제거</td>
+      <td><code class="language-plaintext highlighter-rouge">ALTER TABLE users DROP COLUMN old_field</code></td>
+    </tr>
+    <tr>
+      <td><strong>컬럼 이름 변경</strong></td>
+      <td>컬럼 이름 변경</td>
+      <td>NONE</td>
+      <td>새로운 컬럼 추가 후 기존 컬럼 제거</td>
+      <td><code class="language-plaintext highlighter-rouge">ALTER TABLE users RENAME COLUMN old_name TO new_name</code></td>
+    </tr>
+    <tr>
+      <td><strong>컬럼 타입 변경</strong></td>
+      <td>컬럼 타입 변경</td>
+      <td>FORWARD_TRANSITIVE</td>
+      <td>타입 호환성 확인 후 변환</td>
+      <td><code class="language-plaintext highlighter-rouge">ALTER TABLE users MODIFY COLUMN age INT</code></td>
+    </tr>
+    <tr>
+      <td><strong>테이블 추가</strong></td>
+      <td>새로운 테이블 추가</td>
+      <td>FORWARD</td>
+      <td>자동으로 새로운 토픽 생성</td>
+      <td><code class="language-plaintext highlighter-rouge">CREATE TABLE new_table (...)</code></td>
+    </tr>
+    <tr>
+      <td><strong>테이블 삭제</strong></td>
+      <td>테이블 삭제</td>
+      <td>BACKWARD</td>
+      <td>기존 토픽은 유지하되 새로운 이벤트 중단</td>
+      <td><code class="language-plaintext highlighter-rouge">DROP TABLE old_table</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="스키마-호환성-전략">스키마 호환성 전략</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>전략</th>
+      <th>설명</th>
+      <th>사용 사례</th>
+      <th>필드 추가</th>
+      <th>필드 제거</th>
+      <th>타입 변경</th>
+      <th>안전성</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Backward Compatibility</strong></td>
+      <td>이전 버전과 호환</td>
+      <td>소비자 업데이트 전에 생산자 업데이트</td>
+      <td>✅ 선택적 필드만</td>
+      <td>❌ 금지</td>
+      <td>✅ 확장 가능한 타입만</td>
+      <td>높음</td>
+    </tr>
+    <tr>
+      <td><strong>Forward Compatibility</strong></td>
+      <td>미래 버전과 호환</td>
+      <td>생산자 업데이트 전에 소비자 업데이트</td>
+      <td>❌ 금지</td>
+      <td>✅ 선택적 필드만</td>
+      <td>✅ 축소 가능한 타입만</td>
+      <td>높음</td>
+    </tr>
+    <tr>
+      <td><strong>Full Compatibility</strong></td>
+      <td>양방향 호환</td>
+      <td>가장 안전한 전략</td>
+      <td>✅ 선택적 필드만</td>
+      <td>✅ 선택적 필드만</td>
+      <td>✅ 호환 가능한 타입만</td>
+      <td>최고</td>
+    </tr>
+    <tr>
+      <td><strong>No Compatibility</strong></td>
+      <td>호환성 없음</td>
+      <td>개발 환경 또는 마이그레이션</td>
+      <td>✅ 모든 변경 허용</td>
+      <td>✅ 모든 변경 허용</td>
+      <td>✅ 모든 변경 허용</td>
+      <td>낮음</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="schema-registry-호환성-레벨">Schema Registry 호환성 레벨</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>호환성 레벨</th>
+      <th>설명</th>
+      <th>사용 시기</th>
+      <th>업데이트 순서</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>BACKWARD</strong></td>
+      <td>이전 버전과 호환</td>
+      <td>소비자 업데이트 전에 생산자 업데이트</td>
+      <td>소비자 → 생산자</td>
+    </tr>
+    <tr>
+      <td><strong>FORWARD</strong></td>
+      <td>미래 버전과 호환</td>
+      <td>생산자 업데이트 전에 소비자 업데이트</td>
+      <td>생산자 → 소비자</td>
+    </tr>
+    <tr>
+      <td><strong>FULL</strong></td>
+      <td>양방향 호환</td>
+      <td>가장 안전한 전략</td>
+      <td>순서 무관</td>
+    </tr>
+    <tr>
+      <td><strong>NONE</strong></td>
+      <td>호환성 검사 없음</td>
+      <td>개발 환경 또는 마이그레이션</td>
+      <td>제한 없음</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="스키마-검증-규칙">스키마 검증 규칙</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>규칙</th>
+      <th>설명</th>
+      <th>예시</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>필드 추가</strong></td>
+      <td>새 필드는 optional이어야 함</td>
+      <td><code class="language-plaintext highlighter-rouge">"email": {"type": "string", "optional": true}</code></td>
+    </tr>
+    <tr>
+      <td><strong>필드 제거</strong></td>
+      <td>기존 필드 제거 시 호환성 확인</td>
+      <td>deprecated 마킹 후 단계적 제거</td>
+    </tr>
+    <tr>
+      <td><strong>타입 변경</strong></td>
+      <td>타입 변경 시 호환 가능한 타입만 허용</td>
+      <td>int32 → int64 (가능), string → int (불가능)</td>
+    </tr>
+    <tr>
+      <td><strong>기본값 설정</strong></td>
+      <td>새 필드에 적절한 기본값 설정</td>
+      <td><code class="language-plaintext highlighter-rouge">"default": null</code> 또는 적절한 기본값</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="스키마-진화-전략">스키마 진화 전략</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>전략 유형</th>
+      <th>설명</th>
+      <th>예시</th>
+      <th>처리 방식</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Additive Changes</strong></td>
+      <td>안전한 변경 (호환성 유지)</td>
+      <td>• 새로운 optional 필드 추가<br />• 새로운 테이블 추가<br />• enum 값 추가</td>
+      <td>즉시 적용 가능</td>
+    </tr>
+    <tr>
+      <td><strong>Breaking Changes</strong></td>
+      <td>호환성 파괴 변경</td>
+      <td>• 필수 필드 추가<br />• 필드 타입 변경<br />• 필드 삭제<br />• enum 값 제거</td>
+      <td>새로운 스키마 버전으로 처리</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SchemaCompatibilityStrategies</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">implement_schema_compatibility_strategies</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">스키마 호환성 전략 구현</span><span class="sh">"""</span>
+        
+        <span class="c1"># Schema Registry 설정
+</span>        <span class="n">schema_registry_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">url</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">http://schema-registry:8081</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">compatibility_levels</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">BACKWARD</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">이전 버전과 호환 (소비자 먼저 업데이트)</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">FORWARD</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">미래 버전과 호환 (생산자 먼저 업데이트)</span><span class="sh">"</span><span class="p">,</span> 
+                <span class="sh">"</span><span class="s">FULL</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">양방향 호환 (가장 안전)</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">NONE</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">호환성 검사 없음 (개발 환경)</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">validation_rules</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">field_addition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">새 필드는 optional이어야 함</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">field_removal</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">기존 필드 제거 시 호환성 확인</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">type_changes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">타입 변경 시 호환 가능한 타입만 허용</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">default_values</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">새 필드에 적절한 기본값 설정</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">schema_registry_config</span>
+    
+    <span class="k">def</span> <span class="nf">validate_schema_compatibility</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">old_schema</span><span class="p">,</span> <span class="n">new_schema</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">스키마 호환성 검증</span><span class="sh">"""</span>
+        
+        <span class="n">compatibility_results</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">compatibility_level</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">UNKNOWN</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">issues</span><span class="sh">"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="sh">"</span><span class="s">recommendations</span><span class="sh">"</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># 필드 변경 검증
+</span>        <span class="n">old_fields</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">old_schema</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">,</span> <span class="p">{}).</span><span class="nf">keys</span><span class="p">())</span>
+        <span class="n">new_fields</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">new_schema</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">,</span> <span class="p">{}).</span><span class="nf">keys</span><span class="p">())</span>
+        
+        <span class="c1"># 추가된 필드 검증
+</span>        <span class="n">added_fields</span> <span class="o">=</span> <span class="n">new_fields</span> <span class="o">-</span> <span class="n">old_fields</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">added_fields</span><span class="p">:</span>
+            <span class="n">field_def</span> <span class="o">=</span> <span class="n">new_schema</span><span class="p">[</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">][</span><span class="n">field</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">field_def</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">optional</span><span class="sh">"</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+                <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">issues</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="sh">"</span><span class="s">새 필드 </span><span class="sh">'</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="sh">'</span><span class="s">가 required입니다. optional로 변경하세요.</span><span class="sh">"</span>
+                <span class="p">)</span>
+                <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="c1"># 제거된 필드 검증
+</span>        <span class="n">removed_fields</span> <span class="o">=</span> <span class="n">old_fields</span> <span class="o">-</span> <span class="n">new_fields</span>
+        <span class="k">if</span> <span class="n">removed_fields</span><span class="p">:</span>
+            <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">issues</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="sh">"</span><span class="s">제거된 필드: </span><span class="si">{</span><span class="nf">list</span><span class="p">(</span><span class="n">removed_fields</span><span class="p">)</span><span class="si">}</span><span class="s">. 이는 breaking change입니다.</span><span class="sh">"</span>
+            <span class="p">)</span>
+            <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="c1"># 타입 변경 검증
+</span>        <span class="n">common_fields</span> <span class="o">=</span> <span class="n">old_fields</span> <span class="o">&amp;</span> <span class="n">new_fields</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">common_fields</span><span class="p">:</span>
+            <span class="n">old_type</span> <span class="o">=</span> <span class="n">old_schema</span><span class="p">[</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">][</span><span class="n">field</span><span class="p">].</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">)</span>
+            <span class="n">new_type</span> <span class="o">=</span> <span class="n">new_schema</span><span class="p">[</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">][</span><span class="n">field</span><span class="p">].</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">old_type</span> <span class="o">!=</span> <span class="n">new_type</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">self</span><span class="p">.</span><span class="nf">_is_type_compatible</span><span class="p">(</span><span class="n">old_type</span><span class="p">,</span> <span class="n">new_type</span><span class="p">):</span>
+                    <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">issues</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="sh">"</span><span class="s">필드 </span><span class="sh">'</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="sh">'</span><span class="s"> 타입이 </span><span class="si">{</span><span class="n">old_type</span><span class="si">}</span><span class="s">에서 </span><span class="si">{</span><span class="n">new_type</span><span class="si">}</span><span class="s">로 변경됨</span><span class="sh">"</span>
+                    <span class="p">)</span>
+                    <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="c1"># 호환성 레벨 결정
+</span>        <span class="k">if</span> <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">added_fields</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">removed_fields</span><span class="p">:</span>
+                <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">compatibility_level</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">BACKWARD</span><span class="sh">"</span>
+            <span class="k">elif</span> <span class="n">removed_fields</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">added_fields</span><span class="p">:</span>
+                <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">compatibility_level</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">FORWARD</span><span class="sh">"</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">added_fields</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">removed_fields</span><span class="p">:</span>
+                <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">compatibility_level</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">FULL</span><span class="sh">"</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">compatibility_level</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">NONE</span><span class="sh">"</span>
+        
+        <span class="c1"># 권장사항 생성
+</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">]:</span>
+            <span class="n">compatibility_results</span><span class="p">[</span><span class="sh">"</span><span class="s">recommendations</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="sh">"</span><span class="s">새 필드는 optional로 설정하세요</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">필드 제거 대신 deprecated 마킹을 고려하세요</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">타입 변경 시 호환 가능한 타입으로 변환하세요</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">필요시 새로운 스키마 버전을 생성하세요</span><span class="sh">"</span>
+            <span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">compatibility_results</span>
+    
+    <span class="k">def</span> <span class="nf">_is_type_compatible</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">old_type</span><span class="p">,</span> <span class="n">new_type</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">타입 호환성 검사</span><span class="sh">"""</span>
+        <span class="n">compatible_types</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">int32</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">int64</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">float</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">double</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">int64</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">float</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">double</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">float</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">double</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">bytes</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">bytes</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">]</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">new_type</span> <span class="ow">in</span> <span class="n">compatible_types</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">old_type</span><span class="p">,</span> <span class="p">[])</span>
+    
+    <span class="k">def</span> <span class="nf">create_schema_evolution_plan</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">current_schema</span><span class="p">,</span> <span class="n">target_schema</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">스키마 진화 계획 생성</span><span class="sh">"""</span>
+        
+        <span class="n">evolution_plan</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">phases</span><span class="sh">"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="sh">"</span><span class="s">estimated_duration</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">unknown</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">risk_level</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">low</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Phase 1: 안전한 변경
+</span>        <span class="n">safe_changes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">old_fields</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">current_schema</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">,</span> <span class="p">{}).</span><span class="nf">keys</span><span class="p">())</span>
+        <span class="n">new_fields</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">target_schema</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">,</span> <span class="p">{}).</span><span class="nf">keys</span><span class="p">())</span>
+        
+        <span class="n">added_fields</span> <span class="o">=</span> <span class="n">new_fields</span> <span class="o">-</span> <span class="n">old_fields</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">added_fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">target_schema</span><span class="p">[</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">][</span><span class="n">field</span><span class="p">].</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">optional</span><span class="sh">"</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+                <span class="n">safe_changes</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">필드 </span><span class="sh">'</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="sh">'</span><span class="s"> 추가 (optional)</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">safe_changes</span><span class="p">:</span>
+            <span class="n">evolution_plan</span><span class="p">[</span><span class="sh">"</span><span class="s">phases</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">phase</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">safe_changes</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">안전한 변경 (호환성 유지)</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">changes</span><span class="sh">"</span><span class="p">:</span> <span class="n">safe_changes</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">duration</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1-2주</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Phase 2: Breaking Changes (필요시)
+</span>        <span class="n">breaking_changes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">removed_fields</span> <span class="o">=</span> <span class="n">old_fields</span> <span class="o">-</span> <span class="n">new_fields</span>
+        <span class="k">if</span> <span class="n">removed_fields</span><span class="p">:</span>
+            <span class="n">breaking_changes</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">필드 제거: </span><span class="si">{</span><span class="nf">list</span><span class="p">(</span><span class="n">removed_fields</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="n">evolution_plan</span><span class="p">[</span><span class="sh">"</span><span class="s">risk_level</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">high</span><span class="sh">"</span>
+        
+        <span class="k">if</span> <span class="n">breaking_changes</span><span class="p">:</span>
+            <span class="n">evolution_plan</span><span class="p">[</span><span class="sh">"</span><span class="s">phases</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">phase</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">breaking_changes</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Breaking Changes (새 버전 필요)</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">changes</span><span class="sh">"</span><span class="p">:</span> <span class="n">breaking_changes</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">duration</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2-4주</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">notes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">소비자 업데이트 필요</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">evolution_plan</span>
+</code></pre></div></div>
+
+<h2 id="-실시간-데이터-변환과-라우팅">🔄 실시간 데이터 변환과 라우팅</h2>
+
+<h3 id="데이터-변환-파이프라인">데이터 변환 파이프라인</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DataTransformationPipeline</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">transformation_configs</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_single_message_transform</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">transform_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Single Message Transform (SMT) 설정</span><span class="sh">"""</span>
+        
+        <span class="n">smt_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">transforms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">transform_config</span><span class="p">[</span><span class="sh">"</span><span class="s">transforms</span><span class="sh">"</span><span class="p">]),</span>
+            
+            <span class="c1"># 레코드 언래핑
+</span>            <span class="sh">"</span><span class="s">transforms.unwrap.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.transforms.ExtractNewRecordState</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.drop.tombstones</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.delete.handling.mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">drop</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.add.fields</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">op,ts_ms,source.ts_ms,source.db,source.table</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.unwrap.add.headers</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">op,source.ts_ms</span><span class="sh">"</span><span class="p">,</span>
+            
+            <span class="c1"># 필드 이름 변환
+</span>            <span class="sh">"</span><span class="s">transforms.rename.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.ReplaceField$Value</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.rename.renames</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">transform_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">field_renames</span><span class="sh">"</span><span class="p">,</span> <span class="p">[])),</span>
+            
+            <span class="c1"># 토픽 라우팅
+</span>            <span class="sh">"</span><span class="s">transforms.route.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.RegexRouter</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.route.regex</span><span class="sh">"</span><span class="p">:</span> <span class="n">transform_config</span><span class="p">[</span><span class="sh">"</span><span class="s">topic_regex</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">transforms.route.replacement</span><span class="sh">"</span><span class="p">:</span> <span class="n">transform_config</span><span class="p">[</span><span class="sh">"</span><span class="s">topic_replacement</span><span class="sh">"</span><span class="p">],</span>
+            
+            <span class="c1"># 필터링
+</span>            <span class="sh">"</span><span class="s">transforms.filter.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.Filter</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.filter.condition</span><span class="sh">"</span><span class="p">:</span> <span class="n">transform_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">filter_condition</span><span class="sh">"</span><span class="p">,</span> <span class="sh">""</span><span class="p">),</span>
+            
+            <span class="c1"># 필드 추가
+</span>            <span class="sh">"</span><span class="s">transforms.addfield.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.InsertField$Value</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.addfield.static.field</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">processed_at</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.addfield.static.value</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">$(date:yyyy-MM-dd</span><span class="sh">'</span><span class="s">T</span><span class="sh">'</span><span class="s">HH:mm:ss</span><span class="sh">'</span><span class="s">Z</span><span class="sh">'</span><span class="s">)</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">smt_config</span>
+    
+    <span class="k">def</span> <span class="nf">implement_custom_transformation</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">custom_logic</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">커스텀 변환 로직 구현</span><span class="sh">"""</span>
+        
+        <span class="n">custom_transform_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">transforms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">custom</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.custom.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">com.company.debezium.CustomTransform</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">transforms.custom.config</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">business_rules</span><span class="sh">"</span><span class="p">:</span> <span class="n">custom_logic</span><span class="p">[</span><span class="sh">"</span><span class="s">business_rules</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">data_validation</span><span class="sh">"</span><span class="p">:</span> <span class="n">custom_logic</span><span class="p">[</span><span class="sh">"</span><span class="s">validation_rules</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">enrichment</span><span class="sh">"</span><span class="p">:</span> <span class="n">custom_logic</span><span class="p">[</span><span class="sh">"</span><span class="s">enrichment_config</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">masking</span><span class="sh">"</span><span class="p">:</span> <span class="n">custom_logic</span><span class="p">[</span><span class="sh">"</span><span class="s">masking_rules</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">custom_transform_config</span>
+    
+    <span class="k">def</span> <span class="nf">setup_topic_routing</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">routing_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">토픽 라우팅 설정</span><span class="sh">"""</span>
+        
+        <span class="n">routing_strategies</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">database_based_routing</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">데이터베이스별 토픽 분리</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">configuration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">transforms.route.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.RegexRouter</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.route.regex</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">([^.]+)</span><span class="se">\\</span><span class="s">.([^.]+)</span><span class="se">\\</span><span class="s">.([^.]+)</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.route.replacement</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">$1-$2-$3</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">result</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">server.database.table -&gt; server-database-table</span><span class="sh">"</span>
+            <span class="p">},</span>
+            
+            <span class="sh">"</span><span class="s">table_based_routing</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">테이블별 토픽 분리</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">configuration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">transforms.route.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.RegexRouter</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.route.regex</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">([^.]+)</span><span class="se">\\</span><span class="s">.([^.]+)</span><span class="se">\\</span><span class="s">.([^.]+)</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.route.replacement</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">$3</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">result</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">server.database.table -&gt; table</span><span class="sh">"</span>
+            <span class="p">},</span>
+            
+            <span class="sh">"</span><span class="s">operation_based_routing</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">연산 타입별 토픽 분리</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">configuration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">transforms.route.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">com.company.debezium.OperationRouter</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.route.insert.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">inserts</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.route.update.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">updates</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.route.delete.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">deletes</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">result</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">INSERT -&gt; inserts, UPDATE -&gt; updates, DELETE -&gt; deletes</span><span class="sh">"</span>
+            <span class="p">},</span>
+            
+            <span class="sh">"</span><span class="s">conditional_routing</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">조건부 토픽 라우팅</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">configuration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">transforms.route.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">com.company.debezium.ConditionalRouter</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.route.conditions</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">high_priority</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">priority == </span><span class="sh">'</span><span class="s">HIGH</span><span class="sh">'"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">low_priority</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">priority == </span><span class="sh">'</span><span class="s">LOW</span><span class="sh">'"</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">transforms.route.default.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">normal</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">result</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">조건에 따른 동적 토픽 라우팅</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">routing_strategies</span><span class="p">[</span><span class="n">routing_config</span><span class="p">[</span><span class="sh">"</span><span class="s">strategy</span><span class="sh">"</span><span class="p">]]</span>
+    
+    <span class="k">def</span> <span class="nf">implement_data_enrichment</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">enrichment_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">데이터 풍부화 구현</span><span class="sh">"""</span>
+        
+        <span class="n">enrichment_pipeline</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">lookup_enrichment</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">외부 데이터 소스 조회</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">implementation</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">transforms.enrich.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">com.company.debezium.LookupTransform</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.enrich.lookup.source</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">redis</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.enrich.lookup.key.field</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.enrich.lookup.value.fields</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user_name,user_email,user_role</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            
+            <span class="sh">"</span><span class="s">calculation_enrichment</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">계산된 필드 추가</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">implementation</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">transforms.calc.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">com.company.debezium.CalculationTransform</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.calc.formulas</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">total_amount</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">price * quantity</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">discount_amount</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">total_amount * discount_rate</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">final_amount</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">total_amount - discount_amount</span><span class="sh">"</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            
+            <span class="sh">"</span><span class="s">geolocation_enrichment</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">지리적 정보 풍부화</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">implementation</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">transforms.geo.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">com.company.debezium.GeolocationTransform</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.geo.latitude.field</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">lat</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.geo.longitude.field</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">lng</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transforms.geo.output.fields</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">country,region,city,timezone</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">enrichment_pipeline</span>
+</code></pre></div></div>
+
+<h2 id="-실무-프로젝트-실시간-데이터-동기화-시스템">🚀 실무 프로젝트: 실시간 데이터 동기화 시스템</h2>
+
+<h3 id="프로젝트-개요">프로젝트 개요</h3>
+
+<p>대규모 이커머스 플랫폼을 위한 실시간 데이터 동기화 시스템을 구축합니다. MySQL 주문 데이터베이스의 변경사항을 실시간으로 캡처하여 Elasticsearch 검색 엔진, Redis 캐시, 그리고 데이터 레이크로 동기화합니다.</p>
+
+<h4 id="프로젝트-목표">프로젝트 목표</h4>
+
+<ul>
+  <li><strong>실시간 검색</strong>: 주문 데이터 변경사항을 즉시 Elasticsearch에 반영</li>
+  <li><strong>캐시 동기화</strong>: Redis 캐시의 실시간 업데이트로 응답 속도 향상</li>
+  <li><strong>데이터 레이크</strong>: 분석용 데이터를 Parquet 형태로 저장</li>
+  <li><strong>모니터링</strong>: 전체 파이프라인의 실시간 모니터링 및 알림</li>
+</ul>
+
+<h4 id="기술적-도전과제">기술적 도전과제</h4>
+
+<ul>
+  <li><strong>대용량 처리</strong>: 일일 100만 건 이상의 주문 처리</li>
+  <li><strong>낮은 지연시간</strong>: 5초 이내의 데이터 동기화</li>
+  <li><strong>고가용성</strong>: 99.9% 이상의 시스템 가용성</li>
+  <li><strong>데이터 일관성</strong>: 모든 시스템 간의 데이터 일관성 보장</li>
+</ul>
+
+<h3 id="1-시스템-아키텍처">1. 시스템 아키텍처</h3>
+
+<h4 id="소스-데이터베이스">소스 데이터베이스</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>데이터베이스</th>
+      <th>용도</th>
+      <th>테이블</th>
+      <th>일일 볼륨</th>
+      <th>지연시간 요구사항</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>MySQL Orders</strong></td>
+      <td>주문 데이터 저장</td>
+      <td>orders, order_items, customers, products</td>
+      <td>1M 트랜잭션</td>
+      <td>&lt; 5초</td>
+    </tr>
+    <tr>
+      <td><strong>MySQL Inventory</strong></td>
+      <td>재고 데이터 저장</td>
+      <td>inventory, warehouses, stock_movements</td>
+      <td>500K 업데이트</td>
+      <td>&lt; 1초</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="kafka-클러스터-구성">Kafka 클러스터 구성</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>구성 요소</th>
+      <th>설정값</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>브로커 수</strong></td>
+      <td>3개</td>
+      <td>고가용성 보장</td>
+    </tr>
+    <tr>
+      <td><strong>파티션 수</strong></td>
+      <td>12개</td>
+      <td>병렬 처리 성능</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 보관</strong></td>
+      <td>7일</td>
+      <td>스트리밍 데이터 보관</td>
+    </tr>
+    <tr>
+      <td><strong>토픽</strong></td>
+      <td>4개</td>
+      <td>주문, 아이템, 고객, 재고 이벤트</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="대상-시스템">대상 시스템</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>시스템</th>
+      <th>용도</th>
+      <th>인덱스/데이터 타입</th>
+      <th>업데이트 빈도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Elasticsearch</strong></td>
+      <td>실시간 검색 및 분석</td>
+      <td>orders, customers, products</td>
+      <td>실시간</td>
+    </tr>
+    <tr>
+      <td><strong>Redis</strong></td>
+      <td>캐시 및 세션 저장</td>
+      <td>customer_sessions, product_cache</td>
+      <td>실시간</td>
+    </tr>
+    <tr>
+      <td><strong>Data Lake</strong></td>
+      <td>데이터 분석 및 ML</td>
+      <td>Parquet 형식</td>
+      <td>시간별 배치</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">RealTimeDataSyncSystem</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">components</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">data_flows</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">design_system_architecture</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">시스템 아키텍처 설계</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">source_databases</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">mysql_orders</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">mysql_inventory</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">kafka_cluster</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">brokers</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="sh">"</span><span class="s">partitions</span><span class="sh">"</span><span class="p">:</span> <span class="mi">12</span><span class="p">},</span>
+            <span class="sh">"</span><span class="s">target_systems</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">elasticsearch</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">redis</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">data_lake</span><span class="sh">"</span><span class="p">]</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def implement_order_sync_pipeline(self):
+    """주문 동기화 파이프라인 구현"""
+    
+    # MySQL 주문 데이터베이스 커넥터
+    orders_connector_config = {
+        "name": "mysql-orders-connector",
+        "config": {
+            "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+            "database.hostname": "mysql-orders-cluster",
+            "database.port": "3306",
+            "database.user": "debezium_user",
+            "database.password": "secure_password",
+            "database.server.id": "184054",
+            "topic.prefix": "orders.ecommerce",
+            
+            # 테이블 필터링
+            "table.include.list": "ecommerce.orders,ecommerce.order_items,ecommerce.customers",
+            "database.include.list": "ecommerce",
+            
+            # 성능 최적화
+            "binlog.buffer.size": "32768",
+            "max.batch.size": "4096",
+            "max.queue.size": "16384",
+            "poll.interval.ms": "100",
+            
+            # 스키마 설정
+            "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
+            "schema.history.internal.kafka.topic": "schema-changes.orders.ecommerce",
+            "include.schema.changes": "true",
+            
+            # 데이터 변환
+            "transforms": "unwrap,route,addTimestamp",
+            "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+            "transforms.unwrap.drop.tombstones": "false",
+            "transforms.unwrap.delete.handling.mode": "drop",
+            "transforms.unwrap.add.fields": "op,ts_ms,source.ts_ms",
+            
+            # 토픽 라우팅
+            "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+            "transforms.route.regex": "orders\\.ecommerce\\.([^.]+)",
+            "transforms.route.replacement": "orders.$1",
+            
+            # 타임스탬프 추가
+            "transforms.addTimestamp.type": "org.apache.kafka.connect.transforms.InsertField$Value",
+            "transforms.addTimestamp.static.field": "processed_at",
+            "transforms.addTimestamp.static.value": "$(date:yyyy-MM-dd'T'HH:mm:ss'Z')",
+            
+            # 트랜잭션 메타데이터
+            "provide.transaction.metadata": "true",
+            "transaction.topic": "transactions.orders.ecommerce"
+        }
+    }
+    
+    return orders_connector_config
+
+def implement_elasticsearch_sink(self):
+    """Elasticsearch 싱크 구현"""
+    
+    elasticsearch_sink_config = {
+        "name": "elasticsearch-orders-sink",
+        "config": {
+            "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+            "topics": "orders.orders,orders.order_items,orders.customers",
+            "connection.url": "http://elasticsearch-cluster:9200",
+            
+            # 인덱스 설정
+            "type.name": "_doc",
+            "key.ignore": "false",
+            "schema.ignore": "true",
+            
+            # 성능 설정
+            "batch.size": "1000",
+            "max.in.flight.requests": "5",
+            "flush.timeout.ms": "30000",
+            "max.retries": "3",
+            "retry.backoff.ms": "1000",
+            
+            # 인덱스 매핑
+            "transforms": "route,addTimestamp",
+            "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+            "transforms.route.regex": "orders\\.([^.]+)",
+            "transforms.route.replacement": "$1-index",
+            
+            # 타임스탬프 추가
+            "transforms.addTimestamp.type": "org.apache.kafka.connect.transforms.InsertField$Value",
+            "transforms.addTimestamp.static.field": "indexed_at",
+            "transforms.addTimestamp.static.value": "$(date:yyyy-MM-dd'T'HH:mm:ss'Z')",
+            
+            # 에러 처리
+            "errors.tolerance": "all",
+            "errors.log.enable": "true",
+            "errors.log.include.messages": "true"
+        }
+    }
+    
+    return elasticsearch_sink_config
+
+def implement_redis_sink(self):
+    """Redis 싱크 구현"""
+    
+    redis_sink_config = {
+        "name": "redis-cache-sink",
+        "config": {
+            "connector.class": "com.company.connect.redis.RedisSinkConnector",
+            "topics": "orders.customers,orders.products",
+            "redis.hosts": "redis-cluster:6379",
+            "redis.password": "redis_password",
+            
+            # 데이터 매핑
+            "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+            "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+            "value.converter.schemas.enable": "false",
+            
+            # 캐시 전략
+            "cache.strategy": "write_through",
+            "cache.ttl": "3600",  # 1 hour
+            "cache.key.field": "id",
+            "cache.prefix": "cache:",
+            
+            # 성능 설정
+            "batch.size": "500",
+            "flush.timeout.ms": "10000",
+            "max.retries": "3",
+            
+            # 데이터 변환
+            "transforms": "extractKey,addMetadata",
+            "transforms.extractKey.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+            "transforms.extractKey.field": "id",
+            
+            "transforms.addMetadata.type": "org.apache.kafka.connect.transforms.InsertField$Value",
+            "transforms.addMetadata.static.field": "cached_at",
+            "transforms.addMetadata.static.value": "$(date:yyyy-MM-dd'T'HH:mm:ss'Z')"
+        }
+    }
+    
+    return redis_sink_config
+
+def implement_data_lake_sink(self):
+    """데이터 레이크 싱크 구현"""
+    
+    data_lake_sink_config = {
+        "name": "s3-data-lake-sink",
+        "config": {
+            "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+            "topics": "orders.orders,orders.order_items,orders.customers",
+            "s3.bucket.name": "ecommerce-data-lake",
+            "s3.region": "us-west-2",
+            "s3.part.size": "5242880",  # 5MB
+            "flush.size": "10000",
+            "rotate.interval.ms": "3600000",  # 1 hour
+            
+            # 파일 포맷
+            "format.class": "io.confluent.connect.s3.format.parquet.ParquetFormat",
+            "parquet.compression.codec": "snappy",
+            
+            # 파티셔닝
+            "partitioner.class": "io.confluent.connect.storage.partitioner.TimeBasedPartitioner",
+            "partition.duration.ms": "3600000",  # 1 hour
+            "path.format": "YYYY/MM/dd/HH",
+            "locale": "en_US",
+            "timezone": "UTC",
+            
+            # 스키마 진화
+            "schema.compatibility": "BACKWARD",
+            "value.converter": "io.confluent.connect.avro.AvroConverter",
+            "value.converter.schema.registry.url": "http://schema-registry:8081",
+            
+            # 에러 처리
+            "errors.tolerance": "all",
+            "errors.log.enable": "true"
+        }
+    }
+    
+    return data_lake_sink_config
+
+def setup_monitoring_and_alerting(self):
+    """모니터링 및 알림 설정"""
+    
+    monitoring_config = {
+        "kafka_connect_metrics": {
+            "connector_status": "RUNNING, PAUSED, FAILED",
+            "task_status": "RUNNING, FAILED, UNASSIGNED",
+            "throughput_metrics": "records_per_second, bytes_per_second",
+            "latency_metrics": "offset_lag, consumer_lag"
+        },
+        
+        "debezium_metrics": {
+            "binlog_position": "MySQL binlog position tracking",
+            "snapshot_progress": "Initial snapshot progress",
+            "transaction_metrics": "Transaction processing metrics",
+            "error_metrics": "Error counts and types"
+        },
+        
+        "alerting_rules": {
+            "connector_failure": {
+                "condition": "connector_status == 'FAILED'",
+                "severity": "critical",
+                "notification": ["slack", "email", "pagerduty"]
+            },
+            
+            "high_latency": {
+                "condition": "offset_lag &gt; 10000",
+                "severity": "warning",
+                "notification": ["slack", "email"]
+            },
+            
+            "low_throughput": {
+                "condition": "records_per_second &lt; 100",
+                "severity": "warning",
+                "notification": ["slack"]
+            },
+            
+            "snapshot_stalled": {
+                "condition": "snapshot_progress_stalled &gt; 10min",
+                "severity": "warning",
+                "notification": ["slack", "email"]
+            }
+        },
+        
+        "dashboard_metrics": {
+            "system_overview": [
+                "Total connectors running",
+                "Total records processed",
+                "Average processing latency",
+                "Error rate percentage"
+            ],
+            
+            "per_connector_metrics": [
+                "Records per second",
+                "Bytes per second",
+                "Offset lag",
+                "Last processed timestamp"
+            ],
+            
+            "target_system_health": [
+                "Elasticsearch indexing rate",
+                "Redis cache hit rate",
+                "S3 upload success rate"
+            ]
+        }
+    }
+    
+    return monitoring_config ```
+</code></pre></div></div>
+
+<h3 id="2-시스템-배포-및-실행">2. 시스템 배포 및 실행</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">deploy_realtime_sync_system</span><span class="p">():</span>
+    <span class="sh">"""</span><span class="s">실시간 동기화 시스템 배포</span><span class="sh">"""</span>
+    <span class="n">sync_system</span> <span class="o">=</span> <span class="nc">RealTimeDataSyncSystem</span><span class="p">()</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">🚀 Starting Real-time Data Sync System Deployment...</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 1. 아키텍처 설계
+</span>    <span class="n">architecture</span> <span class="o">=</span> <span class="n">sync_system</span><span class="p">.</span><span class="nf">design_system_architecture</span><span class="p">()</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">✅ System architecture designed</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 2. 커넥터 설정
+</span>    <span class="n">orders_connector</span> <span class="o">=</span> <span class="n">sync_system</span><span class="p">.</span><span class="nf">implement_order_sync_pipeline</span><span class="p">()</span>
+    <span class="n">elasticsearch_sink</span> <span class="o">=</span> <span class="n">sync_system</span><span class="p">.</span><span class="nf">implement_elasticsearch_sink</span><span class="p">()</span>
+    <span class="n">redis_sink</span> <span class="o">=</span> <span class="n">sync_system</span><span class="p">.</span><span class="nf">implement_redis_sink</span><span class="p">()</span>
+    <span class="n">data_lake_sink</span> <span class="o">=</span> <span class="n">sync_system</span><span class="p">.</span><span class="nf">implement_data_lake_sink</span><span class="p">()</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">✅ Connector configurations created</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 3. 모니터링 설정
+</span>    <span class="n">monitoring</span> <span class="o">=</span> <span class="n">sync_system</span><span class="p">.</span><span class="nf">setup_monitoring_and_alerting</span><span class="p">()</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">✅ Monitoring and alerting configured</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 4. 배포 검증
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">✅ System deployment completed successfully!</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="sh">"</span><span class="s">architecture</span><span class="sh">"</span><span class="p">:</span> <span class="n">architecture</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">connectors</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">orders_source</span><span class="sh">"</span><span class="p">:</span> <span class="n">orders_connector</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">elasticsearch_sink</span><span class="sh">"</span><span class="p">:</span> <span class="n">elasticsearch_sink</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">redis_sink</span><span class="sh">"</span><span class="p">:</span> <span class="n">redis_sink</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">data_lake_sink</span><span class="sh">"</span><span class="p">:</span> <span class="n">data_lake_sink</span>
+        <span class="p">},</span>
+        <span class="sh">"</span><span class="s">monitoring</span><span class="sh">"</span><span class="p">:</span> <span class="n">monitoring</span>
+    <span class="p">}</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="nf">deploy_realtime_sync_system</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="-학습-요약">📚 학습 요약</h2>
+
+<h3 id="이번-파트에서-학습한-내용">이번 파트에서 학습한 내용</h3>
+
+<ol>
+  <li><strong>Change Data Capture 기초 개념</strong>
+    <ul>
+      <li>CDC의 개념과 필요성</li>
+      <li>배치 처리 vs CDC 방식 비교</li>
+      <li>주요 CDC 도구들 비교 (Debezium, Kafka Connect, Maxwell, AWS DMS)</li>
+      <li>CDC 도입 ROI 계산</li>
+    </ul>
+  </li>
+  <li><strong>Debezium 아키텍처와 핵심 기능</strong>
+    <ul>
+      <li>Debezium 아키텍처 이해</li>
+      <li>데이터베이스별 변경 감지 메커니즘</li>
+      <li>이벤트 스트리밍 패턴 (이벤트 소싱, CQRS, Saga)</li>
+    </ul>
+  </li>
+  <li><strong>Debezium 커넥터 설정과 운영</strong>
+    <ul>
+      <li>MySQL 커넥터 고급 설정</li>
+      <li>PostgreSQL 커넥터 설정</li>
+      <li>MongoDB 커넥터 설정</li>
+      <li>성능 최적화 전략</li>
+    </ul>
+  </li>
+  <li><strong>스키마 진화와 스키마 레지스트리</strong>
+    <ul>
+      <li>스키마 진화 개념과 시나리오</li>
+      <li>Confluent Schema Registry 통합</li>
+      <li>스키마 호환성 전략</li>
+    </ul>
+  </li>
+  <li><strong>실시간 데이터 변환과 라우팅</strong>
+    <ul>
+      <li>Single Message Transform (SMT) 활용</li>
+      <li>커스텀 변환 로직 구현</li>
+      <li>토픽 라우팅 전략</li>
+      <li>데이터 풍부화 구현</li>
+    </ul>
+  </li>
+  <li><strong>실무 프로젝트</strong>
+    <ul>
+      <li>대규모 이커머스 플랫폼 실시간 동기화 시스템</li>
+      <li>MySQL → Elasticsearch/Redis/Data Lake 파이프라인</li>
+      <li>모니터링과 알림 시스템</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="핵심-기술-스택">핵심 기술 스택</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>기술</th>
+      <th>용도</th>
+      <th>중요도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Debezium</strong></td>
+      <td>CDC 플랫폼</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Apache Kafka</strong></td>
+      <td>이벤트 스트리밍</td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Kafka Connect</strong></td>
+      <td>커넥터 프레임워크</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Schema Registry</strong></td>
+      <td>스키마 관리</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Elasticsearch</strong></td>
+      <td>검색 엔진</td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="다음-파트-예고">다음 파트 예고</h3>
+
+<p><strong>Part 2: Kafka Connect와 프로덕션 CDC 운영</strong>에서는:</p>
+<ul>
+  <li>Kafka Connect 고급 아키텍처와 확장성</li>
+  <li>커스텀 커넥터 개발</li>
+  <li>대규모 CDC 파이프라인 운영 전략</li>
+  <li>성능 최적화와 병목 해결</li>
+  <li>데이터 일관성 보장과 검증</li>
+  <li>모니터링과 장애 복구 전략</li>
+  <li>엔터프라이즈급 CDC 운영 시스템 구축</li>
+</ul>
+
+<hr />
+
+<p><strong>시리즈 진행</strong>: <a href="/data-engineering/2025/09/19/change-data-capture-debezium-guide.html">Change Data Capture 완전 정복 시리즈</a></p>
+
+<hr />
+
+<p><em>실시간 데이터 동기화의 힘으로 현대적인 이벤트 드리븐 아키텍처를 구축하세요!</em> 🚀</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+          
+          
+      
+      
+      
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
