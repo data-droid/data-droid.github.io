@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Advanced Kafka Connect architecture, custom connector development, large-scale CDC pipeline operation strategies, performance optimization and disaster recovery.">
+
+
+
+<title>Part 2: Kafka Connect and Production CDC Operations - Enterprise Real-time Data Pipeline - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 2: Kafka Connect and Production CDC Operations - Enterprise Real-time Data Pipeline">
+<meta property="og:description" content="Advanced Kafka Connect architecture, custom connector development, large-scale CDC pipeline operation strategies, performance optimization and disaster recovery.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2025-09-20-kafka-connect-production-cdc-operations.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 2: Kafka Connect and Production CDC Operations - Enterprise Real-time Data Pipeline">
+<meta name="twitter:description" content="Advanced Kafka Connect architecture, custom connector development, large-scale CDC pipeline operation strategies, performance optimization and disaster recovery.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2025/09/20/kafka-connect-production-cdc-operations.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2025-09-20-kafka-connect-production-cdc-operations.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 20일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 2: Kafka Connect and Production CDC Operations - Enterprise Real-time Data Pipeline</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Kafka-Connect</span>
+      
+        <span class="tag">CDC-Operations</span>
+      
+        <span class="tag">Custom-Connectors</span>
+      
+        <span class="tag">Performance-Optimization</span>
+      
+        <span class="tag">Monitoring</span>
+      
+        <span class="tag">Disaster-Recovery</span>
+      
+        <span class="tag">Enterprise</span>
+      
+        <span class="tag">Production</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Change data capture complete guide 시리즈</span>
+      <span class="series-order">Part 3</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 55 minutes</span>
+      
+      
+        <span class="difficulty">📊 Advanced</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-2-kafka-connect-and-production-cdc-operations---enterprise-real-time-data-pipeline">Part 2: Kafka Connect and Production CDC Operations - Enterprise Real-time Data Pipeline</h1>
+
+<blockquote>
+  <p>Advanced Kafka Connect architecture, custom connector development, large-scale CDC pipeline operation strategies, performance optimization and disaster recovery.</p>
+</blockquote>
+
+<h2 id="-table-of-contents">📋 Table of Contents</h2>
+
+<ol>
+  <li><a href="#kafka-connect-advanced-architecture">Kafka Connect Advanced Architecture</a></li>
+  <li><a href="#custom-connector-development">Custom Connector Development</a></li>
+  <li><a href="#large-scale-cdc-pipeline-operations">Large-scale CDC Pipeline Operations</a></li>
+  <li><a href="#performance-optimization-and-bottleneck-resolution">Performance Optimization and Bottleneck Resolution</a></li>
+  <li><a href="#data-consistency-assurance-and-validation">Data Consistency Assurance and Validation</a></li>
+  <li><a href="#monitoring-and-disaster-recovery-strategies">Monitoring and Disaster Recovery Strategies</a></li>
+  <li><a href="#practical-project-enterprise-cdc-operation-system">Practical Project: Enterprise CDC Operation System</a></li>
+  <li><a href="#learning-summary">Learning Summary</a></li>
+</ol>
+
+<h2 id="️-kafka-connect-advanced-architecture">🏗️ Kafka Connect Advanced Architecture</h2>
+
+<h3 id="kafka-connect-architecture-deep-dive">Kafka Connect Architecture Deep Dive</h3>
+
+<p>Kafka Connect is a distributed streaming platform that provides a scalable framework for data synchronization between databases and systems.</p>
+
+<h3 id="core-components-detailed-analysis">Core Components Detailed Analysis</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Role</th>
+      <th>Scalability Considerations</th>
+      <th>Operational Points</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Connect Workers</strong></td>
+      <td>Connector execution environment</td>
+      <td>• Horizontal scaling capability<br />• CPU/memory-based scaling</td>
+      <td>• Resource monitoring<br />• Automated failure recovery</td>
+    </tr>
+    <tr>
+      <td><strong>Connectors</strong></td>
+      <td>Data source/sink logic</td>
+      <td>• Plugin architecture<br />• Independent deployment</td>
+      <td>• Version management<br />• Compatibility testing</td>
+    </tr>
+    <tr>
+      <td><strong>Tasks</strong></td>
+      <td>Actual data processing</td>
+      <td>• Partition-based parallelization<br />• Dynamic task allocation</td>
+      <td>• Load distribution<br />• Failure isolation</td>
+    </tr>
+    <tr>
+      <td><strong>Transforms</strong></td>
+      <td>Data transformation logic</td>
+      <td>• Chainable transformations<br />• Custom SMT support</td>
+      <td>• Performance optimization<br />• Memory management</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="cluster-configuration-strategy">Cluster Configuration Strategy</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">KafkaConnectClusterManager</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cluster_config</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">design_cluster_architecture</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">requirements</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Design cluster architecture for large-scale CDC requirements</span><span class="sh">"""</span>
+        
+        <span class="n">architecture</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">cluster_size</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">workers</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_worker_count</span><span class="p">(</span><span class="n">requirements</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">connectors</span><span class="sh">"</span><span class="p">:</span> <span class="n">requirements</span><span class="p">[</span><span class="sh">"</span><span class="s">estimated_connectors</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">tasks_per_connector</span><span class="sh">"</span><span class="p">:</span> <span class="n">requirements</span><span class="p">[</span><span class="sh">"</span><span class="s">max_concurrency</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">resource_allocation</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">worker_specs</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">cpu</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4 cores</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">memory</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8GB</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">heap</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4GB</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">disk</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">100GB SSD</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">jvm_settings</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">Xmx</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4g</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Xms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4g</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">GC_algorithm</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">G1GC</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">GC_tuning</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">-XX:+UseG1GC -XX:MaxGCPauseMillis=200</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">network_topology</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">worker_distribution</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">multi_zone</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">replication_strategy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">rack_aware</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">load_balancing</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">round_robin</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">architecture</span>
+    
+    <span class="k">def</span> <span class="nf">_calculate_worker_count</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">requirements</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Calculate worker count</span><span class="sh">"""</span>
+        
+        <span class="c1"># Basic calculation formula
+</span>        <span class="n">base_workers</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">requirements</span><span class="p">[</span><span class="sh">"</span><span class="s">estimated_connectors</span><span class="sh">"</span><span class="p">]</span> <span class="o">//</span> <span class="mi">10</span><span class="p">)</span>
+        
+        <span class="c1"># Minimum workers for high availability
+</span>        <span class="n">ha_workers</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">base_workers</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        
+        <span class="c1"># Buffer for load distribution
+</span>        <span class="n">buffer_workers</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">ha_workers</span> <span class="o">*</span> <span class="mf">0.3</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">ha_workers</span> <span class="o">+</span> <span class="n">buffer_workers</span>
+    
+    <span class="k">def</span> <span class="nf">configure_distributed_mode</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">cluster_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Configure distributed mode</span><span class="sh">"""</span>
+        
+        <span class="n">distributed_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">bootstrap.servers</span><span class="sh">"</span><span class="p">:</span> <span class="n">cluster_config</span><span class="p">[</span><span class="sh">"</span><span class="s">kafka_bootstrap_servers</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">group.id</span><span class="sh">"</span><span class="p">:</span> <span class="n">cluster_config</span><span class="p">[</span><span class="sh">"</span><span class="s">connect_cluster_id</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">key.converter</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.json.JsonConverter</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">value.converter</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.json.JsonConverter</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">key.converter.schemas.enable</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">value.converter.schemas.enable</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">offset.storage.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">cluster_config</span><span class="p">[</span><span class="sh">'</span><span class="s">connect_cluster_id</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">-offsets</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">offset.storage.replication.factor</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">3</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">offset.storage.partitions</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">25</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">config.storage.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">cluster_config</span><span class="p">[</span><span class="sh">'</span><span class="s">connect_cluster_id</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">-configs</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">config.storage.replication.factor</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">3</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">status.storage.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">cluster_config</span><span class="p">[</span><span class="sh">'</span><span class="s">connect_cluster_id</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">-status</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">status.storage.replication.factor</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">3</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">status.storage.partitions</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">5</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">rest.host.name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0.0.0.0</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">rest.port</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8083</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">plugin.path</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/opt/connectors</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">connector.client.config.override.policy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">All</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">producer.security.protocol</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">SASL_SSL</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">consumer.security.protocol</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">SASL_SSL</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">distributed_config</span>
+</code></pre></div></div>
+
+<h3 id="high-availability-and-disaster-recovery">High Availability and Disaster Recovery</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Failure Scenario</th>
+      <th>Recovery Strategy</th>
+      <th>Automation Level</th>
+      <th>Recovery Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Worker Node Failure</strong></td>
+      <td>• Automatic task reallocation<br />• Health check-based detection</td>
+      <td>Fully automated</td>
+      <td>30-60 seconds</td>
+    </tr>
+    <tr>
+      <td><strong>Connector Failure</strong></td>
+      <td>• Backoff retry<br />• Failure isolation</td>
+      <td>Automated</td>
+      <td>1-5 minutes</td>
+    </tr>
+    <tr>
+      <td><strong>Kafka Broker Failure</strong></td>
+      <td>• Leader election<br />• Partition reassignment</td>
+      <td>Fully automated</td>
+      <td>10-30 seconds</td>
+    </tr>
+    <tr>
+      <td><strong>Network Partition</strong></td>
+      <td>• Quorum-based consensus<br />• Failure recovery</td>
+      <td>Automated</td>
+      <td>1-2 minutes</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-custom-connector-development">🔧 Custom Connector Development</h2>
+
+<h3 id="custom-connector-architecture">Custom Connector Architecture</h3>
+
+<p>Custom connectors are specialized connectors developed for specific data sources or sinks.</p>
+
+<h3 id="source-connector-development">Source Connector Development</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CustomSourceConnector</span><span class="p">(</span><span class="n">SourceConnector</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Custom source connector example</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">version</span> <span class="o">=</span> <span class="sh">"</span><span class="s">1.0.0</span><span class="sh">"</span>
+    
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">props</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Start connector</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">database.hostname</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">database.hostname</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">database.port</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">database.port</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">database.user</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">database.user</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">database.password</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">database.password</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">database.name</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">database.name</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">:</span> <span class="nf">int</span><span class="p">(</span><span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1000</span><span class="sh">"</span><span class="p">)),</span>
+            <span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="nf">int</span><span class="p">(</span><span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1000</span><span class="sh">"</span><span class="p">)),</span>
+            <span class="sh">"</span><span class="s">topic.prefix</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">topic.prefix</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">custom</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">table.whitelist</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">table.whitelist</span><span class="sh">"</span><span class="p">,</span> <span class="sh">""</span><span class="p">).</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Test database connection
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">_validate_connection</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">task_configs</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">maxTasks</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate task configurations</span><span class="sh">"""</span>
+        
+        <span class="c1"># Distribute tables across tasks
+</span>        <span class="n">tables</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">table.whitelist</span><span class="sh">"</span><span class="p">]</span>
+        <span class="n">tasks_config</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">maxTasks</span><span class="p">):</span>
+            <span class="n">task_config</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="nf">copy</span><span class="p">()</span>
+            <span class="n">task_config</span><span class="p">[</span><span class="sh">"</span><span class="s">task.id</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="nf">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            
+            <span class="c1"># Table distribution logic
+</span>            <span class="k">if</span> <span class="n">tables</span><span class="p">:</span>
+                <span class="n">start_idx</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="nf">len</span><span class="p">(</span><span class="n">tables</span><span class="p">)</span> <span class="o">//</span> <span class="n">maxTasks</span>
+                <span class="n">end_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="nf">len</span><span class="p">(</span><span class="n">tables</span><span class="p">)</span> <span class="o">//</span> <span class="n">maxTasks</span>
+                <span class="n">task_config</span><span class="p">[</span><span class="sh">"</span><span class="s">table.whitelist</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span>
+            
+            <span class="n">tasks_config</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">task_config</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">tasks_config</span>
+    
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Stop connector</span><span class="sh">"""</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">config</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Define configuration schema</span><span class="sh">"""</span>
+        
+        <span class="k">return</span> <span class="nc">ConfigDef</span><span class="p">()</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">database.hostname</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Database hostname</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">database.port</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">3306</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Database port</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">database.user</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Database username</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">database.password</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">PASSWORD</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Database password</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">database.name</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Database name</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Batch size</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Polling interval (milliseconds)</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">topic.prefix</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="sh">"</span><span class="s">custom</span><span class="sh">"</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Topic prefix</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">table.whitelist</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Table whitelist (comma-separated)</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_validate_connection</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Validate database connection</span><span class="sh">"""</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Actual connection validation logic
+</span>            <span class="n">connection</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_create_connection</span><span class="p">()</span>
+            <span class="n">connection</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">log</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">Database connection validation successful</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">ConnectException</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Database connection failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_create_connection</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Create database connection</span><span class="sh">"""</span>
+        <span class="c1"># Actual connection creation logic
+</span>        <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">CustomSourceTask</span><span class="p">(</span><span class="n">SourceTask</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Custom source task</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">connection</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">last_offset</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">props</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Start task</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">props</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_create_connection</span><span class="p">()</span>
+        
+        <span class="c1"># Restore offset
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">_restore_offset</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">poll</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Poll data</span><span class="sh">"""</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Fetch data in batch size
+</span>            <span class="n">records</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_fetch_records</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+                <span class="c1"># Short wait if no data
+</span>                <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">[]</span>
+            
+            <span class="c1"># Convert to SourceRecord
+</span>            <span class="n">source_records</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+                <span class="n">source_record</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_convert_to_source_record</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+                <span class="n">source_records</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">source_record</span><span class="p">)</span>
+                
+                <span class="c1"># Update offset
+</span>                <span class="n">self</span><span class="p">.</span><span class="nf">_update_offset</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="n">source_records</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">log</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error occurred while polling data: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">raise</span>
+    
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Stop task</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">connection</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">connection</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">_fetch_records</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Fetch actual data</span><span class="sh">"""</span>
+        
+        <span class="c1"># Batch size
+</span>        <span class="n">batch_size</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1000</span><span class="p">))</span>
+        
+        <span class="c1"># Table list
+</span>        <span class="n">tables</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">table.whitelist</span><span class="sh">"</span><span class="p">,</span> <span class="sh">""</span><span class="p">).</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">table</span><span class="p">.</span><span class="nf">strip</span><span class="p">():</span>
+                <span class="n">table_records</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_fetch_table_records</span><span class="p">(</span><span class="n">table</span><span class="p">.</span><span class="nf">strip</span><span class="p">(),</span> <span class="n">batch_size</span><span class="p">)</span>
+                <span class="n">records</span><span class="p">.</span><span class="nf">extend</span><span class="p">(</span><span class="n">table_records</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">records</span>
+    
+    <span class="k">def</span> <span class="nf">_convert_to_source_record</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Convert record to SourceRecord</span><span class="sh">"""</span>
+        
+        <span class="n">topic</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">topic.prefix</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">.</span><span class="si">{</span><span class="n">record</span><span class="p">[</span><span class="sh">'</span><span class="s">table</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span>
+        
+        <span class="c1"># Schema definition
+</span>        <span class="n">key_schema</span> <span class="o">=</span> <span class="n">SchemaBuilder</span><span class="p">.</span><span class="nf">struct</span><span class="p">()</span> \
+            <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="n">Schema</span><span class="p">.</span><span class="n">INT64_SCHEMA</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">build</span><span class="p">()</span>
+        
+        <span class="n">value_schema</span> <span class="o">=</span> <span class="n">SchemaBuilder</span><span class="p">.</span><span class="nf">struct</span><span class="p">()</span> \
+            <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="n">Schema</span><span class="p">.</span><span class="n">INT64_SCHEMA</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="n">Schema</span><span class="p">.</span><span class="n">STRING_SCHEMA</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">,</span> <span class="n">Schema</span><span class="p">.</span><span class="n">STRING_SCHEMA</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">build</span><span class="p">()</span>
+        
+        <span class="c1"># Create key and value
+</span>        <span class="n">key</span> <span class="o">=</span> <span class="nc">Struct</span><span class="p">(</span><span class="n">key_schema</span><span class="p">).</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">])</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nc">Struct</span><span class="p">(</span><span class="n">value_schema</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">])</span> \
+            <span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">])</span> \
+            <span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">])</span>
+        
+        <span class="c1"># Offset information
+</span>        <span class="n">offset</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">table</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">table</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">]</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="nc">SourceRecord</span><span class="p">(</span>
+            <span class="n">partition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
+            <span class="n">topic</span><span class="o">=</span><span class="n">topic</span><span class="p">,</span>
+            <span class="n">key_schema</span><span class="o">=</span><span class="n">key_schema</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+            <span class="n">value_schema</span><span class="o">=</span><span class="n">value_schema</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">]</span>
+        <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_update_offset</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Update offset</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">last_offset</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">table</span><span class="sh">"</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">]</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">_restore_offset</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Restore offset</span><span class="sh">"""</span>
+        
+        <span class="c1"># Kafka Connect automatically manages offsets
+</span>        <span class="k">pass</span>
+</code></pre></div></div>
+
+<h3 id="sink-connector-development">Sink Connector Development</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CustomSinkConnector</span><span class="p">(</span><span class="n">SinkConnector</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Custom sink connector</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">props</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Start connector</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">target.hostname</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">target.hostname</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">target.port</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">target.port</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">target.database</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">target.database</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">target.username</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">target.username</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">target.password</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">target.password</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">:</span> <span class="nf">int</span><span class="p">(</span><span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1000</span><span class="sh">"</span><span class="p">)),</span>
+            <span class="sh">"</span><span class="s">flush.timeout.ms</span><span class="sh">"</span><span class="p">:</span> <span class="nf">int</span><span class="p">(</span><span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">flush.timeout.ms</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">5000</span><span class="sh">"</span><span class="p">)),</span>
+            <span class="sh">"</span><span class="s">auto.create</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">auto.create</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">).</span><span class="nf">lower</span><span class="p">()</span> <span class="o">==</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">delete.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">delete.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">).</span><span class="nf">lower</span><span class="p">()</span> <span class="o">==</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">task_configs</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">maxTasks</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate task configurations</span><span class="sh">"""</span>
+        
+        <span class="n">tasks_config</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">maxTasks</span><span class="p">):</span>
+            <span class="n">task_config</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="nf">copy</span><span class="p">()</span>
+            <span class="n">task_config</span><span class="p">[</span><span class="sh">"</span><span class="s">task.id</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="nf">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">tasks_config</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">task_config</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">tasks_config</span>
+    
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Stop connector</span><span class="sh">"""</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">config</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Configuration schema</span><span class="sh">"""</span>
+        
+        <span class="k">return</span> <span class="nc">ConfigDef</span><span class="p">()</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">target.hostname</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Target system hostname</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">target.port</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">INT</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Target system port</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">target.database</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Target database</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">target.username</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Target system username</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">target.password</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">PASSWORD</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Target system password</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Batch size</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">flush.timeout.ms</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Flush timeout</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">auto.create</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">BOOLEAN</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">LOW</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Auto table creation</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">delete.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">BOOLEAN</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">Enable delete operations</span><span class="sh">"</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">CustomSinkTask</span><span class="p">(</span><span class="n">SinkTask</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Custom sink task</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">connection</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">last_flush_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">props</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Start task</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">props</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_create_connection</span><span class="p">()</span>
+        
+        <span class="c1"># Initialize table schema cache
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">_initialize_table_schemas</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">records</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Process records</span><span class="sh">"""</span>
+        
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">batch</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+            
+            <span class="c1"># Flush when batch size or timeout reached
+</span>            <span class="nf">if </span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">batch</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nf">int</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">])</span> <span class="ow">or</span>
+                <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">last_flush_time</span> <span class="o">&gt;</span> <span class="nf">int</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">flush.timeout.ms</span><span class="sh">"</span><span class="p">])</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">):</span>
+                <span class="n">self</span><span class="p">.</span><span class="nf">_flush_batch</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">offsets</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Manual flush</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="nf">_flush_batch</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Stop task</span><span class="sh">"""</span>
+        
+        <span class="c1"># Process remaining batch
+</span>        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">batch</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_flush_batch</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">connection</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">connection</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">_flush_batch</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Flush batch</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">self</span><span class="p">.</span><span class="n">batch</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Group batch by table
+</span>            <span class="n">grouped_records</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_group_by_table</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">batch</span><span class="p">)</span>
+            
+            <span class="c1"># Process each table
+</span>            <span class="k">for</span> <span class="n">table</span><span class="p">,</span> <span class="n">records</span> <span class="ow">in</span> <span class="n">grouped_records</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+                <span class="n">self</span><span class="p">.</span><span class="nf">_process_table_batch</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">records</span><span class="p">)</span>
+            
+            <span class="c1"># Reset batch
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">last_flush_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">log</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error occurred while flushing batch: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">raise</span>
+    
+    <span class="k">def</span> <span class="nf">_process_table_batch</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">records</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Process table batch</span><span class="sh">"""</span>
+        
+        <span class="c1"># Classify as INSERT, UPDATE, DELETE
+</span>        <span class="n">inserts</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">records</span> <span class="k">if</span> <span class="n">r</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">]</span>
+        <span class="n">deletes</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">records</span> <span class="k">if</span> <span class="n">r</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">]</span>
+        
+        <span class="c1"># Process INSERT/UPDATE
+</span>        <span class="k">if</span> <span class="n">inserts</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_upsert_records</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">inserts</span><span class="p">)</span>
+        
+        <span class="c1"># Process DELETE
+</span>        <span class="k">if</span> <span class="n">deletes</span> <span class="ow">and</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">delete.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">).</span><span class="nf">lower</span><span class="p">()</span> <span class="o">==</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_delete_records</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">deletes</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_upsert_records</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">records</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Upsert records</span><span class="sh">"""</span>
+        
+        <span class="c1"># Actual upsert logic implementation
+</span>        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">_delete_records</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">records</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Delete records</span><span class="sh">"""</span>
+        
+        <span class="c1"># Actual delete logic implementation
+</span>        <span class="k">pass</span>
+</code></pre></div></div>
+
+<h3 id="custom-transform-development">Custom Transform Development</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CustomTransform</span><span class="p">(</span><span class="n">Transform</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Custom Single Message Transform</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">configs</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Configure settings</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">field.mapping</span><span class="sh">"</span><span class="p">:</span> <span class="n">configs</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">field.mapping</span><span class="sh">"</span><span class="p">,</span> <span class="sh">""</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">data.type</span><span class="sh">"</span><span class="p">:</span> <span class="n">configs</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">data.type</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">json</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">validation.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="n">configs</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">validation.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">).</span><span class="nf">lower</span><span class="p">()</span> <span class="o">==</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Parse field mapping
+</span>        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">field.mapping</span><span class="sh">"</span><span class="p">]:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">field_mapping</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_parse_field_mapping</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">field.mapping</span><span class="sh">"</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">field_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Apply record transformation</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Extract value
+</span>            <span class="n">value</span> <span class="o">=</span> <span class="n">record</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">record</span>
+            
+            <span class="c1"># Process by data type
+</span>            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">data.type</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">json</span><span class="sh">"</span><span class="p">:</span>
+                <span class="n">transformed_value</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_transform_json</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">data.type</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">avro</span><span class="sh">"</span><span class="p">:</span>
+                <span class="n">transformed_value</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_transform_avro</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">transformed_value</span> <span class="o">=</span> <span class="n">value</span>
+            
+            <span class="c1"># Validation
+</span>            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">validation.enabled</span><span class="sh">"</span><span class="p">]:</span>
+                <span class="n">self</span><span class="p">.</span><span class="nf">_validate_record</span><span class="p">(</span><span class="n">transformed_value</span><span class="p">)</span>
+            
+            <span class="c1"># Create new record
+</span>            <span class="k">return</span> <span class="n">record</span><span class="p">.</span><span class="nf">new_record</span><span class="p">(</span>
+                <span class="n">topic</span><span class="o">=</span><span class="n">record</span><span class="p">.</span><span class="nf">topic</span><span class="p">(),</span>
+                <span class="n">partition</span><span class="o">=</span><span class="n">record</span><span class="p">.</span><span class="nf">kafkaPartition</span><span class="p">(),</span>
+                <span class="n">key_schema</span><span class="o">=</span><span class="n">record</span><span class="p">.</span><span class="nf">keySchema</span><span class="p">(),</span>
+                <span class="n">key</span><span class="o">=</span><span class="n">record</span><span class="p">.</span><span class="nf">key</span><span class="p">(),</span>
+                <span class="n">value_schema</span><span class="o">=</span><span class="n">record</span><span class="p">.</span><span class="nf">valueSchema</span><span class="p">(),</span>
+                <span class="n">value</span><span class="o">=</span><span class="n">transformed_value</span><span class="p">,</span>
+                <span class="n">timestamp</span><span class="o">=</span><span class="n">record</span><span class="p">.</span><span class="nf">timestamp</span><span class="p">()</span>
+            <span class="p">)</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">log</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error occurred while transforming record: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">record</span>  <span class="c1"># Return original record
+</span>    
+    <span class="k">def</span> <span class="nf">_transform_json</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Transform JSON data</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">transformed</span> <span class="o">=</span> <span class="n">value</span><span class="p">.</span><span class="nf">copy</span><span class="p">()</span>
+            
+            <span class="c1"># Apply field mapping
+</span>            <span class="k">for</span> <span class="n">old_field</span><span class="p">,</span> <span class="n">new_field</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">field_mapping</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">old_field</span> <span class="ow">in</span> <span class="n">transformed</span><span class="p">:</span>
+                    <span class="n">transformed</span><span class="p">[</span><span class="n">new_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">transformed</span><span class="p">.</span><span class="nf">pop</span><span class="p">(</span><span class="n">old_field</span><span class="p">)</span>
+            
+            <span class="c1"># Additional transformation logic
+</span>            <span class="n">transformed</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_apply_business_rules</span><span class="p">(</span><span class="n">transformed</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="n">transformed</span>
+        
+        <span class="k">return</span> <span class="n">value</span>
+    
+    <span class="k">def</span> <span class="nf">_transform_avro</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Transform Avro data</span><span class="sh">"""</span>
+        
+        <span class="c1"># Avro schema transformation logic
+</span>        <span class="k">return</span> <span class="n">value</span>
+    
+    <span class="k">def</span> <span class="nf">_apply_business_rules</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Apply business rules</span><span class="sh">"""</span>
+        
+        <span class="c1"># Example: timestamp format conversion
+</span>        <span class="k">if</span> <span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_format_timestamp</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">])</span>
+        
+        <span class="c1"># Example: data normalization
+</span>        <span class="k">if</span> <span class="sh">"</span><span class="s">email</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="sh">"</span><span class="s">email</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="sh">"</span><span class="s">email</span><span class="sh">"</span><span class="p">].</span><span class="nf">lower</span><span class="p">().</span><span class="nf">strip</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="n">data</span>
+    
+    <span class="k">def</span> <span class="nf">_validate_record</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Validate record</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># Required field validation
+</span>        <span class="n">required_fields</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">required_fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Required field </span><span class="sh">'</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="sh">'</span><span class="s"> is missing</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_parse_field_mapping</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">mapping_str</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Parse field mapping</span><span class="sh">"""</span>
+        
+        <span class="n">mapping</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">mapping_str</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">):</span>
+            <span class="k">if</span> <span class="sh">"</span><span class="s">:</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">pair</span><span class="p">:</span>
+                <span class="n">old_field</span><span class="p">,</span> <span class="n">new_field</span> <span class="o">=</span> <span class="n">pair</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s">:</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">mapping</span><span class="p">[</span><span class="n">old_field</span><span class="p">.</span><span class="nf">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">new_field</span><span class="p">.</span><span class="nf">strip</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="n">mapping</span>
+    
+    <span class="k">def</span> <span class="nf">_format_timestamp</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Format timestamp</span><span class="sh">"""</span>
+        
+        <span class="c1"># Actual formatting logic
+</span>        <span class="k">return</span> <span class="n">timestamp</span>
+</code></pre></div></div>
+
+<h2 id="-data-consistency-assurance-and-validation">🔒 Data Consistency Assurance and Validation</h2>
+
+<h3 id="data-consistency-strategy">Data Consistency Strategy</h3>
+
+<p>Ensuring data consistency in CDC pipelines is crucial.</p>
+
+<h3 id="consistency-assurance-methods">Consistency Assurance Methods</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Description</th>
+      <th>Implementation Complexity</th>
+      <th>Performance Impact</th>
+      <th>Use Cases</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Exactly-once Semantics</strong></td>
+      <td>Process each message exactly once</td>
+      <td>High</td>
+      <td>Medium</td>
+      <td>Financial transactions, order processing</td>
+    </tr>
+    <tr>
+      <td><strong>At-least-once Semantics</strong></td>
+      <td>Process messages at least once</td>
+      <td>Low</td>
+      <td>Low</td>
+      <td>Log collection, metrics collection</td>
+    </tr>
+    <tr>
+      <td><strong>At-most-once Semantics</strong></td>
+      <td>Process messages at most once</td>
+      <td>Medium</td>
+      <td>Low</td>
+      <td>Notifications, event streaming</td>
+    </tr>
+    <tr>
+      <td><strong>Transactional Processing</strong></td>
+      <td>Guarantee consistency by transaction unit</td>
+      <td>High</td>
+      <td>High</td>
+      <td>Account transfers, inventory management</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-monitoring-and-disaster-recovery-strategies">📊 Monitoring and Disaster Recovery Strategies</h2>
+
+<h3 id="comprehensive-monitoring-system">Comprehensive Monitoring System</h3>
+
+<p>A comprehensive monitoring system for healthy operation of CDC pipelines.</p>
+
+<h3 id="monitoring-layers">Monitoring Layers</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Monitoring Target</th>
+      <th>Key Metrics</th>
+      <th>Alert Thresholds</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Infrastructure Layer</strong></td>
+      <td>• Kubernetes cluster<br />• Kafka brokers<br />• Databases</td>
+      <td>• CPU/memory usage<br />• Disk I/O<br />• Network throughput</td>
+      <td>• CPU &gt; 80%<br />• Memory &gt; 90%<br />• Disk &gt; 85%</td>
+    </tr>
+    <tr>
+      <td><strong>Application Layer</strong></td>
+      <td>• Kafka Connect workers<br />• Connectors<br />• Tasks</td>
+      <td>• JVM memory<br />• GC time<br />• Thread count</td>
+      <td>• GC time &gt; 20%<br />• Thread count &gt; 1000<br />• Heap usage &gt; 80%</td>
+    </tr>
+    <tr>
+      <td><strong>Data Layer</strong></td>
+      <td>• Data throughput<br />• Latency<br />• Error rate</td>
+      <td>• Records/sec<br />• P99 latency<br />• Failure rate</td>
+      <td>• Throughput &lt; 1000/s<br />• Latency &gt; 5s<br />• Error rate &gt; 1%</td>
+    </tr>
+    <tr>
+      <td><strong>Business Layer</strong></td>
+      <td>• Data quality<br />• Consistency<br />• Completeness</td>
+      <td>• Data validation failures<br />• Checksum mismatches<br />• Missing records</td>
+      <td>• Validation failures &gt; 0<br />• Checksum mismatches &gt; 0<br />• Missing rate &gt; 0.1%</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-practical-project-enterprise-cdc-operation-system">🚀 Practical Project: Enterprise CDC Operation System</h2>
+
+<h3 id="project-overview">Project Overview</h3>
+
+<p>Build an enterprise-grade CDC operation system for a large-scale e-commerce platform.</p>
+
+<h3 id="system-architecture">System Architecture</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Technology Stack</th>
+      <th>Capacity</th>
+      <th>High Availability</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Source Systems</strong></td>
+      <td>• MySQL 8.0 (Orders)<br />• PostgreSQL 13 (Users)<br />• MongoDB 5.0 (Products)</td>
+      <td>• 1M+ records/day<br />• 50+ tables<br />• 10+ databases</td>
+      <td>• Read-only replicas<br />• Automatic failure recovery</td>
+    </tr>
+    <tr>
+      <td><strong>Kafka Cluster</strong></td>
+      <td>• Apache Kafka 3.0<br />• Schema Registry<br />• Kafka Connect</td>
+      <td>• 3 brokers<br />• 100+ topics<br />• 1000+ partitions</td>
+      <td>• Triple replication<br />• Automatic rebalancing</td>
+    </tr>
+    <tr>
+      <td><strong>Target Systems</strong></td>
+      <td>• Elasticsearch 8.0<br />• Redis 7.0<br />• S3 Data Lake<br />• Snowflake</td>
+      <td>• 3-node ES cluster<br />• 6-node Redis cluster<br />• Unlimited S3 storage</td>
+      <td>• Cluster mode<br />• Automatic backup</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-learning-summary">📚 Learning Summary</h2>
+
+<h3 id="what-we-learned-in-this-part">What We Learned in This Part</h3>
+
+<ol>
+  <li><strong>Kafka Connect Advanced Architecture</strong>
+    <ul>
+      <li>Distributed mode configuration and cluster design</li>
+      <li>Worker node management and scalability strategies</li>
+      <li>High availability and disaster recovery mechanisms</li>
+    </ul>
+  </li>
+  <li><strong>Custom Connector Development</strong>
+    <ul>
+      <li>Source Connector and Sink Connector implementation</li>
+      <li>Custom Transform development</li>
+      <li>Connector testing and deployment strategies</li>
+    </ul>
+  </li>
+  <li><strong>Large-scale CDC Pipeline Operations</strong>
+    <ul>
+      <li>Pipeline orchestration</li>
+      <li>Load balancing and failure isolation</li>
+      <li>Scalability and data consistency assurance</li>
+    </ul>
+  </li>
+  <li><strong>Performance Optimization and Bottleneck Resolution</strong>
+    <ul>
+      <li>Performance bottleneck analysis</li>
+      <li>Dynamic performance tuning</li>
+      <li>Auto-scaling implementation</li>
+    </ul>
+  </li>
+  <li><strong>Data Consistency Assurance and Validation</strong>
+    <ul>
+      <li>Consistency assurance methodology</li>
+      <li>Data validation system</li>
+      <li>Drift detection and anomaly detection</li>
+    </ul>
+  </li>
+  <li><strong>Monitoring and Disaster Recovery Strategies</strong>
+    <ul>
+      <li>Comprehensive monitoring system</li>
+      <li>Disaster recovery planning</li>
+      <li>Automatic failure handling</li>
+    </ul>
+  </li>
+  <li><strong>Practical Project</strong>
+    <ul>
+      <li>Enterprise-grade CDC operation system</li>
+      <li>Large-scale e-commerce platform application</li>
+      <li>Operation automation and optimization</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="core-technology-stack">Core Technology Stack</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Technology</th>
+      <th>Role</th>
+      <th>Importance</th>
+      <th>Learning Points</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Kafka Connect</strong></td>
+      <td>Connector framework</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>Distributed architecture, scalability</td>
+    </tr>
+    <tr>
+      <td><strong>Debezium</strong></td>
+      <td>CDC platform</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>Advanced configuration, performance optimization</td>
+    </tr>
+    <tr>
+      <td><strong>Custom Connectors</strong></td>
+      <td>Specialized data processing</td>
+      <td>⭐⭐⭐⭐</td>
+      <td>Development patterns, testing strategies</td>
+    </tr>
+    <tr>
+      <td><strong>Monitoring</strong></td>
+      <td>Operational visibility</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>Metric collection, alert configuration</td>
+    </tr>
+    <tr>
+      <td><strong>Automation</strong></td>
+      <td>Operational efficiency</td>
+      <td>⭐⭐⭐⭐</td>
+      <td>Scaling, recovery automation</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="next-steps">Next Steps</h3>
+
+<p>We have now learned all the core content of the CDC series. The next steps are:</p>
+
+<ol>
+  <li><strong>Real Project Application</strong>: Apply learned content to actual projects</li>
+  <li><strong>Advanced Topic Exploration</strong>: Stream processing, event sourcing, and other advanced topics</li>
+  <li><strong>Other Technology Stacks</strong>: Apache Pulsar, Apache Flink, and other streaming technologies</li>
+</ol>
+
+<hr />
+
+<p><strong>Series Complete</strong>: <a href="/en/data-engineering/2025/09/19/change-data-capture-debezium-guide.html">Change Data Capture Complete Guide Series</a></p>
+
+<hr />
+
+<p><em>Build enterprise-grade real-time data pipelines to complete the core of modern data architecture!</em> 🚀</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+      
+      
+      
+      
+      
+        
+        
+        <a href="/data-engineering/2025/09/20/kafka-connect-production-cdc-operations.html" class="nav-link next">
+          다음: Part 2: Kafka Connect와 프로덕션 CDC 운영 - 엔터프라이즈급 실시간 데이터 파이프라인 →
+        </a>
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

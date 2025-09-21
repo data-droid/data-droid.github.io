@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Kafka Connect 고급 아키텍처, 커스텀 커넥터 개발, 대규모 CDC 파이프라인 운영 전략, 성능 최적화와 장애 복구까지 완전한 가이드입니다.">
+
+
+
+<title>Part 2: Kafka Connect와 프로덕션 CDC 운영 - 엔터프라이즈급 실시간 데이터 파이프라인 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 2: Kafka Connect와 프로덕션 CDC 운영 - 엔터프라이즈급 실시간 데이터 파이프라인">
+<meta property="og:description" content="Kafka Connect 고급 아키텍처, 커스텀 커넥터 개발, 대규모 CDC 파이프라인 운영 전략, 성능 최적화와 장애 복구까지 완전한 가이드입니다.">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2025/09/20/kafka-connect-production-cdc-operations.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 2: Kafka Connect와 프로덕션 CDC 운영 - 엔터프라이즈급 실시간 데이터 파이프라인">
+<meta name="twitter:description" content="Kafka Connect 고급 아키텍처, 커스텀 커넥터 개발, 대규모 CDC 파이프라인 운영 전략, 성능 최적화와 장애 복구까지 완전한 가이드입니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2025/09/20/kafka-connect-production-cdc-operations.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2025-09-20-kafka-connect-production-cdc-operations.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 20일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 2: Kafka Connect와 프로덕션 CDC 운영 - 엔터프라이즈급 실시간 데이터 파이프라인</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Kafka-Connect</span>
+      
+        <span class="tag">CDC-운영</span>
+      
+        <span class="tag">커스텀커넥터</span>
+      
+        <span class="tag">성능최적화</span>
+      
+        <span class="tag">모니터링</span>
+      
+        <span class="tag">장애복구</span>
+      
+        <span class="tag">엔터프라이즈</span>
+      
+        <span class="tag">프로덕션</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Change data capture complete guide 시리즈</span>
+      <span class="series-order">Part 3</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 55분</span>
+      
+      
+        <span class="difficulty">📊 고급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-2-kafka-connect와-프로덕션-cdc-운영---엔터프라이즈급-실시간-데이터-파이프라인">Part 2: Kafka Connect와 프로덕션 CDC 운영 - 엔터프라이즈급 실시간 데이터 파이프라인</h1>
+
+<blockquote>
+  <p>Kafka Connect 고급 아키텍처, 커스텀 커넥터 개발, 대규모 CDC 파이프라인 운영 전략, 성능 최적화와 장애 복구까지 완전한 가이드입니다.</p>
+</blockquote>
+
+<h2 id="-목차">📋 목차</h2>
+
+<ol>
+  <li><a href="#kafka-connect-고급-아키텍처">Kafka Connect 고급 아키텍처</a></li>
+  <li><a href="#커스텀-커넥터-개발">커스텀 커넥터 개발</a></li>
+  <li><a href="#대규모-cdc-파이프라인-운영">대규모 CDC 파이프라인 운영</a></li>
+  <li><a href="#성능-최적화와-병목-해결">성능 최적화와 병목 해결</a></li>
+  <li><a href="#데이터-일관성-보장과-검증">데이터 일관성 보장과 검증</a></li>
+  <li><a href="#모니터링과-장애-복구-전략">모니터링과 장애 복구 전략</a></li>
+  <li><a href="#실무-프로젝트-엔터프라이즈-cdc-운영-시스템">실무 프로젝트: 엔터프라이즈 CDC 운영 시스템</a></li>
+  <li><a href="#학습-요약">학습 요약</a></li>
+</ol>
+
+<h2 id="️-kafka-connect-고급-아키텍처">🏗️ Kafka Connect 고급 아키텍처</h2>
+
+<h3 id="kafka-connect-아키텍처-심화">Kafka Connect 아키텍처 심화</h3>
+
+<p>Kafka Connect는 분산 스트리밍 플랫폼으로, 데이터베이스와 시스템 간의 데이터 동기화를 위한 확장 가능한 프레임워크입니다.</p>
+
+<h3 id="핵심-컴포넌트-상세-분석">핵심 컴포넌트 상세 분석</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>컴포넌트</th>
+      <th>역할</th>
+      <th>확장성 고려사항</th>
+      <th>운영 포인트</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Connect Workers</strong></td>
+      <td>커넥터 실행 환경</td>
+      <td>• 수평 확장 가능<br />• CPU/메모리 기반 스케일링</td>
+      <td>• 리소스 모니터링<br />• 장애 복구 자동화</td>
+    </tr>
+    <tr>
+      <td><strong>Connectors</strong></td>
+      <td>데이터 소스/싱크 로직</td>
+      <td>• 플러그인 아키텍처<br />• 독립적 배포</td>
+      <td>• 버전 관리<br />• 호환성 테스트</td>
+    </tr>
+    <tr>
+      <td><strong>Tasks</strong></td>
+      <td>실제 데이터 처리</td>
+      <td>• 파티션 기반 병렬화<br />• 동적 태스크 할당</td>
+      <td>• 부하 분산<br />• 장애 격리</td>
+    </tr>
+    <tr>
+      <td><strong>Transforms</strong></td>
+      <td>데이터 변환 로직</td>
+      <td>• 체인 가능한 변환<br />• 커스텀 SMT 지원</td>
+      <td>• 성능 최적화<br />• 메모리 관리</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="클러스터-구성-전략">클러스터 구성 전략</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">KafkaConnectClusterManager</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cluster_config</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">design_cluster_architecture</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">requirements</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">대규모 CDC 요구사항에 맞는 클러스터 아키텍처 설계</span><span class="sh">"""</span>
+        
+        <span class="n">architecture</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">cluster_size</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">workers</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_worker_count</span><span class="p">(</span><span class="n">requirements</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">connectors</span><span class="sh">"</span><span class="p">:</span> <span class="n">requirements</span><span class="p">[</span><span class="sh">"</span><span class="s">estimated_connectors</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">tasks_per_connector</span><span class="sh">"</span><span class="p">:</span> <span class="n">requirements</span><span class="p">[</span><span class="sh">"</span><span class="s">max_concurrency</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">resource_allocation</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">worker_specs</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">cpu</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4 cores</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">memory</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8GB</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">heap</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4GB</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">disk</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">100GB SSD</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">jvm_settings</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">Xmx</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4g</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Xms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4g</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">GC_algorithm</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">G1GC</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">GC_tuning</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">-XX:+UseG1GC -XX:MaxGCPauseMillis=200</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">network_topology</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">worker_distribution</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">multi_zone</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">replication_strategy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">rack_aware</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">load_balancing</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">round_robin</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">architecture</span>
+    
+    <span class="k">def</span> <span class="nf">_calculate_worker_count</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">requirements</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">워커 수 계산</span><span class="sh">"""</span>
+        
+        <span class="c1"># 기본 계산 공식
+</span>        <span class="n">base_workers</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">requirements</span><span class="p">[</span><span class="sh">"</span><span class="s">estimated_connectors</span><span class="sh">"</span><span class="p">]</span> <span class="o">//</span> <span class="mi">10</span><span class="p">)</span>
+        
+        <span class="c1"># 고가용성을 위한 최소 워커 수
+</span>        <span class="n">ha_workers</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">base_workers</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        
+        <span class="c1"># 부하 분산을 위한 여유분
+</span>        <span class="n">buffer_workers</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">ha_workers</span> <span class="o">*</span> <span class="mf">0.3</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">ha_workers</span> <span class="o">+</span> <span class="n">buffer_workers</span>
+    
+    <span class="k">def</span> <span class="nf">configure_distributed_mode</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">cluster_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">분산 모드 설정</span><span class="sh">"""</span>
+        
+        <span class="n">distributed_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">bootstrap.servers</span><span class="sh">"</span><span class="p">:</span> <span class="n">cluster_config</span><span class="p">[</span><span class="sh">"</span><span class="s">kafka_bootstrap_servers</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">group.id</span><span class="sh">"</span><span class="p">:</span> <span class="n">cluster_config</span><span class="p">[</span><span class="sh">"</span><span class="s">connect_cluster_id</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">key.converter</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.json.JsonConverter</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">value.converter</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.json.JsonConverter</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">key.converter.schemas.enable</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">value.converter.schemas.enable</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">offset.storage.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">cluster_config</span><span class="p">[</span><span class="sh">'</span><span class="s">connect_cluster_id</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">-offsets</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">offset.storage.replication.factor</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">3</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">offset.storage.partitions</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">25</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">config.storage.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">cluster_config</span><span class="p">[</span><span class="sh">'</span><span class="s">connect_cluster_id</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">-configs</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">config.storage.replication.factor</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">3</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">status.storage.topic</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">cluster_config</span><span class="p">[</span><span class="sh">'</span><span class="s">connect_cluster_id</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">-status</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">status.storage.replication.factor</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">3</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">status.storage.partitions</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">5</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">rest.host.name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">0.0.0.0</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">rest.port</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8083</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">plugin.path</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/opt/connectors</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">connector.client.config.override.policy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">All</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">producer.security.protocol</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">SASL_SSL</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">consumer.security.protocol</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">SASL_SSL</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">distributed_config</span>
+</code></pre></div></div>
+
+<h3 id="고가용성과-장애-복구">고가용성과 장애 복구</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>장애 시나리오</th>
+      <th>복구 전략</th>
+      <th>자동화 수준</th>
+      <th>복구 시간</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Worker 노드 장애</strong></td>
+      <td>• 자동 태스크 재배치<br />• 헬스체크 기반 감지</td>
+      <td>완전 자동</td>
+      <td>30-60초</td>
+    </tr>
+    <tr>
+      <td><strong>Connector 장애</strong></td>
+      <td>• 백오프 재시도<br />• 장애 격리</td>
+      <td>자동</td>
+      <td>1-5분</td>
+    </tr>
+    <tr>
+      <td><strong>Kafka 브로커 장애</strong></td>
+      <td>• 리더 선출<br />• 파티션 재할당</td>
+      <td>완전 자동</td>
+      <td>10-30초</td>
+    </tr>
+    <tr>
+      <td><strong>네트워크 분할</strong></td>
+      <td>• 쿠럼 기반 합의<br />• 장애 복구</td>
+      <td>자동</td>
+      <td>1-2분</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-커스텀-커넥터-개발">🔧 커스텀 커넥터 개발</h2>
+
+<h3 id="커스텀-커넥터-아키텍처">커스텀 커넥터 아키텍처</h3>
+
+<p>커스텀 커넥터는 특정 데이터 소스나 싱크에 최적화된 전용 커넥터를 개발하는 것입니다.</p>
+
+<h3 id="source-connector-개발">Source Connector 개발</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CustomSourceConnector</span><span class="p">(</span><span class="n">SourceConnector</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">커스텀 소스 커넥터 예제</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">version</span> <span class="o">=</span> <span class="sh">"</span><span class="s">1.0.0</span><span class="sh">"</span>
+    
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">props</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">커넥터 시작</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">database.hostname</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">database.hostname</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">database.port</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">database.port</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">database.user</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">database.user</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">database.password</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">database.password</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">database.name</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">database.name</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">:</span> <span class="nf">int</span><span class="p">(</span><span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1000</span><span class="sh">"</span><span class="p">)),</span>
+            <span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="nf">int</span><span class="p">(</span><span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1000</span><span class="sh">"</span><span class="p">)),</span>
+            <span class="sh">"</span><span class="s">topic.prefix</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">topic.prefix</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">custom</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">table.whitelist</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">table.whitelist</span><span class="sh">"</span><span class="p">,</span> <span class="sh">""</span><span class="p">).</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># 데이터베이스 연결 테스트
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">_validate_connection</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">task_configs</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">maxTasks</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">태스크 설정 생성</span><span class="sh">"""</span>
+        
+        <span class="c1"># 테이블을 태스크 수에 따라 분할
+</span>        <span class="n">tables</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">table.whitelist</span><span class="sh">"</span><span class="p">]</span>
+        <span class="n">tasks_config</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">maxTasks</span><span class="p">):</span>
+            <span class="n">task_config</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="nf">copy</span><span class="p">()</span>
+            <span class="n">task_config</span><span class="p">[</span><span class="sh">"</span><span class="s">task.id</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="nf">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            
+            <span class="c1"># 테이블 분할 로직
+</span>            <span class="k">if</span> <span class="n">tables</span><span class="p">:</span>
+                <span class="n">start_idx</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="nf">len</span><span class="p">(</span><span class="n">tables</span><span class="p">)</span> <span class="o">//</span> <span class="n">maxTasks</span>
+                <span class="n">end_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="nf">len</span><span class="p">(</span><span class="n">tables</span><span class="p">)</span> <span class="o">//</span> <span class="n">maxTasks</span>
+                <span class="n">task_config</span><span class="p">[</span><span class="sh">"</span><span class="s">table.whitelist</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span>
+            
+            <span class="n">tasks_config</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">task_config</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">tasks_config</span>
+    
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">커넥터 중지</span><span class="sh">"""</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">config</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">설정 스키마 정의</span><span class="sh">"""</span>
+        
+        <span class="k">return</span> <span class="nc">ConfigDef</span><span class="p">()</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">database.hostname</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">데이터베이스 호스트명</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">database.port</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">3306</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">데이터베이스 포트</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">database.user</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">데이터베이스 사용자명</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">database.password</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">PASSWORD</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">데이터베이스 비밀번호</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">database.name</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">데이터베이스 이름</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">배치 크기</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">폴링 간격 (밀리초)</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">topic.prefix</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="sh">"</span><span class="s">custom</span><span class="sh">"</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">토픽 접두사</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">table.whitelist</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">테이블 화이트리스트 (쉼표 구분)</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_validate_connection</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">데이터베이스 연결 검증</span><span class="sh">"""</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 실제 연결 검증 로직
+</span>            <span class="n">connection</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_create_connection</span><span class="p">()</span>
+            <span class="n">connection</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">log</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">데이터베이스 연결 검증 성공</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">ConnectException</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">데이터베이스 연결 실패: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_create_connection</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">데이터베이스 연결 생성</span><span class="sh">"""</span>
+        <span class="c1"># 실제 연결 생성 로직
+</span>        <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">CustomSourceTask</span><span class="p">(</span><span class="n">SourceTask</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">커스텀 소스 태스크</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">connection</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">last_offset</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">props</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">태스크 시작</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">props</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_create_connection</span><span class="p">()</span>
+        
+        <span class="c1"># 오프셋 복원
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">_restore_offset</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">poll</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">데이터 폴링</span><span class="sh">"""</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 배치 크기만큼 데이터 조회
+</span>            <span class="n">records</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_fetch_records</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+                <span class="c1"># 데이터가 없으면 짧은 대기
+</span>                <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">[]</span>
+            
+            <span class="c1"># SourceRecord로 변환
+</span>            <span class="n">source_records</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+                <span class="n">source_record</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_convert_to_source_record</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+                <span class="n">source_records</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">source_record</span><span class="p">)</span>
+                
+                <span class="c1"># 오프셋 업데이트
+</span>                <span class="n">self</span><span class="p">.</span><span class="nf">_update_offset</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="n">source_records</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">log</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">데이터 폴링 중 오류 발생: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">raise</span>
+    
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">태스크 중지</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">connection</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">connection</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">_fetch_records</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">실제 데이터 조회</span><span class="sh">"""</span>
+        
+        <span class="c1"># 배치 크기
+</span>        <span class="n">batch_size</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1000</span><span class="p">))</span>
+        
+        <span class="c1"># 테이블 목록
+</span>        <span class="n">tables</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">table.whitelist</span><span class="sh">"</span><span class="p">,</span> <span class="sh">""</span><span class="p">).</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">table</span><span class="p">.</span><span class="nf">strip</span><span class="p">():</span>
+                <span class="n">table_records</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_fetch_table_records</span><span class="p">(</span><span class="n">table</span><span class="p">.</span><span class="nf">strip</span><span class="p">(),</span> <span class="n">batch_size</span><span class="p">)</span>
+                <span class="n">records</span><span class="p">.</span><span class="nf">extend</span><span class="p">(</span><span class="n">table_records</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">records</span>
+    
+    <span class="k">def</span> <span class="nf">_convert_to_source_record</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">레코드를 SourceRecord로 변환</span><span class="sh">"""</span>
+        
+        <span class="n">topic</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">topic.prefix</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">.</span><span class="si">{</span><span class="n">record</span><span class="p">[</span><span class="sh">'</span><span class="s">table</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span>
+        
+        <span class="c1"># 스키마 정의
+</span>        <span class="n">key_schema</span> <span class="o">=</span> <span class="n">SchemaBuilder</span><span class="p">.</span><span class="nf">struct</span><span class="p">()</span> \
+            <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="n">Schema</span><span class="p">.</span><span class="n">INT64_SCHEMA</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">build</span><span class="p">()</span>
+        
+        <span class="n">value_schema</span> <span class="o">=</span> <span class="n">SchemaBuilder</span><span class="p">.</span><span class="nf">struct</span><span class="p">()</span> \
+            <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="n">Schema</span><span class="p">.</span><span class="n">INT64_SCHEMA</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="n">Schema</span><span class="p">.</span><span class="n">STRING_SCHEMA</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">,</span> <span class="n">Schema</span><span class="p">.</span><span class="n">STRING_SCHEMA</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">build</span><span class="p">()</span>
+        
+        <span class="c1"># 키와 값 생성
+</span>        <span class="n">key</span> <span class="o">=</span> <span class="nc">Struct</span><span class="p">(</span><span class="n">key_schema</span><span class="p">).</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">])</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nc">Struct</span><span class="p">(</span><span class="n">value_schema</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">])</span> \
+            <span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">])</span> \
+            <span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">])</span>
+        
+        <span class="c1"># 오프셋 정보
+</span>        <span class="n">offset</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">table</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">table</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">]</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="nc">SourceRecord</span><span class="p">(</span>
+            <span class="n">partition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
+            <span class="n">topic</span><span class="o">=</span><span class="n">topic</span><span class="p">,</span>
+            <span class="n">key_schema</span><span class="o">=</span><span class="n">key_schema</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+            <span class="n">value_schema</span><span class="o">=</span><span class="n">value_schema</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">]</span>
+        <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_update_offset</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">오프셋 업데이트</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">last_offset</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">table</span><span class="sh">"</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">]</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">_restore_offset</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">오프셋 복원</span><span class="sh">"""</span>
+        
+        <span class="c1"># Kafka Connect에서 자동으로 오프셋 관리
+</span>        <span class="k">pass</span>
+</code></pre></div></div>
+
+<h3 id="sink-connector-개발">Sink Connector 개발</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CustomSinkConnector</span><span class="p">(</span><span class="n">SinkConnector</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">커스텀 싱크 커넥터</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">props</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">커넥터 시작</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">target.hostname</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">target.hostname</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">target.port</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">target.port</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">target.database</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">target.database</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">target.username</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">target.username</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">target.password</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">target.password</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">:</span> <span class="nf">int</span><span class="p">(</span><span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1000</span><span class="sh">"</span><span class="p">)),</span>
+            <span class="sh">"</span><span class="s">flush.timeout.ms</span><span class="sh">"</span><span class="p">:</span> <span class="nf">int</span><span class="p">(</span><span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">flush.timeout.ms</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">5000</span><span class="sh">"</span><span class="p">)),</span>
+            <span class="sh">"</span><span class="s">auto.create</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">auto.create</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">).</span><span class="nf">lower</span><span class="p">()</span> <span class="o">==</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">delete.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="n">props</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">delete.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">).</span><span class="nf">lower</span><span class="p">()</span> <span class="o">==</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">task_configs</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">maxTasks</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">태스크 설정 생성</span><span class="sh">"""</span>
+        
+        <span class="n">tasks_config</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">maxTasks</span><span class="p">):</span>
+            <span class="n">task_config</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="nf">copy</span><span class="p">()</span>
+            <span class="n">task_config</span><span class="p">[</span><span class="sh">"</span><span class="s">task.id</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="nf">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">tasks_config</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">task_config</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">tasks_config</span>
+    
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">커넥터 중지</span><span class="sh">"""</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">config</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">설정 스키마</span><span class="sh">"""</span>
+        
+        <span class="k">return</span> <span class="nc">ConfigDef</span><span class="p">()</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">target.hostname</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">대상 시스템 호스트명</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">target.port</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">INT</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">대상 시스템 포트</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">target.database</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">대상 데이터베이스</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">target.username</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">대상 시스템 사용자명</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">target.password</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">PASSWORD</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">HIGH</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">대상 시스템 비밀번호</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">배치 크기</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">flush.timeout.ms</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">플러시 타임아웃</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">auto.create</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">BOOLEAN</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">LOW</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">자동 테이블 생성</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="sh">"</span><span class="s">delete.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="n">Type</span><span class="p">.</span><span class="n">BOOLEAN</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="n">ConfigDef</span><span class="p">.</span><span class="n">Importance</span><span class="p">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                   <span class="sh">"</span><span class="s">삭제 작업 활성화</span><span class="sh">"</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">CustomSinkTask</span><span class="p">(</span><span class="n">SinkTask</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">커스텀 싱크 태스크</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">connection</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">last_flush_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">props</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">태스크 시작</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">props</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_create_connection</span><span class="p">()</span>
+        
+        <span class="c1"># 테이블 스키마 캐시 초기화
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">_initialize_table_schemas</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">records</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">레코드 처리</span><span class="sh">"""</span>
+        
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">batch</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+            
+            <span class="c1"># 배치 크기 또는 타임아웃에 도달하면 플러시
+</span>            <span class="nf">if </span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">batch</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nf">int</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">])</span> <span class="ow">or</span>
+                <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">last_flush_time</span> <span class="o">&gt;</span> <span class="nf">int</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">flush.timeout.ms</span><span class="sh">"</span><span class="p">])</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">):</span>
+                <span class="n">self</span><span class="p">.</span><span class="nf">_flush_batch</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">offsets</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">수동 플러시</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="nf">_flush_batch</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">태스크 중지</span><span class="sh">"""</span>
+        
+        <span class="c1"># 남은 배치 처리
+</span>        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">batch</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_flush_batch</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">connection</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">connection</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">_flush_batch</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">배치 플러시</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">self</span><span class="p">.</span><span class="n">batch</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 배치를 테이블별로 그룹화
+</span>            <span class="n">grouped_records</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_group_by_table</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">batch</span><span class="p">)</span>
+            
+            <span class="c1"># 각 테이블별로 처리
+</span>            <span class="k">for</span> <span class="n">table</span><span class="p">,</span> <span class="n">records</span> <span class="ow">in</span> <span class="n">grouped_records</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+                <span class="n">self</span><span class="p">.</span><span class="nf">_process_table_batch</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">records</span><span class="p">)</span>
+            
+            <span class="c1"># 배치 초기화
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">last_flush_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">log</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">배치 플러시 중 오류 발생: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">raise</span>
+    
+    <span class="k">def</span> <span class="nf">_process_table_batch</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">records</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">테이블별 배치 처리</span><span class="sh">"""</span>
+        
+        <span class="c1"># INSERT, UPDATE, DELETE로 분류
+</span>        <span class="n">inserts</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">records</span> <span class="k">if</span> <span class="n">r</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">]</span>
+        <span class="n">deletes</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">records</span> <span class="k">if</span> <span class="n">r</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">]</span>
+        
+        <span class="c1"># INSERT/UPDATE 처리
+</span>        <span class="k">if</span> <span class="n">inserts</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_upsert_records</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">inserts</span><span class="p">)</span>
+        
+        <span class="c1"># DELETE 처리
+</span>        <span class="k">if</span> <span class="n">deletes</span> <span class="ow">and</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">delete.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">).</span><span class="nf">lower</span><span class="p">()</span> <span class="o">==</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_delete_records</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">deletes</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_upsert_records</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">records</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">레코드 업서트</span><span class="sh">"""</span>
+        
+        <span class="c1"># 실제 업서트 로직 구현
+</span>        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">_delete_records</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">records</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">레코드 삭제</span><span class="sh">"""</span>
+        
+        <span class="c1"># 실제 삭제 로직 구현
+</span>        <span class="k">pass</span>
+</code></pre></div></div>
+
+<h3 id="커스텀-transform-개발">커스텀 Transform 개발</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CustomTransform</span><span class="p">(</span><span class="n">Transform</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">커스텀 Single Message Transform</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">configs</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">설정 구성</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">field.mapping</span><span class="sh">"</span><span class="p">:</span> <span class="n">configs</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">field.mapping</span><span class="sh">"</span><span class="p">,</span> <span class="sh">""</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">data.type</span><span class="sh">"</span><span class="p">:</span> <span class="n">configs</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">data.type</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">json</span><span class="sh">"</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">validation.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="n">configs</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">validation.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">).</span><span class="nf">lower</span><span class="p">()</span> <span class="o">==</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># 필드 매핑 파싱
+</span>        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">field.mapping</span><span class="sh">"</span><span class="p">]:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">field_mapping</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_parse_field_mapping</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">field.mapping</span><span class="sh">"</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">field_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">레코드 변환 적용</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 값 추출
+</span>            <span class="n">value</span> <span class="o">=</span> <span class="n">record</span><span class="p">.</span><span class="nf">value</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">record</span>
+            
+            <span class="c1"># 데이터 타입별 처리
+</span>            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">data.type</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">json</span><span class="sh">"</span><span class="p">:</span>
+                <span class="n">transformed_value</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_transform_json</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">data.type</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">avro</span><span class="sh">"</span><span class="p">:</span>
+                <span class="n">transformed_value</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_transform_avro</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">transformed_value</span> <span class="o">=</span> <span class="n">value</span>
+            
+            <span class="c1"># 검증
+</span>            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">[</span><span class="sh">"</span><span class="s">validation.enabled</span><span class="sh">"</span><span class="p">]:</span>
+                <span class="n">self</span><span class="p">.</span><span class="nf">_validate_record</span><span class="p">(</span><span class="n">transformed_value</span><span class="p">)</span>
+            
+            <span class="c1"># 새 레코드 생성
+</span>            <span class="k">return</span> <span class="n">record</span><span class="p">.</span><span class="nf">new_record</span><span class="p">(</span>
+                <span class="n">topic</span><span class="o">=</span><span class="n">record</span><span class="p">.</span><span class="nf">topic</span><span class="p">(),</span>
+                <span class="n">partition</span><span class="o">=</span><span class="n">record</span><span class="p">.</span><span class="nf">kafkaPartition</span><span class="p">(),</span>
+                <span class="n">key_schema</span><span class="o">=</span><span class="n">record</span><span class="p">.</span><span class="nf">keySchema</span><span class="p">(),</span>
+                <span class="n">key</span><span class="o">=</span><span class="n">record</span><span class="p">.</span><span class="nf">key</span><span class="p">(),</span>
+                <span class="n">value_schema</span><span class="o">=</span><span class="n">record</span><span class="p">.</span><span class="nf">valueSchema</span><span class="p">(),</span>
+                <span class="n">value</span><span class="o">=</span><span class="n">transformed_value</span><span class="p">,</span>
+                <span class="n">timestamp</span><span class="o">=</span><span class="n">record</span><span class="p">.</span><span class="nf">timestamp</span><span class="p">()</span>
+            <span class="p">)</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">log</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">레코드 변환 중 오류 발생: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">record</span>  <span class="c1"># 원본 레코드 반환
+</span>    
+    <span class="k">def</span> <span class="nf">_transform_json</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">JSON 데이터 변환</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">transformed</span> <span class="o">=</span> <span class="n">value</span><span class="p">.</span><span class="nf">copy</span><span class="p">()</span>
+            
+            <span class="c1"># 필드 매핑 적용
+</span>            <span class="k">for</span> <span class="n">old_field</span><span class="p">,</span> <span class="n">new_field</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">field_mapping</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">old_field</span> <span class="ow">in</span> <span class="n">transformed</span><span class="p">:</span>
+                    <span class="n">transformed</span><span class="p">[</span><span class="n">new_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">transformed</span><span class="p">.</span><span class="nf">pop</span><span class="p">(</span><span class="n">old_field</span><span class="p">)</span>
+            
+            <span class="c1"># 추가 변환 로직
+</span>            <span class="n">transformed</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_apply_business_rules</span><span class="p">(</span><span class="n">transformed</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="n">transformed</span>
+        
+        <span class="k">return</span> <span class="n">value</span>
+    
+    <span class="k">def</span> <span class="nf">_transform_avro</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Avro 데이터 변환</span><span class="sh">"""</span>
+        
+        <span class="c1"># Avro 스키마 변환 로직
+</span>        <span class="k">return</span> <span class="n">value</span>
+    
+    <span class="k">def</span> <span class="nf">_apply_business_rules</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">비즈니스 규칙 적용</span><span class="sh">"""</span>
+        
+        <span class="c1"># 예: 타임스탬프 포맷 변환
+</span>        <span class="k">if</span> <span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_format_timestamp</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">])</span>
+        
+        <span class="c1"># 예: 데이터 정규화
+</span>        <span class="k">if</span> <span class="sh">"</span><span class="s">email</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="sh">"</span><span class="s">email</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="sh">"</span><span class="s">email</span><span class="sh">"</span><span class="p">].</span><span class="nf">lower</span><span class="p">().</span><span class="nf">strip</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="n">data</span>
+    
+    <span class="k">def</span> <span class="nf">_validate_record</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">레코드 검증</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># 필수 필드 검증
+</span>        <span class="n">required_fields</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">required_fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">필수 필드 </span><span class="sh">'</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="sh">'</span><span class="s">가 누락되었습니다</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_parse_field_mapping</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">mapping_str</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">필드 매핑 파싱</span><span class="sh">"""</span>
+        
+        <span class="n">mapping</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">mapping_str</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">):</span>
+            <span class="k">if</span> <span class="sh">"</span><span class="s">:</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">pair</span><span class="p">:</span>
+                <span class="n">old_field</span><span class="p">,</span> <span class="n">new_field</span> <span class="o">=</span> <span class="n">pair</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s">:</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">mapping</span><span class="p">[</span><span class="n">old_field</span><span class="p">.</span><span class="nf">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">new_field</span><span class="p">.</span><span class="nf">strip</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="n">mapping</span>
+    
+    <span class="k">def</span> <span class="nf">_format_timestamp</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">타임스탬프 포맷팅</span><span class="sh">"""</span>
+        
+        <span class="c1"># 실제 포맷팅 로직
+</span>        <span class="k">return</span> <span class="n">timestamp</span>
+</code></pre></div></div>
+
+<h2 id="-대규모-cdc-파이프라인-운영">🚀 대규모 CDC 파이프라인 운영</h2>
+
+<h3 id="파이프라인-아키텍처-설계">파이프라인 아키텍처 설계</h3>
+
+<p>대규모 CDC 파이프라인은 수백 개의 테이블과 수십 개의 시스템을 동시에 처리해야 합니다.</p>
+
+<h3 id="파이프라인-구성-요소">파이프라인 구성 요소</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>구성 요소</th>
+      <th>역할</th>
+      <th>확장성 전략</th>
+      <th>모니터링 포인트</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Source Connectors</strong></td>
+      <td>데이터 소스에서 변경사항 캡처</td>
+      <td>• 테이블별 커넥터 분리<br />• 파티션 기반 병렬화</td>
+      <td>• 지연시간<br />• 처리량<br />• 오류율</td>
+    </tr>
+    <tr>
+      <td><strong>Transform Layer</strong></td>
+      <td>데이터 변환 및 정제</td>
+      <td>• 스트림 기반 변환<br />• 병렬 처리</td>
+      <td>• 변환 지연시간<br />• 데이터 품질</td>
+    </tr>
+    <tr>
+      <td><strong>Sink Connectors</strong></td>
+      <td>대상 시스템으로 데이터 전송</td>
+      <td>• 대상별 커넥터 분리<br />• 배치 최적화</td>
+      <td>• 전송 지연시간<br />• 성공률</td>
+    </tr>
+    <tr>
+      <td><strong>Schema Registry</strong></td>
+      <td>스키마 관리 및 호환성</td>
+      <td>• 분산 캐싱<br />• 버전 관리</td>
+      <td>• 스키마 변경<br />• 호환성 검사</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="파이프라인-오케스트레이션">파이프라인 오케스트레이션</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CDCPipelineOrchestrator</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">pipeline_configs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">connector_manager</span> <span class="o">=</span> <span class="nc">ConnectorManager</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">monitoring_system</span> <span class="o">=</span> <span class="nc">MonitoringSystem</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">deploy_large_scale_pipeline</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">pipeline_spec</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">대규모 CDC 파이프라인 배포</span><span class="sh">"""</span>
+        
+        <span class="n">deployment_plan</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">phase_1</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_deploy_source_connectors</span><span class="p">(</span><span class="n">pipeline_spec</span><span class="p">[</span><span class="sh">"</span><span class="s">sources</span><span class="sh">"</span><span class="p">]),</span>
+            <span class="sh">"</span><span class="s">phase_2</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_configure_transformations</span><span class="p">(</span><span class="n">pipeline_spec</span><span class="p">[</span><span class="sh">"</span><span class="s">transforms</span><span class="sh">"</span><span class="p">]),</span>
+            <span class="sh">"</span><span class="s">phase_3</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_deploy_sink_connectors</span><span class="p">(</span><span class="n">pipeline_spec</span><span class="p">[</span><span class="sh">"</span><span class="s">sinks</span><span class="sh">"</span><span class="p">]),</span>
+            <span class="sh">"</span><span class="s">phase_4</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_setup_monitoring</span><span class="p">(</span><span class="n">pipeline_spec</span><span class="p">[</span><span class="sh">"</span><span class="s">monitoring</span><span class="sh">"</span><span class="p">])</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">deployment_plan</span>
+    
+    <span class="k">def</span> <span class="nf">_deploy_source_connectors</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">sources</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">소스 커넥터 배포</span><span class="sh">"""</span>
+        
+        <span class="n">source_deployment</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">:</span>
+            <span class="c1"># 데이터베이스별 커넥터 설정
+</span>            <span class="n">connector_config</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">source-</span><span class="si">{</span><span class="n">source</span><span class="p">[</span><span class="sh">'</span><span class="s">database</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">-</span><span class="si">{</span><span class="n">source</span><span class="p">[</span><span class="sh">'</span><span class="s">schema</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">connector.class</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_get_connector_class</span><span class="p">(</span><span class="n">source</span><span class="p">[</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">]),</span>
+                <span class="sh">"</span><span class="s">tasks.max</span><span class="sh">"</span><span class="p">:</span> <span class="n">source</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">tasks_max</span><span class="sh">"</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">database.hostname</span><span class="sh">"</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="sh">"</span><span class="s">hostname</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.port</span><span class="sh">"</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="sh">"</span><span class="s">port</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.user</span><span class="sh">"</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="sh">"</span><span class="s">username</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.password</span><span class="sh">"</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="sh">"</span><span class="s">password</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">database.server.id</span><span class="sh">"</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="sh">"</span><span class="s">server_id</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">topic.prefix</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">source</span><span class="p">[</span><span class="sh">'</span><span class="s">database</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">.</span><span class="si">{</span><span class="n">source</span><span class="p">[</span><span class="sh">'</span><span class="s">schema</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">table.include.list</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">source</span><span class="p">[</span><span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">]),</span>
+                <span class="sh">"</span><span class="s">transforms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">unwrap,route,addTimestamp</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transforms.unwrap.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.debezium.transforms.ExtractNewRecordState</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transforms.route.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.kafka.connect.transforms.RegexRouter</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transforms.route.regex</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">source</span><span class="p">[</span><span class="sh">'</span><span class="s">database</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="se">\\</span><span class="s">.</span><span class="si">{</span><span class="n">source</span><span class="p">[</span><span class="sh">'</span><span class="s">schema</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="se">\\</span><span class="s">.([^.]+)</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transforms.route.replacement</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">source</span><span class="p">[</span><span class="sh">'</span><span class="s">database</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">.$1</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">max.batch.size</span><span class="sh">"</span><span class="p">:</span> <span class="n">source</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">batch_size</span><span class="sh">"</span><span class="p">,</span> <span class="mi">4096</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">:</span> <span class="n">source</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">poll_interval</span><span class="sh">"</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+            <span class="p">}</span>
+            
+            <span class="c1"># 커넥터 배포
+</span>            <span class="n">result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">connector_manager</span><span class="p">.</span><span class="nf">deploy_connector</span><span class="p">(</span><span class="n">connector_config</span><span class="p">)</span>
+            <span class="n">source_deployment</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">connector_name</span><span class="sh">"</span><span class="p">:</span> <span class="n">connector_config</span><span class="p">[</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">source_deployment</span>
+    
+    <span class="k">def</span> <span class="nf">_configure_transformations</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">transforms</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">변환 설정</span><span class="sh">"""</span>
+        
+        <span class="n">transform_configs</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">transform</span> <span class="ow">in</span> <span class="n">transforms</span><span class="p">:</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">transform-</span><span class="si">{</span><span class="n">transform</span><span class="p">[</span><span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">transforms</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">transform</span><span class="p">[</span><span class="sh">"</span><span class="s">steps</span><span class="sh">"</span><span class="p">]),</span>
+                <span class="sh">"</span><span class="s">topics</span><span class="sh">"</span><span class="p">:</span> <span class="n">transform</span><span class="p">[</span><span class="sh">"</span><span class="s">input_topics</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">output_topic</span><span class="sh">"</span><span class="p">:</span> <span class="n">transform</span><span class="p">[</span><span class="sh">"</span><span class="s">output_topic</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">}</span>
+            
+            <span class="c1"># 각 변환 단계별 설정
+</span>            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">transform</span><span class="p">[</span><span class="sh">"</span><span class="s">steps</span><span class="sh">"</span><span class="p">]):</span>
+                <span class="n">step_config</span> <span class="o">=</span> <span class="n">transform</span><span class="p">[</span><span class="sh">"</span><span class="s">step_configs</span><span class="sh">"</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">config</span><span class="p">.</span><span class="nf">update</span><span class="p">({</span>
+                    <span class="sa">f</span><span class="sh">"</span><span class="s">transforms.</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s">.type</span><span class="sh">"</span><span class="p">:</span> <span class="n">step_config</span><span class="p">[</span><span class="sh">"</span><span class="s">class</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sa">f</span><span class="sh">"</span><span class="s">transforms.</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s">.field.mapping</span><span class="sh">"</span><span class="p">:</span> <span class="n">step_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">field_mapping</span><span class="sh">"</span><span class="p">,</span> <span class="sh">""</span><span class="p">),</span>
+                    <span class="sa">f</span><span class="sh">"</span><span class="s">transforms.</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s">.validation.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="n">step_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">validation</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span>
+                <span class="p">})</span>
+            
+            <span class="n">transform_configs</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">transform_configs</span>
+    
+    <span class="k">def</span> <span class="nf">_deploy_sink_connectors</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">sinks</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">싱크 커넥터 배포</span><span class="sh">"""</span>
+        
+        <span class="n">sink_deployment</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">sink</span> <span class="ow">in</span> <span class="n">sinks</span><span class="p">:</span>
+            <span class="n">sink_config</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">sink-</span><span class="si">{</span><span class="n">sink</span><span class="p">[</span><span class="sh">'</span><span class="s">target</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">-</span><span class="si">{</span><span class="n">sink</span><span class="p">[</span><span class="sh">'</span><span class="s">database</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">connector.class</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_get_sink_connector_class</span><span class="p">(</span><span class="n">sink</span><span class="p">[</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">]),</span>
+                <span class="sh">"</span><span class="s">tasks.max</span><span class="sh">"</span><span class="p">:</span> <span class="n">sink</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">tasks_max</span><span class="sh">"</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">topics</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">,</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">sink</span><span class="p">[</span><span class="sh">"</span><span class="s">topics</span><span class="sh">"</span><span class="p">]),</span>
+                <span class="sh">"</span><span class="s">batch.size</span><span class="sh">"</span><span class="p">:</span> <span class="n">sink</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">batch_size</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">flush.timeout.ms</span><span class="sh">"</span><span class="p">:</span> <span class="n">sink</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">flush_timeout</span><span class="sh">"</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+            <span class="p">}</span>
+            
+            <span class="c1"># 대상 시스템별 설정 추가
+</span>            <span class="k">if</span> <span class="n">sink</span><span class="p">[</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">elasticsearch</span><span class="sh">"</span><span class="p">:</span>
+                <span class="n">sink_config</span><span class="p">.</span><span class="nf">update</span><span class="p">({</span>
+                    <span class="sh">"</span><span class="s">connection.url</span><span class="sh">"</span><span class="p">:</span> <span class="n">sink</span><span class="p">[</span><span class="sh">"</span><span class="s">connection_url</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">type.name</span><span class="sh">"</span><span class="p">:</span> <span class="n">sink</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">type_name</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">_doc</span><span class="sh">"</span><span class="p">),</span>
+                    <span class="sh">"</span><span class="s">key.ignore</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">schema.ignore</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span>
+                <span class="p">})</span>
+            <span class="k">elif</span> <span class="n">sink</span><span class="p">[</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">postgresql</span><span class="sh">"</span><span class="p">:</span>
+                <span class="n">sink_config</span><span class="p">.</span><span class="nf">update</span><span class="p">({</span>
+                    <span class="sh">"</span><span class="s">connection.url</span><span class="sh">"</span><span class="p">:</span> <span class="n">sink</span><span class="p">[</span><span class="sh">"</span><span class="s">connection_url</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">auto.create</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">delete.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span>
+                <span class="p">})</span>
+            <span class="k">elif</span> <span class="n">sink</span><span class="p">[</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">s3</span><span class="sh">"</span><span class="p">:</span>
+                <span class="n">sink_config</span><span class="p">.</span><span class="nf">update</span><span class="p">({</span>
+                    <span class="sh">"</span><span class="s">s3.bucket.name</span><span class="sh">"</span><span class="p">:</span> <span class="n">sink</span><span class="p">[</span><span class="sh">"</span><span class="s">bucket</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">s3.region</span><span class="sh">"</span><span class="p">:</span> <span class="n">sink</span><span class="p">[</span><span class="sh">"</span><span class="s">region</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">flush.size</span><span class="sh">"</span><span class="p">:</span> <span class="n">sink</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">flush_size</span><span class="sh">"</span><span class="p">,</span> <span class="mi">10000</span><span class="p">),</span>
+                    <span class="sh">"</span><span class="s">format.class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">io.confluent.connect.s3.format.parquet.ParquetFormat</span><span class="sh">"</span>
+                <span class="p">})</span>
+            
+            <span class="c1"># 커넥터 배포
+</span>            <span class="n">result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">connector_manager</span><span class="p">.</span><span class="nf">deploy_connector</span><span class="p">(</span><span class="n">sink_config</span><span class="p">)</span>
+            <span class="n">sink_deployment</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">connector_name</span><span class="sh">"</span><span class="p">:</span> <span class="n">sink_config</span><span class="p">[</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">target</span><span class="sh">"</span><span class="p">:</span> <span class="n">sink</span><span class="p">[</span><span class="sh">"</span><span class="s">target</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">sink_deployment</span>
+    
+    <span class="k">def</span> <span class="nf">_setup_monitoring</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">monitoring_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">모니터링 설정</span><span class="sh">"""</span>
+        
+        <span class="n">monitoring_setup</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">metrics</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">monitoring_system</span><span class="p">.</span><span class="nf">setup_metrics</span><span class="p">(</span><span class="n">monitoring_config</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">alerts</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">monitoring_system</span><span class="p">.</span><span class="nf">setup_alerts</span><span class="p">(</span><span class="n">monitoring_config</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">dashboards</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">monitoring_system</span><span class="p">.</span><span class="nf">setup_dashboards</span><span class="p">(</span><span class="n">monitoring_config</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">monitoring_setup</span>
+</code></pre></div></div>
+
+<h3 id="파이프라인-운영-전략">파이프라인 운영 전략</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>운영 영역</th>
+      <th>전략</th>
+      <th>구현 방법</th>
+      <th>모니터링</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>부하 분산</strong></td>
+      <td>• 테이블별 파티션 분산<br />• 워커 노드 균등 분배</td>
+      <td>• 파티션 수 최적화<br />• 워커 수 동적 조정</td>
+      <td>• 파티션별 처리량<br />• 워커별 리소스 사용률</td>
+    </tr>
+    <tr>
+      <td><strong>장애 격리</strong></td>
+      <td>• 커넥터별 독립 실행<br />• 장애 전파 방지</td>
+      <td>• 서킷 브레이커 패턴<br />• 백오프 재시도</td>
+      <td>• 장애 발생률<br />• 복구 시간</td>
+    </tr>
+    <tr>
+      <td><strong>확장성</strong></td>
+      <td>• 수평 확장 우선<br />• 자동 스케일링</td>
+      <td>• Kubernetes HPA<br />• 메트릭 기반 스케일링</td>
+      <td>• 처리 용량<br />• 확장 이벤트</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 일관성</strong></td>
+      <td>• Exactly-once 처리<br />• 순서 보장</td>
+      <td>• 트랜잭션 기반 처리<br />• 오프셋 관리</td>
+      <td>• 데이터 일관성 검증<br />• 중복 데이터 감지</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-성능-최적화와-병목-해결">⚡ 성능 최적화와 병목 해결</h2>
+
+<h3 id="성능-최적화-전략">성능 최적화 전략</h3>
+
+<p>CDC 파이프라인의 성능을 최적화하기 위한 종합적인 접근 방법입니다.</p>
+
+<h3 id="병목-지점-분석">병목 지점 분석</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>병목 지점</th>
+      <th>원인</th>
+      <th>해결 방법</th>
+      <th>모니터링 지표</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>데이터베이스 읽기</strong></td>
+      <td>• 인덱스 부족<br />• 락 경합<br />• 네트워크 지연</td>
+      <td>• 읽기 전용 복제본 활용<br />• 배치 크기 최적화<br />• 연결 풀 튜닝</td>
+      <td>• 읽기 지연시간<br />• 연결 풀 사용률<br />• 쿼리 실행 시간</td>
+    </tr>
+    <tr>
+      <td><strong>Kafka 처리</strong></td>
+      <td>• 파티션 수 부족<br />• 브로커 리소스 부족<br />• 압축 설정</td>
+      <td>• 파티션 수 증가<br />• 브로커 스케일링<br />• 압축 알고리즘 최적화</td>
+      <td>• 토픽별 처리량<br />• 브로커 CPU/메모리<br />• 압축 비율</td>
+    </tr>
+    <tr>
+      <td><strong>커넥터 처리</strong></td>
+      <td>• 배치 크기 부적절<br />• 변환 로직 비효율<br />• 메모리 부족</td>
+      <td>• 배치 크기 동적 조정<br />• 변환 로직 최적화<br />• JVM 튜닝</td>
+      <td>• 커넥터 처리량<br />• GC 시간<br />• 메모리 사용률</td>
+    </tr>
+    <tr>
+      <td><strong>네트워크 전송</strong></td>
+      <td>• 대역폭 부족<br />• 네트워크 지연<br />• 압축 효율</td>
+      <td>• 네트워크 최적화<br />• 압축 설정 조정<br />• 배치 전송</td>
+      <td>• 네트워크 처리량<br />• 지연시간<br />• 패킷 손실률</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="성능-튜닝-구현">성능 튜닝 구현</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">PerformanceOptimizer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">optimization_configs</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_connector_performance</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">connector_name</span><span class="p">,</span> <span class="n">current_metrics</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">커넥터 성능 최적화</span><span class="sh">"""</span>
+        
+        <span class="n">optimizations</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># 처리량 기반 배치 크기 조정
+</span>        <span class="k">if</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">throughput</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">batch_size</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span><span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">batch_size</span><span class="sh">"</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8192</span><span class="p">)</span>
+            <span class="n">optimizations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">parameter</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">max.batch.size</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">current_value</span><span class="sh">"</span><span class="p">:</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">batch_size</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">new_value</span><span class="sh">"</span><span class="p">:</span> <span class="n">batch_size</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">reason</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">처리량 향상을 위한 배치 크기 증가</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># 지연시간 기반 폴링 간격 조정
+</span>        <span class="k">if</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">latency</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">5000</span><span class="p">:</span>
+            <span class="n">poll_interval</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">poll_interval</span><span class="sh">"</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+            <span class="n">optimizations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">parameter</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">poll.interval.ms</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">current_value</span><span class="sh">"</span><span class="p">:</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">poll_interval</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">new_value</span><span class="sh">"</span><span class="p">:</span> <span class="n">poll_interval</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">reason</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">지연시간 감소를 위한 폴링 간격 단축</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># 메모리 사용률 기반 큐 크기 조정
+</span>        <span class="k">if</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">memory_usage</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.8</span><span class="p">:</span>
+            <span class="n">queue_size</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">queue_size</span><span class="sh">"</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1024</span><span class="p">)</span>
+            <span class="n">optimizations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">parameter</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">max.queue.size</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">current_value</span><span class="sh">"</span><span class="p">:</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">queue_size</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">new_value</span><span class="sh">"</span><span class="p">:</span> <span class="n">queue_size</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">reason</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">메모리 사용률 감소를 위한 큐 크기 축소</span><span class="sh">"</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">optimizations</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_kafka_cluster</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">cluster_metrics</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Kafka 클러스터 성능 최적화</span><span class="sh">"""</span>
+        
+        <span class="n">kafka_optimizations</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># 브로커별 CPU 사용률 확인
+</span>        <span class="k">for</span> <span class="n">broker_id</span><span class="p">,</span> <span class="n">metrics</span> <span class="ow">in</span> <span class="n">cluster_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">brokers</span><span class="sh">"</span><span class="p">].</span><span class="nf">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">cpu_usage</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.8</span><span class="p">:</span>
+                <span class="n">kafka_optimizations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                    <span class="sh">"</span><span class="s">broker_id</span><span class="sh">"</span><span class="p">:</span> <span class="n">broker_id</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">optimization</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">CPU 사용률이 높음 - 파티션 재분배 또는 브로커 추가 필요</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">current_cpu</span><span class="sh">"</span><span class="p">:</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">cpu_usage</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">recommended_action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">파티션 리밸런싱 또는 브로커 스케일링</span><span class="sh">"</span>
+                <span class="p">})</span>
+            
+            <span class="k">if</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">memory_usage</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.9</span><span class="p">:</span>
+                <span class="n">kafka_optimizations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                    <span class="sh">"</span><span class="s">broker_id</span><span class="sh">"</span><span class="p">:</span> <span class="n">broker_id</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">optimization</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">메모리 사용률이 높음 - JVM 힙 크기 조정 필요</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">current_memory</span><span class="sh">"</span><span class="p">:</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">memory_usage</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">recommended_action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">JVM 힙 크기 증가 또는 브로커 추가</span><span class="sh">"</span>
+                <span class="p">})</span>
+        
+        <span class="c1"># 토픽별 처리량 최적화
+</span>        <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">metrics</span> <span class="ow">in</span> <span class="n">cluster_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">topics</span><span class="sh">"</span><span class="p">].</span><span class="nf">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">throughput</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">:</span>
+                <span class="n">kafka_optimizations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                    <span class="sh">"</span><span class="s">topic</span><span class="sh">"</span><span class="p">:</span> <span class="n">topic</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">optimization</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">처리량이 낮음 - 파티션 수 증가 필요</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">current_partitions</span><span class="sh">"</span><span class="p">:</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">partitions</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">recommended_partitions</span><span class="sh">"</span><span class="p">:</span> <span class="nf">min</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">partitions</span><span class="sh">"</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+                <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">kafka_optimizations</span>
+    
+    <span class="k">def</span> <span class="nf">generate_performance_report</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">system_metrics</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">성능 리포트 생성</span><span class="sh">"""</span>
+        
+        <span class="n">report</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">summary</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">overall_health</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_overall_health</span><span class="p">(</span><span class="n">system_metrics</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">total_throughput</span><span class="sh">"</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="sh">"</span><span class="s">throughput</span><span class="sh">"</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">system_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">connectors</span><span class="sh">"</span><span class="p">]),</span>
+                <span class="sh">"</span><span class="s">average_latency</span><span class="sh">"</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="sh">"</span><span class="s">latency</span><span class="sh">"</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">system_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">connectors</span><span class="sh">"</span><span class="p">])</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">system_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">connectors</span><span class="sh">"</span><span class="p">]),</span>
+                <span class="sh">"</span><span class="s">error_rate</span><span class="sh">"</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="sh">"</span><span class="s">error_rate</span><span class="sh">"</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">system_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">connectors</span><span class="sh">"</span><span class="p">])</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">system_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">connectors</span><span class="sh">"</span><span class="p">])</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">bottlenecks</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_identify_bottlenecks</span><span class="p">(</span><span class="n">system_metrics</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">recommendations</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_generate_recommendations</span><span class="p">(</span><span class="n">system_metrics</span><span class="p">),</span>
+            <span class="sh">"</span><span class="s">optimization_plan</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_create_optimization_plan</span><span class="p">(</span><span class="n">system_metrics</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">report</span>
+    
+    <span class="k">def</span> <span class="nf">_calculate_overall_health</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">전체 시스템 건강도 계산</span><span class="sh">"""</span>
+        
+        <span class="n">health_score</span> <span class="o">=</span> <span class="mi">100</span>
+        
+        <span class="c1"># 처리량 기준 감점
+</span>        <span class="k">for</span> <span class="n">connector</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">connectors</span><span class="sh">"</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">connector</span><span class="p">[</span><span class="sh">"</span><span class="s">throughput</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">:</span>
+                <span class="n">health_score</span> <span class="o">-=</span> <span class="mi">10</span>
+        
+        <span class="c1"># 지연시간 기준 감점
+</span>        <span class="k">for</span> <span class="n">connector</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">connectors</span><span class="sh">"</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">connector</span><span class="p">[</span><span class="sh">"</span><span class="s">latency</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">5000</span><span class="p">:</span>
+                <span class="n">health_score</span> <span class="o">-=</span> <span class="mi">15</span>
+        
+        <span class="c1"># 오류율 기준 감점
+</span>        <span class="k">for</span> <span class="n">connector</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">connectors</span><span class="sh">"</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">connector</span><span class="p">[</span><span class="sh">"</span><span class="s">error_rate</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">:</span>
+                <span class="n">health_score</span> <span class="o">-=</span> <span class="mi">20</span>
+        
+        <span class="k">return</span> <span class="nf">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">health_score</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_identify_bottlenecks</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">병목 지점 식별</span><span class="sh">"""</span>
+        
+        <span class="n">bottlenecks</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># 데이터베이스 병목
+</span>        <span class="n">db_metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">database</span><span class="sh">"</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">if</span> <span class="n">db_metrics</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">connection_pool_usage</span><span class="sh">"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.9</span><span class="p">:</span>
+            <span class="n">bottlenecks</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">database</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">데이터베이스 연결 풀 사용률이 높음</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">severity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">high</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">current_value</span><span class="sh">"</span><span class="p">:</span> <span class="n">db_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">connection_pool_usage</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Kafka 병목
+</span>        <span class="n">kafka_metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">topic_metrics</span> <span class="ow">in</span> <span class="n">kafka_metrics</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">topics</span><span class="sh">"</span><span class="p">,</span> <span class="p">{}).</span><span class="nf">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">topic_metrics</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">consumer_lag</span><span class="sh">"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">10000</span><span class="p">:</span>
+                <span class="n">bottlenecks</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                    <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">토픽 </span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s">의 컨슈머 지연이 높음</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">severity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">medium</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">current_value</span><span class="sh">"</span><span class="p">:</span> <span class="n">topic_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">consumer_lag</span><span class="sh">"</span><span class="p">]</span>
+                <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">bottlenecks</span>
+</code></pre></div></div>
+
+<h3 id="자동-스케일링-구현">자동 스케일링 구현</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">AutoScaler</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">scaling_configs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">metrics_collector</span> <span class="o">=</span> <span class="nc">MetricsCollector</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">setup_auto_scaling</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">scaling_config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">자동 스케일링 설정</span><span class="sh">"""</span>
+        
+        <span class="n">auto_scaling_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">connectors</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">min_tasks</span><span class="sh">"</span><span class="p">:</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">min_tasks</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">max_tasks</span><span class="sh">"</span><span class="p">:</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">max_tasks</span><span class="sh">"</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">scale_up_threshold</span><span class="sh">"</span><span class="p">:</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">scale_up_threshold</span><span class="sh">"</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">scale_down_threshold</span><span class="sh">"</span><span class="p">:</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">scale_down_threshold</span><span class="sh">"</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">scale_up_cooldown</span><span class="sh">"</span><span class="p">:</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">scale_up_cooldown</span><span class="sh">"</span><span class="p">,</span> <span class="mi">300</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">scale_down_cooldown</span><span class="sh">"</span><span class="p">:</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">scale_down_cooldown</span><span class="sh">"</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">workers</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">min_workers</span><span class="sh">"</span><span class="p">:</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">min_workers</span><span class="sh">"</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">max_workers</span><span class="sh">"</span><span class="p">:</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">max_workers</span><span class="sh">"</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">cpu_threshold</span><span class="sh">"</span><span class="p">:</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">cpu_threshold</span><span class="sh">"</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">memory_threshold</span><span class="sh">"</span><span class="p">:</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">memory_threshold</span><span class="sh">"</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">auto_scaling_config</span>
+    
+    <span class="k">def</span> <span class="nf">evaluate_scaling_needs</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">connector_name</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">스케일링 필요성 평가</span><span class="sh">"""</span>
+        
+        <span class="n">current_metrics</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">metrics_collector</span><span class="p">.</span><span class="nf">get_connector_metrics</span><span class="p">(</span><span class="n">connector_name</span><span class="p">)</span>
+        <span class="n">scaling_config</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">scaling_configs</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">connector_name</span><span class="p">,</span> <span class="p">{})</span>
+        
+        <span class="n">scaling_decision</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">connector</span><span class="sh">"</span><span class="p">:</span> <span class="n">connector_name</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">none</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">reason</span><span class="sh">"</span><span class="p">:</span> <span class="sh">""</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">current_tasks</span><span class="sh">"</span><span class="p">:</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">task_count</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">recommended_tasks</span><span class="sh">"</span><span class="p">:</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">task_count</span><span class="sh">"</span><span class="p">]</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># CPU 사용률 기반 스케일링
+</span>        <span class="n">cpu_usage</span> <span class="o">=</span> <span class="n">current_metrics</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">cpu_usage</span><span class="sh">"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cpu_usage</span> <span class="o">&gt;</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">scale_up_threshold</span><span class="sh">"</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">task_count</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">max_tasks</span><span class="sh">"</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+                <span class="n">scaling_decision</span><span class="p">.</span><span class="nf">update</span><span class="p">({</span>
+                    <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">scale_up</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">reason</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">CPU 사용률이 </span><span class="si">{</span><span class="n">cpu_usage</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="o">%</span><span class="si">}</span><span class="s">로 높음</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">recommended_tasks</span><span class="sh">"</span><span class="p">:</span> <span class="nf">min</span><span class="p">(</span><span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">task_count</span><span class="sh">"</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">max_tasks</span><span class="sh">"</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+                <span class="p">})</span>
+        
+        <span class="k">elif</span> <span class="n">cpu_usage</span> <span class="o">&lt;</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">scale_down_threshold</span><span class="sh">"</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">task_count</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">min_tasks</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">scaling_decision</span><span class="p">.</span><span class="nf">update</span><span class="p">({</span>
+                    <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">scale_down</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">reason</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">CPU 사용률이 </span><span class="si">{</span><span class="n">cpu_usage</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="o">%</span><span class="si">}</span><span class="s">로 낮음</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">recommended_tasks</span><span class="sh">"</span><span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">task_count</span><span class="sh">"</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">min_tasks</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="p">})</span>
+        
+        <span class="c1"># 처리량 기반 스케일링
+</span>        <span class="n">throughput</span> <span class="o">=</span> <span class="n">current_metrics</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">throughput</span><span class="sh">"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">throughput</span> <span class="o">&gt;</span> <span class="mi">10000</span> <span class="ow">and</span> <span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">task_count</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">max_tasks</span><span class="sh">"</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+            <span class="n">scaling_decision</span><span class="p">.</span><span class="nf">update</span><span class="p">({</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">scale_up</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">reason</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">처리량이 </span><span class="si">{</span><span class="n">throughput</span><span class="si">}</span><span class="s">로 높음</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">recommended_tasks</span><span class="sh">"</span><span class="p">:</span> <span class="nf">min</span><span class="p">(</span><span class="n">current_metrics</span><span class="p">[</span><span class="sh">"</span><span class="s">task_count</span><span class="sh">"</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">scaling_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">max_tasks</span><span class="sh">"</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">scaling_decision</span>
+    
+    <span class="k">def</span> <span class="nf">execute_scaling</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">scaling_decision</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">스케일링 실행</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="n">scaling_decision</span><span class="p">[</span><span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">scale_up</span><span class="sh">"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">_scale_up_connector</span><span class="p">(</span>
+                <span class="n">scaling_decision</span><span class="p">[</span><span class="sh">"</span><span class="s">connector</span><span class="sh">"</span><span class="p">],</span>
+                <span class="n">scaling_decision</span><span class="p">[</span><span class="sh">"</span><span class="s">recommended_tasks</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">scaling_decision</span><span class="p">[</span><span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">scale_down</span><span class="sh">"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">_scale_down_connector</span><span class="p">(</span>
+                <span class="n">scaling_decision</span><span class="p">[</span><span class="sh">"</span><span class="s">connector</span><span class="sh">"</span><span class="p">],</span>
+                <span class="n">scaling_decision</span><span class="p">[</span><span class="sh">"</span><span class="s">recommended_tasks</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">no_action_needed</span><span class="sh">"</span><span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">_scale_up_connector</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">connector_name</span><span class="p">,</span> <span class="n">new_task_count</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">커넥터 스케일 업</span><span class="sh">"""</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 커넥터 설정 업데이트
+</span>            <span class="n">connector_config</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">connector_manager</span><span class="p">.</span><span class="nf">get_connector_config</span><span class="p">(</span><span class="n">connector_name</span><span class="p">)</span>
+            <span class="n">connector_config</span><span class="p">[</span><span class="sh">"</span><span class="s">tasks.max</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_task_count</span>
+            
+            <span class="c1"># 커넥터 재시작
+</span>            <span class="n">result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">connector_manager</span><span class="p">.</span><span class="nf">update_connector</span><span class="p">(</span><span class="n">connector_name</span><span class="p">,</span> <span class="n">connector_config</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">success</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">scale_up</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">old_task_count</span><span class="sh">"</span><span class="p">:</span> <span class="n">connector_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">tasks.max</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">new_task_count</span><span class="sh">"</span><span class="p">:</span> <span class="n">new_task_count</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">커넥터 </span><span class="si">{</span><span class="n">connector_name</span><span class="si">}</span><span class="s">이 </span><span class="si">{</span><span class="n">new_task_count</span><span class="si">}</span><span class="s">개 태스크로 스케일 업됨</span><span class="sh">"</span>
+            <span class="p">}</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">error</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">scale_up</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">error</span><span class="sh">"</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">커넥터 </span><span class="si">{</span><span class="n">connector_name</span><span class="si">}</span><span class="s"> 스케일 업 실패</span><span class="sh">"</span>
+            <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">_scale_down_connector</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">connector_name</span><span class="p">,</span> <span class="n">new_task_count</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">커넥터 스케일 다운</span><span class="sh">"""</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 커넥터 설정 업데이트
+</span>            <span class="n">connector_config</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">connector_manager</span><span class="p">.</span><span class="nf">get_connector_config</span><span class="p">(</span><span class="n">connector_name</span><span class="p">)</span>
+            <span class="n">connector_config</span><span class="p">[</span><span class="sh">"</span><span class="s">tasks.max</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_task_count</span>
+            
+            <span class="c1"># 커넥터 재시작
+</span>            <span class="n">result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">connector_manager</span><span class="p">.</span><span class="nf">update_connector</span><span class="p">(</span><span class="n">connector_name</span><span class="p">,</span> <span class="n">connector_config</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">success</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">scale_down</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">old_task_count</span><span class="sh">"</span><span class="p">:</span> <span class="n">connector_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">tasks.max</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">new_task_count</span><span class="sh">"</span><span class="p">:</span> <span class="n">new_task_count</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">커넥터 </span><span class="si">{</span><span class="n">connector_name</span><span class="si">}</span><span class="s">이 </span><span class="si">{</span><span class="n">new_task_count</span><span class="si">}</span><span class="s">개 태스크로 스케일 다운됨</span><span class="sh">"</span>
+            <span class="p">}</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">error</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">scale_down</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">error</span><span class="sh">"</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">커넥터 </span><span class="si">{</span><span class="n">connector_name</span><span class="si">}</span><span class="s"> 스케일 다운 실패</span><span class="sh">"</span>
+            <span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="-데이터-일관성-보장과-검증">🔒 데이터 일관성 보장과 검증</h2>
+
+<h3 id="데이터-일관성-전략">데이터 일관성 전략</h3>
+
+<p>CDC 파이프라인에서 데이터 일관성을 보장하는 것은 매우 중요합니다.</p>
+
+<h3 id="일관성-보장-방법">일관성 보장 방법</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>방법</th>
+      <th>설명</th>
+      <th>구현 복잡도</th>
+      <th>성능 영향</th>
+      <th>사용 사례</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Exactly-once Semantics</strong></td>
+      <td>각 메시지를 정확히 한 번만 처리</td>
+      <td>높음</td>
+      <td>중간</td>
+      <td>금융 거래, 주문 처리</td>
+    </tr>
+    <tr>
+      <td><strong>At-least-once Semantics</strong></td>
+      <td>메시지를 최소 한 번은 처리</td>
+      <td>낮음</td>
+      <td>낮음</td>
+      <td>로그 수집, 메트릭 수집</td>
+    </tr>
+    <tr>
+      <td><strong>At-most-once Semantics</strong></td>
+      <td>메시지를 최대 한 번만 처리</td>
+      <td>중간</td>
+      <td>낮음</td>
+      <td>알림, 이벤트 스트리밍</td>
+    </tr>
+    <tr>
+      <td><strong>Transactional Processing</strong></td>
+      <td>트랜잭션 단위로 일관성 보장</td>
+      <td>높음</td>
+      <td>높음</td>
+      <td>계정 이체, 재고 관리</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-모니터링과-장애-복구-전략">📊 모니터링과 장애 복구 전략</h2>
+
+<h3 id="종합-모니터링-시스템">종합 모니터링 시스템</h3>
+
+<p>CDC 파이프라인의 건강한 운영을 위한 포괄적인 모니터링 시스템입니다.</p>
+
+<h3 id="모니터링-계층">모니터링 계층</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>계층</th>
+      <th>모니터링 대상</th>
+      <th>주요 메트릭</th>
+      <th>알림 임계값</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>인프라 계층</strong></td>
+      <td>• Kubernetes 클러스터<br />• Kafka 브로커<br />• 데이터베이스</td>
+      <td>• CPU/메모리 사용률<br />• 디스크 I/O<br />• 네트워크 처리량</td>
+      <td>• CPU &gt; 80%<br />• 메모리 &gt; 90%<br />• 디스크 &gt; 85%</td>
+    </tr>
+    <tr>
+      <td><strong>애플리케이션 계층</strong></td>
+      <td>• Kafka Connect 워커<br />• 커넥터<br />• 태스크</td>
+      <td>• JVM 메모리<br />• GC 시간<br />• 스레드 수</td>
+      <td>• GC 시간 &gt; 20%<br />• 스레드 수 &gt; 1000<br />• 힙 사용률 &gt; 80%</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 계층</strong></td>
+      <td>• 데이터 처리량<br />• 지연시간<br />• 오류율</td>
+      <td>• 레코드/초<br />• P99 지연시간<br />• 실패율</td>
+      <td>• 처리량 &lt; 1000/s<br />• 지연시간 &gt; 5초<br />• 오류율 &gt; 1%</td>
+    </tr>
+    <tr>
+      <td><strong>비즈니스 계층</strong></td>
+      <td>• 데이터 품질<br />• 일관성<br />• 완전성</td>
+      <td>• 데이터 검증 실패<br />• 체크섬 불일치<br />• 누락 레코드</td>
+      <td>• 검증 실패 &gt; 0<br />• 체크섬 불일치 &gt; 0<br />• 누락률 &gt; 0.1%</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-실무-프로젝트-엔터프라이즈-cdc-운영-시스템">🚀 실무 프로젝트: 엔터프라이즈 CDC 운영 시스템</h2>
+
+<h3 id="프로젝트-개요">프로젝트 개요</h3>
+
+<p>대규모 전자상거래 플랫폼을 위한 엔터프라이즈급 CDC 운영 시스템을 구축합니다.</p>
+
+<h3 id="시스템-아키텍처">시스템 아키텍처</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>구성 요소</th>
+      <th>기술 스택</th>
+      <th>용량</th>
+      <th>고가용성</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Source Systems</strong></td>
+      <td>• MySQL 8.0 (주문)<br />• PostgreSQL 13 (사용자)<br />• MongoDB 5.0 (제품)</td>
+      <td>• 100만+ 레코드/일<br />• 50+ 테이블<br />• 10+ 데이터베이스</td>
+      <td>• 읽기 전용 복제본<br />• 자동 장애 복구</td>
+    </tr>
+    <tr>
+      <td><strong>Kafka Cluster</strong></td>
+      <td>• Apache Kafka 3.0<br />• Schema Registry<br />• Kafka Connect</td>
+      <td>• 3 브로커<br />• 100+ 토픽<br />• 1000+ 파티션</td>
+      <td>• 3중 복제<br />• 자동 리밸런싱</td>
+    </tr>
+    <tr>
+      <td><strong>Target Systems</strong></td>
+      <td>• Elasticsearch 8.0<br />• Redis 7.0<br />• S3 Data Lake<br />• Snowflake</td>
+      <td>• 3 노드 ES 클러스터<br />• 6 노드 Redis 클러스터<br />• 무제한 S3 저장소</td>
+      <td>• 클러스터 모드<br />• 자동 백업</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-학습-요약">📚 학습 요약</h2>
+
+<h3 id="이번-part에서-학습한-내용">이번 Part에서 학습한 내용</h3>
+
+<ol>
+  <li><strong>Kafka Connect 고급 아키텍처</strong>
+    <ul>
+      <li>분산 모드 구성과 클러스터 설계</li>
+      <li>워커 노드 관리와 확장성 전략</li>
+      <li>고가용성과 장애 복구 메커니즘</li>
+    </ul>
+  </li>
+  <li><strong>커스텀 커넥터 개발</strong>
+    <ul>
+      <li>Source Connector와 Sink Connector 구현</li>
+      <li>커스텀 Transform 개발</li>
+      <li>커넥터 테스트와 배포 전략</li>
+    </ul>
+  </li>
+  <li><strong>대규모 CDC 파이프라인 운영</strong>
+    <ul>
+      <li>파이프라인 오케스트레이션</li>
+      <li>부하 분산과 장애 격리</li>
+      <li>확장성과 데이터 일관성 보장</li>
+    </ul>
+  </li>
+  <li><strong>성능 최적화와 병목 해결</strong>
+    <ul>
+      <li>성능 병목 지점 분석</li>
+      <li>동적 성능 튜닝</li>
+      <li>자동 스케일링 구현</li>
+    </ul>
+  </li>
+  <li><strong>데이터 일관성 보장과 검증</strong>
+    <ul>
+      <li>일관성 보장 방법론</li>
+      <li>데이터 검증 시스템</li>
+      <li>드리프트 감지와 이상 탐지</li>
+    </ul>
+  </li>
+  <li><strong>모니터링과 장애 복구 전략</strong>
+    <ul>
+      <li>종합 모니터링 시스템</li>
+      <li>재해 복구 계획</li>
+      <li>자동 장애 조치</li>
+    </ul>
+  </li>
+  <li><strong>실무 프로젝트</strong>
+    <ul>
+      <li>엔터프라이즈급 CDC 운영 시스템</li>
+      <li>대규모 전자상거래 플랫폼 적용</li>
+      <li>운영 자동화와 최적화</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="핵심-기술-스택">핵심 기술 스택</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>기술</th>
+      <th>역할</th>
+      <th>중요도</th>
+      <th>학습 포인트</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Kafka Connect</strong></td>
+      <td>커넥터 프레임워크</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>분산 아키텍처, 확장성</td>
+    </tr>
+    <tr>
+      <td><strong>Debezium</strong></td>
+      <td>CDC 플랫폼</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>고급 설정, 성능 최적화</td>
+    </tr>
+    <tr>
+      <td><strong>커스텀 커넥터</strong></td>
+      <td>특화된 데이터 처리</td>
+      <td>⭐⭐⭐⭐</td>
+      <td>개발 패턴, 테스트 전략</td>
+    </tr>
+    <tr>
+      <td><strong>모니터링</strong></td>
+      <td>운영 가시성</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>메트릭 수집, 알림 설정</td>
+    </tr>
+    <tr>
+      <td><strong>자동화</strong></td>
+      <td>운영 효율성</td>
+      <td>⭐⭐⭐⭐</td>
+      <td>스케일링, 복구 자동화</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="다음-단계">다음 단계</h3>
+
+<p>이제 CDC 시리즈의 핵심 내용을 모두 학습했습니다. 다음 단계로는:</p>
+
+<ol>
+  <li><strong>실제 프로젝트 적용</strong>: 학습한 내용을 실제 프로젝트에 적용</li>
+  <li><strong>고급 주제 탐구</strong>: 스트림 처리, 이벤트 소싱 등 고급 주제</li>
+  <li><strong>다른 기술 스택</strong>: Apache Pulsar, Apache Flink 등 다른 스트리밍 기술</li>
+</ol>
+
+<hr />
+
+<p><strong>시리즈 완료</strong>: <a href="/data-engineering/2025/09/19/change-data-capture-debezium-guide.html">Change Data Capture Complete Guide Series</a></p>
+
+<hr />
+
+<p><em>엔터프라이즈급 실시간 데이터 파이프라인을 구축하여 현대적인 데이터 아키텍처의 핵심을 완성하세요!</em> 🚀</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+          
+          
+      
+      
+        
+        
+        <a href="/data-engineering/2025/09/19/change-data-capture-debezium-guide.html" class="nav-link prev">
+          ← 이전: Part 1: Change Data Capture와 Debezium 실전 구현 - 실시간 데이터 동기화의 완성
+        </a>
+      
+      
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
