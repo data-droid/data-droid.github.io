@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Learn the complete fundamentals of modern data lakehouse from Apache Iceberg's core concepts to table format, schema evolution, and partitioning strategies.">
+
+
+
+<title>Part 1: Apache Iceberg Fundamentals and Table Format - The Beginning of Modern Data Lakehouse - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 1: Apache Iceberg Fundamentals and Table Format - The Beginning of Modern Data Lakehouse">
+<meta property="og:description" content="Learn the complete fundamentals of modern data lakehouse from Apache Iceberg's core concepts to table format, schema evolution, and partitioning strategies.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2025-09-21-apache-iceberg-fundamentals.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 1: Apache Iceberg Fundamentals and Table Format - The Beginning of Modern Data Lakehouse">
+<meta name="twitter:description" content="Learn the complete fundamentals of modern data lakehouse from Apache Iceberg's core concepts to table format, schema evolution, and partitioning strategies.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2025/09/21/apache-iceberg-fundamentals.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2025-09-21-apache-iceberg-fundamentals.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 21일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 1: Apache Iceberg Fundamentals and Table Format - The Beginning of Modern Data Lakehouse</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Iceberg</span>
+      
+        <span class="tag">Data-Lakehouse</span>
+      
+        <span class="tag">Table-Format</span>
+      
+        <span class="tag">Schema-Evolution</span>
+      
+        <span class="tag">Partitioning</span>
+      
+        <span class="tag">ACID</span>
+      
+        <span class="tag">Transaction</span>
+      
+        <span class="tag">Big-Data</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Apache iceberg complete guide 시리즈</span>
+      <span class="series-order">Part 2</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 45 min</span>
+      
+      
+        <span class="difficulty">📊 Intermediate</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-1-apache-iceberg-fundamentals-and-table-format---the-beginning-of-modern-data-lakehouse">Part 1: Apache Iceberg Fundamentals and Table Format - The Beginning of Modern Data Lakehouse</h1>
+
+<blockquote>
+  <p>Learn the complete fundamentals of modern data lakehouse from Apache Iceberg’s core concepts to table format, schema evolution, and partitioning strategies.</p>
+</blockquote>
+
+<h2 id="-table-of-contents">📋 Table of Contents</h2>
+
+<ol>
+  <li><a href="#apache-iceberg-introduction">Apache Iceberg Introduction</a></li>
+  <li><a href="#iceberg-architecture-and-core-concepts">Iceberg Architecture and Core Concepts</a></li>
+  <li><a href="#table-format-and-metadata-structure">Table Format and Metadata Structure</a></li>
+  <li><a href="#schema-evolution-and-compatibility">Schema Evolution and Compatibility</a></li>
+  <li><a href="#partitioning-and-sorting-strategies">Partitioning and Sorting Strategies</a></li>
+  <li><a href="#transactions-and-acid-guarantees">Transactions and ACID Guarantees</a></li>
+  <li><a href="#practical-project-building-iceberg-data-lake">Practical Project: Building Iceberg Data Lake</a></li>
+  <li><a href="#learning-summary">Learning Summary</a></li>
+</ol>
+
+<h2 id="-apache-iceberg-introduction">🧊 Apache Iceberg Introduction</h2>
+
+<h3 id="what-is-iceberg">What is Iceberg?</h3>
+
+<p>Apache Iceberg is an open-source table format for modern data lakehouse. It provides a high-performance table format that can efficiently store and manage large-scale data.</p>
+
+<h3 id="evolution-of-data-lakes">Evolution of Data Lakes</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Generation</th>
+      <th>Characteristics</th>
+      <th>Key Technologies</th>
+      <th>Limitations</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1st Generation</strong></td>
+      <td>File-based Storage</td>
+      <td>HDFS, S3</td>
+      <td>• No Schema Evolution<br />• No ACID Transactions<br />• Limited Metadata</td>
+    </tr>
+    <tr>
+      <td><strong>2nd Generation</strong></td>
+      <td>Table Format Emergence</td>
+      <td>Hive, HBase</td>
+      <td>• Limited Schema Evolution<br />• Partial ACID Support<br />• Performance Issues</td>
+    </tr>
+    <tr>
+      <td><strong>3rd Generation</strong></td>
+      <td>Modern Table Formats</td>
+      <td>Iceberg, Delta Lake, Hudi</td>
+      <td>• Complete Schema Evolution<br />• ACID Transactions<br />• High Performance Queries</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="core-values-of-iceberg">Core Values of Iceberg</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Value</th>
+      <th>Description</th>
+      <th>Benefits</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>ACID Transactions</strong></td>
+      <td>Atomicity, Consistency, Isolation, Durability</td>
+      <td>• Data Consistency<br />• Concurrency Control<br />• Safe Updates</td>
+    </tr>
+    <tr>
+      <td><strong>Schema Evolution</strong></td>
+      <td>Backward Compatibility during Schema Changes</td>
+      <td>• Flexible Data Model<br />• Gradual Schema Changes<br />• Version Management</td>
+    </tr>
+    <tr>
+      <td><strong>Time Travel</strong></td>
+      <td>Query Data from Past Points</td>
+      <td>• Data Recovery<br />• Experimentation &amp; Analysis<br />• Audit Trail</td>
+    </tr>
+    <tr>
+      <td><strong>High Performance</strong></td>
+      <td>Optimized Query Performance</td>
+      <td>• Fast Scans<br />• Efficient Metadata<br />• Parallel Processing</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="️-iceberg-architecture-and-core-concepts">🏗️ Iceberg Architecture and Core Concepts</h2>
+
+<h3 id="iceberg-architecture-overview">Iceberg Architecture Overview</h3>
+
+<p>Iceberg manages large-scale data efficiently through a hierarchical metadata structure.</p>
+
+<h3 id="core-components">Core Components</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Role</th>
+      <th>Features</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Catalog</strong></td>
+      <td>Table Metadata Management</td>
+      <td>• Track Table Location<br />• Version Management<br />• Namespace Management</td>
+    </tr>
+    <tr>
+      <td><strong>Metadata Layer</strong></td>
+      <td>Table Schema and Partition Info</td>
+      <td>• JSON/PB Format<br />• Versioned Snapshots<br />• Schema Evolution Support</td>
+    </tr>
+    <tr>
+      <td><strong>Data Layer</strong></td>
+      <td>Actual Data Files</td>
+      <td>• Parquet/ORC/Avro Format<br />• Partition-based Storage<br />• Compression &amp; Encoding</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="metadata-hierarchical-structure">Metadata Hierarchical Structure</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">IcebergMetadataStructure</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">metadata_layers</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">explain_metadata_structure</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Explain Iceberg metadata structure</span><span class="sh">"""</span>
+        
+        <span class="n">structure</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">catalog</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">purpose</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Entry point for table metadata</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">components</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Table identifier</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Current metadata file location</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Table properties</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">examples</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">HiveCatalog</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">HadoopCatalog</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">JDBC Catalog</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">metadata_file</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">purpose</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Define table schema and current state</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">components</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Table schema (JSON)</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Current snapshot ID</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Partition spec</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Properties and settings</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">format</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">JSON or Protocol Buffers</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">manifest_list</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">purpose</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">List of manifest files for snapshot</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">components</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Manifest file paths</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Partition ranges</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Statistics information</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Schema ID</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Fast snapshot creation</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Efficient partition pruning</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Parallel manifest processing</span><span class="sh">"</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">manifest_file</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">purpose</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Metadata of data files</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">components</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Data file paths</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Partition data</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">File statistics (row count, size, etc.)</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Column statistics</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">File-level pruning</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Column-level statistics</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Efficient scanning</span><span class="sh">"</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">data_files</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">purpose</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Actual data storage</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">formats</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">Parquet</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">ORC</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Avro</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">features</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Column-wise compression</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Indexing</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Embedded statistics</span><span class="sh">"</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">structure</span>
+    
+    <span class="k">def</span> <span class="nf">demonstrate_metadata_evolution</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Demonstrate metadata evolution process</span><span class="sh">"""</span>
+        
+        <span class="n">evolution_process</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">step_1</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Initial table creation</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">metadata_created</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">metadata.json (v1)</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">manifest-list-1.avro</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">manifest-1.avro</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">snapshot_id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">snapshot-1</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">step_2</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Data insertion</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">metadata_created</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">manifest-list-2.avro</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">manifest-2.avro (new files)</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">snapshot_id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">snapshot-2</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">parent_snapshot</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">snapshot-1</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">step_3</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Schema evolution</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">metadata_created</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">metadata.json (v2) - new schema</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">manifest-list-3.avro</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">snapshot_id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">snapshot-3</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">schema_evolution</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">column addition</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">step_4</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Data deletion/update</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">metadata_created</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">manifest-list-4.avro</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">delete-files.avro (deletion markers)</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">snapshot_id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">snapshot-4</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">operation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">copy-on-write</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">evolution_process</span>
+</code></pre></div></div>
+
+<h3 id="iceberg-vs-traditional-table-formats">Iceberg vs Traditional Table Formats</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Iceberg</th>
+      <th>Hive</th>
+      <th>Delta Lake</th>
+      <th>Apache Hudi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>ACID Transactions</strong></td>
+      <td>✅ Full Support</td>
+      <td>❌ Limited</td>
+      <td>✅ Full Support</td>
+      <td>✅ Full Support</td>
+    </tr>
+    <tr>
+      <td><strong>Schema Evolution</strong></td>
+      <td>✅ Full Support</td>
+      <td>❌ Limited</td>
+      <td>✅ Full Support</td>
+      <td>✅ Full Support</td>
+    </tr>
+    <tr>
+      <td><strong>Time Travel</strong></td>
+      <td>✅ Supported</td>
+      <td>❌ Not Supported</td>
+      <td>✅ Supported</td>
+      <td>✅ Supported</td>
+    </tr>
+    <tr>
+      <td><strong>Partition Evolution</strong></td>
+      <td>✅ Supported</td>
+      <td>❌ Not Supported</td>
+      <td>❌ Not Supported</td>
+      <td>❌ Not Supported</td>
+    </tr>
+    <tr>
+      <td><strong>Commit Performance</strong></td>
+      <td>🟢 Fast</td>
+      <td>🔴 Slow</td>
+      <td>🟡 Medium</td>
+      <td>🟡 Medium</td>
+    </tr>
+    <tr>
+      <td><strong>Query Performance</strong></td>
+      <td>🟢 Optimized</td>
+      <td>🔴 Basic</td>
+      <td>🟡 Medium</td>
+      <td>🟡 Medium</td>
+    </tr>
+    <tr>
+      <td><strong>Ecosystem Support</strong></td>
+      <td>🟢 Extensive</td>
+      <td>🟢 Extensive</td>
+      <td>🟡 Spark-focused</td>
+      <td>🟡 Limited</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-table-format-and-metadata-structure">📊 Table Format and Metadata Structure</h2>
+
+<h3 id="detailed-table-format-analysis">Detailed Table Format Analysis</h3>
+
+<p>Iceberg tables provide efficient data management through a hierarchical metadata structure.</p>
+
+<h3 id="metadata-file-structure">Metadata File Structure</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">IcebergTableFormat</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">table_structure</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">analyze_table_format</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Detailed table format analysis</span><span class="sh">"""</span>
+        
+        <span class="n">format_analysis</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">metadata_hierarchy</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">level_1</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Catalog</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">purpose</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Table location and basic information</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">table_identifier</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">database.table_name</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">current_metadata_location</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/path/to/metadata.json</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">table_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ICEBERG</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">properties</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">write.format.default</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">parquet</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">write.metadata.delete-after-commit.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">level_2</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Metadata File</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">purpose</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Table schema and settings</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">format-version</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">table-uuid</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">uuid-string</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">location</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/table/path</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">last-updated-ms</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1234567890000</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">last-column-id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">schema</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">struct</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">schema-id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                                <span class="p">{</span>
+                                    <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                                    <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span>
+                                    <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                                    <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">long</span><span class="sh">"</span>
+                                <span class="p">},</span>
+                                <span class="p">{</span>
+                                    <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                                    <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span>
+                                    <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                    <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">string</span><span class="sh">"</span>
+                                <span class="p">}</span>
+                            <span class="p">]</span>
+                        <span class="p">},</span>
+                        <span class="sh">"</span><span class="s">current-schema-id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">schemas</span><span class="sh">"</span><span class="p">:</span> <span class="p">[...],</span>
+                        <span class="sh">"</span><span class="s">partition-spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">[...],</span>
+                        <span class="sh">"</span><span class="s">default-spec-id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">partition-specs</span><span class="sh">"</span><span class="p">:</span> <span class="p">[...],</span>
+                        <span class="sh">"</span><span class="s">last-partition-id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">default-sort-order-id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">sort-orders</span><span class="sh">"</span><span class="p">:</span> <span class="p">[...],</span>
+                        <span class="sh">"</span><span class="s">current-snapshot-id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">123456789</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">refs</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">main</span><span class="sh">"</span><span class="p">:</span> <span class="mi">123456789</span>
+                        <span class="p">},</span>
+                        <span class="sh">"</span><span class="s">snapshots</span><span class="sh">"</span><span class="p">:</span> <span class="p">[...],</span>
+                        <span class="sh">"</span><span class="s">snapshot-log</span><span class="sh">"</span><span class="p">:</span> <span class="p">[...],</span>
+                        <span class="sh">"</span><span class="s">metadata-log</span><span class="sh">"</span><span class="p">:</span> <span class="p">[...]</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">level_3</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Manifest List</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">purpose</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">List of manifest files for snapshot</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">manifest_path</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/path/to/manifest-list.avro</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">manifest_length</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">partition_spec_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">added_snapshot_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">123456789</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">added_data_files_count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">existing_data_files_count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">deleted_data_files_count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">partitions</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="p">{</span>
+                                <span class="sh">"</span><span class="s">contains_null</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">lower_bound</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2023-01-01</span><span class="sh">"</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">upper_bound</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2023-01-31</span><span class="sh">"</span>
+                            <span class="p">}</span>
+                        <span class="p">],</span>
+                        <span class="sh">"</span><span class="s">added_rows_count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000000</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">existing_rows_count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">deleted_rows_count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">level_4</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Manifest File</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">purpose</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Data file metadata</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">manifest_path</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/path/to/manifest.avro</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">manifest_length</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2048</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">partition_spec_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># DATA=0, DELETES=1
+</span>                        <span class="sh">"</span><span class="s">sequence_number</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">min_sequence_number</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">snapshot_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">123456789</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">added_files</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="p">{</span>
+                                <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">file_path</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/data/file1.parquet</span><span class="sh">"</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">file_format</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">PARQUET</span><span class="sh">"</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">partition</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="sh">"</span><span class="s">year</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2023</span><span class="p">,</span>
+                                    <span class="sh">"</span><span class="s">month</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span>
+                                <span class="p">},</span>
+                                <span class="sh">"</span><span class="s">record_count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">file_size_in_bytes</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1024000</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">column_sizes</span><span class="sh">"</span><span class="p">:</span> <span class="p">{...},</span>
+                                <span class="sh">"</span><span class="s">value_counts</span><span class="sh">"</span><span class="p">:</span> <span class="p">{...},</span>
+                                <span class="sh">"</span><span class="s">null_value_counts</span><span class="sh">"</span><span class="p">:</span> <span class="p">{...},</span>
+                                <span class="sh">"</span><span class="s">lower_bounds</span><span class="sh">"</span><span class="p">:</span> <span class="p">{...},</span>
+                                <span class="sh">"</span><span class="s">upper_bounds</span><span class="sh">"</span><span class="p">:</span> <span class="p">{...}</span>
+                            <span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">format_analysis</span>
+    
+    <span class="k">def</span> <span class="nf">demonstrate_file_lifecycle</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Demonstrate file lifecycle</span><span class="sh">"""</span>
+        
+        <span class="n">lifecycle</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">create_table</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">step</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Table creation</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">files_created</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">metadata.json</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">manifest-list-1.avro (empty list)</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">manifest-1.avro (empty manifest)</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">snapshot</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">snapshot-1 (empty snapshot)</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">insert_data</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">step</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Data insertion</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">files_created</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">data/file-1.parquet</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">data/file-2.parquet</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">manifest-list-2.avro (including new manifest)</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">manifest-2.avro (new files)</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">snapshot</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">snapshot-2 (with new data)</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">operation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">append</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">update_data</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">step</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Data update</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">files_created</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">data/file-3.parquet (new version)</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">delete/delete-1.parquet (deletion marker)</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">manifest-list-3.avro</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">manifest-3.avro</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">snapshot</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">snapshot-3 (updated data)</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">operation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">copy-on-write</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">compact_data</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">step</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Data compaction</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">files_created</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">data/compacted-file-1.parquet (consolidated file)</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">manifest-list-4.avro</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">manifest-4.avro</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">files_removed</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">data/file-1.parquet</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">data/file-2.parquet</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">delete/delete-1.parquet</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">snapshot</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">snapshot-4 (compacted data)</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">operation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">rewrite</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">lifecycle</span>
+</code></pre></div></div>
+
+<h3 id="metadata-optimization-strategies">Metadata Optimization Strategies</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Optimization Area</th>
+      <th>Strategy</th>
+      <th>Implementation</th>
+      <th>Effect</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Manifest Size</strong></td>
+      <td>• Manifest Splitting<br />• Compression Optimization</td>
+      <td>• Limit rows per file<br />• gzip/snappy compression</td>
+      <td>• Query performance improvement<br />• Metadata size reduction</td>
+    </tr>
+    <tr>
+      <td><strong>Scan Optimization</strong></td>
+      <td>• Partition Pruning<br />• Column Pruning</td>
+      <td>• Partition range information<br />• Column statistics</td>
+      <td>• I/O reduction<br />• Query speed improvement</td>
+    </tr>
+    <tr>
+      <td><strong>Commit Performance</strong></td>
+      <td>• Parallel Manifest Generation<br />• Asynchronous Processing</td>
+      <td>• Multi-threaded processing<br />• Background tasks</td>
+      <td>• Write performance improvement<br />• Latency reduction</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-schema-evolution-and-compatibility">🔄 Schema Evolution and Compatibility</h2>
+
+<h3 id="schema-evolution-concepts">Schema Evolution Concepts</h3>
+
+<p>Iceberg ensures backward compatibility during schema changes, allowing safe processing of both existing and new data.</p>
+
+<h3 id="schema-evolution-rules">Schema Evolution Rules</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Change Type</th>
+      <th>Compatibility</th>
+      <th>Description</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Add Column</strong></td>
+      <td>✅ Backward Compatible</td>
+      <td>New column must be nullable</td>
+      <td><code class="language-plaintext highlighter-rouge">ALTER TABLE ADD COLUMN email STRING</code></td>
+    </tr>
+    <tr>
+      <td><strong>Drop Column</strong></td>
+      <td>✅ Backward Compatible</td>
+      <td>Column removed from existing data</td>
+      <td><code class="language-plaintext highlighter-rouge">ALTER TABLE DROP COLUMN old_field</code></td>
+    </tr>
+    <tr>
+      <td><strong>Change Column Type</strong></td>
+      <td>🟡 Conditionally Compatible</td>
+      <td>Only compatible type changes allowed</td>
+      <td><code class="language-plaintext highlighter-rouge">INT → LONG</code>, <code class="language-plaintext highlighter-rouge">STRING → BINARY</code></td>
+    </tr>
+    <tr>
+      <td><strong>Change Column Order</strong></td>
+      <td>✅ Backward Compatible</td>
+      <td>Handled by ID-based processing</td>
+      <td>Column order rearrangement</td>
+    </tr>
+    <tr>
+      <td><strong>Change Column Requirement</strong></td>
+      <td>🟡 Conditionally Compatible</td>
+      <td>nullable → required not allowed</td>
+      <td>Only <code class="language-plaintext highlighter-rouge">required → nullable</code> allowed</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="schema-evolution-implementation">Schema Evolution Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SchemaEvolutionManager</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">schema_versions</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">compatibility_rules</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_schema_evolution</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup schema evolution</span><span class="sh">"""</span>
+        
+        <span class="n">evolution_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">schema_evolution_rules</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">add_column</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">compatibility</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">backward_compatible</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">requirements</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">New column must be nullable</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">Default value can be specified</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">Column ID is automatically assigned</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">example</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">old_schema</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">struct</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                                <span class="p">{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">long</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">},</span>
+                                <span class="p">{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                            <span class="p">]</span>
+                        <span class="p">},</span>
+                        <span class="sh">"</span><span class="s">new_schema</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">struct</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                                <span class="p">{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">long</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">},</span>
+                                <span class="p">{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">},</span>
+                                <span class="p">{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">email</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                            <span class="p">]</span>
+                        <span class="p">},</span>
+                        <span class="sh">"</span><span class="s">evolution_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">add_column</span><span class="sh">"</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">drop_column</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">compatibility</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">backward_compatible</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">requirements</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">Column is marked as deleted</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">Data is not physically removed</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">Old readers can still access data</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">example</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">old_schema</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">struct</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                                <span class="p">{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">long</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">},</span>
+                                <span class="p">{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">},</span>
+                                <span class="p">{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">email</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                            <span class="p">]</span>
+                        <span class="p">},</span>
+                        <span class="sh">"</span><span class="s">new_schema</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">struct</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                                <span class="p">{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">long</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">},</span>
+                                <span class="p">{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">email</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                            <span class="p">]</span>
+                        <span class="p">},</span>
+                        <span class="sh">"</span><span class="s">evolution_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">drop_column</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">deleted_columns</span><span class="sh">"</span><span class="p">:</span> <span class="p">[{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">}]</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">change_column_type</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">compatibility</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">conditional</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">requirements</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">Type change must be compatible</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">Only widening conversions</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">No data loss allowed</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">compatible_changes</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">int → long</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">float → double</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">string → binary</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">decimal(precision, scale) → decimal(precision+1, scale)</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">incompatible_changes</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">long → int</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">double → float</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">string → int</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">binary → string</span><span class="sh">"</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">evolution_config</span>
+    
+    <span class="k">def</span> <span class="nf">demonstrate_schema_evolution_process</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Demonstrate schema evolution process</span><span class="sh">"""</span>
+        
+        <span class="n">evolution_process</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">initial_schema</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">version</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">schema</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">struct</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">schema-id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">long</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">username</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">string</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">data_files</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">user_data_v1.parquet</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">add_email_column</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">version</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">schema</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">struct</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">schema-id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">long</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">username</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">string</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">email</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">string</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">data_files</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">user_data_v1.parquet</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user_data_v2.parquet</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">evolution_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">add_column</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">change_username_to_binary</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">version</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">schema</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">struct</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">schema-id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">long</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">username</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">binary</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">email</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">string</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">data_files</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">user_data_v1.parquet</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user_data_v2.parquet</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user_data_v3.parquet</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">evolution_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">change_column_type</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">drop_email_column</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">version</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">schema</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">struct</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">schema-id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">long</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">username</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">binary</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">data_files</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">user_data_v1.parquet</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user_data_v2.parquet</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user_data_v3.parquet</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user_data_v4.parquet</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">evolution_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">drop_column</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">deleted_columns</span><span class="sh">"</span><span class="p">:</span> <span class="p">[{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">email</span><span class="sh">"</span><span class="p">}]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">evolution_process</span>
+    
+    <span class="k">def</span> <span class="nf">validate_schema_compatibility</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">old_schema</span><span class="p">,</span> <span class="n">new_schema</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Validate schema compatibility</span><span class="sh">"""</span>
+        
+        <span class="n">compatibility_check</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">issues</span><span class="sh">"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="sh">"</span><span class="s">recommendations</span><span class="sh">"</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+        
+        <span class="n">old_fields</span> <span class="o">=</span> <span class="p">{</span><span class="n">field</span><span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">]:</span> <span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">old_schema</span><span class="p">[</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">]}</span>
+        <span class="n">new_fields</span> <span class="o">=</span> <span class="p">{</span><span class="n">field</span><span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">]:</span> <span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">new_schema</span><span class="p">[</span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">]}</span>
+        
+        <span class="c1"># Check for added fields
+</span>        <span class="n">added_fields</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">new_fields</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nf">set</span><span class="p">(</span><span class="n">old_fields</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">field_id</span> <span class="ow">in</span> <span class="n">added_fields</span><span class="p">:</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">new_fields</span><span class="p">[</span><span class="n">field_id</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">field</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">required</span><span class="sh">"</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+                <span class="n">compatibility_check</span><span class="p">[</span><span class="sh">"</span><span class="s">issues</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="sh">"</span><span class="s">Added field </span><span class="sh">'</span><span class="si">{</span><span class="n">field</span><span class="p">[</span><span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">'</span><span class="s"> (id: </span><span class="si">{</span><span class="n">field_id</span><span class="si">}</span><span class="s">) must be nullable</span><span class="sh">"</span>
+                <span class="p">)</span>
+                <span class="n">compatibility_check</span><span class="p">[</span><span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="c1"># Check for removed fields
+</span>        <span class="n">removed_fields</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">old_fields</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nf">set</span><span class="p">(</span><span class="n">new_fields</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">removed_fields</span><span class="p">:</span>
+            <span class="n">compatibility_check</span><span class="p">[</span><span class="sh">"</span><span class="s">recommendations</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span>
+                <span class="sh">"</span><span class="s">Consider marking fields as deprecated before removing them</span><span class="sh">"</span>
+            <span class="p">)</span>
+        
+        <span class="c1"># Check for type changes
+</span>        <span class="n">common_fields</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">old_fields</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span> <span class="o">&amp;</span> <span class="nf">set</span><span class="p">(</span><span class="n">new_fields</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">field_id</span> <span class="ow">in</span> <span class="n">common_fields</span><span class="p">:</span>
+            <span class="n">old_field</span> <span class="o">=</span> <span class="n">old_fields</span><span class="p">[</span><span class="n">field_id</span><span class="p">]</span>
+            <span class="n">new_field</span> <span class="o">=</span> <span class="n">new_fields</span><span class="p">[</span><span class="n">field_id</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="n">old_field</span><span class="p">[</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">new_field</span><span class="p">[</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">self</span><span class="p">.</span><span class="nf">_is_type_compatible</span><span class="p">(</span><span class="n">old_field</span><span class="p">[</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">],</span> <span class="n">new_field</span><span class="p">[</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">]):</span>
+                    <span class="n">compatibility_check</span><span class="p">[</span><span class="sh">"</span><span class="s">issues</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="sh">"</span><span class="s">Field </span><span class="sh">'</span><span class="si">{</span><span class="n">old_field</span><span class="p">[</span><span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">'</span><span class="s"> type change from </span><span class="si">{</span><span class="n">old_field</span><span class="p">[</span><span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s"> to </span><span class="si">{</span><span class="n">new_field</span><span class="p">[</span><span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s"> is not compatible</span><span class="sh">"</span>
+                    <span class="p">)</span>
+                    <span class="n">compatibility_check</span><span class="p">[</span><span class="sh">"</span><span class="s">is_compatible</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="k">return</span> <span class="n">compatibility_check</span>
+    
+    <span class="k">def</span> <span class="nf">_is_type_compatible</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">old_type</span><span class="p">,</span> <span class="n">new_type</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Check type compatibility</span><span class="sh">"""</span>
+        
+        <span class="n">compatible_changes</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">int</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">long</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">float</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">double</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">binary</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">decimal(10,2)</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">decimal(11,2)</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">decimal(10,3)</span><span class="sh">"</span><span class="p">]</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">new_type</span> <span class="ow">in</span> <span class="n">compatible_changes</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">old_type</span><span class="p">,</span> <span class="p">[])</span>
+</code></pre></div></div>
+
+<h3 id="schema-evolution-best-practices">Schema Evolution Best Practices</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Best Practice</th>
+      <th>Description</th>
+      <th>Implementation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Gradual Evolution</strong></td>
+      <td>Change one at a time</td>
+      <td>• Step-by-step schema changes<br />• Test at each step</td>
+    </tr>
+    <tr>
+      <td><strong>Backward Compatibility</strong></td>
+      <td>Ensure existing data access</td>
+      <td>• Add nullable columns<br />• Only allow type expansion</td>
+    </tr>
+    <tr>
+      <td><strong>Version Management</strong></td>
+      <td>Track schema versions</td>
+      <td>• Schema ID management<br />• Change history recording</td>
+    </tr>
+    <tr>
+      <td><strong>Testing Strategy</strong></td>
+      <td>Validate after evolution</td>
+      <td>• Compatibility testing<br />• Performance testing</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-partitioning-and-sorting-strategies">📁 Partitioning and Sorting Strategies</h2>
+
+<h3 id="partitioning-concepts">Partitioning Concepts</h3>
+
+<p>Iceberg partitioning logically divides data to improve query performance and management efficiency.</p>
+
+<h3 id="partitioning-strategies">Partitioning Strategies</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Strategy</th>
+      <th>Description</th>
+      <th>Advantages</th>
+      <th>Disadvantages</th>
+      <th>Use Cases</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Identity Partitioning</strong></td>
+      <td>Use column values directly as partitions</td>
+      <td>• Simplicity<br />• Fast pruning</td>
+      <td>• Limited partition count<br />• Difficult schema changes</td>
+      <td>• Date-based data<br />• Region-based data</td>
+    </tr>
+    <tr>
+      <td><strong>Bucket Partitioning</strong></td>
+      <td>Hash-based partitioning</td>
+      <td>• Even distribution<br />• Join optimization</td>
+      <td>• Inefficient range queries<br />• Fixed partition count</td>
+      <td>• Large tables<br />• Join performance critical</td>
+    </tr>
+    <tr>
+      <td><strong>Truncate Partitioning</strong></td>
+      <td>String truncation</td>
+      <td>• String range partitioning<br />• Flexible size</td>
+      <td>• Uneven distribution<br />• Uneven partition sizes</td>
+      <td>• User IDs<br />• Product codes</td>
+    </tr>
+    <tr>
+      <td><strong>Year/Month/Day</strong></td>
+      <td>Time-based hierarchical partitioning</td>
+      <td>• Time range query optimization<br />• Natural partitioning</td>
+      <td>• Increasing partition count<br />• Management complexity</td>
+      <td>• Time series data<br />• Log data</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="partitioning-implementation">Partitioning Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">IcebergPartitioningStrategy</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">partition_specs</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">design_partitioning_strategy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">table_requirements</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Design partitioning strategy</span><span class="sh">"""</span>
+        
+        <span class="n">strategy</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">time_series_table</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">partition_spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">spec_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># created_at column ID
+</span>                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">created_date</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">day</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># user_id column ID
+</span>                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1001</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user_bucket</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">bucket[16]</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Time range query optimization</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">User-based data distribution</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Parallel processing improvement</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">use_case</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">User activity logs</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">large_analytics_table</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">partition_spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">spec_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># region column ID
+</span>                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">region</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">identity</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>  <span class="c1"># category column ID
+</span>                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1001</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">identity</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Region-based data separation</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Category-based query optimization</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Data locality guarantee</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">use_case</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">E-commerce order data</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">high_frequency_table</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">partition_spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">spec_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># id column ID
+</span>                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">id_bucket</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">bucket[32]</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Even data distribution</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">High concurrency support</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Partition size control</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">use_case</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Real-time event data</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">strategy</span>
+    
+    <span class="k">def</span> <span class="nf">demonstrate_partition_evolution</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Demonstrate partition evolution</span><span class="sh">"""</span>
+        
+        <span class="n">evolution_process</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">initial_partition</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">spec_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">partition_spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">year</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">year</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">data_layout</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/table/data/year=2023/file1.parquet</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">Year-based query optimization</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">add_month_partition</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">spec_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">partition_spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">year</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">year</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1001</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">month</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">month</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">data_layout</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/table/data/year=2023/month=01/file1.parquet</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">Monthly detailed query optimization</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">evolution_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">add_partition_field</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">change_to_day_partition</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">spec_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">partition_spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">day</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">data_layout</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/table/data/date=2023-01-15/file1.parquet</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">Daily detailed query optimization</span><span class="sh">"</span><span class="p">],</span>
+                <span class="sh">"</span><span class="s">evolution_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">replace_partition_field</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">evolution_process</span>
+</code></pre></div></div>
+
+<h3 id="sorting-strategies">Sorting Strategies</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Sorting Strategy</th>
+      <th>Description</th>
+      <th>Advantages</th>
+      <th>Use Cases</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Default Sorting</strong></td>
+      <td>Data insertion order</td>
+      <td>• Simplicity<br />• Fast insertion</td>
+      <td>• General tables</td>
+    </tr>
+    <tr>
+      <td><strong>Column Sorting</strong></td>
+      <td>Sort by specific columns</td>
+      <td>• Range query optimization<br />• Improved compression</td>
+      <td>• Time-ordered data<br />• ID-ordered data</td>
+    </tr>
+    <tr>
+      <td><strong>Composite Sorting</strong></td>
+      <td>Multi-column sorting</td>
+      <td>• Complex query optimization<br />• Advanced pruning</td>
+      <td>• Multi-dimensional queries<br />• Analytics tables</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-transactions-and-acid-guarantees">⚡ Transactions and ACID Guarantees</h2>
+
+<h3 id="acid-transaction-concepts">ACID Transaction Concepts</h3>
+
+<p>Iceberg guarantees ACID (Atomicity, Consistency, Isolation, Durability) properties to provide data consistency and reliability.</p>
+
+<h3 id="transaction-properties">Transaction Properties</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Property</th>
+      <th>Description</th>
+      <th>Iceberg Implementation</th>
+      <th>Benefits</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Atomicity</strong></td>
+      <td>Transaction succeeds all or fails all</td>
+      <td>• Snapshot-based commits<br />• Atomic metadata updates</td>
+      <td>• Prevent partial failures<br />• Ensure data consistency</td>
+    </tr>
+    <tr>
+      <td><strong>Consistency</strong></td>
+      <td>Database in valid state after transaction</td>
+      <td>• Schema validation<br />• Constraint checking</td>
+      <td>• Prevent invalid data<br />• Business rule compliance</td>
+    </tr>
+    <tr>
+      <td><strong>Isolation</strong></td>
+      <td>Prevent interference between concurrent transactions</td>
+      <td>• Optimistic concurrency control<br />• Snapshot isolation</td>
+      <td>• Improve concurrency<br />• Prevent deadlocks</td>
+    </tr>
+    <tr>
+      <td><strong>Durability</strong></td>
+      <td>Committed transactions are permanently preserved</td>
+      <td>• Persistent metadata storage<br />• Replica management</td>
+      <td>• Prevent data loss<br />• Disaster recovery support</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="transaction-implementation">Transaction Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">IcebergTransactionManager</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">active_transactions</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">snapshot_manager</span> <span class="o">=</span> <span class="nc">SnapshotManager</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">demonstrate_transaction_lifecycle</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Demonstrate transaction lifecycle</span><span class="sh">"""</span>
+        
+        <span class="n">transaction_lifecycle</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">begin_transaction</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">step</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Begin transaction</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">process</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Generate new snapshot ID</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Set current snapshot as parent</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Create transaction context</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">metadata</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">transaction_id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">txn-12345</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">parent_snapshot_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">start_time</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2023-01-01T10:00:00Z</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ACTIVE</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">modify_data</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">step</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Modify data</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">process</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Create new data files</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Mark files for deletion</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Update manifests</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">operations</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">INSERT: 1000 rows → new_file1.parquet</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">UPDATE: 500 rows → new_file2.parquet</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">DELETE: 200 rows → delete_file1.parquet</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">metadata</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">added_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">deleted_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">modified_rows</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1500</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">validate_changes</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">step</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Validate changes</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">process</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Schema consistency check</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Partition rule validation</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Constraint verification</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">validation_checks</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Schema compatibility: ✅ PASS</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Partition spec: ✅ PASS</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Data quality: ✅ PASS</span><span class="sh">"</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">commit_transaction</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">step</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Commit transaction</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">process</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Update metadata file</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Create new snapshot</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Update manifest list</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">metadata</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">snapshot_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">101</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">commit_time</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2023-01-01T10:05:00Z</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">operation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">summary</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">added-records</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">deleted-records</span><span class="sh">"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">total-records</span><span class="sh">"</span><span class="p">:</span> <span class="mi">9800</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">rollback_transaction</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">step</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">rollback</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Rollback transaction</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">process</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Delete temporary files</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Clean up transaction context</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Maintain parent snapshot</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">result</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">All changes cancelled, original state restored</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">transaction_lifecycle</span>
+    
+    <span class="k">def</span> <span class="nf">demonstrate_concurrent_transactions</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Demonstrate concurrent transaction processing</span><span class="sh">"""</span>
+        
+        <span class="n">concurrent_scenario</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">initial_state</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">snapshot_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">table_state</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">stable</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">pending_transactions</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">transaction_a</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">transaction_id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">txn-A</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">start_time</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10:00:00</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">operation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">INSERT 1000 rows</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">parent_snapshot</span><span class="sh">"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">IN_PROGRESS</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">transaction_b</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">transaction_id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">txn-B</span><span class="sh">"</span><span class="p">,</span> 
+                <span class="sh">"</span><span class="s">start_time</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10:01:00</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">operation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">UPDATE 500 rows</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">parent_snapshot</span><span class="sh">"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">IN_PROGRESS</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">commit_sequence</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">txn_a_commit</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">time</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10:02:00</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Transaction A commits</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">new_snapshot</span><span class="sh">"</span><span class="p">:</span> <span class="mi">101</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">result</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Success - 1000 rows added</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">txn_b_commit</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">time</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10:03:00</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Transaction B attempts commit</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">conflict_check</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Parent snapshot changed (100 → 101)</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">resolution</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Rebase and retry</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">new_snapshot</span><span class="sh">"</span><span class="p">:</span> <span class="mi">102</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">result</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Success - 500 rows updated</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">final_state</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">snapshot_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">102</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">table_state</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">stable</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">total_rows</span><span class="sh">"</span><span class="p">:</span> <span class="mi">10500</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">committed_transactions</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">concurrent_scenario</span>
+</code></pre></div></div>
+
+<h3 id="concurrency-control-mechanisms">Concurrency Control Mechanisms</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Mechanism</th>
+      <th>Description</th>
+      <th>Advantages</th>
+      <th>Disadvantages</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Optimistic Concurrency Control</strong></td>
+      <td>Assume low conflict and proceed</td>
+      <td>• High concurrency<br />• No deadlocks</td>
+      <td>• Retry needed on conflicts<br />• Complex conflict resolution</td>
+    </tr>
+    <tr>
+      <td><strong>Snapshot Isolation</strong></td>
+      <td>Provide consistent view from transaction start</td>
+      <td>• Improved read performance<br />• Consistent reads</td>
+      <td>• Increased memory usage<br />• Complex snapshot management</td>
+    </tr>
+    <tr>
+      <td><strong>Conflict Detection</strong></td>
+      <td>Check and resolve conflicts at commit</td>
+      <td>• Data consistency guarantee<br />• Automatic conflict resolution</td>
+      <td>• Retry overhead<br />• Performance impact</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-practical-project-building-iceberg-data-lake">🚀 Practical Project: Building Iceberg Data Lake</h2>
+
+<h3 id="project-overview">Project Overview</h3>
+
+<p>Build an Iceberg-based data lakehouse for a large-scale e-commerce platform.</p>
+
+<h3 id="system-architecture">System Architecture</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Technology Stack</th>
+      <th>Capacity</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Storage</strong></td>
+      <td>S3, HDFS</td>
+      <td>• 100TB+ data<br />• 1B+ records</td>
+      <td>• Permanent data storage<br />• Version management</td>
+    </tr>
+    <tr>
+      <td><strong>Metadata</strong></td>
+      <td>Hive Metastore, AWS Glue</td>
+      <td>• 1000+ tables<br />• 100+ databases</td>
+      <td>• Schema management<br />• Table metadata</td>
+    </tr>
+    <tr>
+      <td><strong>Query Engine</strong></td>
+      <td>Spark, Presto/Trino</td>
+      <td>• 100+ concurrent queries<br />• 1TB+/sec processing</td>
+      <td>• SQL query execution<br />• Analytics jobs</td>
+    </tr>
+    <tr>
+      <td><strong>Data Ingestion</strong></td>
+      <td>Kafka, Flink</td>
+      <td>• 1M+ events/sec<br />• Real-time streams</td>
+      <td>• Data collection<br />• Real-time processing</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="project-implementation">Project Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">IcebergDataLakeProject</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">project_config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">table_manager</span> <span class="o">=</span> <span class="nc">IcebergTableManager</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">schema_manager</span> <span class="o">=</span> <span class="nc">SchemaManager</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">design_data_lake_architecture</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Design data lake architecture</span><span class="sh">"""</span>
+        
+        <span class="n">architecture</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">data_domains</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">user_analytics</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">user_profiles</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">user_behavior_events</span><span class="sh">"</span><span class="p">,</span> 
+                        <span class="sh">"</span><span class="s">user_segments</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">partition_strategy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">date + user_bucket</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">retention_policy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">7_years</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">access_patterns</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">Time range-based analysis</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">User behavior analysis</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">Segment-based aggregation</span><span class="sh">"</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">order_analytics</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">orders</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">order_items</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">order_events</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">partition_strategy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">date + region</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">retention_policy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10_years</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">access_patterns</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">Daily sales analysis</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">Regional order analysis</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">Product performance analysis</span><span class="sh">"</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">product_catalog</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">products</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">categories</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">inventory</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">partition_strategy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">retention_policy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">permanent</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">access_patterns</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">Product search</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">Category-based analysis</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">Inventory management</span><span class="sh">"</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">table_specifications</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">user_profiles</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">schema</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">BIGINT</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">username</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">STRING</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">email</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">STRING</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">TIMESTAMP</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">updated_at</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">TIMESTAMP</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">profile_data</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">STRUCT</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">partitioning</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span><span class="sh">"</span><span class="s">field</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">day</span><span class="sh">"</span><span class="p">},</span>
+                        <span class="p">{</span><span class="sh">"</span><span class="s">field</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">bucket[16]</span><span class="sh">"</span><span class="p">}</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">sorting</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">properties</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">write.format.default</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">parquet</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">write.parquet.compression-codec</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">snappy</span><span class="sh">"</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">user_behavior_events</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">schema</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">event_id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">STRING</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">BIGINT</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">event_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">STRING</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">event_data</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">STRUCT</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">TIMESTAMP</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">session_id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">STRING</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">partitioning</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span><span class="sh">"</span><span class="s">field</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">hour</span><span class="sh">"</span><span class="p">},</span>
+                        <span class="p">{</span><span class="sh">"</span><span class="s">field</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">event_type</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">identity</span><span class="sh">"</span><span class="p">}</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">sorting</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">properties</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">write.format.default</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">parquet</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">write.parquet.compression-codec</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">gzip</span><span class="sh">"</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">architecture</span>
+    
+    <span class="k">def</span> <span class="nf">implement_data_pipeline</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Implement data pipeline</span><span class="sh">"""</span>
+        
+        <span class="n">pipeline</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">real_time_ingestion</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">source</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Kafka topics</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">processing</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Apache Flink</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">destination</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Iceberg tables</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">flow</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Kafka → Flink → Iceberg (user_events)</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Kafka → Flink → Iceberg (order_events)</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Kafka → Flink → Iceberg (product_events)</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">latency_target</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">&lt; 5 minutes</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">batch_processing</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">source</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">External systems</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">processing</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Apache Spark</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">destination</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Iceberg tables</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">jobs</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Daily user profile updates</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Weekly order aggregations</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Monthly product analytics</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">schedule</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Daily at 2 AM</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">data_quality</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">validation_rules</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Schema validation</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Data completeness checks</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Referential integrity</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Business rule validation</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">monitoring</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Data freshness metrics</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Quality score tracking</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Anomaly detection</span><span class="sh">"</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">pipeline</span>
+    
+    <span class="k">def</span> <span class="nf">setup_operational_procedures</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup operational procedures</span><span class="sh">"""</span>
+        
+        <span class="n">procedures</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">schema_evolution</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">process</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">1. Review schema change request</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">2. Validate compatibility</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">3. Test in staging environment</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">4. Apply to production</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">5. Monitor and validate</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">approval_required</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Data architect approval</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">rollback_plan</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Restore to previous schema</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">data_retention</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">policies</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">user_events</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">7 years retention then delete</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">order_data</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10 years retention then archive</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">product_catalog</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Permanent retention</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">automation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Scheduled cleanup jobs</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">compliance</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">GDPR, CCPA compliance</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">performance_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">compaction</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">frequency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Weekly</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">criteria</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">File count &gt; 100 or size &gt; 1GB</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">strategy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Automatic compaction</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">partition_pruning</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">monitoring</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Query execution plan analysis</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">optimization</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Partition strategy adjustment</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">procedures</span>
+</code></pre></div></div>
+
+<h2 id="-learning-summary">📚 Learning Summary</h2>
+
+<h3 id="what-we-learned-in-this-part">What We Learned in This Part</h3>
+
+<ol>
+  <li><strong>Apache Iceberg Introduction</strong>
+    <ul>
+      <li>Iceberg’s core concepts and values</li>
+      <li>Evolution of data lakes</li>
+      <li>Comparison with existing table formats</li>
+    </ul>
+  </li>
+  <li><strong>Iceberg Architecture and Core Concepts</strong>
+    <ul>
+      <li>Hierarchical metadata structure</li>
+      <li>Core components and roles</li>
+      <li>Metadata evolution process</li>
+    </ul>
+  </li>
+  <li><strong>Table Format and Metadata Structure</strong>
+    <ul>
+      <li>4-level metadata hierarchy</li>
+      <li>File lifecycle management</li>
+      <li>Metadata optimization strategies</li>
+    </ul>
+  </li>
+  <li><strong>Schema Evolution and Compatibility</strong>
+    <ul>
+      <li>Schema evolution rules and constraints</li>
+      <li>Compatibility validation methods</li>
+      <li>Evolution process demonstration</li>
+    </ul>
+  </li>
+  <li><strong>Partitioning and Sorting Strategies</strong>
+    <ul>
+      <li>Various partitioning strategies</li>
+      <li>Partition evolution features</li>
+      <li>Sorting strategies and optimization</li>
+    </ul>
+  </li>
+  <li><strong>Transactions and ACID Guarantees</strong>
+    <ul>
+      <li>ACID property implementation</li>
+      <li>Transaction lifecycle</li>
+      <li>Concurrency control mechanisms</li>
+    </ul>
+  </li>
+  <li><strong>Practical Project</strong>
+    <ul>
+      <li>Large-scale e-commerce data lake design</li>
+      <li>Data pipeline implementation</li>
+      <li>Operational procedure setup</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="core-technology-stack">Core Technology Stack</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Technology</th>
+      <th>Role</th>
+      <th>Importance</th>
+      <th>Learning Points</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Apache Iceberg</strong></td>
+      <td>Table Format</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>Metadata structure, ACID guarantees</td>
+    </tr>
+    <tr>
+      <td><strong>Partitioning</strong></td>
+      <td>Data Division</td>
+      <td>⭐⭐⭐⭐</td>
+      <td>Performance optimization, management efficiency</td>
+    </tr>
+    <tr>
+      <td><strong>Schema Evolution</strong></td>
+      <td>Flexible Data Model</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>Compatibility, version management</td>
+    </tr>
+    <tr>
+      <td><strong>Transactions</strong></td>
+      <td>Data Consistency</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>ACID properties, concurrency control</td>
+    </tr>
+    <tr>
+      <td><strong>Metadata</strong></td>
+      <td>Table Management</td>
+      <td>⭐⭐⭐⭐</td>
+      <td>Hierarchical structure, optimization</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="next-part-preview">Next Part Preview</h3>
+
+<p><strong>Part 2: Apache Iceberg Advanced Features and Performance Optimization</strong> will cover:</p>
+<ul>
+  <li>Advanced partitioning strategies (Evolution, Hidden Partitioning)</li>
+  <li>Compaction and cleanup operations</li>
+  <li>Query performance optimization</li>
+  <li>Metadata management and version control</li>
+</ul>
+
+<hr />
+
+<p><strong>Series Progress</strong>: <a href="/data-engineering/2025/09/21/apache-iceberg-fundamentals.html">Apache Iceberg Complete Guide Series</a></p>
+
+<hr />
+
+<p><em>Master Apache Iceberg, the core of modern data lakehouse!</em> 🧊</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+      
+      
+      
+      
+        
+        
+        <a href="/data-engineering/2025/09/21/apache-iceberg-fundamentals.html" class="nav-link next">
+          다음: Part 1: Apache Iceberg 기초와 테이블 포맷 - 현대적 데이터 레이크하우스의 시작 →
+        </a>
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
