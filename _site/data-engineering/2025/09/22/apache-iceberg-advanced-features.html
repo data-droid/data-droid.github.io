@@ -1,0 +1,2383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Apache Iceberg의 고급 파티셔닝 전략, 컴팩션과 정리 작업, 쿼리 성능 최적화, 메타데이터 관리와 버전 관리까지 프로덕션 환경에서 필요한 모든 고급 기능을 학습합니다.">
+
+
+
+<title>Part 2: Apache Iceberg 고급 기능과 성능 최적화 - 프로덕션급 데이터 플랫폼 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 2: Apache Iceberg 고급 기능과 성능 최적화 - 프로덕션급 데이터 플랫폼">
+<meta property="og:description" content="Apache Iceberg의 고급 파티셔닝 전략, 컴팩션과 정리 작업, 쿼리 성능 최적화, 메타데이터 관리와 버전 관리까지 프로덕션 환경에서 필요한 모든 고급 기능을 학습합니다.">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2025/09/22/apache-iceberg-advanced-features.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 2: Apache Iceberg 고급 기능과 성능 최적화 - 프로덕션급 데이터 플랫폼">
+<meta name="twitter:description" content="Apache Iceberg의 고급 파티셔닝 전략, 컴팩션과 정리 작업, 쿼리 성능 최적화, 메타데이터 관리와 버전 관리까지 프로덕션 환경에서 필요한 모든 고급 기능을 학습합니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2025/09/22/apache-iceberg-advanced-features.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2025-09-22-apache-iceberg-advanced-features.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 22일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 2: Apache Iceberg 고급 기능과 성능 최적화 - 프로덕션급 데이터 플랫폼</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Iceberg</span>
+      
+        <span class="tag">고급파티셔닝</span>
+      
+        <span class="tag">컴팩션</span>
+      
+        <span class="tag">성능최적화</span>
+      
+        <span class="tag">메타데이터관리</span>
+      
+        <span class="tag">쿼리최적화</span>
+      
+        <span class="tag">프로덕션</span>
+      
+        <span class="tag">빅데이터</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Apache iceberg complete guide 시리즈</span>
+      <span class="series-order">Part 3</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 50분</span>
+      
+      
+        <span class="difficulty">📊 고급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-2-apache-iceberg-고급-기능과-성능-최적화---프로덕션급-데이터-플랫폼">Part 2: Apache Iceberg 고급 기능과 성능 최적화 - 프로덕션급 데이터 플랫폼</h1>
+
+<blockquote>
+  <p>Apache Iceberg의 고급 파티셔닝 전략, 컴팩션과 정리 작업, 쿼리 성능 최적화, 메타데이터 관리와 버전 관리까지 프로덕션 환경에서 필요한 모든 고급 기능을 학습합니다.</p>
+</blockquote>
+
+<h2 id="-목차">📋 목차</h2>
+
+<ol>
+  <li><a href="#고급-파티셔닝-전략">고급 파티셔닝 전략</a></li>
+  <li><a href="#컴팩션과-정리-작업">컴팩션과 정리 작업</a></li>
+  <li><a href="#쿼리-성능-최적화">쿼리 성능 최적화</a></li>
+  <li><a href="#메타데이터-관리와-버전-관리">메타데이터 관리와 버전 관리</a></li>
+  <li><a href="#모니터링과-운영-최적화">모니터링과 운영 최적화</a></li>
+  <li><a href="#실무-프로젝트-대규모-iceberg-클러스터-운영">실무 프로젝트: 대규모 Iceberg 클러스터 운영</a></li>
+  <li><a href="#학습-요약">학습 요약</a></li>
+</ol>
+
+<h2 id="-고급-파티셔닝-전략">🎯 고급 파티셔닝 전략</h2>
+
+<h3 id="파티션-진화-partition-evolution">파티션 진화 (Partition Evolution)</h3>
+
+<p>Iceberg의 가장 강력한 기능 중 하나는 파티션 스펙의 진화입니다. 기존 데이터를 재구성하지 않고도 파티션 전략을 변경할 수 있습니다.</p>
+
+<h3 id="파티션-진화-전략">파티션 진화 전략</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>진화 유형</th>
+      <th>설명</th>
+      <th>구현 방법</th>
+      <th>장점</th>
+      <th>주의사항</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>파티션 필드 추가</strong></td>
+      <td>기존 파티션에 새 필드 추가</td>
+      <td>• 새 파티션 스펙 생성<br />• 기존 데이터 유지</td>
+      <td>• 점진적 세분화<br />• 하위 호환성</td>
+      <td>• 파티션 수 증가</td>
+    </tr>
+    <tr>
+      <td><strong>파티션 필드 제거</strong></td>
+      <td>불필요한 파티션 필드 제거</td>
+      <td>• 단순화된 스펙 적용<br />• 데이터 통합</td>
+      <td>• 관리 단순화<br />• 성능 향상</td>
+      <td>• 기존 쿼리 영향</td>
+    </tr>
+    <tr>
+      <td><strong>파티션 변환 변경</strong></td>
+      <td>변환 함수 변경 (예: day → hour)</td>
+      <td>• 새 변환 적용<br />• 데이터 재구성</td>
+      <td>• 세밀한 제어<br />• 성능 최적화</td>
+      <td>• 데이터 이동 필요</td>
+    </tr>
+    <tr>
+      <td><strong>숨겨진 파티셔닝</strong></td>
+      <td>사용자가 파티션을 인식하지 못하게 함</td>
+      <td>• 자동 파티션 관리<br />• 투명한 최적화</td>
+      <td>• 사용자 편의성<br />• 자동 최적화</td>
+      <td>• 제어권 제한</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="고급-파티셔닝-구현">고급 파티셔닝 구현</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">AdvancedPartitioningManager</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">partition_specs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">evolution_history</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">def</span> <span class="nf">design_advanced_partitioning</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">고급 파티셔닝 전략 설계</span><span class="sh">"""</span>
+        
+        <span class="n">strategies</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">hidden_partitioning</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">concept</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">사용자가 파티션을 인식하지 못하게 하는 파티셔닝</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">implementation</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">partition_spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">spec_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="p">{</span>
+                                <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># created_at 컬럼
+</span>                                <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">created_date</span><span class="sh">"</span><span class="p">,</span>  <span class="c1"># 숨겨진 파티션 이름
+</span>                                <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">day</span><span class="sh">"</span>
+                            <span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">사용자 쿼리 단순화</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">자동 파티션 최적화</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">파티션 관리 투명성</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">use_cases</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">대시보드 쿼리</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">애드혹 분석</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">자동화된 리포트</span><span class="sh">"</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">multi_level_partitioning</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">concept</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">계층적 다단계 파티셔닝</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">implementation</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">partition_spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">spec_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="p">{</span>
+                                <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># region 컬럼
+</span>                                <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">region</span><span class="sh">"</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">identity</span><span class="sh">"</span>
+                            <span class="p">},</span>
+                            <span class="p">{</span>
+                                <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># created_at 컬럼
+</span>                                <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1001</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">created_year</span><span class="sh">"</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">year</span><span class="sh">"</span>
+                            <span class="p">},</span>
+                            <span class="p">{</span>
+                                <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1002</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">created_month</span><span class="sh">"</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">month</span><span class="sh">"</span>
+                            <span class="p">},</span>
+                            <span class="p">{</span>
+                                <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># user_id 컬럼
+</span>                                <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1003</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user_bucket</span><span class="sh">"</span><span class="p">,</span>
+                                <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">bucket[32]</span><span class="sh">"</span>
+                            <span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">다차원 쿼리 최적화</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">데이터 지역성 보장</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">병렬 처리 향상</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">partition_layout</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/data/region=US/year=2023/month=01/user_bucket=5/file.parquet</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">dynamic_partitioning</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">concept</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">데이터 패턴에 따른 동적 파티셔닝</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">implementation</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">partition_strategies</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">high_frequency_data</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">partition_spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span><span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">hour</span><span class="sh">"</span><span class="p">},</span>
+                                    <span class="p">{</span><span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">bucket[64]</span><span class="sh">"</span><span class="p">}</span>
+                                <span class="p">]</span>
+                            <span class="p">},</span>
+                            <span class="sh">"</span><span class="s">trigger</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">data_volume &gt; 1M_rows/hour</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="sh">"</span><span class="s">low_frequency_data</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">partition_spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span><span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">day</span><span class="sh">"</span><span class="p">},</span>
+                                    <span class="p">{</span><span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">identity</span><span class="sh">"</span><span class="p">}</span>
+                                <span class="p">]</span>
+                            <span class="p">},</span>
+                            <span class="sh">"</span><span class="s">trigger</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">data_volume &lt; 100K_rows/day</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">데이터 패턴 자동 적응</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">최적의 파티션 크기 유지</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">동적 성능 조정</span><span class="sh">"</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">strategies</span>
+    
+    <span class="k">def</span> <span class="nf">demonstrate_partition_evolution</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">파티션 진화 과정 시연</span><span class="sh">"""</span>
+        
+        <span class="n">evolution_scenario</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">initial_state</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">partition_spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">spec_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">year</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">year</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">data_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">partition_count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">avg_file_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">500MB</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">add_month_partition</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">partition_spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">spec_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">year</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">year</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1001</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">month</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">month</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">evolution_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">add_partition_field</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">impact</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">data_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>  <span class="c1"># 기존 파일 유지
+</span>                    <span class="sh">"</span><span class="s">partition_count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">36</span><span class="p">,</span>  <span class="c1"># 3년 * 12개월
+</span>                    <span class="sh">"</span><span class="s">avg_file_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">500MB</span><span class="sh">"</span>  <span class="c1"># 변경 없음
+</span>                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">월별 세밀한 쿼리 최적화</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">add_user_bucket</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">partition_spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">spec_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">year</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">year</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1001</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">month</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">month</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1002</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user_bucket</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">bucket[16]</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">evolution_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">add_partition_field</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">impact</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">data_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">partition_count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">576</span><span class="p">,</span>  <span class="c1"># 36 * 16
+</span>                    <span class="sh">"</span><span class="s">avg_file_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">500MB</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">사용자별 데이터 분산</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">병렬 처리 향상</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">change_to_day_partition</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">partition_spec</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">spec_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">day</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">source_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">field_id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1001</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user_bucket</span><span class="sh">"</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">transform</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">bucket[32]</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">evolution_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">replace_partition_fields</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">impact</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">data_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">partition_count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2880</span><span class="p">,</span>  <span class="c1"># 3년 * 365일 * 32
+</span>                    <span class="sh">"</span><span class="s">avg_file_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">500MB</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">일별 세밀한 쿼리 최적화</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">사용자별 균등 분산</span><span class="sh">"</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">evolution_scenario</span>
+</code></pre></div></div>
+
+<h3 id="파티션-최적화-전략">파티션 최적화 전략</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>최적화 영역</th>
+      <th>전략</th>
+      <th>구현 방법</th>
+      <th>효과</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>파티션 크기</strong></td>
+      <td>• 균등한 파티션 크기 유지<br />• 자동 파티션 분할</td>
+      <td>• 파일 수 기반 분할<br />• 크기 기반 분할</td>
+      <td>• 쿼리 성능 향상<br />• 리소스 효율성</td>
+    </tr>
+    <tr>
+      <td><strong>파티션 수</strong></td>
+      <td>• 적절한 파티션 수 유지<br />• 과도한 분할 방지</td>
+      <td>• 파티션 수 모니터링<br />• 자동 통합</td>
+      <td>• 메타데이터 효율성<br />• 관리 복잡성 감소</td>
+    </tr>
+    <tr>
+      <td><strong>파티션 프루닝</strong></td>
+      <td>• 쿼리 패턴 분석<br />• 최적 파티션 선택</td>
+      <td>• 통계 기반 최적화<br />• 히스토그램 활용</td>
+      <td>• I/O 감소<br />• 쿼리 속도 향상</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-컴팩션과-정리-작업">🔧 컴팩션과 정리 작업</h2>
+
+<h3 id="컴팩션-개념">컴팩션 개념</h3>
+
+<p>컴팩션은 작은 파일들을 큰 파일로 합쳐서 쿼리 성능을 향상시키고 메타데이터 오버헤드를 줄이는 작업입니다.</p>
+
+<h3 id="컴팩션-전략">컴팩션 전략</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>컴팩션 유형</th>
+      <th>설명</th>
+      <th>트리거 조건</th>
+      <th>장점</th>
+      <th>단점</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Bin Packing</strong></td>
+      <td>작은 파일들을 하나의 큰 파일로 통합</td>
+      <td>• 파일 크기 &lt; 임계값<br />• 파일 수 &gt; 임계값</td>
+      <td>• I/O 효율성<br />• 메타데이터 감소</td>
+      <td>• 컴팩션 오버헤드</td>
+    </tr>
+    <tr>
+      <td><strong>Sort Compaction</strong></td>
+      <td>데이터를 특정 순서로 정렬하여 통합</td>
+      <td>• 정렬 기준 설정<br />• 주기적 실행</td>
+      <td>• 쿼리 성능 향상<br />• 압축률 개선</td>
+      <td>• 높은 CPU 사용량</td>
+    </tr>
+    <tr>
+      <td><strong>Rewrite Compaction</strong></td>
+      <td>기존 파일을 완전히 재작성</td>
+      <td>• 스키마 변경<br />• 데이터 품질 개선</td>
+      <td>• 최적화된 구조<br />• 일관성 보장</td>
+      <td>• 높은 리소스 사용</td>
+    </tr>
+    <tr>
+      <td><strong>Partial Compaction</strong></td>
+      <td>일부 파일만 선택적 컴팩션</td>
+      <td>• 조건부 실행<br />• 점진적 최적화</td>
+      <td>• 낮은 오버헤드<br />• 유연한 제어</td>
+      <td>• 부분적 효과</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="컴팩션-구현">컴팩션 구현</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">IcebergCompactionManager</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">compaction_strategies</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">metrics_collector</span> <span class="o">=</span> <span class="nc">CompactionMetricsCollector</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">setup_compaction_strategies</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">컴팩션 전략 설정</span><span class="sh">"""</span>
+        
+        <span class="n">strategies</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">bin_packing_compaction</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">strategy_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">BIN_PACKING</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">configuration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">target_file_size_bytes</span><span class="sh">"</span><span class="p">:</span> <span class="mi">134217728</span><span class="p">,</span>  <span class="c1"># 128MB
+</span>                    <span class="sh">"</span><span class="s">min_input_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">max_input_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">min_file_size_bytes</span><span class="sh">"</span><span class="p">:</span> <span class="mi">33554432</span><span class="p">,</span>  <span class="c1"># 32MB
+</span>                    <span class="sh">"</span><span class="s">max_file_size_bytes</span><span class="sh">"</span><span class="p">:</span> <span class="mi">268435456</span>  <span class="c1"># 256MB
+</span>                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">trigger_conditions</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">file_count &gt; 20</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">avg_file_size &lt; 64MB</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">total_size &gt; 1GB</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">execution</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">frequency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">daily</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">time_window</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">02:00-04:00</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">parallelism</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">sort_compaction</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">strategy_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">SORT_COMPACTION</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">configuration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">sort_columns</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">created_at</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">target_file_size_bytes</span><span class="sh">"</span><span class="p">:</span> <span class="mi">268435456</span><span class="p">,</span>  <span class="c1"># 256MB
+</span>                    <span class="sh">"</span><span class="s">sort_buffer_size</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1073741824</span>  <span class="c1"># 1GB
+</span>                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">trigger_conditions</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">query_performance_degraded</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">compression_ratio &lt; 0.3</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">weekly_schedule</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">execution</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">frequency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">weekly</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">time_window</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Sunday 01:00-06:00</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">parallelism</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">rewrite_compaction</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">strategy_type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">REWRITE_COMPACTION</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">configuration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">rewrite_all_files</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">target_file_size_bytes</span><span class="sh">"</span><span class="p">:</span> <span class="mi">536870912</span><span class="p">,</span>  <span class="c1"># 512MB
+</span>                    <span class="sh">"</span><span class="s">compression_codec</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">zstd</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">compression_level</span><span class="sh">"</span><span class="p">:</span> <span class="mi">6</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">trigger_conditions</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">schema_evolution_completed</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">major_version_upgrade</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">data_quality_issues</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">execution</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">frequency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">on_demand</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">approval_required</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">parallelism</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">strategies</span>
+    
+    <span class="k">def</span> <span class="nf">demonstrate_compaction_process</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">컴팩션 과정 시연</span><span class="sh">"""</span>
+        
+        <span class="n">compaction_process</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">before_compaction</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">file_count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">total_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">15GB</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">avg_file_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">100MB</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">small_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">80</span><span class="p">,</span>  <span class="c1"># &lt; 64MB
+</span>                <span class="sh">"</span><span class="s">large_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>   <span class="c1"># &gt; 256MB
+</span>                <span class="sh">"</span><span class="s">medium_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">65</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">metadata_overhead</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">High</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">compaction_planning</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">analysis</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">candidate_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">80</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">estimated_output_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">estimated_size_reduction</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30%</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">estimated_time</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2 hours</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">strategy_selection</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">bin_packing_compaction</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">resource_allocation</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">cpu_cores</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">memory_gb</span><span class="sh">"</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">disk_io_bandwidth</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">500MB/s</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">compaction_execution</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">phase_1</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">File grouping and sorting</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">duration</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30 minutes</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">files_processed</span><span class="sh">"</span><span class="p">:</span> <span class="mi">80</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">phase_2</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Data reading and merging</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">duration</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">60 minutes</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">data_processed</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8GB</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">phase_3</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Compressed file writing</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">duration</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30 minutes</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">output_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">25</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">phase_4</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Metadata update and cleanup</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">duration</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10 minutes</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">old_files_removed</span><span class="sh">"</span><span class="p">:</span> <span class="mi">80</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">after_compaction</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">file_count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">95</span><span class="p">,</span>  <span class="c1"># 70 + 25
+</span>                <span class="sh">"</span><span class="s">total_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">12GB</span><span class="sh">"</span><span class="p">,</span>  <span class="c1"># 15GB - 3GB (압축 효과)
+</span>                <span class="sh">"</span><span class="s">avg_file_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">126MB</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">small_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>  <span class="c1"># 대폭 감소
+</span>                <span class="sh">"</span><span class="s">large_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">medium_files</span><span class="sh">"</span><span class="p">:</span> <span class="mi">80</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">metadata_overhead</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Low</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">improvements</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">query_performance</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">+40%</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">metadata_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">-60%</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">storage_efficiency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">+20%</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">compaction_process</span>
+    
+    <span class="k">def</span> <span class="nf">optimize_compaction_performance</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">컴팩션 성능 최적화</span><span class="sh">"""</span>
+        
+        <span class="n">optimization_strategies</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">resource_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">memory_management</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">sort_buffer_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1GB</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">read_buffer_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">256MB</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">write_buffer_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">512MB</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">cpu_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">parallel_workers</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">thread_pool_size</span><span class="sh">"</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">cpu_affinity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">enabled</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">io_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">sequential_reads</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">compression_level</span><span class="sh">"</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">prefetch_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">64MB</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">scheduling_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">off_peak_scheduling</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">time_window</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">02:00-06:00</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">day_of_week</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Sunday</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">avoid_conflicts</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">incremental_compaction</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">strategy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">small_files_first</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">batch_size</span><span class="sh">"</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">frequency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">daily</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">adaptive_scheduling</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">query_load_monitoring</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">dynamic_rescheduling</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">priority_based</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">monitoring_and_alerting</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">performance_metrics</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">compaction_duration</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">file_size_improvement</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">query_performance_impact</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">resource_utilization</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">alerting_rules</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">compaction_failure</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">performance_degradation</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">resource_exhaustion</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">data_corruption</span><span class="sh">"</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">optimization_strategies</span>
+</code></pre></div></div>
+
+<h3 id="정리-작업-maintenance-operations">정리 작업 (Maintenance Operations)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>작업 유형</th>
+      <th>목적</th>
+      <th>실행 주기</th>
+      <th>영향</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>오래된 스냅샷 정리</strong></td>
+      <td>스토리지 공간 확보</td>
+      <td>주간</td>
+      <td>• 스토리지 절약<br />• 메타데이터 정리</td>
+    </tr>
+    <tr>
+      <td><strong>삭제된 파일 정리</strong></td>
+      <td>물리적 파일 제거</td>
+      <td>일간</td>
+      <td>• 스토리지 최적화<br />• 정리 작업</td>
+    </tr>
+    <tr>
+      <td><strong>메타데이터 정리</strong></td>
+      <td>메타데이터 최적화</td>
+      <td>월간</td>
+      <td>• 메타데이터 크기 감소<br />• 성능 향상</td>
+    </tr>
+    <tr>
+      <td><strong>통계 정보 갱신</strong></td>
+      <td>쿼리 최적화</td>
+      <td>실시간</td>
+      <td>• 쿼리 성능 향상<br />• 정확한 통계</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-쿼리-성능-최적화">⚡ 쿼리 성능 최적화</h2>
+
+<h3 id="쿼리-최적화-전략">쿼리 최적화 전략</h3>
+
+<p>Iceberg의 쿼리 성능 최적화는 메타데이터 활용, 파티션 프루닝, 컬럼 프루닝 등을 통해 달성됩니다.</p>
+
+<h3 id="최적화-기법">최적화 기법</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>최적화 기법</th>
+      <th>설명</th>
+      <th>구현 방법</th>
+      <th>성능 향상</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>파티션 프루닝</strong></td>
+      <td>불필요한 파티션 제외</td>
+      <td>• 파티션 범위 분석<br />• 통계 기반 선택</td>
+      <td>10-100x 향상</td>
+    </tr>
+    <tr>
+      <td><strong>컬럼 프루닝</strong></td>
+      <td>필요한 컬럼만 읽기</td>
+      <td>• 컬럼 통계 활용<br />• 쿼리 계획 최적화</td>
+      <td>2-5x 향상</td>
+    </tr>
+    <tr>
+      <td><strong>파일 프루닝</strong></td>
+      <td>관련 파일만 스캔</td>
+      <td>• 파일 레벨 통계<br />• 범위 기반 필터링</td>
+      <td>5-20x 향상</td>
+    </tr>
+    <tr>
+      <td><strong>푸시다운 필터링</strong></td>
+      <td>스토리지 레벨 필터링</td>
+      <td>• Parquet 필터 활용<br />• 인덱스 기반 스킵</td>
+      <td>3-10x 향상</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="쿼리-최적화-구현">쿼리 최적화 구현</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">QueryOptimizationEngine</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">optimization_rules</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">statistics_manager</span> <span class="o">=</span> <span class="nc">StatisticsManager</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">analyze_query_performance</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">쿼리 성능 분석</span><span class="sh">"""</span>
+        
+        <span class="n">performance_analysis</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">query_types</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">point_queries</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">특정 조건의 단일 레코드 조회</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">optimization_techniques</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">파티션 프루닝</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">파일 프루닝</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">컬럼 프루닝</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">expected_improvement</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">100-1000x</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">range_queries</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">범위 조건의 다중 레코드 조회</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">optimization_techniques</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">파티션 프루닝</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">푸시다운 필터링</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">정렬 최적화</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">expected_improvement</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10-100x</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">aggregation_queries</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">집계 함수를 포함한 쿼리</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">optimization_techniques</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">컬럼 프루닝</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">중간 결과 캐싱</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">병렬 처리</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">expected_improvement</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">5-20x</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">join_queries</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">여러 테이블 조인</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">optimization_techniques</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">브로드캐스트 조인</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">버킷 조인</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">파티션 정렬</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">expected_improvement</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">3-10x</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">optimization_strategies</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">metadata_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">manifest_caching</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">cache_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1GB</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">ttl</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1 hour</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">hit_ratio_target</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">&gt; 90%</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">statistics_utilization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">column_statistics</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">partition_statistics</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">file_statistics</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">storage_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">file_format_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">compression_codec</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">zstd</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">compression_level</span><span class="sh">"</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">block_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">128MB</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">column_encoding</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">string_encoding</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">dictionary</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">numeric_encoding</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">boolean_encoding</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">rle</span><span class="sh">"</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">execution_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">parallel_processing</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">max_parallelism</span><span class="sh">"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">task_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">128MB</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">speculative_execution</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">memory_management</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">executor_memory</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4GB</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">cache_memory</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2GB</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">off_heap_memory</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">performance_analysis</span>
+    
+    <span class="k">def</span> <span class="nf">demonstrate_query_optimization</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">쿼리 최적화 시연</span><span class="sh">"""</span>
+        
+        <span class="n">optimization_examples</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">example_1</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">original_query</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"""</span><span class="s">
+                SELECT user_id, amount, created_at 
+                FROM transactions 
+                WHERE created_at &gt;= </span><span class="sh">'</span><span class="s">2023-01-01</span><span class="sh">'</span><span class="s"> 
+                AND created_at &lt; </span><span class="sh">'</span><span class="s">2023-02-01</span><span class="sh">'</span><span class="s">
+                AND region = </span><span class="sh">'</span><span class="s">US</span><span class="sh">'</span><span class="s">
+                ORDER BY created_at
+                </span><span class="sh">"""</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">optimization_analysis</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">partition_pruning</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">partitions_before</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1095</span><span class="p">,</span>  <span class="c1"># 3년 * 365일
+</span>                        <span class="sh">"</span><span class="s">partitions_after</span><span class="sh">"</span><span class="p">:</span> <span class="mi">31</span><span class="p">,</span>     <span class="c1"># 1월만
+</span>                        <span class="sh">"</span><span class="s">improvement</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">97% reduction</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">file_pruning</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">files_before</span><span class="sh">"</span><span class="p">:</span> <span class="mi">15000</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">files_after</span><span class="sh">"</span><span class="p">:</span> <span class="mi">450</span><span class="p">,</span>         <span class="c1"># US 지역 + 1월
+</span>                        <span class="sh">"</span><span class="s">improvement</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">97% reduction</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">column_pruning</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">columns_before</span><span class="sh">"</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>       <span class="c1"># 전체 스키마
+</span>                        <span class="sh">"</span><span class="s">columns_after</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>         <span class="c1"># 필요한 컬럼만
+</span>                        <span class="sh">"</span><span class="s">improvement</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">80% reduction</span><span class="sh">"</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">performance_impact</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">scan_time</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2 hours → 3 minutes</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">io_bytes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">500GB → 15GB</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">cpu_time</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">4 hours → 10 minutes</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">example_2</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">original_query</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"""</span><span class="s">
+                SELECT COUNT(*), SUM(amount), AVG(amount)
+                FROM transactions 
+                WHERE created_at &gt;= </span><span class="sh">'</span><span class="s">2023-01-01</span><span class="sh">'</span><span class="s">
+                AND status = </span><span class="sh">'</span><span class="s">completed</span><span class="sh">'</span><span class="s">
+                GROUP BY DATE(created_at)
+                </span><span class="sh">"""</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">optimization_analysis</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">aggregation_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">pre_computed_stats</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">intermediate_results</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">cached</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">parallel_aggregation</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">filter_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">pushdown_filters</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">status = </span><span class="sh">'</span><span class="s">completed</span><span class="sh">'"</span><span class="p">],</span>
+                        <span class="sh">"</span><span class="s">partition_filters</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">created_at &gt;= </span><span class="sh">'</span><span class="s">2023-01-01</span><span class="sh">'"</span><span class="p">],</span>
+                        <span class="sh">"</span><span class="s">file_filters</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">min/max values</span><span class="sh">"</span><span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">performance_impact</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">execution_time</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">45 minutes → 5 minutes</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">memory_usage</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8GB → 1GB</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">network_io</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">100GB → 10GB</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">optimization_examples</span>
+    
+    <span class="k">def</span> <span class="nf">implement_advanced_optimizations</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">고급 최적화 기법 구현</span><span class="sh">"""</span>
+        
+        <span class="n">advanced_optimizations</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">adaptive_query_execution</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">concept</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">실행 중 쿼리 계획 동적 조정</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">techniques</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">런타임 통계 수집</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">조인 순서 동적 변경</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">파티션 수 동적 조정</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">실시간 성능 최적화</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">예측 불가능한 패턴 대응</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">자동 튜닝</span><span class="sh">"</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">materialized_views</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">concept</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">자주 사용되는 쿼리 결과 사전 계산</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">implementation</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">view_definition</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"""</span><span class="s">
+                    CREATE MATERIALIZED VIEW daily_sales_summary AS
+                    SELECT 
+                        DATE(created_at) as sale_date,
+                        region,
+                        COUNT(*) as transaction_count,
+                        SUM(amount) as total_amount,
+                        AVG(amount) as avg_amount
+                    FROM transactions
+                    WHERE created_at &gt;= CURRENT_DATE - INTERVAL 30 DAY
+                    GROUP BY DATE(created_at), region
+                    </span><span class="sh">"""</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">refresh_strategy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">incremental</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">refresh_frequency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">hourly</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">쿼리 응답 시간 단축</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">리소스 사용량 감소</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">일관된 성능 보장</span><span class="sh">"</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">predictive_caching</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">concept</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">사용 패턴 기반 예측적 캐싱</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">implementation</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">cache_strategy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">LRU with predictive prefetch</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">cache_layers</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">메모리 캐시 (Hot data)</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">SSD 캐시 (Warm data)</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">HDD 스토리지 (Cold data)</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">prefetch_algorithm</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">time-series prediction</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">benefits</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">캐시 히트율 향상</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">지연 시간 감소</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">사용자 경험 개선</span><span class="sh">"</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">advanced_optimizations</span>
+</code></pre></div></div>
+
+<h2 id="-메타데이터-관리와-버전-관리">📊 메타데이터 관리와 버전 관리</h2>
+
+<h3 id="메타데이터-관리-전략">메타데이터 관리 전략</h3>
+
+<p>Iceberg의 메타데이터는 테이블의 모든 정보를 포함하는 핵심 구성 요소입니다. 효율적인 메타데이터 관리는 전체 시스템 성능에 직접적인 영향을 미칩니다.</p>
+
+<h3 id="메타데이터-관리-전략-1">메타데이터 관리 전략</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>관리 영역</th>
+      <th>전략</th>
+      <th>구현 방법</th>
+      <th>효과</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>메타데이터 캐싱</strong></td>
+      <td>• 자주 사용되는 메타데이터 캐싱<br />• 다단계 캐시 구조</td>
+      <td>• L1: 메모리 캐시<br />• L2: SSD 캐시<br />• L3: 네트워크 캐시</td>
+      <td>• 메타데이터 접근 속도 향상<br />• 네트워크 트래픽 감소</td>
+    </tr>
+    <tr>
+      <td><strong>메타데이터 압축</strong></td>
+      <td>• 메타데이터 파일 압축<br />• 효율적인 직렬화</td>
+      <td>• gzip/snappy 압축<br />• Protocol Buffers 사용</td>
+      <td>• 스토리지 공간 절약<br />• 전송 시간 단축</td>
+    </tr>
+    <tr>
+      <td><strong>메타데이터 분할</strong></td>
+      <td>• 큰 매니페스트 분할<br />• 병렬 처리 지원</td>
+      <td>• 파일 크기 기반 분할<br />• 파티션 기반 분할</td>
+      <td>• 병렬 처리 향상<br />• 메모리 사용량 최적화</td>
+    </tr>
+    <tr>
+      <td><strong>메타데이터 정리</strong></td>
+      <td>• 오래된 메타데이터 제거<br />• 불필요한 스냅샷 정리</td>
+      <td>• TTL 기반 정리<br />• 참조 카운팅</td>
+      <td>• 스토리지 공간 절약<br />• 관리 복잡성 감소</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="메타데이터-관리-구현">메타데이터 관리 구현</h3>
+
+<h4 id="캐시-계층-구조">캐시 계층 구조</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>캐시 레벨</th>
+      <th>타입</th>
+      <th>크기</th>
+      <th>TTL</th>
+      <th>정책</th>
+      <th>내용</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>L1 캐시</strong></td>
+      <td>메모리</td>
+      <td>2GB</td>
+      <td>1시간</td>
+      <td>LRU</td>
+      <td>자주 접근하는 매니페스트, 테이블 스키마</td>
+    </tr>
+    <tr>
+      <td><strong>L2 캐시</strong></td>
+      <td>SSD</td>
+      <td>20GB</td>
+      <td>24시간</td>
+      <td>LFU</td>
+      <td>매니페스트 리스트, 파티션 스펙</td>
+    </tr>
+    <tr>
+      <td><strong>L3 캐시</strong></td>
+      <td>분산 캐시</td>
+      <td>100GB</td>
+      <td>7일</td>
+      <td>TTL</td>
+      <td>히스토리 메타데이터, 백업 스냅샷</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="캐시-전략">캐시 전략</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>전략</th>
+      <th>방법</th>
+      <th>알고리즘</th>
+      <th>설정</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>프리페치 전략</strong></td>
+      <td>예측적 프리페치</td>
+      <td>시계열 분석</td>
+      <td>다음 2시간 윈도우</td>
+    </tr>
+    <tr>
+      <td><strong>무효화 전략</strong></td>
+      <td>이벤트 기반</td>
+      <td>즉시 전파</td>
+      <td>스키마/파티션/데이터 변경 시</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="스냅샷-라이프사이클">스냅샷 라이프사이클</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>단계</th>
+      <th>트리거</th>
+      <th>빈도</th>
+      <th>보존 정책</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>생성</strong></td>
+      <td>데이터 수정</td>
+      <td>커밋당</td>
+      <td>30개 스냅샷</td>
+    </tr>
+    <tr>
+      <td><strong>진화</strong></td>
+      <td>스키마/파티션 변경</td>
+      <td>필요시</td>
+      <td>하위 호환성 보장</td>
+    </tr>
+    <tr>
+      <td><strong>정리</strong></td>
+      <td>참조 카운팅</td>
+      <td>일간</td>
+      <td>미참조 스냅샷, 오래된 메타데이터</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="브랜치-관리">브랜치 관리</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>브랜치 타입</th>
+      <th>목적</th>
+      <th>보호 정책</th>
+      <th>머지 정책</th>
+      <th>수명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>메인 브랜치</strong></td>
+      <td>프로덕션 데이터</td>
+      <td>쓰기 보호</td>
+      <td>스쿼시 머지</td>
+      <td>영구</td>
+    </tr>
+    <tr>
+      <td><strong>기능 브랜치</strong></td>
+      <td>실험적 변경</td>
+      <td>없음</td>
+      <td>자동 정리</td>
+      <td>7일</td>
+    </tr>
+    <tr>
+      <td><strong>핫픽스 브랜치</strong></td>
+      <td>중요 수정</td>
+      <td>없음</td>
+      <td>빠른 트랙</td>
+      <td>3일</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MetadataManagementSystem</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">metadata_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">version_manager</span> <span class="o">=</span> <span class="nc">VersionManager</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cleanup_scheduler</span> <span class="o">=</span> <span class="nc">CleanupScheduler</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">design_metadata_management</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메타데이터 관리 시스템 설계</span><span class="sh">"""</span>
+        
+        <span class="c1"># 캐시 계층 구조 설정
+</span>        <span class="n">cache_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">l1_cache</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">in_memory</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2GB</span><span class="sh">"</span><span class="p">},</span>
+            <span class="sh">"</span><span class="s">l2_cache</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ssd_cache</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">20GB</span><span class="sh">"</span><span class="p">},</span>
+            <span class="sh">"</span><span class="s">l3_cache</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">distributed_cache</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">100GB</span><span class="sh">"</span><span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># 버전 관리 설정
+</span>        <span class="n">version_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">snapshot_retention</span><span class="sh">"</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">branch_lifecycle</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">7_days</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">cleanup_frequency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">daily</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">cache_config</span><span class="p">,</span> <span class="n">version_config</span>
+    
+    <span class="k">def</span> <span class="nf">demonstrate_metadata_lifecycle</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메타데이터 라이프사이클 시연</span><span class="sh">"""</span>
+        
+        <span class="c1"># 메타데이터 라이프사이클 단계별 처리
+</span>        <span class="n">lifecycle_stages</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">creation</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">files</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">metadata.json (v1)</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">manifest-list-1.avro</span><span class="sh">"</span><span class="p">],</span> <span class="sh">"</span><span class="s">size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1MB</span><span class="sh">"</span><span class="p">},</span>
+            <span class="sh">"</span><span class="s">evolution</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">files</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">metadata.json (v2)</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">manifest-list-2.avro</span><span class="sh">"</span><span class="p">],</span> <span class="sh">"</span><span class="s">size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2MB</span><span class="sh">"</span><span class="p">},</span>
+            <span class="sh">"</span><span class="s">optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">compression_ratio</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">8:1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">cache_hit_ratio</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">95%</span><span class="sh">"</span><span class="p">},</span>
+            <span class="sh">"</span><span class="s">cleanup</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">space_saved</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30%</span><span class="sh">"</span><span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">lifecycle_stages</span>
+</code></pre></div></div>
+
+<h4 id="메타데이터-라이프사이클">메타데이터 라이프사이클</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>단계</th>
+      <th>액션</th>
+      <th>프로세스</th>
+      <th>파일</th>
+      <th>크기/결과</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1단계</strong></td>
+      <td>메타데이터 생성</td>
+      <td>• 스키마 정의<br />• 파티션 스펙 생성<br />• 초기 스냅샷 생성</td>
+      <td>• metadata.json (v1)<br />• manifest-list-1.avro<br />• manifest-1.avro</td>
+      <td>1MB</td>
+    </tr>
+    <tr>
+      <td><strong>2단계</strong></td>
+      <td>메타데이터 진화</td>
+      <td>• 새 메타데이터 버전 생성<br />• 기존 메타데이터 보존<br />• 호환성 검증</td>
+      <td>• metadata.json (v2)<br />• manifest-list-2.avro<br />• manifest-2.avro</td>
+      <td>2MB</td>
+    </tr>
+    <tr>
+      <td><strong>3단계</strong></td>
+      <td>메타데이터 최적화</td>
+      <td>• 매니페스트 압축<br />• 통계 정보 갱신<br />• 캐시 워밍업</td>
+      <td>최적화된 메타데이터</td>
+      <td>압축률 8:1, 캐시 히트율 95%</td>
+    </tr>
+    <tr>
+      <td><strong>4단계</strong></td>
+      <td>메타데이터 정리</td>
+      <td>• 참조 카운팅<br />• 안전한 삭제<br />• 백업 생성</td>
+      <td>정리된 메타데이터</td>
+      <td>공간 절약 30%</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="버전-관리-전략">버전 관리 전략</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>관리 영역</th>
+      <th>전략</th>
+      <th>구현 방법</th>
+      <th>효과</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>스냅샷 관리</strong></td>
+      <td>• 버전별 스냅샷 유지<br />• 브랜치 기반 관리</td>
+      <td>• Git-like 버전 관리<br />• 머지 전략 구현</td>
+      <td>• 데이터 복구 지원<br />• 실험 환경 제공</td>
+    </tr>
+    <tr>
+      <td><strong>스키마 버전 관리</strong></td>
+      <td>• 하위 호환성 보장<br />• 진화 이력 추적</td>
+      <td>• 스키마 레지스트리<br />• 버전별 호환성 검사</td>
+      <td>• 안전한 스키마 변경<br />• 롤백 지원</td>
+    </tr>
+    <tr>
+      <td><strong>메타데이터 버전 관리</strong></td>
+      <td>• 메타데이터 형식 버전<br />• 마이그레이션 지원</td>
+      <td>• 버전별 파서<br />• 자동 마이그레이션</td>
+      <td>• 호환성 보장<br />• 점진적 업그레이드</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-모니터링과-운영-최적화">📈 모니터링과 운영 최적화</h2>
+
+<h3 id="모니터링-전략">모니터링 전략</h3>
+
+<p>Iceberg 시스템의 효과적인 모니터링은 성능, 가용성, 비용 최적화의 핵심입니다.</p>
+
+<h3 id="모니터링-영역">모니터링 영역</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>모니터링 영역</th>
+      <th>지표</th>
+      <th>임계값</th>
+      <th>액션</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>성능 모니터링</strong></td>
+      <td>• 쿼리 실행 시간<br />• 처리량 (QPS)<br />• 지연 시간 (P99)</td>
+      <td>• 쿼리 시간 &gt; 30초<br />• QPS &lt; 100<br />• P99 &gt; 5초</td>
+      <td>• 쿼리 최적화<br />• 리소스 증설<br />• 인덱스 재구성</td>
+    </tr>
+    <tr>
+      <td><strong>리소스 모니터링</strong></td>
+      <td>• CPU 사용률<br />• 메모리 사용률<br />• 디스크 I/O</td>
+      <td>• CPU &gt; 80%<br />• 메모리 &gt; 85%<br />• I/O 대기 &gt; 50%</td>
+      <td>• 자동 스케일링<br />• 리소스 재배치<br />• 캐시 최적화</td>
+    </tr>
+    <tr>
+      <td><strong>스토리지 모니터링</strong></td>
+      <td>• 스토리지 사용률<br />• 파일 수<br />• 파티션 분포</td>
+      <td>• 스토리지 &gt; 90%<br />• 파일 수 &gt; 10K<br />• 파티션 불균등</td>
+      <td>• 컴팩션 실행<br />• 데이터 정리<br />• 파티션 재균형</td>
+    </tr>
+    <tr>
+      <td><strong>메타데이터 모니터링</strong></td>
+      <td>• 메타데이터 크기<br />• 캐시 히트율<br />• 스냅샷 수</td>
+      <td>• 메타데이터 &gt; 1GB<br />• 캐시 히트율 &lt; 90%<br />• 스냅샷 &gt; 100개</td>
+      <td>• 메타데이터 압축<br />• 캐시 튜닝<br />• 스냅샷 정리</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="모니터링-구현">모니터링 구현</h3>
+
+<h4 id="성능-메트릭">성능 메트릭</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>메트릭 타입</th>
+      <th>측정 항목</th>
+      <th>측정 방식</th>
+      <th>단위</th>
+      <th>라벨</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>쿼리 메트릭</strong></td>
+      <td>실행 시간</td>
+      <td>히스토그램</td>
+      <td>초</td>
+      <td>테이블, 쿼리 타입, 사용자</td>
+    </tr>
+    <tr>
+      <td><strong>쿼리 메트릭</strong></td>
+      <td>처리량</td>
+      <td>카운터</td>
+      <td>초당 쿼리 수</td>
+      <td>테이블, 작업</td>
+    </tr>
+    <tr>
+      <td><strong>쿼리 메트릭</strong></td>
+      <td>오류율</td>
+      <td>카운터</td>
+      <td>초당 오류 수</td>
+      <td>오류 타입, 테이블</td>
+    </tr>
+    <tr>
+      <td><strong>스토리지 메트릭</strong></td>
+      <td>파일 수</td>
+      <td>게이지</td>
+      <td>파일 수</td>
+      <td>테이블, 파티션</td>
+    </tr>
+    <tr>
+      <td><strong>스토리지 메트릭</strong></td>
+      <td>스토리지 크기</td>
+      <td>게이지</td>
+      <td>바이트</td>
+      <td>테이블, 파티션</td>
+    </tr>
+    <tr>
+      <td><strong>스토리지 메트릭</strong></td>
+      <td>압축률</td>
+      <td>게이지</td>
+      <td>비율</td>
+      <td>테이블, 압축 코덱</td>
+    </tr>
+    <tr>
+      <td><strong>메타데이터 메트릭</strong></td>
+      <td>메타데이터 크기</td>
+      <td>게이지</td>
+      <td>바이트</td>
+      <td>테이블, 메타데이터 타입</td>
+    </tr>
+    <tr>
+      <td><strong>메타데이터 메트릭</strong></td>
+      <td>캐시 히트율</td>
+      <td>게이지</td>
+      <td>퍼센트</td>
+      <td>캐시 레벨, 테이블</td>
+    </tr>
+    <tr>
+      <td><strong>메타데이터 메트릭</strong></td>
+      <td>스냅샷 수</td>
+      <td>게이지</td>
+      <td>스냅샷 수</td>
+      <td>테이블</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="알림-규칙">알림 규칙</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>알림 타입</th>
+      <th>조건</th>
+      <th>심각도</th>
+      <th>액션</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>성능 알림</strong></td>
+      <td>쿼리 시간 &gt; 30초</td>
+      <td>경고</td>
+      <td>팀 알림</td>
+    </tr>
+    <tr>
+      <td><strong>성능 알림</strong></td>
+      <td>오류율 &gt; 5%</td>
+      <td>치명적</td>
+      <td>온콜 페이지</td>
+    </tr>
+    <tr>
+      <td><strong>성능 알림</strong></td>
+      <td>QPS &lt; 10</td>
+      <td>경고</td>
+      <td>조사</td>
+    </tr>
+    <tr>
+      <td><strong>리소스 알림</strong></td>
+      <td>CPU 사용률 &gt; 80%</td>
+      <td>경고</td>
+      <td>스케일 업</td>
+    </tr>
+    <tr>
+      <td><strong>리소스 알림</strong></td>
+      <td>메모리 사용률 &gt; 85%</td>
+      <td>치명적</td>
+      <td>서비스 재시작</td>
+    </tr>
+    <tr>
+      <td><strong>리소스 알림</strong></td>
+      <td>디스크 사용률 &gt; 90%</td>
+      <td>치명적</td>
+      <td>데이터 정리</td>
+    </tr>
+    <tr>
+      <td><strong>스토리지 알림</strong></td>
+      <td>파일 수 &gt; 10,000</td>
+      <td>경고</td>
+      <td>컴팩션 실행</td>
+    </tr>
+    <tr>
+      <td><strong>스토리지 알림</strong></td>
+      <td>메타데이터 크기 &gt; 1GB</td>
+      <td>경고</td>
+      <td>메타데이터 최적화</td>
+    </tr>
+    <tr>
+      <td><strong>스토리지 알림</strong></td>
+      <td>캐시 히트율 &lt; 90%</td>
+      <td>경고</td>
+      <td>캐시 튜닝</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="대시보드-구성">대시보드 구성</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>대시보드</th>
+      <th>대상</th>
+      <th>메트릭</th>
+      <th>새로고침 간격</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>경영진 대시보드</strong></td>
+      <td>경영진</td>
+      <td>• 전체 시스템 상태<br />• 총 스토리지 사용량<br />• 일일 쿼리 볼륨<br />• 비용 트렌드</td>
+      <td>5분</td>
+    </tr>
+    <tr>
+      <td><strong>운영팀 대시보드</strong></td>
+      <td>운영팀</td>
+      <td>• 쿼리 성능<br />• 리소스 사용률<br />• 오류율<br />• 알림 상태</td>
+      <td>1분</td>
+    </tr>
+    <tr>
+      <td><strong>개발자 대시보드</strong></td>
+      <td>개발자</td>
+      <td>• 테이블 성능<br />• 쿼리 패턴<br />• 스키마 변경<br />• 데이터 품질</td>
+      <td>1분</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">IcebergMonitoringSystem</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">metrics_collector</span> <span class="o">=</span> <span class="nc">MetricsCollector</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">alert_manager</span> <span class="o">=</span> <span class="nc">AlertManager</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">dashboard_manager</span> <span class="o">=</span> <span class="nc">DashboardManager</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">setup_comprehensive_monitoring</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">종합 모니터링 시스템 설정</span><span class="sh">"""</span>
+        
+        <span class="c1"># 메트릭 수집 설정
+</span>        <span class="n">metrics_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">performance_metrics</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">execution_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">throughput</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">error_rate</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">storage_metrics</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">file_count</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">storage_size</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">compression_ratio</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">metadata_metrics</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">metadata_size</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">cache_hit_ratio</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">snapshot_count</span><span class="sh">"</span><span class="p">]</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># 알림 규칙 설정
+</span>        <span class="n">alert_rules</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">performance_alerts</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">thresholds</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">query_duration</span><span class="sh">"</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="sh">"</span><span class="s">error_rate</span><span class="sh">"</span><span class="p">:</span> <span class="mi">5</span><span class="p">}},</span>
+            <span class="sh">"</span><span class="s">resource_alerts</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">thresholds</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">cpu_usage</span><span class="sh">"</span><span class="p">:</span> <span class="mi">80</span><span class="p">,</span> <span class="sh">"</span><span class="s">memory_usage</span><span class="sh">"</span><span class="p">:</span> <span class="mi">85</span><span class="p">}},</span>
+            <span class="sh">"</span><span class="s">storage_alerts</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">thresholds</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">file_count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">10000</span><span class="p">,</span> <span class="sh">"</span><span class="s">metadata_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1GB</span><span class="sh">"</span><span class="p">}}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">metrics_config</span><span class="p">,</span> <span class="n">alert_rules</span>
+    
+    <span class="k">def</span> <span class="nf">implement_automated_optimization</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">자동화된 최적화 구현</span><span class="sh">"""</span>
+        
+        <span class="c1"># 자동 스케일링 설정
+</span>        <span class="n">auto_scaling_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">scale_up_conditions</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">cpu_usage &gt; 70%</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">memory_usage &gt; 80%</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">query_queue &gt; 100</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">scale_down_conditions</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">cpu_usage &lt; 30%</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">memory_usage &lt; 50%</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">query_queue &lt; 10</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">scaling_limits</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">min_instances</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="sh">"</span><span class="s">max_instances</span><span class="sh">"</span><span class="p">:</span> <span class="mi">20</span><span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># 자동 최적화 설정
+</span>        <span class="n">auto_optimization_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">compaction_triggers</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">file_count &gt; 1000</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">avg_file_size &lt; 64MB</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">cleanup_schedule</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">daily at 03:00</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">retention_policies</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">snapshots</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30 days</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">metadata</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">90 days</span><span class="sh">"</span><span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">auto_scaling_config</span><span class="p">,</span> <span class="n">auto_optimization_config</span>
+</code></pre></div></div>
+
+<h4 id="자동-스케일링-규칙">자동 스케일링 규칙</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>스케일링 타입</th>
+      <th>조건</th>
+      <th>임계값</th>
+      <th>지속 시간</th>
+      <th>액션</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>스케일 업</strong></td>
+      <td>CPU 사용률</td>
+      <td>&gt; 70%</td>
+      <td>5분</td>
+      <td>인스턴스 추가</td>
+    </tr>
+    <tr>
+      <td><strong>스케일 업</strong></td>
+      <td>메모리 사용률</td>
+      <td>&gt; 80%</td>
+      <td>3분</td>
+      <td>인스턴스 추가</td>
+    </tr>
+    <tr>
+      <td><strong>스케일 업</strong></td>
+      <td>쿼리 큐 길이</td>
+      <td>&gt; 100</td>
+      <td>즉시</td>
+      <td>인스턴스 추가</td>
+    </tr>
+    <tr>
+      <td><strong>스케일 다운</strong></td>
+      <td>CPU 사용률</td>
+      <td>&lt; 30%</td>
+      <td>10분</td>
+      <td>인스턴스 제거</td>
+    </tr>
+    <tr>
+      <td><strong>스케일 다운</strong></td>
+      <td>메모리 사용률</td>
+      <td>&lt; 50%</td>
+      <td>10분</td>
+      <td>인스턴스 제거</td>
+    </tr>
+    <tr>
+      <td><strong>스케일 다운</strong></td>
+      <td>쿼리 큐 길이</td>
+      <td>&lt; 10</td>
+      <td>즉시</td>
+      <td>인스턴스 제거</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="자동-최적화-정책">자동 최적화 정책</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>최적화 영역</th>
+      <th>트리거 조건</th>
+      <th>실행 시간</th>
+      <th>리소스 제한</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>자동 컴팩션</strong></td>
+      <td>• 파일 수 &gt; 1000<br />• 평균 파일 크기 &lt; 64MB<br />• 압축률 &lt; 0.3</td>
+      <td>02:00-04:00</td>
+      <td>CPU 50%, 메모리 4GB</td>
+    </tr>
+    <tr>
+      <td><strong>자동 정리</strong></td>
+      <td>일일 스케줄</td>
+      <td>03:00</td>
+      <td>백그라운드 실행</td>
+    </tr>
+    <tr>
+      <td><strong>자동 인덱싱</strong></td>
+      <td>필터 선택도 &lt; 0.1</td>
+      <td>실시간</td>
+      <td>자동 유지보수</td>
+    </tr>
+    <tr>
+      <td><strong>캐시 최적화</strong></td>
+      <td>히트율 기반</td>
+      <td>시간당</td>
+      <td>1GB-10GB 범위</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="보존-정책">보존 정책</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>데이터 타입</th>
+      <th>보존 기간</th>
+      <th>정리 조건</th>
+      <th>백업 정책</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>스냅샷</strong></td>
+      <td>30일</td>
+      <td>미참조 스냅샷</td>
+      <td>자동 백업</td>
+    </tr>
+    <tr>
+      <td><strong>메타데이터</strong></td>
+      <td>90일</td>
+      <td>오래된 메타데이터</td>
+      <td>버전 관리</td>
+    </tr>
+    <tr>
+      <td><strong>로그</strong></td>
+      <td>7일</td>
+      <td>시간 기반</td>
+      <td>압축 저장</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-실무-프로젝트-대규모-iceberg-클러스터-운영">🚀 실무 프로젝트: 대규모 Iceberg 클러스터 운영</h2>
+
+<h3 id="프로젝트-개요">프로젝트 개요</h3>
+
+<p>대규모 전자상거래 플랫폼을 위한 Iceberg 기반 데이터 플랫폼을 구축하고 운영합니다.</p>
+
+<h3 id="클러스터-아키텍처">클러스터 아키텍처</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>구성 요소</th>
+      <th>기술 스택</th>
+      <th>스케일</th>
+      <th>역할</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>쿼리 엔진</strong></td>
+      <td>Spark, Presto/Trino, Dremio</td>
+      <td>• 50+ 노드<br />• 200+ CPU 코어<br />• 1TB+ 메모리</td>
+      <td>• SQL 쿼리 실행<br />• 분석 작업 처리</td>
+    </tr>
+    <tr>
+      <td><strong>스토리지</strong></td>
+      <td>S3, HDFS, Alluxio</td>
+      <td>• 500TB+ 데이터<br />• 10억+ 레코드<br />• 3-zone 복제</td>
+      <td>• 데이터 영구 저장<br />• 고가용성 보장</td>
+    </tr>
+    <tr>
+      <td><strong>메타데이터</strong></td>
+      <td>Hive Metastore, AWS Glue</td>
+      <td>• 5000+ 테이블<br />• 500+ 데이터베이스<br />• 분산 캐시</td>
+      <td>• 스키마 관리<br />• 메타데이터 서비스</td>
+    </tr>
+    <tr>
+      <td><strong>오케스트레이션</strong></td>
+      <td>Kubernetes, Airflow</td>
+      <td>• 100+ 파드<br />• 20+ 워크플로우<br />• 자동 스케일링</td>
+      <td>• 작업 스케줄링<br />• 리소스 관리</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="프로젝트-구현">프로젝트 구현</h3>
+
+<h4 id="쿼리-엔진-클러스터-구성">쿼리 엔진 클러스터 구성</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>엔진</th>
+      <th>노드 수</th>
+      <th>코어/노드</th>
+      <th>메모리/노드</th>
+      <th>스토리지/노드</th>
+      <th>사용 사례</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Spark 클러스터</strong></td>
+      <td>20</td>
+      <td>16</td>
+      <td>128GB</td>
+      <td>2TB SSD</td>
+      <td>ETL 작업, 배치 처리, ML 훈련</td>
+    </tr>
+    <tr>
+      <td><strong>Presto 클러스터</strong></td>
+      <td>15</td>
+      <td>8</td>
+      <td>64GB</td>
+      <td>1TB SSD</td>
+      <td>대화형 쿼리, 애드혹 분석, 대시보드</td>
+    </tr>
+    <tr>
+      <td><strong>Dremio 클러스터</strong></td>
+      <td>10</td>
+      <td>12</td>
+      <td>96GB</td>
+      <td>1TB SSD</td>
+      <td>셀프서비스 분석, 데이터 가상화</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="스토리지-계층-구성">스토리지 계층 구성</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>스토리지 타입</th>
+      <th>용량</th>
+      <th>복제 전략</th>
+      <th>스토리지 클래스</th>
+      <th>암호화</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>S3 Primary</strong></td>
+      <td>500TB</td>
+      <td>3-zone 복제</td>
+      <td>Standard</td>
+      <td>AES-256</td>
+    </tr>
+    <tr>
+      <td><strong>HDFS Secondary</strong></td>
+      <td>200TB</td>
+      <td>복제 계수 3</td>
+      <td>Rack 인식</td>
+      <td>Snappy 압축</td>
+    </tr>
+    <tr>
+      <td><strong>Alluxio Cache</strong></td>
+      <td>50TB</td>
+      <td>3-tier 전략</td>
+      <td>LRU 정책</td>
+      <td>예측적 프리페치</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="메타데이터-저장소-구성">메타데이터 저장소 구성</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>저장소</th>
+      <th>데이터베이스</th>
+      <th>복제</th>
+      <th>백업 전략</th>
+      <th>연결 관리</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Hive Metastore</strong></td>
+      <td>PostgreSQL</td>
+      <td>Master-Slave</td>
+      <td>일일 전체 백업</td>
+      <td>연결 풀링</td>
+    </tr>
+    <tr>
+      <td><strong>AWS Glue</strong></td>
+      <td>관리형 서비스</td>
+      <td>Cross-region</td>
+      <td>자동 스냅샷</td>
+      <td>IAM 기반</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="데이터-거버넌스-정책">데이터 거버넌스 정책</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>거버넌스 영역</th>
+      <th>정책</th>
+      <th>구현 방법</th>
+      <th>컴플라이언스</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>접근 제어</strong></td>
+      <td>RBAC</td>
+      <td>테이블 레벨 권한</td>
+      <td>감사 로깅</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 마스킹</strong></td>
+      <td>PII 자동 감지</td>
+      <td>토큰화, 암호화, 익명화</td>
+      <td>GDPR, CCPA</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 계보</strong></td>
+      <td>자동 추적</td>
+      <td>테이블-컬럼 레벨</td>
+      <td>2년 보존</td>
+    </tr>
+    <tr>
+      <td><strong>품질 모니터링</strong></td>
+      <td>실시간 검사</td>
+      <td>완전성, 정확성, 일관성</td>
+      <td>일일 요약 리포트</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">LargeScaleIcebergCluster</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cluster_config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">performance_monitor</span> <span class="o">=</span> <span class="nc">PerformanceMonitor</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cost_optimizer</span> <span class="o">=</span> <span class="nc">CostOptimizer</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">design_cluster_architecture</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">클러스터 아키텍처 설계</span><span class="sh">"""</span>
+        
+        <span class="c1"># 쿼리 엔진 구성
+</span>        <span class="n">compute_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">spark_cluster</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">nodes</span><span class="sh">"</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="sh">"</span><span class="s">cores</span><span class="sh">"</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span> <span class="sh">"</span><span class="s">memory</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">128GB</span><span class="sh">"</span><span class="p">},</span>
+            <span class="sh">"</span><span class="s">presto_cluster</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">nodes</span><span class="sh">"</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="sh">"</span><span class="s">cores</span><span class="sh">"</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="sh">"</span><span class="s">memory</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">64GB</span><span class="sh">"</span><span class="p">},</span>
+            <span class="sh">"</span><span class="s">dremio_cluster</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">nodes</span><span class="sh">"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="sh">"</span><span class="s">cores</span><span class="sh">"</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="sh">"</span><span class="s">memory</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">96GB</span><span class="sh">"</span><span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># 스토리지 구성
+</span>        <span class="n">storage_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">s3_primary</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">capacity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">500TB</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">replication</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">3_zone</span><span class="sh">"</span><span class="p">},</span>
+            <span class="sh">"</span><span class="s">hdfs_secondary</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">capacity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">200TB</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">replication_factor</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+            <span class="sh">"</span><span class="s">alluxio_cache</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">capacity</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">50TB</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">tier_strategy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">3_tier</span><span class="sh">"</span><span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">compute_config</span><span class="p">,</span> <span class="n">storage_config</span>
+    
+    <span class="k">def</span> <span class="nf">implement_operational_procedures</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">운영 절차 구현</span><span class="sh">"""</span>
+        
+        <span class="c1"># 재해 복구 설정
+</span>        <span class="n">disaster_recovery_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">backup_frequency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">daily</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">retention_period</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30_days</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">recovery_targets</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">rto</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1_hour</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">rpo</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">15_minutes</span><span class="sh">"</span><span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># 용량 계획 설정
+</span>        <span class="n">capacity_planning_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">growth_forecast</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">12_months</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">growth_rate</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">20%_monthly</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">scaling_factor</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1.5x</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">disaster_recovery_config</span><span class="p">,</span> <span class="n">capacity_planning_config</span>
+</code></pre></div></div>
+
+<h4 id="재해-복구-전략">재해 복구 전략</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>백업 타입</th>
+      <th>빈도</th>
+      <th>보존 기간</th>
+      <th>저장소</th>
+      <th>암호화</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>데이터 백업</strong></td>
+      <td>일간</td>
+      <td>30일</td>
+      <td>Cross-region S3</td>
+      <td>KMS</td>
+    </tr>
+    <tr>
+      <td><strong>메타데이터 백업</strong></td>
+      <td>시간당</td>
+      <td>7일</td>
+      <td>RDS 스냅샷</td>
+      <td>Point-in-time 복구</td>
+    </tr>
+    <tr>
+      <td><strong>설정 백업</strong></td>
+      <td>변경 시</td>
+      <td>90일</td>
+      <td>Git 저장소</td>
+      <td>버전 관리</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="복구-목표">복구 목표</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>데이터 타입</th>
+      <th>RTO (복구 시간 목표)</th>
+      <th>RPO (복구 지점 목표)</th>
+      <th>우선순위</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>중요 테이블</strong></td>
+      <td>1시간</td>
+      <td>15분</td>
+      <td>높음</td>
+    </tr>
+    <tr>
+      <td><strong>표준 테이블</strong></td>
+      <td>4시간</td>
+      <td>1시간</td>
+      <td>보통</td>
+    </tr>
+    <tr>
+      <td><strong>아카이브 테이블</strong></td>
+      <td>24시간</td>
+      <td>4시간</td>
+      <td>낮음</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="용량-계획-전략">용량 계획 전략</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>계획 영역</th>
+      <th>예측 방법</th>
+      <th>예측 기간</th>
+      <th>신뢰 구간</th>
+      <th>성장률</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>데이터 성장</strong></td>
+      <td>시계열 분석</td>
+      <td>12개월</td>
+      <td>95%</td>
+      <td>월 20%</td>
+    </tr>
+    <tr>
+      <td><strong>컴퓨트 성장</strong></td>
+      <td>쿼리 패턴 분석</td>
+      <td>6개월</td>
+      <td>90%</td>
+      <td>1.5배 스케일링</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="리소스-최적화-정책">리소스 최적화 정책</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>최적화 영역</th>
+      <th>전략</th>
+      <th>설정</th>
+      <th>실행 주기</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>비용 최적화</strong></td>
+      <td>• Spot 인스턴스 70%<br />• Reserved 인스턴스 30%<br />• 자동 스토리지 티어링</td>
+      <td>월간 검토</td>
+      <td>지속적</td>
+    </tr>
+    <tr>
+      <td><strong>성능 최적화</strong></td>
+      <td>• 쿼리 최적화<br />• 인덱스 최적화<br />• 파티션 최적화<br />• 캐시 최적화</td>
+      <td>• 연속<br />• 주간<br />• 월간<br />• 일간</td>
+      <td>자동화</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="보안-관리-정책">보안 관리 정책</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>보안 영역</th>
+      <th>정책</th>
+      <th>구현 방법</th>
+      <th>컴플라이언스</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>데이터 암호화</strong></td>
+      <td>• 저장 시 AES-256<br />• 전송 시 TLS-1.3<br />• 키 관리 AWS KMS</td>
+      <td>분기별 키 로테이션</td>
+      <td>SOC2, ISO27001</td>
+    </tr>
+    <tr>
+      <td><strong>접근 제어</strong></td>
+      <td>• LDAP/SAML 인증<br />• RBAC 권한 관리<br />• 포괄적 감사 로깅</td>
+      <td>통합 인증 시스템</td>
+      <td>감사 추적</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 프라이버시</strong></td>
+      <td>• PII 자동 감지<br />• 동적 데이터 마스킹<br />• 자동 보존 정책</td>
+      <td>동의 관리 통합</td>
+      <td>GDPR, CCPA</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">def</span> <span class="nf">setup_performance_optimization</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">성능 최적화 설정</span><span class="sh">"""</span>
+        
+        <span class="c1"># 쿼리 최적화 설정
+</span>        <span class="n">query_optimization_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">adaptive_execution</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">optimization_rules</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">join_reordering</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">partition_pruning</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">column_pruning</span><span class="sh">"</span><span class="p">],</span>
+            <span class="sh">"</span><span class="s">materialized_views</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">auto_creation</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="sh">"</span><span class="s">refresh_frequency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">hourly</span><span class="sh">"</span><span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># 스토리지 최적화 설정
+</span>        <span class="n">storage_optimization_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">compression</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">algorithm</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">zstd</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">level</span><span class="sh">"</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="sh">"</span><span class="s">target_ratio</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10:1</span><span class="sh">"</span><span class="p">},</span>
+            <span class="sh">"</span><span class="s">partitioning</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">strategy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">adaptive</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">max_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1GB</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">min_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">100MB</span><span class="sh">"</span><span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># 캐싱 전략 설정
+</span>        <span class="n">caching_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">query_result_cache</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10GB</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">ttl</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">1_hour</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">policy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">LRU</span><span class="sh">"</span><span class="p">},</span>
+            <span class="sh">"</span><span class="s">metadata_cache</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">2GB</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">ttl</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">24_hours</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">policy</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">LFU</span><span class="sh">"</span><span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">query_optimization_config</span><span class="p">,</span> <span class="n">storage_optimization_config</span><span class="p">,</span> <span class="n">caching_config</span>
+</code></pre></div></div>
+
+<h4 id="성능-최적화-전략">성능 최적화 전략</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>최적화 영역</th>
+      <th>전략</th>
+      <th>설정</th>
+      <th>목표</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>쿼리 최적화</strong></td>
+      <td>• 적응형 쿼리 실행<br />• 자동 최적화 규칙<br />• 물리화된 뷰</td>
+      <td>• 조인 재정렬<br />• 파티션/컬럼 프루닝<br />• 시간당 새로고침</td>
+      <td>최적 쿼리 성능</td>
+    </tr>
+    <tr>
+      <td><strong>스토리지 최적화</strong></td>
+      <td>• zstd 압축 (레벨 6)<br />• 적응형 파티셔닝<br />• 자동 재파티셔닝</td>
+      <td>• 10:1 압축률<br />• 100MB-1GB 파티션</td>
+      <td>스토리지 효율성</td>
+    </tr>
+    <tr>
+      <td><strong>캐싱 전략</strong></td>
+      <td>• 쿼리 결과 캐시<br />• 메타데이터 캐시<br />• 예측적 프리페치</td>
+      <td>• 10GB/1시간<br />• 2GB/24시간<br />• LRU/LFU 정책</td>
+      <td>캐시 히트율 향상</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-학습-요약">📚 학습 요약</h2>
+
+<h3 id="이번-part에서-학습한-내용">이번 Part에서 학습한 내용</h3>
+
+<ol>
+  <li><strong>고급 파티셔닝 전략</strong>
+    <ul>
+      <li>파티션 진화와 숨겨진 파티셔닝</li>
+      <li>다단계 파티셔닝과 동적 파티셔닝</li>
+      <li>파티션 최적화 전략</li>
+    </ul>
+  </li>
+  <li><strong>컴팩션과 정리 작업</strong>
+    <ul>
+      <li>다양한 컴팩션 전략과 구현</li>
+      <li>컴팩션 성능 최적화</li>
+      <li>자동화된 정리 작업</li>
+    </ul>
+  </li>
+  <li><strong>쿼리 성능 최적화</strong>
+    <ul>
+      <li>파티션/컬럼/파일 프루닝</li>
+      <li>적응형 쿼리 실행</li>
+      <li>물리화된 뷰와 예측적 캐싱</li>
+    </ul>
+  </li>
+  <li><strong>메타데이터 관리와 버전 관리</strong>
+    <ul>
+      <li>메타데이터 캐싱과 압축</li>
+      <li>스냅샷 라이프사이클 관리</li>
+      <li>버전 관리 전략</li>
+    </ul>
+  </li>
+  <li><strong>모니터링과 운영 최적화</strong>
+    <ul>
+      <li>종합 모니터링 시스템</li>
+      <li>자동화된 최적화 규칙</li>
+      <li>성능 튜닝과 리소스 관리</li>
+    </ul>
+  </li>
+  <li><strong>실무 프로젝트</strong>
+    <ul>
+      <li>대규모 클러스터 아키텍처 설계</li>
+      <li>운영 절차와 재해 복구</li>
+      <li>성능 최적화와 비용 관리</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="핵심-기술-스택">핵심 기술 스택</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>기술</th>
+      <th>역할</th>
+      <th>중요도</th>
+      <th>학습 포인트</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>고급 파티셔닝</strong></td>
+      <td>데이터 분할 최적화</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>진화, 숨겨진 파티셔닝, 동적 전략</td>
+    </tr>
+    <tr>
+      <td><strong>컴팩션</strong></td>
+      <td>성능 최적화</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>전략, 자동화, 성능 튜닝</td>
+    </tr>
+    <tr>
+      <td><strong>쿼리 최적화</strong></td>
+      <td>실행 성능 향상</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>프루닝, 적응형 실행, 캐싱</td>
+    </tr>
+    <tr>
+      <td><strong>메타데이터 관리</strong></td>
+      <td>시스템 효율성</td>
+      <td>⭐⭐⭐⭐</td>
+      <td>캐싱, 압축, 버전 관리</td>
+    </tr>
+    <tr>
+      <td><strong>모니터링</strong></td>
+      <td>운영 최적화</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>종합 모니터링, 자동화, 알림</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="다음-part-미리보기">다음 Part 미리보기</h3>
+
+<p><strong>Part 3: Apache Iceberg와 빅데이터 생태계 통합</strong>에서는:</p>
+<ul>
+  <li>Spark, Flink, Presto/Trino 통합</li>
+  <li>Delta Lake, Hudi와의 비교</li>
+  <li>클라우드 스토리지 최적화 (S3, ADLS, GCS)</li>
+  <li>실무 프로젝트: 대규모 데이터 레이크하우스 구축</li>
+</ul>
+
+<hr />
+
+<p><strong>시리즈 진행</strong>: <a href="/data-engineering/2025/09/22/apache-iceberg-advanced-features.html">Apache Iceberg Complete Guide Series</a></p>
+
+<hr />
+
+<p><em>프로덕션급 데이터 플랫폼을 위한 Apache Iceberg 고급 기능을 완전히 정복하세요!</em> 🧊</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+          
+          
+      
+      
+        
+        
+        <a href="/data-engineering/2025/09/21/apache-iceberg-fundamentals.html" class="nav-link prev">
+          ← 이전: Part 1: Apache Iceberg 기초와 테이블 포맷 - 현대적 데이터 레이크하우스의 시작
+        </a>
+      
+      
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
