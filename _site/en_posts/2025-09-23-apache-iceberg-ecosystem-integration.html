@@ -1,0 +1,1981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Complete guide to Apache Iceberg integration with Spark, Flink, Presto/Trino, comparison with Delta Lake and Hudi, cloud storage optimization, and building large-scale data lakehouse through practical projects.">
+
+
+
+<title>Part 3: Apache Iceberg and Big Data Ecosystem Integration - Enterprise Data Platform - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 3: Apache Iceberg and Big Data Ecosystem Integration - Enterprise Data Platform">
+<meta property="og:description" content="Complete guide to Apache Iceberg integration with Spark, Flink, Presto/Trino, comparison with Delta Lake and Hudi, cloud storage optimization, and building large-scale data lakehouse through practical projects.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2025-09-23-apache-iceberg-ecosystem-integration.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 3: Apache Iceberg and Big Data Ecosystem Integration - Enterprise Data Platform">
+<meta name="twitter:description" content="Complete guide to Apache Iceberg integration with Spark, Flink, Presto/Trino, comparison with Delta Lake and Hudi, cloud storage optimization, and building large-scale data lakehouse through practical projects.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2025/09/23/apache-iceberg-ecosystem-integration.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2025-09-23-apache-iceberg-ecosystem-integration.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 23일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 3: Apache Iceberg and Big Data Ecosystem Integration - Enterprise Data Platform</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Iceberg</span>
+      
+        <span class="tag">Spark</span>
+      
+        <span class="tag">Flink</span>
+      
+        <span class="tag">Presto</span>
+      
+        <span class="tag">Trino</span>
+      
+        <span class="tag">Delta-Lake</span>
+      
+        <span class="tag">Hudi</span>
+      
+        <span class="tag">Cloud-Storage</span>
+      
+        <span class="tag">Data-Lakehouse</span>
+      
+        <span class="tag">Big-Data-Ecosystem</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Apache iceberg complete guide 시리즈</span>
+      <span class="series-order">Part 4</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 55 min</span>
+      
+      
+        <span class="difficulty">📊 Advanced</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-3-apache-iceberg-and-big-data-ecosystem-integration---enterprise-data-platform">Part 3: Apache Iceberg and Big Data Ecosystem Integration - Enterprise Data Platform</h1>
+
+<blockquote>
+  <p>Complete guide to Apache Iceberg integration with Spark, Flink, Presto/Trino, comparison with Delta Lake and Hudi, cloud storage optimization, and building large-scale data lakehouse through practical projects.</p>
+</blockquote>
+
+<h2 id="-table-of-contents">📋 Table of Contents</h2>
+
+<ol>
+  <li><a href="#apache-spark-and-iceberg-integration">Apache Spark and Iceberg Integration</a></li>
+  <li><a href="#apache-flink-and-iceberg-integration">Apache Flink and Iceberg Integration</a></li>
+  <li><a href="#prestotrino-and-iceberg-integration">Presto/Trino and Iceberg Integration</a></li>
+  <li><a href="#table-format-comparison-analysis">Table Format Comparison Analysis</a></li>
+  <li><a href="#cloud-storage-optimization">Cloud Storage Optimization</a></li>
+  <li><a href="#practical-project-large-scale-data-lakehouse-construction">Practical Project: Large-scale Data Lakehouse Construction</a></li>
+  <li><a href="#learning-summary">Learning Summary</a></li>
+</ol>
+
+<h2 id="-apache-spark-and-iceberg-integration">🔥 Apache Spark and Iceberg Integration</h2>
+
+<h3 id="spark-iceberg-integration-overview">Spark-Iceberg Integration Overview</h3>
+
+<p>Apache Spark is one of the most powerful partners of Iceberg, providing a perfect combination for large-scale data processing and analytics.</p>
+
+<h3 id="spark-iceberg-integration-strategy">Spark-Iceberg Integration Strategy</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Integration Area</th>
+      <th>Strategy</th>
+      <th>Implementation Method</th>
+      <th>Benefits</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Batch Processing</strong></td>
+      <td>• Spark SQL + Iceberg<br />• DataFrame API Utilization<br />• Partition Optimization</td>
+      <td>• Iceberg Spark Connector<br />• Automatic Partition Pruning<br />• Schema Evolution Support</td>
+      <td>• Large-scale Data Processing<br />• Complex Analytical Queries<br />• Scalability</td>
+    </tr>
+    <tr>
+      <td><strong>Streaming Processing</strong></td>
+      <td>• Structured Streaming<br />• Micro-batch Processing<br />• Real-time Updates</td>
+      <td>• Delta Lake-style Processing<br />• ACID Transactions<br />• Schema Evolution</td>
+      <td>• Real-time Data Processing<br />• Consistency Guarantee<br />• Fault Recovery</td>
+    </tr>
+    <tr>
+      <td><strong>ML Pipeline</strong></td>
+      <td>• MLlib Integration<br />• Feature Store<br />• Model Version Management</td>
+      <td>• Iceberg-based Feature Storage<br />• Experiment Tracking<br />• Model Serving</td>
+      <td>• ML Workflow Integration<br />• Experiment Management<br />• Production Deployment</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="spark-iceberg-integration-implementation">Spark-Iceberg Integration Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SparkIcebergIntegration</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">spark_session</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">iceberg_catalog</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">setup_spark_iceberg_environment</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Spark-Iceberg Environment Setup</span><span class="sh">"""</span>
+        
+        <span class="c1"># Spark Configuration
+</span>        <span class="n">spark_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">spark.sql.extensions</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">spark.sql.catalog.spark_catalog</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">org.apache.iceberg.spark.SparkSessionCatalog</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">spark.sql.catalog.spark_catalog.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">hadoop</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">spark.sql.catalog.spark_catalog.warehouse</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/warehouse</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">spark.sql.defaultCatalog</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">spark_catalog</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Iceberg Configuration
+</span>        <span class="n">iceberg_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">write.target-file-size-bytes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">134217728</span><span class="sh">"</span><span class="p">,</span>  <span class="c1"># 128MB
+</span>            <span class="sh">"</span><span class="s">write.parquet.compression-codec</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">zstd</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">write.metadata.delete-after-commit.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">write.data.delete-mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">copy-on-write</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">spark_config</span><span class="p">,</span> <span class="n">iceberg_config</span>
+    
+    <span class="k">def</span> <span class="nf">demonstrate_spark_iceberg_operations</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Spark-Iceberg Operations Demonstration</span><span class="sh">"""</span>
+        
+        <span class="c1"># Table Creation
+</span>        <span class="n">create_table_sql</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+        CREATE TABLE IF NOT EXISTS spark_catalog.default.user_events (
+            user_id BIGINT,
+            event_type STRING,
+            event_data STRUCT&lt;page_url: STRING, session_id: STRING&gt;,
+            timestamp TIMESTAMP
+        ) USING iceberg
+        PARTITIONED BY (days(timestamp))
+        TBLPROPERTIES (
+            </span><span class="sh">'</span><span class="s">write.target-file-size-bytes</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">134217728</span><span class="sh">'</span><span class="s">,
+            </span><span class="sh">'</span><span class="s">write.parquet.compression-codec</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">zstd</span><span class="sh">'</span><span class="s">
+        )
+        </span><span class="sh">"""</span>
+        
+        <span class="c1"># Data Insertion
+</span>        <span class="n">insert_data_sql</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+        INSERT INTO spark_catalog.default.user_events
+        SELECT 
+            user_id,
+            event_type,
+            struct(page_url, session_id) as event_data,
+            timestamp
+        FROM source_table
+        WHERE timestamp &gt;= </span><span class="sh">'</span><span class="s">2023-01-01</span><span class="sh">'</span><span class="s">
+        </span><span class="sh">"""</span>
+        
+        <span class="c1"># Schema Evolution
+</span>        <span class="n">evolve_schema_sql</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+        ALTER TABLE spark_catalog.default.user_events
+        ADD COLUMN device_type STRING
+        </span><span class="sh">"""</span>
+        
+        <span class="c1"># Partition Evolution
+</span>        <span class="n">evolve_partition_sql</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+        ALTER TABLE spark_catalog.default.user_events
+        ADD PARTITION FIELD hours(timestamp)
+        </span><span class="sh">"""</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">create_table</span><span class="sh">"</span><span class="p">:</span> <span class="n">create_table_sql</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">insert_data</span><span class="sh">"</span><span class="p">:</span> <span class="n">insert_data_sql</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">evolve_schema</span><span class="sh">"</span><span class="p">:</span> <span class="n">evolve_schema_sql</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">evolve_partition</span><span class="sh">"</span><span class="p">:</span> <span class="n">evolve_partition_sql</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="spark-structured-streaming-and-iceberg">Spark Structured Streaming and Iceberg</h3>
+
+<h4 id="streaming-processing-strategy">Streaming Processing Strategy</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Processing Mode</th>
+      <th>Description</th>
+      <th>Implementation Method</th>
+      <th>Use Cases</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Append Mode</strong></td>
+      <td>Add new data only</td>
+      <td>• INSERT INTO<br />• Micro-batch</td>
+      <td>• Log Data<br />• Event Streams</td>
+    </tr>
+    <tr>
+      <td><strong>Update Mode</strong></td>
+      <td>Update existing data</td>
+      <td>• MERGE INTO<br />• Upsert Operations</td>
+      <td>• User Profiles<br />• Order Status</td>
+    </tr>
+    <tr>
+      <td><strong>Complete Mode</strong></td>
+      <td>Rewrite entire table</td>
+      <td>• TRUNCATE + INSERT<br />• Full Scan</td>
+      <td>• Aggregation Tables<br />• Summary Data</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="streaming-processing-implementation">Streaming Processing Implementation</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SparkStreamingIceberg</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">streaming_query</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">setup_streaming_processing</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Streaming Processing Setup</span><span class="sh">"""</span>
+        
+        <span class="c1"># Kafka Source Configuration
+</span>        <span class="n">kafka_source_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user_events</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">startingOffsets</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">latest</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">failOnDataLoss</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Iceberg Sink Configuration
+</span>        <span class="n">iceberg_sink_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">checkpointLocation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/checkpoint/streaming</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">outputMode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">trigger</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">processingTime=30 seconds</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">kafka_source_config</span><span class="p">,</span> <span class="n">iceberg_sink_config</span>
+    
+    <span class="k">def</span> <span class="nf">implement_streaming_pipeline</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Streaming Pipeline Implementation</span><span class="sh">"""</span>
+        
+        <span class="c1"># Streaming Query
+</span>        <span class="n">streaming_query</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+        (spark
+         .readStream
+         .format(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="s">)
+         .option(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="s">, </span><span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="s">)
+         .option(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="s">, </span><span class="sh">"</span><span class="s">user_events</span><span class="sh">"</span><span class="s">)
+         .load()
+         .select(
+             from_json(col(</span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="s">).cast(</span><span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="s">), schema).alias(</span><span class="sh">"</span><span class="s">data</span><span class="sh">"</span><span class="s">)
+         )
+         .select(
+             col(</span><span class="sh">"</span><span class="s">data.user_id</span><span class="sh">"</span><span class="s">).cast(</span><span class="sh">"</span><span class="s">long</span><span class="sh">"</span><span class="s">).alias(</span><span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="s">),
+             col(</span><span class="sh">"</span><span class="s">data.event_type</span><span class="sh">"</span><span class="s">).alias(</span><span class="sh">"</span><span class="s">event_type</span><span class="sh">"</span><span class="s">),
+             struct(
+                 col(</span><span class="sh">"</span><span class="s">data.page_url</span><span class="sh">"</span><span class="s">).alias(</span><span class="sh">"</span><span class="s">page_url</span><span class="sh">"</span><span class="s">),
+                 col(</span><span class="sh">"</span><span class="s">data.session_id</span><span class="sh">"</span><span class="s">).alias(</span><span class="sh">"</span><span class="s">session_id</span><span class="sh">"</span><span class="s">)
+             ).alias(</span><span class="sh">"</span><span class="s">event_data</span><span class="sh">"</span><span class="s">),
+             col(</span><span class="sh">"</span><span class="s">data.timestamp</span><span class="sh">"</span><span class="s">).cast(</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="s">).alias(</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="s">)
+         )
+         .writeStream
+         .format(</span><span class="sh">"</span><span class="s">iceberg</span><span class="sh">"</span><span class="s">)
+         .option(</span><span class="sh">"</span><span class="s">checkpointLocation</span><span class="sh">"</span><span class="s">, </span><span class="sh">"</span><span class="s">/checkpoint/streaming</span><span class="sh">"</span><span class="s">)
+         .trigger(processingTime=</span><span class="sh">"</span><span class="s">30 seconds</span><span class="sh">"</span><span class="s">)
+         .toTable(</span><span class="sh">"</span><span class="s">spark_catalog.default.user_events</span><span class="sh">"</span><span class="s">)
+         .start()
+        )
+        </span><span class="sh">"""</span>
+        
+        <span class="k">return</span> <span class="n">streaming_query</span>
+</code></pre></div></div>
+
+<h2 id="-apache-flink-and-iceberg-integration">⚡ Apache Flink and Iceberg Integration</h2>
+
+<h3 id="flink-iceberg-integration-overview">Flink-Iceberg Integration Overview</h3>
+
+<p>Apache Flink is specialized for real-time streaming processing and can implement real-time data lakehouse through integration with Iceberg.</p>
+
+<h3 id="flink-iceberg-integration-strategy">Flink-Iceberg Integration Strategy</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Integration Area</th>
+      <th>Strategy</th>
+      <th>Implementation Method</th>
+      <th>Benefits</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Streaming Processing</strong></td>
+      <td>• DataStream API<br />• Table API<br />• SQL API</td>
+      <td>• Flink Iceberg Connector<br />• Real-time Snapshots<br />• Exactly-once Processing</td>
+      <td>• Low-latency Processing<br />• High Throughput<br />• Fault Recovery</td>
+    </tr>
+    <tr>
+      <td><strong>Batch Processing</strong></td>
+      <td>• DataSet API<br />• Batch Snapshots<br />• Historical Data Processing</td>
+      <td>• Iceberg Table Reading<br />• Partition Scanning<br />• Schema Evolution</td>
+      <td>• Large-scale Batch Processing<br />• Historical Analysis<br />• Data Migration</td>
+    </tr>
+    <tr>
+      <td><strong>State Management</strong></td>
+      <td>• Flink State Backend<br />• Iceberg Metadata<br />• Checkpoint Integration</td>
+      <td>• State Persistence<br />• Metadata Consistency<br />• Recovery Optimization</td>
+      <td>• State Recovery<br />• Consistency Guarantee<br />• Performance Optimization</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="flink-iceberg-integration-implementation">Flink-Iceberg Integration Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">FlinkIcebergIntegration</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">flink_env</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">table_env</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">setup_flink_iceberg_environment</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Flink-Iceberg Environment Setup</span><span class="sh">"""</span>
+        
+        <span class="c1"># Flink Configuration
+</span>        <span class="n">flink_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">execution.runtime-mode</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">streaming</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">execution.checkpointing.interval</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30s</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">execution.checkpointing.externalized-checkpoint-retention</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">retain-on-cancellation</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">state.backend</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">rocksdb</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">state.checkpoints.dir</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">file:///checkpoints</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Iceberg Configuration
+</span>        <span class="n">iceberg_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">write.target-file-size-bytes</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">134217728</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">write.parquet.compression-codec</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">zstd</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">write.metadata.delete-after-commit.enabled</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">flink_config</span><span class="p">,</span> <span class="n">iceberg_config</span>
+    
+    <span class="k">def</span> <span class="nf">implement_flink_streaming_pipeline</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Flink Streaming Pipeline Implementation</span><span class="sh">"""</span>
+        
+        <span class="c1"># Streaming Processing using Table API
+</span>        <span class="n">streaming_pipeline</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+        # Create Kafka Source Table
+        CREATE TABLE kafka_source (
+            user_id BIGINT,
+            event_type STRING,
+            page_url STRING,
+            session_id STRING,
+            timestamp TIMESTAMP(3),
+            WATERMARK FOR timestamp AS timestamp - INTERVAL </span><span class="sh">'</span><span class="s">5</span><span class="sh">'</span><span class="s"> SECOND
+        ) WITH (
+            </span><span class="sh">'</span><span class="s">connector</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">kafka</span><span class="sh">'</span><span class="s">,
+            </span><span class="sh">'</span><span class="s">topic</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">user_events</span><span class="sh">'</span><span class="s">,
+            </span><span class="sh">'</span><span class="s">properties.bootstrap.servers</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">localhost:9092</span><span class="sh">'</span><span class="s">,
+            </span><span class="sh">'</span><span class="s">format</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">json</span><span class="sh">'</span><span class="s">
+        )
+        
+        # Create Iceberg Sink Table
+        CREATE TABLE iceberg_sink (
+            user_id BIGINT,
+            event_type STRING,
+            event_data STRUCT&lt;page_url STRING, session_id STRING&gt;,
+            timestamp TIMESTAMP
+        ) PARTITIONED BY (days(timestamp))
+        WITH (
+            </span><span class="sh">'</span><span class="s">connector</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">iceberg</span><span class="sh">'</span><span class="s">,
+            </span><span class="sh">'</span><span class="s">catalog-name</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">hadoop_catalog</span><span class="sh">'</span><span class="s">,
+            </span><span class="sh">'</span><span class="s">catalog-type</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">hadoop</span><span class="sh">'</span><span class="s">,
+            </span><span class="sh">'</span><span class="s">warehouse</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">/warehouse</span><span class="sh">'</span><span class="s">,
+            </span><span class="sh">'</span><span class="s">database-name</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">default</span><span class="sh">'</span><span class="s">,
+            </span><span class="sh">'</span><span class="s">table-name</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">user_events</span><span class="sh">'</span><span class="s">
+        )
+        
+        # Execute Streaming Query
+        INSERT INTO iceberg_sink
+        SELECT 
+            user_id,
+            event_type,
+            STRUCT(page_url, session_id) as event_data,
+            timestamp
+        FROM kafka_source
+        WHERE event_type IN (</span><span class="sh">'</span><span class="s">page_view</span><span class="sh">'</span><span class="s">, </span><span class="sh">'</span><span class="s">click</span><span class="sh">'</span><span class="s">, </span><span class="sh">'</span><span class="s">purchase</span><span class="sh">'</span><span class="s">)
+        </span><span class="sh">"""</span>
+        
+        <span class="k">return</span> <span class="n">streaming_pipeline</span>
+    
+    <span class="k">def</span> <span class="nf">implement_flink_batch_processing</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Flink Batch Processing Implementation</span><span class="sh">"""</span>
+        
+        <span class="c1"># Batch Processing Pipeline
+</span>        <span class="n">batch_pipeline</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+        # Historical Data Processing
+        CREATE TABLE historical_data (
+            user_id BIGINT,
+            event_type STRING,
+            event_count BIGINT,
+            processing_date DATE
+        ) PARTITIONED BY (processing_date)
+        WITH (
+            </span><span class="sh">'</span><span class="s">connector</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">iceberg</span><span class="sh">'</span><span class="s">,
+            </span><span class="sh">'</span><span class="s">catalog-name</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">hadoop_catalog</span><span class="sh">'</span><span class="s">,
+            </span><span class="sh">'</span><span class="s">catalog-type</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">hadoop</span><span class="sh">'</span><span class="s">,
+            </span><span class="sh">'</span><span class="s">warehouse</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">/warehouse</span><span class="sh">'</span><span class="s">,
+            </span><span class="sh">'</span><span class="s">database-name</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">default</span><span class="sh">'</span><span class="s">,
+            </span><span class="sh">'</span><span class="s">table-name</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">daily_event_summary</span><span class="sh">'</span><span class="s">
+        )
+        
+        # Daily Event Aggregation
+        INSERT INTO historical_data
+        SELECT 
+            user_id,
+            event_type,
+            COUNT(*) as event_count,
+            DATE(timestamp) as processing_date
+        FROM iceberg_sink
+        WHERE DATE(timestamp) = </span><span class="sh">'</span><span class="s">2023-01-01</span><span class="sh">'</span><span class="s">
+        GROUP BY user_id, event_type, DATE(timestamp)
+        </span><span class="sh">"""</span>
+        
+        <span class="k">return</span> <span class="n">batch_pipeline</span>
+</code></pre></div></div>
+
+<h2 id="-prestotrino-and-iceberg-integration">🚀 Presto/Trino and Iceberg Integration</h2>
+
+<h3 id="prestotrino-iceberg-integration-overview">Presto/Trino-Iceberg Integration Overview</h3>
+
+<p>Presto and Trino are query engines optimized for interactive analytics, providing fast ad-hoc analysis through integration with Iceberg.</p>
+
+<h3 id="prestotrino-iceberg-integration-strategy">Presto/Trino-Iceberg Integration Strategy</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Integration Area</th>
+      <th>Strategy</th>
+      <th>Implementation Method</th>
+      <th>Benefits</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Interactive Queries</strong></td>
+      <td>• SQL Interface<br />• Partition Pruning<br />• Column Pruning</td>
+      <td>• Iceberg Connector<br />• Metadata Caching<br />• Query Optimization</td>
+      <td>• Fast Response Time<br />• Complex Analytics<br />• User-friendly</td>
+    </tr>
+    <tr>
+      <td><strong>Distributed Queries</strong></td>
+      <td>• MPP Architecture<br />• Parallel Processing<br />• Resource Management</td>
+      <td>• Cluster Scaling<br />• Query Scheduling<br />• Memory Management</td>
+      <td>• High Throughput<br />• Scalability<br />• Resource Efficiency</td>
+    </tr>
+    <tr>
+      <td><strong>Metadata Management</strong></td>
+      <td>• Unified Catalog<br />• Schema Inference<br />• Statistics Information</td>
+      <td>• Hive Metastore Integration<br />• AWS Glue Support<br />• Automatic Schema Detection</td>
+      <td>• Unified Management<br />• Automation<br />• Compatibility</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="prestotrino-iceberg-integration-implementation">Presto/Trino-Iceberg Integration Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">PrestoTrinoIcebergIntegration</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">catalog_config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">query_optimizer</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">setup_presto_trino_catalog</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Presto/Trino Catalog Setup</span><span class="sh">"""</span>
+        
+        <span class="c1"># Iceberg Catalog Configuration
+</span>        <span class="n">catalog_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">connector.name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">iceberg</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">hive.metastore.uri</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">thrift://localhost:9083</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">iceberg.catalog.type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">hive_metastore</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">iceberg.catalog.warehouse</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">/warehouse</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">iceberg.file-format</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">PARQUET</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">iceberg.compression-codec</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">ZSTD</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Query Optimization Configuration
+</span>        <span class="n">optimization_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">optimizer.use-mark-distinct</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">optimizer.optimize-metadata-queries</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">optimizer.partition-pruning</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">optimizer.column-pruning</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">catalog_config</span><span class="p">,</span> <span class="n">optimization_config</span>
+    
+    <span class="k">def</span> <span class="nf">demonstrate_analytical_queries</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Analytical Queries Demonstration</span><span class="sh">"""</span>
+        
+        <span class="c1"># Complex Analytical Queries
+</span>        <span class="n">analytical_queries</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">user_behavior_analysis</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"""</span><span class="s">
+            SELECT 
+                user_id,
+                COUNT(*) as total_events,
+                COUNT(DISTINCT event_type) as unique_event_types,
+                COUNT(DISTINCT DATE(timestamp)) as active_days,
+                MAX(timestamp) as last_activity,
+                AVG(CASE WHEN event_type = </span><span class="sh">'</span><span class="s">purchase</span><span class="sh">'</span><span class="s"> THEN 1 ELSE 0 END) as purchase_rate
+            FROM iceberg.default.user_events
+            WHERE timestamp &gt;= CURRENT_DATE - INTERVAL </span><span class="sh">'</span><span class="s">30</span><span class="sh">'</span><span class="s"> DAY
+            GROUP BY user_id
+            HAVING COUNT(*) &gt;= 10
+            ORDER BY total_events DESC
+            LIMIT 100
+            </span><span class="sh">"""</span><span class="p">,</span>
+            
+            <span class="sh">"</span><span class="s">real_time_metrics</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"""</span><span class="s">
+            WITH hourly_metrics AS (
+                SELECT 
+                    DATE_TRUNC(</span><span class="sh">'</span><span class="s">hour</span><span class="sh">'</span><span class="s">, timestamp) as hour,
+                    event_type,
+                    COUNT(*) as event_count,
+                    COUNT(DISTINCT user_id) as unique_users
+                FROM iceberg.default.user_events
+                WHERE timestamp &gt;= CURRENT_TIMESTAMP - INTERVAL </span><span class="sh">'</span><span class="s">24</span><span class="sh">'</span><span class="s"> HOUR
+                GROUP BY DATE_TRUNC(</span><span class="sh">'</span><span class="s">hour</span><span class="sh">'</span><span class="s">, timestamp), event_type
+            )
+            SELECT 
+                hour,
+                SUM(event_count) as total_events,
+                SUM(unique_users) as total_unique_users,
+                COUNT(DISTINCT event_type) as event_types
+            FROM hourly_metrics
+            GROUP BY hour
+            ORDER BY hour DESC
+            </span><span class="sh">"""</span><span class="p">,</span>
+            
+            <span class="sh">"</span><span class="s">funnel_analysis</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"""</span><span class="s">
+            WITH user_journey AS (
+                SELECT 
+                    user_id,
+                    session_id,
+                    timestamp,
+                    event_type,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY user_id, session_id 
+                        ORDER BY timestamp
+                    ) as step_number
+                FROM iceberg.default.user_events
+                WHERE timestamp &gt;= CURRENT_DATE - INTERVAL </span><span class="sh">'</span><span class="s">7</span><span class="sh">'</span><span class="s"> DAY
+            ),
+            funnel_steps AS (
+                SELECT 
+                    step_number,
+                    event_type,
+                    COUNT(DISTINCT CONCAT(user_id, </span><span class="sh">'</span><span class="s">-</span><span class="sh">'</span><span class="s">, session_id)) as sessions
+                FROM user_journey
+                WHERE step_number &lt;= 5
+                GROUP BY step_number, event_type
+            )
+            SELECT 
+                step_number,
+                event_type,
+                sessions,
+                LAG(sessions) OVER (ORDER BY step_number) as previous_step_sessions,
+                ROUND(sessions * 100.0 / LAG(sessions) OVER (ORDER BY step_number), 2) as conversion_rate
+            FROM funnel_steps
+            ORDER BY step_number, event_type
+            </span><span class="sh">"""</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">analytical_queries</span>
+    
+    <span class="k">def</span> <span class="nf">implement_performance_optimization</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Performance Optimization Implementation</span><span class="sh">"""</span>
+        
+        <span class="c1"># Query Optimization Strategies
+</span>        <span class="n">optimization_strategies</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">partition_pruning</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">I/O optimization through partition pruning</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">implementation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Add partition column conditions in WHERE clause</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">benefit</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Reduce number of partitions to scan</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">column_pruning</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">I/O optimization by selecting only necessary columns</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">implementation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Specify only required columns in SELECT clause</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">benefit</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Reduce network and memory usage</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">predicate_pushdown</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Push filter conditions to storage level</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">implementation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Optimize WHERE clause conditions</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">benefit</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Reduce I/O through storage-level filtering</span><span class="sh">"</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">statistics_utilization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Utilize table statistics information</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">implementation</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Update statistics with ANALYZE TABLE command</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">benefit</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Query planner optimization</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">optimization_strategies</span>
+</code></pre></div></div>
+
+<h2 id="-table-format-comparison-analysis">🔄 Table Format Comparison Analysis</h2>
+
+<h3 id="major-table-format-comparison">Major Table Format Comparison</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Characteristic</th>
+      <th>Apache Iceberg</th>
+      <th>Delta Lake</th>
+      <th>Apache Hudi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Developer</strong></td>
+      <td>Netflix → Apache</td>
+      <td>Databricks</td>
+      <td>Uber → Apache</td>
+    </tr>
+    <tr>
+      <td><strong>Primary Language</strong></td>
+      <td>Java, Python, Scala</td>
+      <td>Scala, Python, Java</td>
+      <td>Java, Scala</td>
+    </tr>
+    <tr>
+      <td><strong>Schema Evolution</strong></td>
+      <td>✅ Full Support</td>
+      <td>✅ Full Support</td>
+      <td>✅ Full Support</td>
+    </tr>
+    <tr>
+      <td><strong>Partition Evolution</strong></td>
+      <td>✅ Full Support</td>
+      <td>❌ Not Supported</td>
+      <td>✅ Partial Support</td>
+    </tr>
+    <tr>
+      <td><strong>ACID Transactions</strong></td>
+      <td>✅ Full Support</td>
+      <td>✅ Full Support</td>
+      <td>✅ Full Support</td>
+    </tr>
+    <tr>
+      <td><strong>Time Travel</strong></td>
+      <td>✅ Supported</td>
+      <td>✅ Supported</td>
+      <td>✅ Supported</td>
+    </tr>
+    <tr>
+      <td><strong>Cloud Support</strong></td>
+      <td>✅ Excellent</td>
+      <td>✅ Excellent</td>
+      <td>🟡 Good</td>
+    </tr>
+    <tr>
+      <td><strong>Performance</strong></td>
+      <td>🟢 Optimized</td>
+      <td>🟢 Optimized</td>
+      <td>🟡 Good</td>
+    </tr>
+    <tr>
+      <td><strong>Ecosystem</strong></td>
+      <td>🟢 Extensive</td>
+      <td>🟢 Spark-centric</td>
+      <td>🟡 Limited</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="detailed-feature-comparison">Detailed Feature Comparison</h3>
+
+<h4 id="schema-management">Schema Management</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Iceberg</th>
+      <th>Delta Lake</th>
+      <th>Hudi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Schema Addition</strong></td>
+      <td>✅ Backward Compatible</td>
+      <td>✅ Backward Compatible</td>
+      <td>✅ Backward Compatible</td>
+    </tr>
+    <tr>
+      <td><strong>Schema Deletion</strong></td>
+      <td>✅ Backward Compatible</td>
+      <td>✅ Backward Compatible</td>
+      <td>✅ Backward Compatible</td>
+    </tr>
+    <tr>
+      <td><strong>Type Change</strong></td>
+      <td>✅ Conditionally Compatible</td>
+      <td>✅ Conditionally Compatible</td>
+      <td>✅ Conditionally Compatible</td>
+    </tr>
+    <tr>
+      <td><strong>Schema Registry</strong></td>
+      <td>✅ Supported</td>
+      <td>✅ Supported</td>
+      <td>❌ Not Supported</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="partitioning">Partitioning</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Iceberg</th>
+      <th>Delta Lake</th>
+      <th>Hudi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Partition Addition</strong></td>
+      <td>✅ Runtime</td>
+      <td>❌ Requires Reconfiguration</td>
+      <td>✅ Runtime</td>
+    </tr>
+    <tr>
+      <td><strong>Partition Deletion</strong></td>
+      <td>✅ Runtime</td>
+      <td>❌ Requires Reconfiguration</td>
+      <td>✅ Runtime</td>
+    </tr>
+    <tr>
+      <td><strong>Partition Transformation</strong></td>
+      <td>✅ Runtime</td>
+      <td>❌ Requires Reconfiguration</td>
+      <td>✅ Runtime</td>
+    </tr>
+    <tr>
+      <td><strong>Hidden Partitioning</strong></td>
+      <td>✅ Supported</td>
+      <td>❌ Not Supported</td>
+      <td>❌ Not Supported</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="performance-characteristics">Performance Characteristics</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Characteristic</th>
+      <th>Iceberg</th>
+      <th>Delta Lake</th>
+      <th>Hudi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Read Performance</strong></td>
+      <td>🟢 Optimized</td>
+      <td>🟢 Optimized</td>
+      <td>🟡 Good</td>
+    </tr>
+    <tr>
+      <td><strong>Write Performance</strong></td>
+      <td>🟢 Optimized</td>
+      <td>🟢 Optimized</td>
+      <td>🟡 Good</td>
+    </tr>
+    <tr>
+      <td><strong>Commit Performance</strong></td>
+      <td>🟢 Fast</td>
+      <td>🟡 Good</td>
+      <td>🟡 Good</td>
+    </tr>
+    <tr>
+      <td><strong>Metadata Size</strong></td>
+      <td>🟢 Small</td>
+      <td>🟡 Good</td>
+      <td>🔴 Large</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="selection-guide">Selection Guide</h3>
+
+<h4 id="iceberg-selection-scenarios">Iceberg Selection Scenarios</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Scenario</th>
+      <th>Reason</th>
+      <th>Implementation Method</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Multiple Query Engines</strong></td>
+      <td>• Spark, Flink, Presto/Trino Support<br />• Vendor Neutrality</td>
+      <td>• Unified Catalog Construction<br />• Standard SQL Interface</td>
+    </tr>
+    <tr>
+      <td><strong>Partition Evolution</strong></td>
+      <td>• Runtime Partition Changes<br />• Hidden Partitioning</td>
+      <td>• Gradual Partition Strategy<br />• Automatic Optimization</td>
+    </tr>
+    <tr>
+      <td><strong>Cloud Native</strong></td>
+      <td>• S3, ADLS, GCS Optimization<br />• Object Storage Friendly</td>
+      <td>• Cloud Storage Integration<br />• Cost Optimization</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="delta-lake-selection-scenarios">Delta Lake Selection Scenarios</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Scenario</th>
+      <th>Reason</th>
+      <th>Implementation Method</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Spark-centric</strong></td>
+      <td>• Spark Ecosystem Integration<br />• Databricks Support</td>
+      <td>• Spark-based Pipelines<br />• Databricks Platform</td>
+    </tr>
+    <tr>
+      <td><strong>ML/AI Workloads</strong></td>
+      <td>• MLlib Integration<br />• Feature Store</td>
+      <td>• ML Pipeline Construction<br />• Experiment Management</td>
+    </tr>
+    <tr>
+      <td><strong>Existing Spark Users</strong></td>
+      <td>• Minimal Learning Curve<br />• Code Reuse</td>
+      <td>• Gradual Migration<br />• Compatibility Maintenance</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="hudi-selection-scenarios">Hudi Selection Scenarios</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Scenario</th>
+      <th>Reason</th>
+      <th>Implementation Method</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Real-time Processing</strong></td>
+      <td>• Streaming Optimization<br />• Low-latency Updates</td>
+      <td>• Kafka Integration<br />• Real-time Pipelines</td>
+    </tr>
+    <tr>
+      <td><strong>CDC (Change Data Capture)</strong></td>
+      <td>• Database Change Detection<br />• Real-time Synchronization</td>
+      <td>• Debezium Integration<br />• CDC Pipelines</td>
+    </tr>
+    <tr>
+      <td><strong>Upsert-centric</strong></td>
+      <td>• Frequent Updates<br />• Deduplication</td>
+      <td>• Upsert Strategy<br />• Data Quality Management</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="️-cloud-storage-optimization">☁️ Cloud Storage Optimization</h2>
+
+<h3 id="cloud-storage-comparison">Cloud Storage Comparison</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Storage</th>
+      <th>Iceberg Support</th>
+      <th>Optimization Features</th>
+      <th>Cost Model</th>
+      <th>Performance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Amazon S3</strong></td>
+      <td>✅ Full Support</td>
+      <td>• Intelligent Tiering<br />• S3 Select<br />• Transfer Acceleration</td>
+      <td>• Storage Class-based Pricing<br />• Request-based Pricing</td>
+      <td>🟢 Excellent</td>
+    </tr>
+    <tr>
+      <td><strong>Azure Data Lake Storage</strong></td>
+      <td>✅ Full Support</td>
+      <td>• Hierarchical Namespace<br />• Blob Storage Integration<br />• Azure Analytics</td>
+      <td>• Hot/Cool/Archive<br />• Access Frequency-based</td>
+      <td>🟢 Excellent</td>
+    </tr>
+    <tr>
+      <td><strong>Google Cloud Storage</strong></td>
+      <td>✅ Full Support</td>
+      <td>• Lifecycle Management<br />• Nearline/Coldline<br />• Transfer Service</td>
+      <td>• Storage Class-based Pricing<br />• Network Pricing</td>
+      <td>🟢 Excellent</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="cloud-specific-optimization-strategies">Cloud-specific Optimization Strategies</h3>
+
+<h4 id="amazon-s3-optimization">Amazon S3 Optimization</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Optimization Area</th>
+      <th>Strategy</th>
+      <th>Implementation Method</th>
+      <th>Effect</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Storage Classes</strong></td>
+      <td>• Intelligent Tiering<br />• Automatic Lifecycle</td>
+      <td>• S3 Lifecycle Policies<br />• Access Pattern Analysis</td>
+      <td>• 40-60% Cost Savings<br />• Automatic Optimization</td>
+    </tr>
+    <tr>
+      <td><strong>Transfer Optimization</strong></td>
+      <td>• Transfer Acceleration<br />• Multipart Upload</td>
+      <td>• CloudFront Integration<br />• Parallel Upload</td>
+      <td>• 50-500% Speed Improvement<br />• Stability Enhancement</td>
+    </tr>
+    <tr>
+      <td><strong>Request Optimization</strong></td>
+      <td>• S3 Select<br />• Glacier Select</td>
+      <td>• Column-based Queries<br />• Direct Compressed Data Queries</td>
+      <td>• 80% Network Reduction<br />• Query Speed Improvement</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="azure-data-lake-storage-optimization">Azure Data Lake Storage Optimization</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Optimization Area</th>
+      <th>Strategy</th>
+      <th>Implementation Method</th>
+      <th>Effect</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Hierarchical Namespace</strong></td>
+      <td>• Directory-based Policies<br />• Metadata Optimization</td>
+      <td>• ACL-based Access Control<br />• Per-directory Policies</td>
+      <td>• Enhanced Security<br />• Management Efficiency</td>
+    </tr>
+    <tr>
+      <td><strong>Storage Tiers</strong></td>
+      <td>• Hot/Cool/Archive<br />• Automatic Tier Movement</td>
+      <td>• Lifecycle Policies<br />• Access Pattern-based Movement</td>
+      <td>• 30-70% Cost Savings<br />• Automatic Management</td>
+    </tr>
+    <tr>
+      <td><strong>Analytics Integration</strong></td>
+      <td>• Azure Synapse<br />• Azure Databricks</td>
+      <td>• Native Integration<br />• Optimized Connectors</td>
+      <td>• Performance Enhancement<br />• Unified Management</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="google-cloud-storage-optimization">Google Cloud Storage Optimization</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Optimization Area</th>
+      <th>Strategy</th>
+      <th>Implementation Method</th>
+      <th>Effect</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Lifecycle Management</strong></td>
+      <td>• Automatic Class Changes<br />• Deletion Policies</td>
+      <td>• Lifecycle Rules<br />• Condition-based Policies</td>
+      <td>• 40-80% Cost Savings<br />• Automatic Management</td>
+    </tr>
+    <tr>
+      <td><strong>Transfer Optimization</strong></td>
+      <td>• Transfer Service<br />• Parallel Processing</td>
+      <td>• Large Data Transfer<br />• Network Optimization</td>
+      <td>• Transfer Speed Improvement<br />• Stability Enhancement</td>
+    </tr>
+    <tr>
+      <td><strong>Security Optimization</strong></td>
+      <td>• IAM Integration<br />• Encryption</td>
+      <td>• Fine-grained Permission Management<br />• Customer-managed Keys</td>
+      <td>• Enhanced Security<br />• Compliance</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="cloud-storage-optimization-implementation">Cloud Storage Optimization Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CloudStorageOptimizer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">storage_configs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">optimization_rules</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_s3_optimization</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">S3 Optimization Setup</span><span class="sh">"""</span>
+        
+        <span class="c1"># Storage Class Optimization
+</span>        <span class="n">storage_class_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">standard</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">use_case</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Frequently accessed data</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">retention</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30_days</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">cost_per_gb</span><span class="sh">"</span><span class="p">:</span> <span class="mf">0.023</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">standard_ia</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">use_case</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Occasionally accessed data</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">retention</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">90_days</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">cost_per_gb</span><span class="sh">"</span><span class="p">:</span> <span class="mf">0.0125</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">glacier</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">use_case</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Long-term archived data</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">retention</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">365_days</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">cost_per_gb</span><span class="sh">"</span><span class="p">:</span> <span class="mf">0.004</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">intelligent_tiering</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">use_case</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Data with irregular access patterns</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">automation</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">cost_per_gb</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">variable</span><span class="sh">"</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Lifecycle Policy
+</span>        <span class="n">lifecycle_policy</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">rules</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">IcebergDataLifecycle</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Enabled</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transitions</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">days</span><span class="sh">"</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">storage_class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">STANDARD_IA</span><span class="sh">"</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">days</span><span class="sh">"</span><span class="p">:</span> <span class="mi">90</span><span class="p">,</span>
+                            <span class="sh">"</span><span class="s">storage_class</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">GLACIER</span><span class="sh">"</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">expiration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">days</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2555</span>  <span class="c1"># 7 years
+</span>                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">storage_class_config</span><span class="p">,</span> <span class="n">lifecycle_policy</span>
+    
+    <span class="k">def</span> <span class="nf">setup_azure_optimization</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Azure Storage Optimization Setup</span><span class="sh">"""</span>
+        
+        <span class="c1"># Storage Tier Configuration
+</span>        <span class="n">storage_tiers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">hot</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">use_case</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Frequently accessed data</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">retention</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30_days</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">cost_per_gb</span><span class="sh">"</span><span class="p">:</span> <span class="mf">0.0184</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">cool</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">use_case</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Occasionally accessed data</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">retention</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">90_days</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">cost_per_gb</span><span class="sh">"</span><span class="p">:</span> <span class="mf">0.01</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">archive</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">use_case</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Long-term archived data</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">retention</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">365_days</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">cost_per_gb</span><span class="sh">"</span><span class="p">:</span> <span class="mf">0.00099</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Lifecycle Management Policy
+</span>        <span class="n">lifecycle_management</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">rules</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">IcebergDataLifecycle</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">enabled</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Lifecycle</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">definition</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">filters</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">blob_types</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">blockBlob</span><span class="sh">"</span><span class="p">],</span>
+                            <span class="sh">"</span><span class="s">prefix_match</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">iceberg/</span><span class="sh">"</span><span class="p">]</span>
+                        <span class="p">},</span>
+                        <span class="sh">"</span><span class="s">actions</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="sh">"</span><span class="s">base_blob</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="sh">"</span><span class="s">tier_to_cool</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="sh">"</span><span class="s">days_after_modification_greater_than</span><span class="sh">"</span><span class="p">:</span> <span class="mi">30</span>
+                                <span class="p">},</span>
+                                <span class="sh">"</span><span class="s">tier_to_archive</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="sh">"</span><span class="s">days_after_modification_greater_than</span><span class="sh">"</span><span class="p">:</span> <span class="mi">90</span>
+                                <span class="p">},</span>
+                                <span class="sh">"</span><span class="s">delete</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="sh">"</span><span class="s">days_after_modification_greater_than</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2555</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">storage_tiers</span><span class="p">,</span> <span class="n">lifecycle_management</span>
+    
+    <span class="k">def</span> <span class="nf">setup_gcs_optimization</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Google Cloud Storage Optimization Setup</span><span class="sh">"""</span>
+        
+        <span class="c1"># Storage Class Configuration
+</span>        <span class="n">storage_classes</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">standard</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">use_case</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Frequently accessed data</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">retention</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30_days</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">cost_per_gb</span><span class="sh">"</span><span class="p">:</span> <span class="mf">0.02</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">nearline</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">use_case</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Data accessed monthly</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">retention</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30_days</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">cost_per_gb</span><span class="sh">"</span><span class="p">:</span> <span class="mf">0.01</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">coldline</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">use_case</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Data accessed quarterly</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">retention</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">90_days</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">cost_per_gb</span><span class="sh">"</span><span class="p">:</span> <span class="mf">0.007</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">archive</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">use_case</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Data accessed annually</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">retention</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">365_days</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">cost_per_gb</span><span class="sh">"</span><span class="p">:</span> <span class="mf">0.0012</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Lifecycle Rules
+</span>        <span class="n">lifecycle_rules</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">rules</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">SetStorageClass</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">storageClass</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">nearline</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">condition</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">:</span> <span class="mi">30</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">SetStorageClass</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">storageClass</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">coldline</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">condition</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">:</span> <span class="mi">90</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">SetStorageClass</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">storageClass</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">archive</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">condition</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">:</span> <span class="mi">365</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">action</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Delete</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">condition</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2555</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">storage_classes</span><span class="p">,</span> <span class="n">lifecycle_rules</span>
+</code></pre></div></div>
+
+<h2 id="️-practical-project-large-scale-data-lakehouse-construction">🏗️ Practical Project: Large-scale Data Lakehouse Construction</h2>
+
+<h3 id="project-overview">Project Overview</h3>
+
+<p>Building an Iceberg-based data lakehouse for a large-scale e-commerce platform, integrating various query engines and cloud storage.</p>
+
+<h3 id="system-architecture">System Architecture</h3>
+
+<h4 id="overall-architecture">Overall Architecture</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Components</th>
+      <th>Technology Stack</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Data Ingestion</strong></td>
+      <td>• Real-time Streams<br />• Batch Files<br />• API Data</td>
+      <td>• Kafka, Flink<br />• Spark, Airflow<br />• REST API</td>
+      <td>• Data Collection<br />• Real-time Processing<br />• Batch Processing</td>
+    </tr>
+    <tr>
+      <td><strong>Data Storage</strong></td>
+      <td>• Raw Data<br />• Refined Data<br />• Aggregated Data</td>
+      <td>• Iceberg Tables<br />• S3/ADLS/GCS<br />• Partitioning</td>
+      <td>• Data Storage<br />• Version Management<br />• Schema Evolution</td>
+    </tr>
+    <tr>
+      <td><strong>Data Processing</strong></td>
+      <td>• ETL/ELT<br />• Real-time Analytics<br />• ML Pipeline</td>
+      <td>• Spark, Flink<br />• Presto/Trino<br />• MLlib, TensorFlow</td>
+      <td>• Data Transformation<br />• Analytical Processing<br />• ML Modeling</td>
+    </tr>
+    <tr>
+      <td><strong>Data Serving</strong></td>
+      <td>• BI Tools<br />• API Services<br />• Real-time Dashboards</td>
+      <td>• Tableau, PowerBI<br />• REST API<br />• Grafana, Kibana</td>
+      <td>• Data Visualization<br />• API Provision<br />• Monitoring</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="data-domain-design">Data Domain Design</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Data Domain</th>
+      <th>Table Count</th>
+      <th>Data Volume</th>
+      <th>Partition Strategy</th>
+      <th>Retention Policy</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>User Analytics</strong></td>
+      <td>25 tables</td>
+      <td>500TB</td>
+      <td>Date + User Bucket</td>
+      <td>7 years</td>
+    </tr>
+    <tr>
+      <td><strong>Order Analytics</strong></td>
+      <td>15 tables</td>
+      <td>300TB</td>
+      <td>Date + Region</td>
+      <td>10 years</td>
+    </tr>
+    <tr>
+      <td><strong>Product Catalog</strong></td>
+      <td>10 tables</td>
+      <td>50TB</td>
+      <td>Category</td>
+      <td>Permanent</td>
+    </tr>
+    <tr>
+      <td><strong>Marketing Analytics</strong></td>
+      <td>20 tables</td>
+      <td>200TB</td>
+      <td>Campaign + Date</td>
+      <td>5 years</td>
+    </tr>
+    <tr>
+      <td><strong>Financial Analytics</strong></td>
+      <td>12 tables</td>
+      <td>100TB</td>
+      <td>Monthly</td>
+      <td>15 years</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="project-implementation">Project Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">EnterpriseDataLakehouse</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">catalog_manager</span> <span class="o">=</span> <span class="nc">CatalogManager</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">schema_registry</span> <span class="o">=</span> <span class="nc">SchemaRegistry</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">data_governance</span> <span class="o">=</span> <span class="nc">DataGovernance</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">design_data_architecture</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Data Architecture Design</span><span class="sh">"""</span>
+        
+        <span class="n">architecture</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">data_layers</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">bronze_layer</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">purpose</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Raw data storage</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">user_events_raw</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">order_events_raw</span><span class="sh">"</span><span class="p">,</span> 
+                        <span class="sh">"</span><span class="s">product_updates_raw</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">marketing_events_raw</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">partitioning</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">hourly</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">retention</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30_days</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">format</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">parquet</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">compression</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">snappy</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">silver_layer</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">purpose</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Refined data storage</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">user_events_cleaned</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">order_events_cleaned</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">product_catalog</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">marketing_campaigns</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">partitioning</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">daily</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">retention</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">7_years</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">format</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">parquet</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">compression</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">zstd</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">gold_layer</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">purpose</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Business analytics aggregated data</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="sh">"</span><span class="s">user_behavior_summary</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">daily_sales_summary</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">product_performance</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">marketing_effectiveness</span><span class="sh">"</span>
+                    <span class="p">],</span>
+                    <span class="sh">"</span><span class="s">partitioning</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">monthly</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">retention</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">10_years</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">format</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">parquet</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">compression</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">zstd</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">integration_patterns</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">real_time_ingestion</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">source</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Kafka topics</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">processing</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Apache Flink</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">destination</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Bronze layer</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">latency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">&lt; 5 minutes</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">batch_processing</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">source</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">External systems</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">processing</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Apache Spark</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">destination</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Silver/Gold layers</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">frequency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">daily</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">streaming_analytics</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">source</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Bronze layer</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">processing</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Apache Flink + Spark</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">destination</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Gold layer</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">latency</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">&lt; 30 minutes</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">architecture</span>
+    
+    <span class="k">def</span> <span class="nf">implement_multi_engine_integration</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Multi-engine Integration Implementation</span><span class="sh">"""</span>
+        
+        <span class="n">integration_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">spark_integration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">use_cases</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">ETL jobs</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Batch analytics</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">ML pipelines</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">user_events_processed</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">order_analytics</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">ml_features</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">target_file_size</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">128MB</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">compression</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">zstd</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">partitioning</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">adaptive</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">flink_integration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">use_cases</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Real-time streaming</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Event processing</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Real-time aggregation</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">real_time_metrics</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">streaming_events</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">live_dashboards</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">checkpoint_interval</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30s</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">parallelism</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">auto</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">state_backend</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">rocksdb</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">presto_trino_integration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">use_cases</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">Interactive analytics</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">Ad-hoc queries</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">BI tool integration</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">tables</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">"</span><span class="s">analytical_views</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">summary_tables</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">reporting_data</span><span class="sh">"</span>
+                <span class="p">],</span>
+                <span class="sh">"</span><span class="s">optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">metadata_caching</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">query_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">parallel_execution</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">integration_config</span>
+    
+    <span class="k">def</span> <span class="nf">setup_cloud_optimization</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Cloud Optimization Setup</span><span class="sh">"""</span>
+        
+        <span class="n">cloud_optimization</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">storage_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">s3_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">storage_classes</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">standard</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Frequently accessed data (30 days)</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">standard_ia</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Occasionally accessed data (90 days)</span><span class="sh">"</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">glacier</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Long-term archived data (365 days)</span><span class="sh">"</span>
+                    <span class="p">},</span>
+                    <span class="sh">"</span><span class="s">lifecycle_policies</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="sh">"</span><span class="s">automated_tiering</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">cost_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                        <span class="sh">"</span><span class="s">retention_management</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">performance_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">intelligent_tiering</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">transfer_acceleration</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">s3_select</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">compute_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">auto_scaling</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">spark_cluster</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">CPU-based scaling</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">flink_cluster</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Throughput-based scaling</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">presto_cluster</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Query queue-based scaling</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">resource_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">spot_instances</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">70% cost savings</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">reserved_instances</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">30% stability</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">right_sizing</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Monthly optimization</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">"</span><span class="s">cost_optimization</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">storage_costs</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">current_monthly</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">$15,000</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">optimized_monthly</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">$8,500</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">savings_percentage</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">43%</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">compute_costs</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">current_monthly</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">$25,000</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">optimized_monthly</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">$18,000</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">savings_percentage</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">28%</span><span class="sh">"</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">total_savings</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">monthly</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">$13,500</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">annual</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">$162,000</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="sh">"</span><span class="s">savings_percentage</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">34%</span><span class="sh">"</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">cloud_optimization</span>
+</code></pre></div></div>
+
+<h3 id="data-governance-and-quality-management">Data Governance and Quality Management</h3>
+
+<h4 id="data-governance-framework">Data Governance Framework</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Governance Area</th>
+      <th>Policy</th>
+      <th>Implementation Method</th>
+      <th>Responsible</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Data Quality</strong></td>
+      <td>• Completeness &gt; 95%<br />• Accuracy &gt; 99%<br />• Consistency Validation</td>
+      <td>• Automated Quality Checks<br />• Data Profiling<br />• Outlier Detection</td>
+      <td>Data Quality Team</td>
+    </tr>
+    <tr>
+      <td><strong>Data Security</strong></td>
+      <td>• Encryption (Storage/Transit)<br />• Access Control (RBAC)<br />• Audit Logging</td>
+      <td>• KMS Key Management<br />• IAM Policies<br />• CloudTrail Logging</td>
+      <td>Security Team</td>
+    </tr>
+    <tr>
+      <td><strong>Data Lifecycle</strong></td>
+      <td>• Retention Policies<br />• Deletion Policies<br />• Archive Policies</td>
+      <td>• Automated Lifecycle<br />• Policy Engine<br />• Compliance Checks</td>
+      <td>Data Architect</td>
+    </tr>
+    <tr>
+      <td><strong>Metadata Management</strong></td>
+      <td>• Schema Registry<br />• Data Lineage<br />• Business Glossary</td>
+      <td>• Automated Metadata Collection<br />• Lineage Tracking<br />• Glossary Management</td>
+      <td>Data Steward</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="data-quality-monitoring">Data Quality Monitoring</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Quality Metric</th>
+      <th>Measurement Method</th>
+      <th>Threshold</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Completeness</strong></td>
+      <td>NULL value ratio</td>
+      <td>&lt; 5%</td>
+      <td>Data collection review</td>
+    </tr>
+    <tr>
+      <td><strong>Accuracy</strong></td>
+      <td>Business rule validation</td>
+      <td>&gt; 99%</td>
+      <td>Data transformation logic review</td>
+    </tr>
+    <tr>
+      <td><strong>Consistency</strong></td>
+      <td>Referential integrity check</td>
+      <td>100%</td>
+      <td>Relational constraint review</td>
+    </tr>
+    <tr>
+      <td><strong>Timeliness</strong></td>
+      <td>Data refresh delay</td>
+      <td>&lt; 1 hour</td>
+      <td>Pipeline performance optimization</td>
+    </tr>
+    <tr>
+      <td><strong>Validity</strong></td>
+      <td>Data type validation</td>
+      <td>100%</td>
+      <td>Schema validation enhancement</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="operational-monitoring-and-alerting">Operational Monitoring and Alerting</h3>
+
+<h4 id="monitoring-dashboards">Monitoring Dashboards</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Dashboard</th>
+      <th>Target</th>
+      <th>Key Metrics</th>
+      <th>Refresh Interval</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Operations Dashboard</strong></td>
+      <td>Operations Team</td>
+      <td>• System Status<br />• Throughput<br />• Error Rate</td>
+      <td>1 minute</td>
+    </tr>
+    <tr>
+      <td><strong>Business Dashboard</strong></td>
+      <td>Business Team</td>
+      <td>• Data Quality<br />• Processing Delay<br />• Cost Trends</td>
+      <td>5 minutes</td>
+    </tr>
+    <tr>
+      <td><strong>Developer Dashboard</strong></td>
+      <td>Development Team</td>
+      <td>• Pipeline Performance<br />• Query Performance<br />• Resource Utilization</td>
+      <td>1 minute</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="alert-rules">Alert Rules</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Alert Type</th>
+      <th>Condition</th>
+      <th>Severity</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>System Alert</strong></td>
+      <td>CPU &gt; 80%</td>
+      <td>Warning</td>
+      <td>Scale up</td>
+    </tr>
+    <tr>
+      <td><strong>Data Alert</strong></td>
+      <td>Quality score &lt; 90%</td>
+      <td>Critical</td>
+      <td>Data team notification</td>
+    </tr>
+    <tr>
+      <td><strong>Performance Alert</strong></td>
+      <td>Query time &gt; 5 minutes</td>
+      <td>Warning</td>
+      <td>Query optimization</td>
+    </tr>
+    <tr>
+      <td><strong>Cost Alert</strong></td>
+      <td>Daily cost &gt; $2,000</td>
+      <td>Warning</td>
+      <td>Cost review</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-learning-summary">📚 Learning Summary</h2>
+
+<h3 id="what-we-learned-in-this-part">What We Learned in This Part</h3>
+
+<ol>
+  <li><strong>Apache Spark and Iceberg Integration</strong>
+    <ul>
+      <li>Batch processing, streaming processing, ML pipeline integration</li>
+      <li>Structured Streaming and Iceberg integration</li>
+      <li>Performance optimization strategies</li>
+    </ul>
+  </li>
+  <li><strong>Apache Flink and Iceberg Integration</strong>
+    <ul>
+      <li>Real-time streaming processing integration</li>
+      <li>State management and checkpoint integration</li>
+      <li>Combination of batch and streaming processing</li>
+    </ul>
+  </li>
+  <li><strong>Presto/Trino and Iceberg Integration</strong>
+    <ul>
+      <li>Interactive analytics query optimization</li>
+      <li>Distributed query processing</li>
+      <li>Metadata management integration</li>
+    </ul>
+  </li>
+  <li><strong>Table Format Comparison Analysis</strong>
+    <ul>
+      <li>Detailed comparison of Iceberg vs Delta Lake vs Hudi</li>
+      <li>Selection guide and scenario-specific recommendations</li>
+      <li>Migration strategies</li>
+    </ul>
+  </li>
+  <li><strong>Cloud Storage Optimization</strong>
+    <ul>
+      <li>S3, ADLS, GCS optimization strategies</li>
+      <li>Cost optimization and performance optimization</li>
+      <li>Lifecycle management</li>
+    </ul>
+  </li>
+  <li><strong>Practical Project</strong>
+    <ul>
+      <li>Large-scale data lakehouse construction</li>
+      <li>Multi-engine integration architecture</li>
+      <li>Data governance and quality management</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="core-technology-stack">Core Technology Stack</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Technology</th>
+      <th>Role</th>
+      <th>Importance</th>
+      <th>Learning Points</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Spark-Iceberg</strong></td>
+      <td>Large-scale Data Processing</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>Batch/Streaming Integration, ML Pipelines</td>
+    </tr>
+    <tr>
+      <td><strong>Flink-Iceberg</strong></td>
+      <td>Real-time Streaming</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>Low-latency Processing, State Management, Checkpoints</td>
+    </tr>
+    <tr>
+      <td><strong>Presto/Trino-Iceberg</strong></td>
+      <td>Interactive Analytics</td>
+      <td>⭐⭐⭐⭐</td>
+      <td>Query Optimization, Metadata Caching</td>
+    </tr>
+    <tr>
+      <td><strong>Cloud Optimization</strong></td>
+      <td>Cost/Performance Optimization</td>
+      <td>⭐⭐⭐⭐⭐</td>
+      <td>Storage Tiers, Lifecycle, Automation</td>
+    </tr>
+    <tr>
+      <td><strong>Data Governance</strong></td>
+      <td>Quality/Security Management</td>
+      <td>⭐⭐⭐⭐</td>
+      <td>Quality Monitoring, Security Policies, Metadata</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="series-completion-summary">Series Completion Summary</h3>
+
+<p>Through the <strong>Apache Iceberg Complete Guide Series</strong>, we have completely mastered:</p>
+
+<ol>
+  <li><strong>Part 1: Fundamentals and Table Format</strong> - Iceberg’s core concepts and basic features</li>
+  <li><strong>Part 2: Advanced Features and Performance Optimization</strong> - Production-grade optimization and operational management</li>
+  <li><strong>Part 3: Big Data Ecosystem Integration</strong> - Enterprise data platform construction</li>
+</ol>
+
+<h3 id="next-steps">Next Steps</h3>
+
+<p>Now that you have completely mastered Apache Iceberg, explore these topics:</p>
+
+<ul>
+  <li><strong>Apache Kafka Complete Guide</strong> - Real-time streaming platform</li>
+  <li><strong>Apache Spark Advanced Guide</strong> - Advanced large-scale data processing</li>
+  <li><strong>Cloud Data Platform Architecture</strong> - Cloud data platform design</li>
+</ul>
+
+<hr />
+
+<p><strong>Series Complete</strong>: <a href="/data-engineering/2025/09/23/apache-iceberg-ecosystem-integration.html">Apache Iceberg Complete Guide Series</a></p>
+
+<hr />
+
+<p><em>Completely master enterprise-grade data platforms through Apache Iceberg and big data ecosystem integration!</em> 🧊✨</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+      
+        
+      
+      
+      
+      
+      
+        
+        
+        <a href="/data-engineering/2025/09/23/apache-iceberg-ecosystem-integration.html" class="nav-link next">
+          다음: Part 3: Apache Iceberg와 빅데이터 생태계 통합 - 엔터프라이즈 데이터 플랫폼 →
+        </a>
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
