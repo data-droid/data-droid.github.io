@@ -27,7 +27,7 @@ difficulty: "Intermediate"
 6. [Performance Benchmarking and Analysis](#performance-benchmarking-and-analysis)
 7. [Learning Summary](#learning-summary)
 
-## 🎯 What is Cardinality Estimation?
+## 🎯 What is Cardinality Estimation? {#what-is-cardinality-estimation}
 
 ### Definition of Cardinality Estimation
 
@@ -61,7 +61,7 @@ difficulty: "Intermediate"
 | **Hash Set** | 3 minutes | 30 minutes | 5 hours |
 | **HyperLogLog** | 30 seconds | 5 minutes | 50 minutes |
 
-## 🔬 HyperLogLog Algorithm Principles
+## 🔬 HyperLogLog Algorithm Principles {#hyperloglog-algorithm-principles}
 
 ### Core Ideas
 
@@ -135,7 +135,7 @@ def estimate_cardinality(leading_zero_counts, m):
 | **12** | 2^12 = 4,096 | ~1.6% | 32 |
 | **16** | 2^16 = 65,536 | ~0.4% | 512 |
 
-## ⚖️ Comparison with Existing Methods
+## ⚖️ Comparison with Existing Methods {#comparison-with-existing-methods}
 
 ### Detailed Method Comparison
 
@@ -165,7 +165,7 @@ def estimate_cardinality(leading_zero_counts, m):
 | **Hash Set** | 50,000 | 1,000 | 50 |
 | **HyperLogLog** | 500,000 | 10 | 0.01 |
 
-## 🏢 Practical Application Scenarios
+## 🏢 Practical Application Scenarios {#practical-application-scenarios}
 
 ### Scenario 1: Real-time Web Analytics
 
@@ -315,7 +315,7 @@ class NetworkSecurityMonitor:
         }
 ```
 
-## 🛠️ HyperLogLog Implementation and Optimization
+## 🛠️ HyperLogLog Implementation and Optimization {#hyperloglog-implementation-and-optimization}
 
 ### Basic HyperLogLog Implementation
 
@@ -512,7 +512,7 @@ class StreamingHyperLogLog:
         return merged.estimate()
 ```
 
-## 📊 Performance Benchmarking and Analysis
+## 📊 Performance Benchmarking and Analysis {#performance-benchmarking-and-analysis}
 
 ### Benchmark Environment
 - **CPU**: Intel i7-10700K (8 cores)
@@ -567,7 +567,7 @@ class StreamingHyperLogLog:
 | **14 bits** | 64KB | 99.9% | 3,000,000/sec |
 | **16 bits** | 256KB | 99.99% | 2,500,000/sec |
 
-## 📚 Learning Summary
+## 📚 Learning Summary {#learning-summary}
 
 ### What We Learned in This Part
 

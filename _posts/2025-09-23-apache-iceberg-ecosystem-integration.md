@@ -17,7 +17,7 @@ difficulty: "고급"
 
 > Apache Iceberg와 Spark, Flink, Presto/Trino 통합, Delta Lake와 Hudi 비교, 클라우드 스토리지 최적화, 실무 프로젝트를 통한 대규모 데이터 레이크하우스 구축까지 완전한 가이드입니다.
 
-## 📋 목차
+## 📋 목차 {#목차}
 
 1. [Apache Spark와 Iceberg 통합](#apache-spark와-iceberg-통합)
 2. [Apache Flink와 Iceberg 통합](#apache-flink와-iceberg-통합)
@@ -27,7 +27,7 @@ difficulty: "고급"
 6. [실무 프로젝트: 대규모 데이터 레이크하우스 구축](#실무-프로젝트-대규모-데이터-레이크하우스-구축)
 7. [학습 요약](#학습-요약)
 
-## 🔥 Apache Spark와 Iceberg 통합
+## 🔥 Apache Spark와 Iceberg 통합 {#apache-spark와-iceberg-통합}
 
 ### Spark-Iceberg 통합 개요
 
@@ -193,7 +193,7 @@ class SparkStreamingIceberg:
         return streaming_query
 ```
 
-## ⚡ Apache Flink와 Iceberg 통합
+## ⚡ Apache Flink와 Iceberg 통합 {#apache-flink와-iceberg-통합}
 
 ### Flink-Iceberg 통합 개요
 
@@ -321,7 +321,7 @@ class FlinkIcebergIntegration:
         return batch_pipeline
 ```
 
-## 🚀 Presto/Trino와 Iceberg 통합
+## 🚀 Presto/Trino와 Iceberg 통합 {#prestotrino와-iceberg-통합}
 
 ### Presto/Trino-Iceberg 통합 개요
 
@@ -474,7 +474,7 @@ class PrestoTrinoIcebergIntegration:
         return optimization_strategies
 ```
 
-## 🔄 테이블 포맷 비교 분석
+## 🔄 테이블 포맷 비교 분석 {#테이블-포맷-비교-분석}
 
 ### 주요 테이블 포맷 비교
 
@@ -545,7 +545,7 @@ class PrestoTrinoIcebergIntegration:
 | **CDC (Change Data Capture)** | • 데이터베이스 변경 감지<br>• 실시간 동기화 | • Debezium 통합<br>• CDC 파이프라인 |
 | **Upsert 중심** | • 빈번한 업데이트<br>• 중복 제거 | • Upsert 전략<br>• 데이터 품질 관리 |
 
-## ☁️ 클라우드 스토리지 최적화
+## ☁️ 클라우드 스토리지 최적화 {#클라우드-스토리지-최적화}
 
 ### 클라우드 스토리지 비교
 
@@ -766,7 +766,7 @@ class CloudStorageOptimizer:
         return storage_classes, lifecycle_rules
 ```
 
-## 🏗️ 실무 프로젝트: 대규모 데이터 레이크하우스 구축
+## 🏗️ 실무 프로젝트: 대규모 데이터 레이크하우스 구축 {#실무-프로젝트-대규모-데이터-레이크하우스-구축}
 
 ### 프로젝트 개요
 
@@ -1027,7 +1027,7 @@ class EnterpriseDataLakehouse:
 | **성능 알림** | 쿼리 시간 > 5분 | 경고 | 쿼리 최적화 |
 | **비용 알림** | 일일 비용 > $2,000 | 경고 | 비용 검토 |
 
-## 📚 학습 요약
+## 📚 학습 요약 {#학습-요약}
 
 ### 이번 Part에서 학습한 내용
 

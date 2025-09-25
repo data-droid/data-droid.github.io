@@ -15,7 +15,7 @@ difficulty: "고급"
 
 > Python을 활용한 Apache Kafka 실시간 스트리밍 개발과 데이터 처리 기법을 학습하고 실제 프로젝트에 적용해봅니다.
 
-## 📋 목차
+## 📋 목차 {#목차}
 
 1. [Python Kafka 라이브러리 선택](#python-kafka-라이브러리-선택)
 2. [kafka-python 기본 사용법](#kafka-python-기본-사용법)
@@ -55,7 +55,7 @@ pip install aiokafka
 pip install pandas numpy asyncio
 ```
 
-## ⚡ kafka-python 기본 사용법
+## ⚡ kafka-python 기본 사용법 {#kafka-python-기본-사용법}
 
 ### 1. 프로듀서 구현
 
@@ -234,7 +234,7 @@ if __name__ == "__main__":
     consumer.start_consuming()
 ```
 
-## 🚀 confluent-kafka 고성능 처리
+## 🚀 confluent-kafka 고성능 처리 {#confluent-kafka-고성능-처리}
 
 ### 1. 고성능 프로듀서
 
@@ -520,7 +520,7 @@ async def window_aggregation(events):
 processed_windows = set()
 ```
 
-## 🛠️ 실습: Python 기반 스트리밍 시스템
+## 🛠 ️ 실습: Python 기반 스트리밍 시스템 {#실습-python-기반-스트리밍-시스템}
 
 ### 1. 실시간 로그 처리 시스템
 
@@ -720,7 +720,7 @@ if __name__ == "__main__":
     asyncio.run(service.start_service())
 ```
 
-## 📊 성능 최적화와 모니터링
+## 📊 성능 최적화와 모니터링 {#성능-최적화와-모니터링}
 
 ### 1. 성능 모니터링
 
@@ -882,7 +882,7 @@ class ResilientKafkaProducer:
         print(f"Retried {retry_count} messages from dead letter queue")
 ```
 
-## 📚 학습 요약
+## 📚 학습 요약 {#학습-요약}
 
 ### 이번 포스트에서 학습한 내용
 

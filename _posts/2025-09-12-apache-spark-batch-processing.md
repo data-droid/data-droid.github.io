@@ -17,7 +17,7 @@ difficulty: "고급"
 
 > Apache Spark의 고급 배치 처리 기법, UDF 작성, 그리고 Docker와 Kubernetes를 활용한 프로덕션 환경 구축까지 다룹니다.
 
-## 📋 목차
+## 📋 목차 {#목차}
 
 1. [UDF (User Defined Function) 완전 정리](#udf-user-defined-function-완전-정리)
 2. [고급 집계와 윈도우 함수](#고급-집계와-윈도우-함수)
@@ -27,7 +27,7 @@ difficulty: "고급"
 6. [Airflow 스케줄링](#airflow-스케줄링)
 7. [학습 요약](#학습-요약)
 
-## 🔧 UDF (User Defined Function) 완전 정리
+## 🔧 UDF (User Defined Function) 완전 정리 {#udf-user-defined-function-완전-정리}
 
 ### UDF란?
 
@@ -186,7 +186,7 @@ df1.withColumn("processed", text_processor("text1")).show()
 df2.withColumn("processed", text_processor("text2")).show()
 ```
 
-## 📊 고급 집계와 윈도우 함수
+## 📊 고급 집계와 윈도우 함수 {#고급-집계와-윈도우-함수}
 
 ### 고급 윈도우 함수
 
@@ -237,7 +237,7 @@ stats_df = df.groupBy("category") \
     )
 ```
 
-## ⚡ 파티셔닝 전략과 성능 최적화
+## ⚡ 파티셔닝 전략과 성능 최적화 {#파티셔닝-전략과-성능-최적화}
 
 ### 파티셔닝 전략
 
@@ -690,7 +690,7 @@ if __name__ == "__main__":
     main()
 ```
 
-## 🔄 Airflow 스케줄링
+## 🔄 Airflow 스케줄링 {#airflow-스케줄링}
 
 ### Airflow DAG
 
@@ -860,7 +860,7 @@ kubectl cp kubernetes/airflow-dag.py airflow-web-0:/opt/airflow/dags/
 echo "Deployment completed!"
 ```
 
-## ⚡ 배치 처리 처리량 최적화
+## ⚡ 배치 처리 처리량 최적화 {#배치-처리-처리량-최적화}
 
 ### 처리량 분석 도구
 
@@ -1388,7 +1388,7 @@ def throughput_monitoring_example():
     return monitor
 ```
 
-## 📚 학습 요약
+## 📚 학습 요약 {#학습-요약}
 
 ### 이번 파트에서 학습한 내용
 

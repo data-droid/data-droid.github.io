@@ -17,7 +17,7 @@ difficulty: "초급"
 
 > 시계열 데이터의 기본 개념과 전통적 통계 방법, Prophet의 등장까지 체계적으로 학습하고 실제 코드로 구현해보세요.
 
-## 📋 목차
+## 📋 목차 {#목차}
 
 1. [시계열 예측이란 무엇인가?](#시계열-예측이란-무엇인가)
 2. [시계열 데이터의 특성](#시계열-데이터의-특성)
@@ -28,7 +28,7 @@ difficulty: "초급"
 7. [방법론 비교](#방법론-비교)
 8. [다음 단계](#다음-단계)
 
-## 🎯 시계열 예측이란 무엇인가?
+## 🎯 시계열 예측이란 무엇인가? {#시계열-예측이란-무엇인가}
 
 시계열 예측은 **시간 순서대로 배열된 데이터의 패턴을 학습하여 미래 값을 예측하는 기술**입니다. 주식 가격, 판매량, 센서 데이터 등 다양한 분야에서 사용됩니다.
 
@@ -39,7 +39,7 @@ difficulty: "초급"
 - **노이즈(Noise)**: 예측하기 어려운 무작위 변동
 - **구조적 변화(Structural Changes)**: 특정 시점에서 발생하는 패턴 변화
 
-## 📊 시계열 데이터의 특성
+## 📊 시계열 데이터의 특성 {#시계열-데이터의-특성}
 
 ### 1. 정상성(Stationarity)
 정상성은 시계열의 통계적 특성이 시간에 따라 변하지 않는다는 의미입니다.
@@ -77,7 +77,7 @@ def plot_correlation_functions(timeseries, lags=40):
     plt.show()
 ```
 
-## 📈 전통적 통계 방법
+## 📈 전통적 통계 방법 {#전통적-통계-방법}
 
 ### 1. 이동평균(Moving Average)
 이동평균은 노이즈를 줄이기 위해 특정 기간의 평균을 계산하는 방법입니다.
@@ -101,7 +101,7 @@ def difference_series(data, order=1):
     return data.diff(order).dropna()
 ```
 
-## 🏗️ ARIMA 모델
+## 🏗 ️ ARIMA 모델 {#arima-모델}
 
 ARIMA (AutoRegressive Integrated Moving Average)는 시계열 예측을 위한 가장 기본적인 모델입니다.
 
@@ -195,7 +195,7 @@ print(f"MAE: {mae:.4f}")
 print(f"RMSE: {rmse:.4f}")
 ```
 
-## 🚀 Prophet 소개
+## 🚀 Prophet 소개 {#prophet-소개}
 
 Prophet은 Facebook에서 개발한 자동화된 시계열 예측 도구로, 비즈니스 시계열 데이터에 특화되어 있습니다.
 
@@ -274,7 +274,7 @@ print(f"MAE: {mae_prophet:.4f}")
 print(f"RMSE: {rmse_prophet:.4f}")
 ```
 
-## 🛠️ 실습 구현
+## 🛠 ️ 실습 구현 {#실습-구현}
 
 ### 1. 환경 설정 및 데이터 준비
 
@@ -609,7 +609,7 @@ def compare_models(timeseries, arima_forecast, prophet_forecast):
 compare_models(complex_ts, arima_forecast, prophet_forecast)
 ```
 
-## 📊 방법론 비교
+## 📊 방법론 비교 {#방법론-비교}
 
 ### ARIMA vs Prophet
 
@@ -637,7 +637,7 @@ compare_models(complex_ts, arima_forecast, prophet_forecast)
 - 자동화된 모델링이 필요한 경우
 - 비즈니스 시계열 데이터
 
-## 🚀 다음 단계
+## 🚀 다음 단계 {#다음-단계}
 
 이제 **Part 2: 딥러닝 기반 시계열 예측**으로 넘어가서 N-BEATS와 DeepAR을 통해 더 강력한 시계열 예측 모델들을 학습해보세요!
 

@@ -17,7 +17,7 @@ difficulty: "중급"
 
 > Apache Spark의 기본 구조와 핵심 개념인 RDD, DataFrame, Spark SQL을 학습하고 실습해봅니다.
 
-## 📋 목차
+## 📋 목차 {#목차}
 
 1. [Spark 아키텍처 이해](#spark-아키텍처-이해)
 2. [RDD (Resilient Distributed Dataset)](#rdd-resilient-distributed-dataset)
@@ -26,7 +26,7 @@ difficulty: "중급"
 5. [실습: 기본 데이터 처리](#실습-기본-데이터-처리)
 6. [학습 요약](#학습-요약)
 
-## 🏗️ Spark 아키텍처 이해
+## 🏗 ️ Spark 아키텍처 이해 {#spark-아키텍처-이해}
 
 ### 핵심 컴포넌트
 
@@ -69,7 +69,7 @@ spark = SparkSession.builder \
 sc_from_session = spark.sparkContext
 ```
 
-## 🔄 RDD (Resilient Distributed Dataset)
+## 🔄 RDD (Resilient Distributed Dataset) {#rdd-resilient-distributed-dataset}
 
 ### RDD란?
 
@@ -197,7 +197,7 @@ print(cartesian.collect())
 # [('apple', ('apple', 'red')), ('apple', ('banana', 'yellow')), ...]
 ```
 
-## 📊 DataFrame과 Dataset
+## 📊 DataFrame과 Dataset {#dataframe과-dataset}
 
 ### DataFrame 소개
 
@@ -356,7 +356,7 @@ spark.sql("""
 """).show()
 ```
 
-## 🛠️ 실습: 기본 데이터 처리
+## 🛠 ️ 실습: 기본 데이터 처리 {#실습-기본-데이터-처리}
 
 ### 실습 1: 로그 데이터 분석
 
@@ -459,7 +459,7 @@ print("\n전일 대비 구매액 변화:")
 df_with_lag.show()
 ```
 
-## 📚 학습 요약
+## 📚 학습 요약 {#학습-요약}
 
 ### 이번 파트에서 학습한 내용
 

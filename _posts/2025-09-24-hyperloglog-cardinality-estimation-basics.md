@@ -17,7 +17,7 @@ difficulty: "중급"
 
 > HyperLogLog 알고리즘의 원리부터 실무 적용까지, 대용량 데이터에서 카디널리티를 효율적으로 추정하는 방법을 완전히 정복합니다.
 
-## 📋 목차
+## 📋 목차 {#목차}
 
 1. [카디널리티 추정이란?](#카디널리티-추정이란)
 2. [HyperLogLog 알고리즘 원리](#hyperloglog-알고리즘-원리)
@@ -27,7 +27,7 @@ difficulty: "중급"
 6. [성능 벤치마크와 분석](#성능-벤치마크와-분석)
 7. [학습 요약](#학습-요약)
 
-## 🎯 카디널리티 추정이란?
+## 🎯 카디널리티 추정이란? {#카디널리티-추정이란}
 
 ### 카디널리티 추정의 정의
 
@@ -61,7 +61,7 @@ difficulty: "중급"
 | **Hash Set** | 3분 | 30분 | 5시간 |
 | **HyperLogLog** | 30초 | 5분 | 50분 |
 
-## 🔬 HyperLogLog 알고리즘 원리
+## 🔬 HyperLogLog 알고리즘 원리 {#hyperloglog-알고리즘-원리}
 
 ### 핵심 아이디어
 
@@ -135,7 +135,7 @@ def estimate_cardinality(leading_zero_counts, m):
 | **12** | 2^12 = 4,096 | ~1.6% | 32 |
 | **16** | 2^16 = 65,536 | ~0.4% | 512 |
 
-## ⚖️ 기존 방법과의 비교
+## ⚖️ 기존 방법과의 비교 {#기존-방법과의-비교}
 
 ### 방법별 상세 비교
 
@@ -165,7 +165,7 @@ def estimate_cardinality(leading_zero_counts, m):
 | **Hash Set** | 50,000 | 1,000 | 50 |
 | **HyperLogLog** | 500,000 | 10 | 0.01 |
 
-## 🏢 실무 적용 시나리오
+## 🏢 실무 적용 시나리오 {#실무-적용-시나리오}
 
 ### 시나리오 1: 실시간 웹 분석
 
@@ -315,7 +315,7 @@ class NetworkSecurityMonitor:
         }
 ```
 
-## 🛠️ HyperLogLog 구현과 최적화
+## 🛠️ HyperLogLog 구현과 최적화 {#hyperloglog-구현과-최적화}
 
 ### 기본 HyperLogLog 구현
 
@@ -512,7 +512,7 @@ class StreamingHyperLogLog:
         return merged.estimate()
 ```
 
-## 📊 성능 벤치마크와 분석
+## 📊 성능 벤치마크와 분석 {#성능-벤치마크와-분석}
 
 ### 벤치마크 환경
 - **CPU**: Intel i7-10700K (8코어)
@@ -567,7 +567,7 @@ class StreamingHyperLogLog:
 | **14 bits** | 64KB | 99.9% | 3,000,000/sec |
 | **16 bits** | 256KB | 99.99% | 2,500,000/sec |
 
-## 📚 학습 요약
+## 📚 학습 요약 {#학습-요약}
 
 ### 이번 Part에서 학습한 내용
 

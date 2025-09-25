@@ -17,7 +17,7 @@ difficulty: "고급"
 
 > CDC의 핵심 개념부터 Debezium을 활용한 실시간 데이터 동기화 시스템 구축까지, 이벤트 드리븐 아키텍처의 완전한 가이드입니다.
 
-## 📋 목차
+## 📋 목차 {#목차}
 
 1. [Change Data Capture 기초 개념](#change-data-capture-기초-개념)
 2. [Debezium 아키텍처와 핵심 기능](#debezium-아키텍처와-핵심-기능)
@@ -27,7 +27,7 @@ difficulty: "고급"
 6. [실무 프로젝트: 실시간 데이터 동기화 시스템](#실무-프로젝트-실시간-데이터-동기화-시스템)
 7. [학습 요약](#학습-요약)
 
-## 🔄 Change Data Capture 기초 개념
+## 🔄 Change Data Capture 기초 개념 {#change-data-capture-기초-개념}
 
 ### CDC란 무엇인가?
 
@@ -147,7 +147,7 @@ class CDCToolsComparison:
             return "kafka_connect"
 ```
 
-## 🔧 Debezium 아키텍처와 핵심 기능
+## 🔧 Debezium 아키텍처와 핵심 기능 {#debezium-아키텍처와-핵심-기능}
 
 ### Debezium 아키텍처 개요
 
@@ -657,7 +657,7 @@ class MongoDBConnectorSetup:
         }
 ```
 
-## 📊 스키마 진화와 스키마 레지스트리
+## 📊 스키마 진화와 스키마 레지스트리 {#스키마-진화와-스키마-레지스트리}
 
 ### 스키마 진화 개념
 
@@ -894,7 +894,7 @@ class SchemaCompatibilityStrategies:
         return evolution_plan
 ```
 
-## 🔄 실시간 데이터 변환과 라우팅
+## 🔄 실시간 데이터 변환과 라우팅 {#실시간-데이터-변환과-라우팅}
 
 ### 데이터 변환 파이프라인
 
@@ -1044,7 +1044,7 @@ class DataTransformationPipeline:
         return enrichment_pipeline
 ```
 
-## 🚀 실무 프로젝트: 실시간 데이터 동기화 시스템
+## 🚀 실무 프로젝트: 실시간 데이터 동기화 시스템 {#실무-프로젝트-실시간-데이터-동기화-시스템}
 
 ### 프로젝트 개요
 
@@ -1392,7 +1392,7 @@ if __name__ == "__main__":
     system = deploy_realtime_sync_system()
 ```
 
-## 📚 학습 요약
+## 📚 학습 요약 {#학습-요약}
 
 ### 이번 파트에서 학습한 내용
 
