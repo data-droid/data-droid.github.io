@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="데이터 엔지니어가 다루는 기술 블로그">
+
+
+
+<title>Part 2: HyperLogLog Production Application and Optimization - Building Production-grade BI Systems - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 2: HyperLogLog Production Application and Optimization - Building Production-grade BI Systems">
+<meta property="og:description" content="데이터 엔지니어가 다루는 기술 블로그">
+<meta property="og:url" content="http://localhost:4000/en_posts/2025-09-25-hyperloglog-production-optimization.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 2: HyperLogLog Production Application and Optimization - Building Production-grade BI Systems">
+<meta name="twitter:description" content="데이터 엔지니어가 다루는 기술 블로그">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/bi-engineering/2025/09/24/hyperloglog-production-optimization.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2025-09-25-hyperloglog-production-optimization.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Bi engineering</span>
+      <span class="post-date">2025년 09월 24일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 2: HyperLogLog Production Application and Optimization - Building Production-grade BI Systems</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">HyperLogLog</span>
+      
+        <span class="tag">Production-Application</span>
+      
+        <span class="tag">Performance-Optimization</span>
+      
+        <span class="tag">BI-Systems</span>
+      
+        <span class="tag">Production</span>
+      
+        <span class="tag">Streaming</span>
+      
+        <span class="tag">Real-time-Analytics</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Modern bi engineering 시리즈</span>
+      <span class="series-order">Part 3</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 45 min</span>
+      
+      
+        <span class="difficulty">📊 Advanced</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-2-hyperloglog-production-application-and-optimization---building-production-grade-bi-systems">Part 2: HyperLogLog Production Application and Optimization - Building Production-grade BI Systems</h1>
+
+<blockquote>
+  <p>Complete practical guide from applying HyperLogLog in real production environments to performance optimization, monitoring, and building large-scale BI systems.</p>
+</blockquote>
+
+<h2 id="table-of-contents">📋 Table of Contents</h2>
+
+<ol>
+  <li><a href="#production-application-scenarios">Production Application Scenarios</a></li>
+  <li><a href="#performance-optimization-strategies">Performance Optimization Strategies</a></li>
+  <li><a href="#monitoring-and-quality-management">Monitoring and Quality Management</a></li>
+  <li><a href="#large-scale-bi-system-architecture">Large-scale BI System Architecture</a></li>
+  <li><a href="#practical-project-real-time-analytics-platform">Practical Project: Real-time Analytics Platform</a></li>
+  <li><a href="#learning-summary">Learning Summary</a></li>
+</ol>
+
+<hr />
+
+<h2 id="production-application-scenarios">🎯 Production Application Scenarios</h2>
+
+<h3 id="hyperloglog-in-web-analytics">HyperLogLog in Web Analytics</h3>
+
+<p>Web analytics is one of the most effective fields for HyperLogLog utilization.</p>
+
+<h4 id="user-behavior-analysis">User Behavior Analysis</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">WebAnalyticsEngine</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">daily_unique_visitors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">page_view_analytics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">conversion_funnels</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">track_daily_visitors</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">visitor_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Track daily unique visitors</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="n">date</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">daily_unique_visitors</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">daily_unique_visitors</span><span class="p">[</span><span class="n">date</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">total_visitors</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">12</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">mobile_visitors</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">12</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">desktop_visitors</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">12</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">new_visitors</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">12</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">returning_visitors</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+            <span class="p">}</span>
+        
+        <span class="n">hll</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">daily_unique_visitors</span><span class="p">[</span><span class="n">date</span><span class="p">]</span>
+        
+        <span class="c1"># Total visitors
+</span>        <span class="n">hll</span><span class="p">[</span><span class="sh">'</span><span class="s">total_visitors</span><span class="sh">'</span><span class="p">].</span><span class="nf">add</span><span class="p">(</span><span class="n">visitor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">])</span>
+        
+        <span class="c1"># Device-based classification
+</span>        <span class="k">if</span> <span class="n">visitor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">device_type</span><span class="sh">'</span><span class="p">]</span> <span class="o">==</span> <span class="sh">'</span><span class="s">mobile</span><span class="sh">'</span><span class="p">:</span>
+            <span class="n">hll</span><span class="p">[</span><span class="sh">'</span><span class="s">mobile_visitors</span><span class="sh">'</span><span class="p">].</span><span class="nf">add</span><span class="p">(</span><span class="n">visitor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hll</span><span class="p">[</span><span class="sh">'</span><span class="s">desktop_visitors</span><span class="sh">'</span><span class="p">].</span><span class="nf">add</span><span class="p">(</span><span class="n">visitor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">])</span>
+        
+        <span class="c1"># New/returning visitor classification
+</span>        <span class="k">if</span> <span class="n">visitor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">is_new_visitor</span><span class="sh">'</span><span class="p">]:</span>
+            <span class="n">hll</span><span class="p">[</span><span class="sh">'</span><span class="s">new_visitors</span><span class="sh">'</span><span class="p">].</span><span class="nf">add</span><span class="p">(</span><span class="n">visitor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hll</span><span class="p">[</span><span class="sh">'</span><span class="s">returning_visitors</span><span class="sh">'</span><span class="p">].</span><span class="nf">add</span><span class="p">(</span><span class="n">visitor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">date</span><span class="sh">'</span><span class="p">:</span> <span class="n">date</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">total_unique_visitors</span><span class="sh">'</span><span class="p">:</span> <span class="n">hll</span><span class="p">[</span><span class="sh">'</span><span class="s">total_visitors</span><span class="sh">'</span><span class="p">].</span><span class="nf">count</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">mobile_unique_visitors</span><span class="sh">'</span><span class="p">:</span> <span class="n">hll</span><span class="p">[</span><span class="sh">'</span><span class="s">mobile_visitors</span><span class="sh">'</span><span class="p">].</span><span class="nf">count</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">desktop_unique_visitors</span><span class="sh">'</span><span class="p">:</span> <span class="n">hll</span><span class="p">[</span><span class="sh">'</span><span class="s">desktop_visitors</span><span class="sh">'</span><span class="p">].</span><span class="nf">count</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">new_unique_visitors</span><span class="sh">'</span><span class="p">:</span> <span class="n">hll</span><span class="p">[</span><span class="sh">'</span><span class="s">new_visitors</span><span class="sh">'</span><span class="p">].</span><span class="nf">count</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">returning_unique_visitors</span><span class="sh">'</span><span class="p">:</span> <span class="n">hll</span><span class="p">[</span><span class="sh">'</span><span class="s">returning_visitors</span><span class="sh">'</span><span class="p">].</span><span class="nf">count</span><span class="p">()</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">analyze_user_journey</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">user_events</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">User journey analysis</span><span class="sh">"""</span>
+        
+        <span class="n">journey_analysis</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">funnel_steps</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">landing</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">product_view</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">add_to_cart</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">checkout</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">purchase</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">conversion_rates</span><span class="sh">'</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="sh">'</span><span class="s">drop_off_analysis</span><span class="sh">'</span><span class="p">:</span> <span class="p">{}</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Collect unique users for each step
+</span>        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">user_events</span><span class="p">:</span>
+            <span class="n">user_id</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">]</span>
+            <span class="n">event_type</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="sh">'</span><span class="s">event_type</span><span class="sh">'</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="n">event_type</span> <span class="ow">in</span> <span class="n">journey_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">funnel_steps</span><span class="sh">'</span><span class="p">]:</span>
+                <span class="n">journey_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">funnel_steps</span><span class="sh">'</span><span class="p">][</span><span class="n">event_type</span><span class="p">].</span><span class="nf">add</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate conversion rates
+</span>        <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s">landing</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">product_view</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">add_to_cart</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">checkout</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">purchase</span><span class="sh">'</span><span class="p">]</span>
+        <span class="n">previous_count</span> <span class="o">=</span> <span class="bp">None</span>
+        
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
+            <span class="n">current_count</span> <span class="o">=</span> <span class="n">journey_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">funnel_steps</span><span class="sh">'</span><span class="p">][</span><span class="n">step</span><span class="p">].</span><span class="nf">count</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="n">previous_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">conversion_rate</span> <span class="o">=</span> <span class="p">(</span><span class="n">current_count</span> <span class="o">/</span> <span class="n">previous_count</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+                <span class="n">journey_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">conversion_rates</span><span class="sh">'</span><span class="p">][</span><span class="sa">f</span><span class="sh">'</span><span class="si">{</span><span class="n">previous_step</span><span class="si">}</span><span class="s">_to_</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">rate</span><span class="sh">'</span><span class="p">:</span> <span class="n">conversion_rate</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">users</span><span class="sh">'</span><span class="p">:</span> <span class="n">current_count</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">previous_users</span><span class="sh">'</span><span class="p">:</span> <span class="n">previous_count</span>
+                <span class="p">}</span>
+            
+            <span class="n">previous_count</span> <span class="o">=</span> <span class="n">current_count</span>
+            <span class="n">previous_step</span> <span class="o">=</span> <span class="n">step</span>
+        
+        <span class="k">return</span> <span class="n">journey_analysis</span>
+</code></pre></div></div>
+
+<h4 id="real-time-dashboard-implementation">Real-time Dashboard Implementation</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">RealTimeDashboard</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">metrics_store</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">update_interval</span> <span class="o">=</span> <span class="mi">60</span>  <span class="c1"># Update every 60 seconds
+</span>    
+    <span class="k">def</span> <span class="nf">generate_realtime_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate real-time metrics</span><span class="sh">"""</span>
+        
+        <span class="n">current_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">current_time</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">unique_visitors_1h</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_unique_visitors</span><span class="p">(</span><span class="sh">'</span><span class="s">1h</span><span class="sh">'</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">unique_visitors_24h</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_unique_visitors</span><span class="p">(</span><span class="sh">'</span><span class="s">24h</span><span class="sh">'</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">page_views_1h</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_page_views</span><span class="p">(</span><span class="sh">'</span><span class="s">1h</span><span class="sh">'</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">conversion_rate_24h</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_conversion_rate</span><span class="p">(</span><span class="sh">'</span><span class="s">24h</span><span class="sh">'</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">top_pages</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_get_top_pages</span><span class="p">(</span><span class="sh">'</span><span class="s">1h</span><span class="sh">'</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">device_breakdown</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_get_device_breakdown</span><span class="p">(</span><span class="sh">'</span><span class="s">1h</span><span class="sh">'</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">metrics</span>
+    
+    <span class="k">def</span> <span class="nf">_calculate_unique_visitors</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">time_window</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Calculate unique visitors by time window</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="n">time_window</span> <span class="o">==</span> <span class="sh">'</span><span class="s">1h</span><span class="sh">'</span><span class="p">:</span>
+            <span class="c1"># Last 1 hour data
+</span>            <span class="n">cutoff_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">-</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">hll</span> <span class="o">=</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+            
+            <span class="c1"># Collect visitor data within 1 hour
+</span>            <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">visitor_data</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="nf">_get_visitor_data_since</span><span class="p">(</span><span class="n">cutoff_time</span><span class="p">):</span>
+                <span class="n">hll</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">visitor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">])</span>
+            
+            <span class="k">return</span> <span class="n">hll</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+        
+        <span class="k">elif</span> <span class="n">time_window</span> <span class="o">==</span> <span class="sh">'</span><span class="s">24h</span><span class="sh">'</span><span class="p">:</span>
+            <span class="c1"># Last 24 hours data
+</span>            <span class="n">cutoff_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">-</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+            <span class="n">hll</span> <span class="o">=</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span>  <span class="c1"># Higher precision
+</span>            
+            <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">visitor_data</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="nf">_get_visitor_data_since</span><span class="p">(</span><span class="n">cutoff_time</span><span class="p">):</span>
+                <span class="n">hll</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">visitor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">])</span>
+            
+            <span class="k">return</span> <span class="n">hll</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="marketing-analytics-applications">Marketing Analytics Applications</h3>
+
+<h4 id="campaign-effectiveness-measurement">Campaign Effectiveness Measurement</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MarketingCampaignAnalyzer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">campaign_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">attribution_models</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">track_campaign_performance</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">campaign_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Track campaign performance</span><span class="sh">"""</span>
+        
+        <span class="n">campaign_id</span> <span class="o">=</span> <span class="n">campaign_data</span><span class="p">[</span><span class="sh">'</span><span class="s">campaign_id</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">campaign_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">campaign_metrics</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">campaign_metrics</span><span class="p">[</span><span class="n">campaign_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">impressions</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">clicks</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">conversions</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">revenue</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">cost</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span>
+            <span class="p">}</span>
+        
+        <span class="n">metrics</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">campaign_metrics</span><span class="p">[</span><span class="n">campaign_id</span><span class="p">]</span>
+        
+        <span class="c1"># Impression count (deduplicated)
+</span>        <span class="k">if</span> <span class="sh">'</span><span class="s">impression</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">campaign_data</span><span class="p">[</span><span class="sh">'</span><span class="s">event_type</span><span class="sh">'</span><span class="p">]:</span>
+            <span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">impressions</span><span class="sh">'</span><span class="p">].</span><span class="nf">add</span><span class="p">(</span><span class="n">campaign_data</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">])</span>
+        
+        <span class="c1"># Click count
+</span>        <span class="k">if</span> <span class="sh">'</span><span class="s">click</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">campaign_data</span><span class="p">[</span><span class="sh">'</span><span class="s">event_type</span><span class="sh">'</span><span class="p">]:</span>
+            <span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">clicks</span><span class="sh">'</span><span class="p">].</span><span class="nf">add</span><span class="p">(</span><span class="n">campaign_data</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">])</span>
+        
+        <span class="c1"># Conversion count
+</span>        <span class="k">if</span> <span class="sh">'</span><span class="s">conversion</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">campaign_data</span><span class="p">[</span><span class="sh">'</span><span class="s">event_type</span><span class="sh">'</span><span class="p">]:</span>
+            <span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">conversions</span><span class="sh">'</span><span class="p">].</span><span class="nf">add</span><span class="p">(</span><span class="n">campaign_data</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">])</span>
+            <span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">revenue</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="n">campaign_data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">revenue</span><span class="sh">'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate performance metrics
+</span>        <span class="n">performance</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_campaign_performance</span><span class="p">(</span><span class="n">campaign_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">performance</span>
+    
+    <span class="k">def</span> <span class="nf">_calculate_campaign_performance</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">campaign_id</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Calculate campaign performance metrics</span><span class="sh">"""</span>
+        
+        <span class="n">metrics</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">campaign_metrics</span><span class="p">[</span><span class="n">campaign_id</span><span class="p">]</span>
+        
+        <span class="n">unique_impressions</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">impressions</span><span class="sh">'</span><span class="p">].</span><span class="nf">count</span><span class="p">()</span>
+        <span class="n">unique_clicks</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">clicks</span><span class="sh">'</span><span class="p">].</span><span class="nf">count</span><span class="p">()</span>
+        <span class="n">unique_conversions</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">conversions</span><span class="sh">'</span><span class="p">].</span><span class="nf">count</span><span class="p">()</span>
+        
+        <span class="n">performance</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">campaign_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">campaign_id</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">unique_impressions</span><span class="sh">'</span><span class="p">:</span> <span class="n">unique_impressions</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">unique_clicks</span><span class="sh">'</span><span class="p">:</span> <span class="n">unique_clicks</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">unique_conversions</span><span class="sh">'</span><span class="p">:</span> <span class="n">unique_conversions</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">ctr</span><span class="sh">'</span><span class="p">:</span> <span class="p">(</span><span class="n">unique_clicks</span> <span class="o">/</span> <span class="n">unique_impressions</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="k">if</span> <span class="n">unique_impressions</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">conversion_rate</span><span class="sh">'</span><span class="p">:</span> <span class="p">(</span><span class="n">unique_conversions</span> <span class="o">/</span> <span class="n">unique_clicks</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="k">if</span> <span class="n">unique_clicks</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">cpc</span><span class="sh">'</span><span class="p">:</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">cost</span><span class="sh">'</span><span class="p">]</span> <span class="o">/</span> <span class="n">unique_clicks</span> <span class="k">if</span> <span class="n">unique_clicks</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">cpa</span><span class="sh">'</span><span class="p">:</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">cost</span><span class="sh">'</span><span class="p">]</span> <span class="o">/</span> <span class="n">unique_conversions</span> <span class="k">if</span> <span class="n">unique_conversions</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">roi</span><span class="sh">'</span><span class="p">:</span> <span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">revenue</span><span class="sh">'</span><span class="p">]</span> <span class="o">-</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">cost</span><span class="sh">'</span><span class="p">])</span> <span class="o">/</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">cost</span><span class="sh">'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span> <span class="k">if</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">cost</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">performance</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="performance-optimization-strategies">⚡ Performance Optimization Strategies</h2>
+
+<h3 id="performance-optimization-strategy-comparison">Performance Optimization Strategy Comparison</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Optimization Area</th>
+      <th>Strategy</th>
+      <th>Memory Usage</th>
+      <th>Accuracy</th>
+      <th>Complexity</th>
+      <th>Application Timing</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Precision Adjustment</strong></td>
+      <td>Adaptive Precision</td>
+      <td>Low → High</td>
+      <td>High → Very High</td>
+      <td>Medium</td>
+      <td>Runtime</td>
+    </tr>
+    <tr>
+      <td><strong>Compression Storage</strong></td>
+      <td>gzip/lz4/zstd</td>
+      <td>Very Low</td>
+      <td>Same</td>
+      <td>Low</td>
+      <td>Storage Time</td>
+    </tr>
+    <tr>
+      <td><strong>Parallel Processing</strong></td>
+      <td>Distributed HLL Merge</td>
+      <td>High</td>
+      <td>Same</td>
+      <td>High</td>
+      <td>Processing Time</td>
+    </tr>
+    <tr>
+      <td><strong>Caching</strong></td>
+      <td>Memory/Redis</td>
+      <td>Medium</td>
+      <td>Same</td>
+      <td>Medium</td>
+      <td>Query Time</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="memory-usage-optimization">Memory Usage Optimization</h3>
+
+<h4 id="adaptive-precision-adjustment">Adaptive Precision Adjustment</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">AdaptivePrecisionHLL</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">initial_precision</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">precision</span> <span class="o">=</span> <span class="n">initial_precision</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">hll</span> <span class="o">=</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="n">initial_precision</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cardinality_threshold</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">initial_precision</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">max_precision</span> <span class="o">=</span> <span class="mi">16</span>
+    
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Automatic precision adjustment when adding values</span><span class="sh">"""</span>
+        
+        <span class="n">current_count</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">hll</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+        
+        <span class="c1"># Increase precision if cardinality exceeds threshold
+</span>        <span class="k">if</span> <span class="n">current_count</span> <span class="o">&gt;</span> <span class="n">self</span><span class="p">.</span><span class="n">cardinality_threshold</span> <span class="ow">and</span> <span class="n">self</span><span class="p">.</span><span class="n">precision</span> <span class="o">&lt;</span> <span class="n">self</span><span class="p">.</span><span class="n">max_precision</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_increase_precision</span><span class="p">()</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">hll</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_increase_precision</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Increase precision and migrate data</span><span class="sh">"""</span>
+        
+        <span class="n">old_precision</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">precision</span>
+        <span class="n">new_precision</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">precision</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">max_precision</span><span class="p">)</span>
+        
+        <span class="c1"># Create new HLL
+</span>        <span class="n">new_hll</span> <span class="o">=</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="n">new_precision</span><span class="p">)</span>
+        
+        <span class="c1"># Migrate existing register values to new HLL
+</span>        <span class="k">for</span> <span class="n">register_value</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">hll</span><span class="p">.</span><span class="n">registers</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">register_value</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Convert register value to new precision
+</span>                <span class="n">new_hll</span><span class="p">.</span><span class="n">registers</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">register_value</span><span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">hll</span> <span class="o">=</span> <span class="n">new_hll</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">precision</span> <span class="o">=</span> <span class="n">new_precision</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cardinality_threshold</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">new_precision</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Precision increased from </span><span class="si">{</span><span class="n">old_precision</span><span class="si">}</span><span class="s"> to </span><span class="si">{</span><span class="n">new_precision</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="compression-based-storage">Compression-based Storage</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CompressedHLLStorage</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">compression_algorithms</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">gzip</span><span class="sh">'</span><span class="p">:</span> <span class="n">gzip</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">lz4</span><span class="sh">'</span><span class="p">:</span> <span class="n">lz4</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">zstd</span><span class="sh">'</span><span class="p">:</span> <span class="n">zstd</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">compress_hll_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">hll_data</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="sh">'</span><span class="s">zstd</span><span class="sh">'</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Compress HLL data</span><span class="sh">"""</span>
+        
+        <span class="c1"># Serialize HLL register data
+</span>        <span class="n">serialized_data</span> <span class="o">=</span> <span class="n">pickle</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">hll_data</span><span class="p">)</span>
+        
+        <span class="c1"># Apply compression
+</span>        <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="sh">'</span><span class="s">gzip</span><span class="sh">'</span><span class="p">:</span>
+            <span class="n">compressed_data</span> <span class="o">=</span> <span class="n">gzip</span><span class="p">.</span><span class="nf">compress</span><span class="p">(</span><span class="n">serialized_data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="sh">'</span><span class="s">lz4</span><span class="sh">'</span><span class="p">:</span>
+            <span class="n">compressed_data</span> <span class="o">=</span> <span class="n">lz4</span><span class="p">.</span><span class="nf">compress</span><span class="p">(</span><span class="n">serialized_data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="sh">'</span><span class="s">zstd</span><span class="sh">'</span><span class="p">:</span>
+            <span class="n">compressed_data</span> <span class="o">=</span> <span class="n">zstd</span><span class="p">.</span><span class="nf">compress</span><span class="p">(</span><span class="n">serialized_data</span><span class="p">)</span>
+        
+        <span class="n">compression_ratio</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">compressed_data</span><span class="p">)</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">serialized_data</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">compressed_data</span><span class="sh">'</span><span class="p">:</span> <span class="n">compressed_data</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">algorithm</span><span class="sh">'</span><span class="p">:</span> <span class="n">algorithm</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">compression_ratio</span><span class="sh">'</span><span class="p">:</span> <span class="n">compression_ratio</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">original_size</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">serialized_data</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">compressed_size</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">compressed_data</span><span class="p">)</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">decompress_hll_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">compressed_info</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Decompress HLL data</span><span class="sh">"""</span>
+        
+        <span class="n">compressed_data</span> <span class="o">=</span> <span class="n">compressed_info</span><span class="p">[</span><span class="sh">'</span><span class="s">compressed_data</span><span class="sh">'</span><span class="p">]</span>
+        <span class="n">algorithm</span> <span class="o">=</span> <span class="n">compressed_info</span><span class="p">[</span><span class="sh">'</span><span class="s">algorithm</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="c1"># Decompress
+</span>        <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="sh">'</span><span class="s">gzip</span><span class="sh">'</span><span class="p">:</span>
+            <span class="n">serialized_data</span> <span class="o">=</span> <span class="n">gzip</span><span class="p">.</span><span class="nf">decompress</span><span class="p">(</span><span class="n">compressed_data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="sh">'</span><span class="s">lz4</span><span class="sh">'</span><span class="p">:</span>
+            <span class="n">serialized_data</span> <span class="o">=</span> <span class="n">lz4</span><span class="p">.</span><span class="nf">decompress</span><span class="p">(</span><span class="n">compressed_data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="sh">'</span><span class="s">zstd</span><span class="sh">'</span><span class="p">:</span>
+            <span class="n">serialized_data</span> <span class="o">=</span> <span class="n">zstd</span><span class="p">.</span><span class="nf">decompress</span><span class="p">(</span><span class="n">compressed_data</span><span class="p">)</span>
+        
+        <span class="c1"># Restore HLL object
+</span>        <span class="n">hll_data</span> <span class="o">=</span> <span class="n">pickle</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">serialized_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">hll_data</span>
+</code></pre></div></div>
+
+<h3 id="parallel-processing-optimization">Parallel Processing Optimization</h3>
+
+<h4 id="distributed-hll-merging">Distributed HLL Merging</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DistributedHLLProcessor</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="n">num_workers</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">worker_pools</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">process_large_dataset</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_stream</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">10000</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Parallel processing of large datasets</span><span class="sh">"""</span>
+        
+        <span class="c1"># Split data into chunks
+</span>        <span class="n">chunks</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_split_data_into_chunks</span><span class="p">(</span><span class="n">data_stream</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">)</span>
+        
+        <span class="c1"># Parallel processing
+</span>        <span class="k">with</span> <span class="nc">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">num_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+            <span class="n">futures</span> <span class="o">=</span> <span class="p">[]</span>
+            
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">chunks</span><span class="p">):</span>
+                <span class="n">future</span> <span class="o">=</span> <span class="n">executor</span><span class="p">.</span><span class="nf">submit</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">_process_chunk</span><span class="p">,</span> <span class="n">chunk</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">futures</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+            
+            <span class="c1"># Collect results
+</span>            <span class="n">chunk_results</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="nf">as_completed</span><span class="p">(</span><span class="n">futures</span><span class="p">):</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">future</span><span class="p">.</span><span class="nf">result</span><span class="p">()</span>
+                <span class="n">chunk_results</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        
+        <span class="c1"># Merge HLL results
+</span>        <span class="n">final_hll</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_merge_hll_results</span><span class="p">(</span><span class="n">chunk_results</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">final_hll</span>
+    
+    <span class="k">def</span> <span class="nf">_process_chunk</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">,</span> <span class="n">chunk_id</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Process individual chunk</span><span class="sh">"""</span>
+        
+        <span class="n">hll</span> <span class="o">=</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">:</span>
+            <span class="n">hll</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">chunk_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">chunk_id</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">hll</span><span class="sh">'</span><span class="p">:</span> <span class="n">hll</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">processed_count</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">_merge_hll_results</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">chunk_results</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Merge HLL results</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">chunk_results</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+        
+        <span class="c1"># Use first HLL as base for merging
+</span>        <span class="n">merged_hll</span> <span class="o">=</span> <span class="n">chunk_results</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="sh">'</span><span class="s">hll</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">chunk_results</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">merged_hll</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_union_hll</span><span class="p">(</span><span class="n">merged_hll</span><span class="p">,</span> <span class="n">result</span><span class="p">[</span><span class="sh">'</span><span class="s">hll</span><span class="sh">'</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">merged_hll</span>
+    
+    <span class="k">def</span> <span class="nf">_union_hll</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">hll1</span><span class="p">,</span> <span class="n">hll2</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Calculate union of two HLLs</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="n">hll1</span><span class="p">.</span><span class="n">precision</span> <span class="o">!=</span> <span class="n">hll2</span><span class="p">.</span><span class="n">precision</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sh">"</span><span class="s">HLL precision mismatch</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="n">union_hll</span> <span class="o">=</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="n">hll1</span><span class="p">.</span><span class="n">precision</span><span class="p">)</span>
+        
+        <span class="c1"># Select maximum value for each register
+</span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">hll1</span><span class="p">.</span><span class="n">registers</span><span class="p">)):</span>
+            <span class="n">union_hll</span><span class="p">.</span><span class="n">registers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">hll1</span><span class="p">.</span><span class="n">registers</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">hll2</span><span class="p">.</span><span class="n">registers</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">union_hll</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="monitoring-and-quality-management">📊 Monitoring and Quality Management</h2>
+
+<h3 id="monitoring-metrics-system">Monitoring Metrics System</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Monitoring Area</th>
+      <th>Key Metrics</th>
+      <th>Threshold</th>
+      <th>Alert Level</th>
+      <th>Response Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Accuracy</strong></td>
+      <td>Error Rate</td>
+      <td>5% (Warning), 10% (Critical)</td>
+      <td>WARNING/CRITICAL</td>
+      <td>Precision Adjustment</td>
+    </tr>
+    <tr>
+      <td><strong>Performance</strong></td>
+      <td>Latency</td>
+      <td>100ms</td>
+      <td>WARNING</td>
+      <td>Parallel Processing</td>
+    </tr>
+    <tr>
+      <td><strong>Throughput</strong></td>
+      <td>TPS</td>
+      <td>1000 req/s</td>
+      <td>WARNING</td>
+      <td>Scaling</td>
+    </tr>
+    <tr>
+      <td><strong>Memory</strong></td>
+      <td>Usage Rate</td>
+      <td>80%</td>
+      <td>WARNING</td>
+      <td>Compression/Cache Cleanup</td>
+    </tr>
+    <tr>
+      <td><strong>CPU</strong></td>
+      <td>Usage Rate</td>
+      <td>85%</td>
+      <td>WARNING</td>
+      <td>Optimization</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="alert-rules-configuration">Alert Rules Configuration</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Rule Name</th>
+      <th>Condition</th>
+      <th>Severity</th>
+      <th>Alert Channel</th>
+      <th>Auto Response</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Accuracy Degradation</strong></td>
+      <td>error_rate &gt; 5%</td>
+      <td>WARNING</td>
+      <td>Slack/Email</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td><strong>Critical Accuracy Drop</strong></td>
+      <td>error_rate &gt; 10%</td>
+      <td>CRITICAL</td>
+      <td>PagerDuty</td>
+      <td>Auto Precision Increase</td>
+    </tr>
+    <tr>
+      <td><strong>Performance Degradation</strong></td>
+      <td>latency &gt; 100ms</td>
+      <td>WARNING</td>
+      <td>Slack</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td><strong>Memory Shortage</strong></td>
+      <td>memory_usage &gt; 80%</td>
+      <td>WARNING</td>
+      <td>Email</td>
+      <td>Cache Cleanup</td>
+    </tr>
+    <tr>
+      <td><strong>Service Down</strong></td>
+      <td>health_check = FAIL</td>
+      <td>CRITICAL</td>
+      <td>PagerDuty</td>
+      <td>Auto Restart</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="accuracy-monitoring">Accuracy Monitoring</h3>
+
+<h4 id="error-rate-tracking-system">Error Rate Tracking System</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">HLLAccuracyMonitor</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">accuracy_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">baseline_counts</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">track_accuracy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">hll_result</span><span class="p">,</span> <span class="n">exact_count</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Track HLL accuracy</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="n">exact_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="n">error_rate</span> <span class="o">=</span> <span class="nf">abs</span><span class="p">(</span><span class="n">hll_result</span> <span class="o">-</span> <span class="n">exact_count</span><span class="p">)</span> <span class="o">/</span> <span class="n">exact_count</span>
+        <span class="n">relative_error</span> <span class="o">=</span> <span class="p">(</span><span class="n">hll_result</span> <span class="o">-</span> <span class="n">exact_count</span><span class="p">)</span> <span class="o">/</span> <span class="n">exact_count</span>
+        
+        <span class="n">accuracy_record</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">hll_count</span><span class="sh">'</span><span class="p">:</span> <span class="n">hll_result</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">exact_count</span><span class="sh">'</span><span class="p">:</span> <span class="n">exact_count</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">error_rate</span><span class="sh">'</span><span class="p">:</span> <span class="n">error_rate</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">relative_error</span><span class="sh">'</span><span class="p">:</span> <span class="n">relative_error</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">context</span><span class="sh">'</span><span class="p">:</span> <span class="n">context</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Track accuracy by context
+</span>        <span class="k">if</span> <span class="n">context</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">accuracy_metrics</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">accuracy_metrics</span><span class="p">[</span><span class="n">context</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">accuracy_metrics</span><span class="p">[</span><span class="n">context</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="n">accuracy_record</span><span class="p">)</span>
+        
+        <span class="c1"># Check alert conditions
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">_check_accuracy_alerts</span><span class="p">(</span><span class="n">accuracy_record</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">accuracy_record</span>
+    
+    <span class="k">def</span> <span class="nf">_check_accuracy_alerts</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">record</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Check accuracy alert conditions</span><span class="sh">"""</span>
+        
+        <span class="n">error_rate</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="sh">'</span><span class="s">error_rate</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="c1"># Alert if error rate exceeds threshold
+</span>        <span class="k">if</span> <span class="n">error_rate</span> <span class="o">&gt;</span> <span class="mf">0.05</span><span class="p">:</span>  <span class="c1"># 5% error
+</span>            <span class="n">alert</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">level</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">WARNING</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">HLL accuracy degraded in </span><span class="si">{</span><span class="n">context</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">error_rate</span><span class="sh">'</span><span class="p">:</span> <span class="n">error_rate</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">}</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_send_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">)</span>
+        
+        <span class="k">elif</span> <span class="n">error_rate</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">:</span>  <span class="c1"># 10% error
+</span>            <span class="n">alert</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">level</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">CRITICAL</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">HLL accuracy critically low in </span><span class="si">{</span><span class="n">context</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">error_rate</span><span class="sh">'</span><span class="p">:</span> <span class="n">error_rate</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">}</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_send_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">generate_accuracy_report</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">time_window</span><span class="o">=</span><span class="sh">'</span><span class="s">24h</span><span class="sh">'</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate accuracy report</span><span class="sh">"""</span>
+        
+        <span class="n">cutoff_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">-</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span> <span class="k">if</span> <span class="n">time_window</span> <span class="o">==</span> <span class="sh">'</span><span class="s">24h</span><span class="sh">'</span> <span class="k">else</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">-</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+        
+        <span class="n">report</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">time_window</span><span class="sh">'</span><span class="p">:</span> <span class="n">time_window</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">overall_accuracy</span><span class="sh">'</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="sh">'</span><span class="s">context_breakdown</span><span class="sh">'</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="sh">'</span><span class="s">recommendations</span><span class="sh">'</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">context</span><span class="p">,</span> <span class="n">records</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">accuracy_metrics</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="c1"># Filter records within time window
+</span>            <span class="n">recent_records</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">records</span> <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">cutoff_time</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">recent_records</span><span class="p">:</span>
+                <span class="k">continue</span>
+            
+            <span class="c1"># Calculate average error rate
+</span>            <span class="n">avg_error_rate</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="sh">'</span><span class="s">error_rate</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">recent_records</span><span class="p">)</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">recent_records</span><span class="p">)</span>
+            <span class="n">max_error_rate</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="sh">'</span><span class="s">error_rate</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">recent_records</span><span class="p">)</span>
+            
+            <span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">context_breakdown</span><span class="sh">'</span><span class="p">][</span><span class="n">context</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">avg_error_rate</span><span class="sh">'</span><span class="p">:</span> <span class="n">avg_error_rate</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">max_error_rate</span><span class="sh">'</span><span class="p">:</span> <span class="n">max_error_rate</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">sample_count</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">recent_records</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">accuracy_score</span><span class="sh">'</span><span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span> <span class="o">-</span> <span class="p">(</span><span class="n">avg_error_rate</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span>
+            <span class="p">}</span>
+        
+        <span class="c1"># Calculate overall accuracy
+</span>        <span class="n">all_records</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">records</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">accuracy_metrics</span><span class="p">.</span><span class="nf">values</span><span class="p">():</span>
+            <span class="n">all_records</span><span class="p">.</span><span class="nf">extend</span><span class="p">([</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">records</span> <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">cutoff_time</span><span class="p">])</span>
+        
+        <span class="k">if</span> <span class="n">all_records</span><span class="p">:</span>
+            <span class="n">overall_avg_error</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="sh">'</span><span class="s">error_rate</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">all_records</span><span class="p">)</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">all_records</span><span class="p">)</span>
+            <span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">overall_accuracy</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">avg_error_rate</span><span class="sh">'</span><span class="p">:</span> <span class="n">overall_avg_error</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">accuracy_score</span><span class="sh">'</span><span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span> <span class="o">-</span> <span class="p">(</span><span class="n">overall_avg_error</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)),</span>
+                <span class="sh">'</span><span class="s">total_samples</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">all_records</span><span class="p">)</span>
+            <span class="p">}</span>
+        
+        <span class="c1"># Generate recommendations
+</span>        <span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">recommendations</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_generate_recommendations</span><span class="p">(</span><span class="n">report</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">report</span>
+    
+    <span class="k">def</span> <span class="nf">_generate_recommendations</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">report</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate accuracy improvement recommendations</span><span class="sh">"""</span>
+        
+        <span class="n">recommendations</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">context</span><span class="p">,</span> <span class="n">metrics</span> <span class="ow">in</span> <span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">context_breakdown</span><span class="sh">'</span><span class="p">].</span><span class="nf">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">avg_error_rate</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.05</span><span class="p">:</span>
+                <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                    <span class="sh">'</span><span class="s">context</span><span class="sh">'</span><span class="p">:</span> <span class="n">context</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">issue</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">High error rate detected</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">recommendation</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">'</span><span class="s">Consider increasing HLL precision for </span><span class="si">{</span><span class="n">context</span><span class="si">}</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">priority</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">HIGH</span><span class="sh">'</span> <span class="k">if</span> <span class="n">metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">avg_error_rate</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.1</span> <span class="k">else</span> <span class="sh">'</span><span class="s">MEDIUM</span><span class="sh">'</span>
+                <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">recommendations</span>
+</code></pre></div></div>
+
+<h3 id="performance-monitoring">Performance Monitoring</h3>
+
+<h4 id="throughput-and-latency-tracking">Throughput and Latency Tracking</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">HLLPerformanceMonitor</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">performance_metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">throughput</span><span class="sh">'</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="sh">'</span><span class="s">latency</span><span class="sh">'</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="sh">'</span><span class="s">memory_usage</span><span class="sh">'</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="sh">'</span><span class="s">cpu_usage</span><span class="sh">'</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">track_operation_performance</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">operation_type</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">memory_usage</span><span class="p">,</span> <span class="n">cpu_usage</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Track HLL operation performance</span><span class="sh">"""</span>
+        
+        <span class="n">duration</span> <span class="o">=</span> <span class="p">(</span><span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">).</span><span class="nf">total_seconds</span><span class="p">()</span>
+        
+        <span class="n">performance_record</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">operation_type</span><span class="sh">'</span><span class="p">:</span> <span class="n">operation_type</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">duration</span><span class="sh">'</span><span class="p">:</span> <span class="n">duration</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">memory_usage</span><span class="sh">'</span><span class="p">:</span> <span class="n">memory_usage</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">cpu_usage</span><span class="sh">'</span><span class="p">:</span> <span class="n">cpu_usage</span>
+        <span class="p">}</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">performance_metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">latency</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="n">performance_record</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate throughput (items processed per second)
+</span>        <span class="k">if</span> <span class="n">duration</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">throughput</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">duration</span>  <span class="c1"># Single operation basis
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">performance_metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">throughput</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">performance_record</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">operation_type</span><span class="sh">'</span><span class="p">:</span> <span class="n">operation_type</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">throughput</span><span class="sh">'</span><span class="p">:</span> <span class="n">throughput</span>
+            <span class="p">})</span>
+    
+    <span class="k">def</span> <span class="nf">analyze_performance_trends</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">time_window</span><span class="o">=</span><span class="sh">'</span><span class="s">1h</span><span class="sh">'</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Analyze performance trends</span><span class="sh">"""</span>
+        
+        <span class="n">cutoff_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">-</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">time_window</span> <span class="o">==</span> <span class="sh">'</span><span class="s">1h</span><span class="sh">'</span> <span class="k">else</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">-</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+        
+        <span class="c1"># Analyze latency
+</span>        <span class="n">recent_latency</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">performance_metrics</span><span class="p">[</span><span class="sh">'</span><span class="s">latency</span><span class="sh">'</span><span class="p">]</span> <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">cutoff_time</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">recent_latency</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        
+        <span class="n">latency_by_operation</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">recent_latency</span><span class="p">:</span>
+            <span class="n">op_type</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="sh">'</span><span class="s">operation_type</span><span class="sh">'</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">op_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">latency_by_operation</span><span class="p">:</span>
+                <span class="n">latency_by_operation</span><span class="p">[</span><span class="n">op_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">latency_by_operation</span><span class="p">[</span><span class="n">op_type</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="sh">'</span><span class="s">duration</span><span class="sh">'</span><span class="p">])</span>
+        
+        <span class="c1"># Calculate statistics
+</span>        <span class="n">performance_analysis</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">time_window</span><span class="sh">'</span><span class="p">:</span> <span class="n">time_window</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">operation_breakdown</span><span class="sh">'</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="sh">'</span><span class="s">overall_metrics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">avg_latency</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="sh">'</span><span class="s">duration</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">recent_latency</span><span class="p">)</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">recent_latency</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">max_latency</span><span class="sh">'</span><span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="sh">'</span><span class="s">duration</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">recent_latency</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">min_latency</span><span class="sh">'</span><span class="p">:</span> <span class="nf">min</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="sh">'</span><span class="s">duration</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">recent_latency</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">op_type</span><span class="p">,</span> <span class="n">latencies</span> <span class="ow">in</span> <span class="n">latency_by_operation</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="n">performance_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">operation_breakdown</span><span class="sh">'</span><span class="p">][</span><span class="n">op_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">avg_latency</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">latencies</span><span class="p">)</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">latencies</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">max_latency</span><span class="sh">'</span><span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="n">latencies</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">min_latency</span><span class="sh">'</span><span class="p">:</span> <span class="nf">min</span><span class="p">(</span><span class="n">latencies</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">operation_count</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">latencies</span><span class="p">)</span>
+            <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">performance_analysis</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="large-scale-bi-system-architecture">🏗️ Large-scale BI System Architecture</h2>
+
+<h3 id="system-architecture-components">System Architecture Components</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Component</th>
+      <th>Technology Stack</th>
+      <th>Role</th>
+      <th>Scalability</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Presentation</strong></td>
+      <td>Dashboard</td>
+      <td>React/Vue.js, D3.js</td>
+      <td>User Interface</td>
+      <td>Horizontal Scaling</td>
+    </tr>
+    <tr>
+      <td><strong>API Gateway</strong></td>
+      <td>Routing</td>
+      <td>Kong/Nginx, Auth0</td>
+      <td>Request Routing, Authentication</td>
+      <td>Horizontal Scaling</td>
+    </tr>
+    <tr>
+      <td><strong>Business Logic</strong></td>
+      <td>HLL Service</td>
+      <td>Python/Node.js, FastAPI</td>
+      <td>Cardinality Calculation</td>
+      <td>Horizontal Scaling</td>
+    </tr>
+    <tr>
+      <td><strong>Data Processing</strong></td>
+      <td>Streaming</td>
+      <td>Apache Flink, Kafka</td>
+      <td>Real-time Processing</td>
+      <td>Horizontal Scaling</td>
+    </tr>
+    <tr>
+      <td><strong>Caching</strong></td>
+      <td>Distributed Cache</td>
+      <td>Redis Cluster</td>
+      <td>Performance Optimization</td>
+      <td>Horizontal Scaling</td>
+    </tr>
+    <tr>
+      <td><strong>Storage</strong></td>
+      <td>Database</td>
+      <td>PostgreSQL, MongoDB</td>
+      <td>Data Storage</td>
+      <td>Vertical/Horizontal Scaling</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="microservice-architecture">Microservice Architecture</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Service Name</th>
+      <th>Port</th>
+      <th>Dependencies</th>
+      <th>Replicas</th>
+      <th>Resources</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>hll-api</strong></td>
+      <td>8080</td>
+      <td>Redis, DB</td>
+      <td>3</td>
+      <td>2CPU, 4GB</td>
+    </tr>
+    <tr>
+      <td><strong>hll-processor</strong></td>
+      <td>8081</td>
+      <td>Kafka, Redis</td>
+      <td>5</td>
+      <td>4CPU, 8GB</td>
+    </tr>
+    <tr>
+      <td><strong>hll-cache</strong></td>
+      <td>6379</td>
+      <td>-</td>
+      <td>3</td>
+      <td>1CPU, 2GB</td>
+    </tr>
+    <tr>
+      <td><strong>hll-monitor</strong></td>
+      <td>9090</td>
+      <td>Prometheus</td>
+      <td>2</td>
+      <td>1CPU, 2GB</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="architecture-design">Architecture Design</h3>
+
+<h4 id="microservice-based-hll-service">Microservice-based HLL Service</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">HLLMicroservice</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">service_name</span><span class="p">,</span> <span class="n">redis_client</span><span class="p">,</span> <span class="n">kafka_producer</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">service_name</span> <span class="o">=</span> <span class="n">service_name</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">redis_client</span> <span class="o">=</span> <span class="n">redis_client</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">kafka_producer</span> <span class="o">=</span> <span class="n">kafka_producer</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">hll_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">metrics_collector</span> <span class="o">=</span> <span class="nc">HLLPerformanceMonitor</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">process_cardinality_request</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Process cardinality calculation request</span><span class="sh">"""</span>
+        
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Parse request
+</span>            <span class="n">dataset_id</span> <span class="o">=</span> <span class="n">request</span><span class="p">[</span><span class="sh">'</span><span class="s">dataset_id</span><span class="sh">'</span><span class="p">]</span>
+            <span class="n">time_range</span> <span class="o">=</span> <span class="n">request</span><span class="p">[</span><span class="sh">'</span><span class="s">time_range</span><span class="sh">'</span><span class="p">]</span>
+            <span class="n">filters</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">filters</span><span class="sh">'</span><span class="p">,</span> <span class="p">{})</span>
+            
+            <span class="c1"># Get or create HLL
+</span>            <span class="n">hll_key</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_generate_hll_key</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">,</span> <span class="n">time_range</span><span class="p">,</span> <span class="n">filters</span><span class="p">)</span>
+            <span class="n">hll</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_get_or_create_hll</span><span class="p">(</span><span class="n">hll_key</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">time_range</span><span class="p">,</span> <span class="n">filters</span><span class="p">)</span>
+            
+            <span class="c1"># Calculate cardinality
+</span>            <span class="n">cardinality</span> <span class="o">=</span> <span class="n">hll</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+            
+            <span class="c1"># Return result
+</span>            <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">dataset_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">dataset_id</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">time_range</span><span class="sh">'</span><span class="p">:</span> <span class="n">time_range</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">filters</span><span class="sh">'</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">cardinality</span><span class="sh">'</span><span class="p">:</span> <span class="n">cardinality</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">confidence_interval</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_confidence_interval</span><span class="p">(</span><span class="n">cardinality</span><span class="p">,</span> <span class="n">hll</span><span class="p">.</span><span class="n">precision</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span>
+            <span class="p">}</span>
+            
+            <span class="c1"># Record performance metrics
+</span>            <span class="n">end_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">metrics_collector</span><span class="p">.</span><span class="nf">track_operation_performance</span><span class="p">(</span>
+                <span class="sh">'</span><span class="s">cardinality_calculation</span><span class="sh">'</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> 
+                <span class="n">self</span><span class="p">.</span><span class="nf">_get_memory_usage</span><span class="p">(),</span> <span class="n">self</span><span class="p">.</span><span class="nf">_get_cpu_usage</span><span class="p">()</span>
+            <span class="p">)</span>
+            
+            <span class="k">return</span> <span class="n">result</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># Error logging and alerting
+</span>            <span class="n">self</span><span class="p">.</span><span class="nf">_handle_error</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+            <span class="k">raise</span>
+    
+    <span class="k">def</span> <span class="nf">_get_or_create_hll</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">hll_key</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">time_range</span><span class="p">,</span> <span class="n">filters</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Get or create HLL</span><span class="sh">"""</span>
+        
+        <span class="c1"># Check cache first
+</span>        <span class="k">if</span> <span class="n">hll_key</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">hll_cache</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">hll_cache</span><span class="p">[</span><span class="n">hll_key</span><span class="p">]</span>
+        
+        <span class="c1"># Check Redis
+</span>        <span class="n">cached_hll</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_load_hll_from_redis</span><span class="p">(</span><span class="n">hll_key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cached_hll</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">hll_cache</span><span class="p">[</span><span class="n">hll_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">cached_hll</span>
+            <span class="k">return</span> <span class="n">cached_hll</span>
+        
+        <span class="c1"># Create new HLL
+</span>        <span class="n">hll</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_create_new_hll</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">,</span> <span class="n">time_range</span><span class="p">,</span> <span class="n">filters</span><span class="p">)</span>
+        
+        <span class="c1"># Store in cache and Redis
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">hll_cache</span><span class="p">[</span><span class="n">hll_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">hll</span>
+        <span class="n">self</span><span class="p">.</span><span class="nf">_save_hll_to_redis</span><span class="p">(</span><span class="n">hll_key</span><span class="p">,</span> <span class="n">hll</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">hll</span>
+    
+    <span class="k">def</span> <span class="nf">_create_new_hll</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">time_range</span><span class="p">,</span> <span class="n">filters</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Create new HLL</span><span class="sh">"""</span>
+        
+        <span class="c1"># Fetch data from data source
+</span>        <span class="n">raw_data</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_fetch_data_from_source</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">,</span> <span class="n">time_range</span><span class="p">,</span> <span class="n">filters</span><span class="p">)</span>
+        
+        <span class="c1"># Create HLL and add data
+</span>        <span class="n">hll</span> <span class="o">=</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>  <span class="c1"># Set appropriate precision
+</span>        
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">raw_data</span><span class="p">:</span>
+            <span class="n">hll</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">hll</span>
+    
+    <span class="k">def</span> <span class="nf">_calculate_confidence_interval</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">cardinality</span><span class="p">,</span> <span class="n">precision</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Calculate confidence interval</span><span class="sh">"""</span>
+        
+        <span class="c1"># Calculate HyperLogLog standard error
+</span>        <span class="n">standard_error</span> <span class="o">=</span> <span class="mf">1.04</span> <span class="o">/</span> <span class="n">math</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">precision</span><span class="p">)</span>
+        <span class="n">margin_of_error</span> <span class="o">=</span> <span class="n">cardinality</span> <span class="o">*</span> <span class="n">standard_error</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">lower_bound</span><span class="sh">'</span><span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cardinality</span> <span class="o">-</span> <span class="n">margin_of_error</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">upper_bound</span><span class="sh">'</span><span class="p">:</span> <span class="n">cardinality</span> <span class="o">+</span> <span class="n">margin_of_error</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">margin_of_error</span><span class="sh">'</span><span class="p">:</span> <span class="n">margin_of_error</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">confidence_level</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.95</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="distributed-caching-system">Distributed Caching System</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DistributedHLLCache</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">redis_cluster</span><span class="p">,</span> <span class="n">cache_ttl</span><span class="o">=</span><span class="mi">3600</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">redis_cluster</span> <span class="o">=</span> <span class="n">redis_cluster</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cache_ttl</span> <span class="o">=</span> <span class="n">cache_ttl</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">local_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cache_stats</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">hits</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">misses</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">evictions</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">get_hll</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">cache_key</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Get HLL from cache</span><span class="sh">"""</span>
+        
+        <span class="c1"># Check local cache first
+</span>        <span class="k">if</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">local_cache</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">cache_stats</span><span class="p">[</span><span class="sh">'</span><span class="s">hits</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">local_cache</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span>
+        
+        <span class="c1"># Check Redis
+</span>        <span class="k">try</span><span class="p">:</span>
+            <span class="n">redis_key</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">hll:</span><span class="si">{</span><span class="n">cache_key</span><span class="si">}</span><span class="sh">"</span>
+            <span class="n">cached_data</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">redis_cluster</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">redis_key</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">cached_data</span><span class="p">:</span>
+                <span class="n">hll</span> <span class="o">=</span> <span class="n">pickle</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">cached_data</span><span class="p">)</span>
+                <span class="c1"># Store in local cache
+</span>                <span class="n">self</span><span class="p">.</span><span class="n">local_cache</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">hll</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">cache_stats</span><span class="p">[</span><span class="sh">'</span><span class="s">hits</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">return</span> <span class="n">hll</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">cache_stats</span><span class="p">[</span><span class="sh">'</span><span class="s">misses</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">return</span> <span class="bp">None</span>
+                
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Redis cache error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">cache_stats</span><span class="p">[</span><span class="sh">'</span><span class="s">misses</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">set_hll</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">cache_key</span><span class="p">,</span> <span class="n">hll</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Store HLL in cache</span><span class="sh">"""</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Store in local cache
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">local_cache</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">hll</span>
+            
+            <span class="c1"># Store in Redis
+</span>            <span class="n">redis_key</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">hll:</span><span class="si">{</span><span class="n">cache_key</span><span class="si">}</span><span class="sh">"</span>
+            <span class="n">serialized_hll</span> <span class="o">=</span> <span class="n">pickle</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">hll</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">redis_cluster</span><span class="p">.</span><span class="nf">setex</span><span class="p">(</span><span class="n">redis_key</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">cache_ttl</span><span class="p">,</span> <span class="n">serialized_hll</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Cache storage error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">evict_cache</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">cache_key</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Evict cache</span><span class="sh">"""</span>
+        
+        <span class="c1"># Remove from local cache
+</span>        <span class="k">if</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">local_cache</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">self</span><span class="p">.</span><span class="n">local_cache</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span>
+        
+        <span class="c1"># Remove from Redis
+</span>        <span class="k">try</span><span class="p">:</span>
+            <span class="n">redis_key</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">hll:</span><span class="si">{</span><span class="n">cache_key</span><span class="si">}</span><span class="sh">"</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">redis_cluster</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="n">redis_key</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">cache_stats</span><span class="p">[</span><span class="sh">'</span><span class="s">evictions</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Cache eviction error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get_cache_stats</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Return cache statistics</span><span class="sh">"""</span>
+        
+        <span class="n">total_requests</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">cache_stats</span><span class="p">[</span><span class="sh">'</span><span class="s">hits</span><span class="sh">'</span><span class="p">]</span> <span class="o">+</span> <span class="n">self</span><span class="p">.</span><span class="n">cache_stats</span><span class="p">[</span><span class="sh">'</span><span class="s">misses</span><span class="sh">'</span><span class="p">]</span>
+        <span class="n">hit_rate</span> <span class="o">=</span> <span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">cache_stats</span><span class="p">[</span><span class="sh">'</span><span class="s">hits</span><span class="sh">'</span><span class="p">]</span> <span class="o">/</span> <span class="n">total_requests</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="k">if</span> <span class="n">total_requests</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">hit_rate</span><span class="sh">'</span><span class="p">:</span> <span class="n">hit_rate</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">total_requests</span><span class="sh">'</span><span class="p">:</span> <span class="n">total_requests</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">local_cache_size</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">local_cache</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">stats</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">cache_stats</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="practical-project-real-time-analytics-platform">🚀 Practical Project: Real-time Analytics Platform</h2>
+
+<h3 id="project-overview">Project Overview</h3>
+
+<p>Build a real-time user analytics system for a large-scale e-commerce platform.</p>
+
+<h4 id="system-architecture">System Architecture</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">RealTimeAnalyticsPlatform</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">data_pipeline</span> <span class="o">=</span> <span class="nc">DataPipeline</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">hll_processor</span> <span class="o">=</span> <span class="nc">DistributedHLLProcessor</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cache_system</span> <span class="o">=</span> <span class="nc">DistributedHLLCache</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">monitoring_system</span> <span class="o">=</span> <span class="nc">HLLAccuracyMonitor</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">alert_system</span> <span class="o">=</span> <span class="nc">AlertSystem</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">setup_analytics_pipeline</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup analytics pipeline</span><span class="sh">"""</span>
+        
+        <span class="n">pipeline_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">data_sources</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">user_events</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">source</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Kafka</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">topics</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">user-page-views</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">user-clicks</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">user-purchases</span><span class="sh">'</span><span class="p">],</span>
+                    <span class="sh">'</span><span class="s">processing_mode</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">streaming</span><span class="sh">'</span>
+                <span class="p">},</span>
+                <span class="sh">'</span><span class="s">user_profiles</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">source</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Database</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">table</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">user_profiles</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">processing_mode</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">batch</span><span class="sh">'</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">hll_processing</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">precision_levels</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">hourly</span><span class="sh">'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">daily</span><span class="sh">'</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">weekly</span><span class="sh">'</span><span class="p">:</span> <span class="mi">14</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">monthly</span><span class="sh">'</span><span class="p">:</span> <span class="mi">16</span>
+                <span class="p">},</span>
+                <span class="sh">'</span><span class="s">aggregation_windows</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">1h</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">24h</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">7d</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">30d</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">cache_strategy</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">distributed</span><span class="sh">'</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">output_targets</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">real_time_dashboard</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">update_interval</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">1m</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">metrics</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">unique_visitors</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">page_views</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">conversion_rate</span><span class="sh">'</span><span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">'</span><span class="s">data_warehouse</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">storage_format</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Parquet</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">partition_strategy</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">daily</span><span class="sh">'</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">pipeline_config</span>
+    
+    <span class="k">def</span> <span class="nf">implement_real_time_processing</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Implement real-time processing</span><span class="sh">"""</span>
+        
+        <span class="n">processing_engine</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">stream_processing</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">framework</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Apache Flink</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">configuration</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">parallelism</span><span class="sh">'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">checkpoint_interval</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">60s</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">state_backend</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">RocksDB</span><span class="sh">'</span>
+                <span class="p">},</span>
+                <span class="sh">'</span><span class="s">operators</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">event_parser</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">JSONParser</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">user_id_extractor</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">UserIDExtractor</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">hll_aggregator</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">HLLAggregator</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">result_sink</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">KafkaSink</span><span class="sh">'</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">batch_processing</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">framework</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Apache Spark</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">configuration</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">executor_instances</span><span class="sh">'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">executor_memory</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">4g</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">driver_memory</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">2g</span><span class="sh">'</span>
+                <span class="p">},</span>
+                <span class="sh">'</span><span class="s">jobs</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">daily_aggregation</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">DailyHLLAggregation</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">weekly_rollup</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">WeeklyRollup</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">monthly_archive</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">MonthlyArchive</span><span class="sh">'</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">processing_engine</span>
+    
+    <span class="k">def</span> <span class="nf">setup_monitoring_and_alerts</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup monitoring and alerts</span><span class="sh">"""</span>
+        
+        <span class="n">monitoring_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">accuracy_monitoring</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">check_interval</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">5m</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">error_threshold</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">critical_threshold</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">baseline_comparison</span><span class="sh">'</span><span class="p">:</span> <span class="bp">True</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">performance_monitoring</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">latency_threshold</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">100ms</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">throughput_threshold</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">memory_threshold</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">80%</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">cpu_threshold</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">85%</span><span class="sh">'</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">alert_channels</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">email</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">admin@company.com</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">slack</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">#data-alerts</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">pagerduty</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">data-team</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">monitoring_config</span>
+    
+    <span class="k">def</span> <span class="nf">generate_business_insights</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate business insights</span><span class="sh">"""</span>
+        
+        <span class="n">insights_engine</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">user_behavior_analysis</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">retention_cohorts</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">CohortAnalysis</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">user_segmentation</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">UserSegmentation</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">conversion_funnels</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">ConversionFunnelAnalysis</span><span class="sh">'</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">marketing_effectiveness</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">campaign_attribution</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">CampaignAttribution</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">channel_performance</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">ChannelPerformance</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">roi_analysis</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">ROIAnalysis</span><span class="sh">'</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">product_analytics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">feature_adoption</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">FeatureAdoption</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">user_engagement</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">EngagementMetrics</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">churn_prediction</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">ChurnPrediction</span><span class="sh">'</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">insights_engine</span>
+</code></pre></div></div>
+
+<h3 id="operations-and-maintenance">Operations and Maintenance</h3>
+
+<h4 id="automated-operations-system">Automated Operations System</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">AutomatedOperationsSystem</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="nc">APScheduler</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">health_checker</span> <span class="o">=</span> <span class="nc">HealthChecker</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">auto_scaler</span> <span class="o">=</span> <span class="nc">AutoScaler</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">backup_manager</span> <span class="o">=</span> <span class="nc">BackupManager</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">setup_automated_operations</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup automated operations</span><span class="sh">"""</span>
+        
+        <span class="n">operations</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">scheduled_tasks</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">daily_hll_refresh</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">schedule</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">0 2 * * *</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># Every day at 2 AM
+</span>                    <span class="sh">'</span><span class="s">task</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">refresh_daily_hll_metrics</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">retry_count</span><span class="sh">'</span><span class="p">:</span> <span class="mi">3</span>
+                <span class="p">},</span>
+                <span class="sh">'</span><span class="s">weekly_accuracy_check</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">schedule</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">0 3 * * 1</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># Every Monday at 3 AM
+</span>                    <span class="sh">'</span><span class="s">task</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">validate_hll_accuracy</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">alert_on_failure</span><span class="sh">'</span><span class="p">:</span> <span class="bp">True</span>
+                <span class="p">},</span>
+                <span class="sh">'</span><span class="s">monthly_archive</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">schedule</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">0 4 1 * *</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># First day of month at 4 AM
+</span>                    <span class="sh">'</span><span class="s">task</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">archive_old_hll_data</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">retention_days</span><span class="sh">'</span><span class="p">:</span> <span class="mi">365</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">health_checks</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">hll_service_health</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">check_interval</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">30s</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">endpoints</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">/health</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">/metrics</span><span class="sh">'</span><span class="p">],</span>
+                    <span class="sh">'</span><span class="s">failure_threshold</span><span class="sh">'</span><span class="p">:</span> <span class="mi">3</span>
+                <span class="p">},</span>
+                <span class="sh">'</span><span class="s">cache_health</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">check_interval</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">1m</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">redis_cluster_check</span><span class="sh">'</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">cache_hit_rate_threshold</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.8</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">auto_scaling</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">hll_processing_nodes</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">min_instances</span><span class="sh">'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">max_instances</span><span class="sh">'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">scale_up_threshold</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">cpu &gt; 70%</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">scale_down_threshold</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">cpu &lt; 30%</span><span class="sh">'</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">operations</span>
+    
+    <span class="k">def</span> <span class="nf">implement_disaster_recovery</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Implement disaster recovery</span><span class="sh">"""</span>
+        
+        <span class="n">dr_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">backup_strategy</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">hll_data_backup</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">frequency</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">hourly</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">retention</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">7 days</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">storage</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">S3</span><span class="sh">'</span>
+                <span class="p">},</span>
+                <span class="sh">'</span><span class="s">configuration_backup</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">frequency</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">daily</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">retention</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">30 days</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">storage</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Git repository</span><span class="sh">'</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">failover_procedures</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">primary_failure</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">detection_time</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">30s</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">failover_time</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">2m</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">secondary_region</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">us-west-2</span><span class="sh">'</span>
+                <span class="p">},</span>
+                <span class="sh">'</span><span class="s">data_corruption</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">detection_method</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">checksum_validation</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">recovery_time</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">5m</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">backup_source</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">latest_known_good</span><span class="sh">'</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">recovery_testing</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">frequency</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">monthly</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">test_scenarios</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">'</span><span class="s">primary_region_failure</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">database_corruption</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">cache_failure</span><span class="sh">'</span>
+                <span class="p">],</span>
+                <span class="sh">'</span><span class="s">success_criteria</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">rto</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">5 minutes</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># Recovery Time Objective
+</span>                    <span class="sh">'</span><span class="s">rpo</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">1 minute</span><span class="sh">'</span>    <span class="c1"># Recovery Point Objective
+</span>                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">dr_config</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="learning-summary">📚 Learning Summary</h2>
+
+<h3 id="key-concepts-summary">Key Concepts Summary</h3>
+
+<ol>
+  <li><strong>Production Application Scenarios</strong>
+    <ul>
+      <li>Web Analytics: User behavior tracking, conversion rate analysis</li>
+      <li>Marketing Analytics: Campaign effectiveness measurement, ROI calculation</li>
+      <li>Real-time Dashboard: Live metrics provision</li>
+    </ul>
+  </li>
+  <li><strong>Performance Optimization Strategies</strong>
+    <ul>
+      <li>Adaptive precision adjustment for improved memory efficiency</li>
+      <li>Compression-based storage for storage optimization</li>
+      <li>Parallel processing for accelerated large-scale data processing</li>
+    </ul>
+  </li>
+  <li><strong>Monitoring and Quality Management</strong>
+    <ul>
+      <li>Accuracy monitoring to ensure result reliability</li>
+      <li>Performance monitoring to maintain system stability</li>
+      <li>Automated alerting system for early problem detection</li>
+    </ul>
+  </li>
+  <li><strong>Large-scale BI System Architecture</strong>
+    <ul>
+      <li>Microservice architecture for scalability</li>
+      <li>Distributed caching for response time optimization</li>
+      <li>Real-time processing pipeline for minimal latency</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="practical-application-guide">Practical Application Guide</h3>
+
+<ol>
+  <li><strong>System Design Considerations</strong>
+    <ul>
+      <li>Analyze data volume and accuracy requirements</li>
+      <li>Balance memory usage and processing performance</li>
+      <li>Consider scalability and maintainability</li>
+    </ul>
+  </li>
+  <li><strong>Operational Best Practices</strong>
+    <ul>
+      <li>Regular accuracy validation</li>
+      <li>Performance metrics monitoring</li>
+      <li>Automated backup and recovery systems</li>
+    </ul>
+  </li>
+  <li><strong>Problem Resolution Methods</strong>
+    <ul>
+      <li>Adjust precision when accuracy degrades</li>
+      <li>Introduce parallel processing when performance degrades</li>
+      <li>Apply compression techniques when memory is insufficient</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="next-steps">Next Steps</h3>
+
+<p>We’ve completed the practical application and optimization of HyperLogLog. In the next Part 3, we’ll cover other probabilistic algorithms used alongside HyperLogLog and advanced analytics techniques.</p>
+
+<p><strong>Key Learning Points:</strong></p>
+<ul>
+  <li>✅ HyperLogLog application methods in production environments</li>
+  <li>✅ Various strategies for performance optimization</li>
+  <li>✅ Building monitoring and quality management systems</li>
+  <li>✅ Large-scale BI system architecture design</li>
+  <li>✅ Implementing automated operations systems</li>
+</ul>
+
+<p>We’ve learned all the essentials of building modern BI systems using HyperLogLog! 🎉</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+      
+      
+      
+      
+      
+        
+        
+        <a href="/bi-engineering/2025/09/24/hyperloglog-production-optimization.html" class="nav-link next">
+          다음: Part 2: HyperLogLog 실무 적용과 최적화 - 프로덕션급 BI 시스템 구축 →
+        </a>
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/bi-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
