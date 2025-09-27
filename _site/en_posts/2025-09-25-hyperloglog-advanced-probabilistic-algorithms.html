@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="데이터 엔지니어가 다루는 기술 블로그">
+
+
+
+<title>Part 3: HyperLogLog and Advanced Probabilistic Algorithms - Completion of Modern BI Analytics - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 3: HyperLogLog and Advanced Probabilistic Algorithms - Completion of Modern BI Analytics">
+<meta property="og:description" content="데이터 엔지니어가 다루는 기술 블로그">
+<meta property="og:url" content="http://localhost:4000/en_posts/2025-09-25-hyperloglog-advanced-probabilistic-algorithms.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 3: HyperLogLog and Advanced Probabilistic Algorithms - Completion of Modern BI Analytics">
+<meta name="twitter:description" content="데이터 엔지니어가 다루는 기술 블로그">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/bi-engineering/2025/09/25/hyperloglog-advanced-probabilistic-algorithms.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2025-09-25-hyperloglog-advanced-probabilistic-algorithms.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Bi engineering</span>
+      <span class="post-date">2025년 09월 25일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 3: HyperLogLog and Advanced Probabilistic Algorithms - Completion of Modern BI Analytics</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">HyperLogLog</span>
+      
+        <span class="tag">Probabilistic-Algorithms</span>
+      
+        <span class="tag">Advanced-Analytics</span>
+      
+        <span class="tag">BI-Systems</span>
+      
+        <span class="tag">Streaming-Analytics</span>
+      
+        <span class="tag">Real-time-Processing</span>
+      
+        <span class="tag">Big-Data</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Modern bi engineering 시리즈</span>
+      <span class="series-order">Part 4</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 50 min</span>
+      
+      
+        <span class="difficulty">📊 Advanced</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-3-hyperloglog-and-advanced-probabilistic-algorithms---completion-of-modern-bi-analytics">Part 3: HyperLogLog and Advanced Probabilistic Algorithms - Completion of Modern BI Analytics</h1>
+
+<blockquote>
+  <p>Complete guide covering advanced probabilistic algorithms used alongside HyperLogLog, streaming analytics, real-time processing, and the completion of modern BI systems.</p>
+</blockquote>
+
+<h2 id="table-of-contents">📋 Table of Contents</h2>
+
+<ol>
+  <li><a href="#advanced-probabilistic-algorithms-overview">Advanced Probabilistic Algorithms Overview</a></li>
+  <li><a href="#analysis-with-count-min-sketch">Analysis with Count-Min Sketch</a></li>
+  <li><a href="#bloom-filter-and-deduplication">Bloom Filter and Deduplication</a></li>
+  <li><a href="#streaming-analytics-and-real-time-processing">Streaming Analytics and Real-time Processing</a></li>
+  <li><a href="#advanced-bi-analytics-techniques">Advanced BI Analytics Techniques</a></li>
+  <li><a href="#practical-project-integrated-analytics-platform">Practical Project: Integrated Analytics Platform</a></li>
+  <li><a href="#learning-summary">Learning Summary</a></li>
+</ol>
+
+<hr />
+
+<h2 id="advanced-probabilistic-algorithms-overview">🎯 Advanced Probabilistic Algorithms Overview</h2>
+
+<h3 id="types-and-characteristics-of-probabilistic-algorithms">Types and Characteristics of Probabilistic Algorithms</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Algorithm</th>
+      <th>Primary Use</th>
+      <th>Memory Complexity</th>
+      <th>Accuracy</th>
+      <th>Characteristics</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>HyperLogLog</strong></td>
+      <td>Cardinality Estimation</td>
+      <td>O(log log n)</td>
+      <td>±1.04/√m</td>
+      <td>Unique value counting</td>
+    </tr>
+    <tr>
+      <td><strong>Count-Min Sketch</strong></td>
+      <td>Frequency Estimation</td>
+      <td>O(d×w)</td>
+      <td>±εN</td>
+      <td>Element frequency calculation</td>
+    </tr>
+    <tr>
+      <td><strong>Bloom Filter</strong></td>
+      <td>Membership Testing</td>
+      <td>O(m)</td>
+      <td>0% False Negative</td>
+      <td>Deduplication, existence check</td>
+    </tr>
+    <tr>
+      <td><strong>MinHash</strong></td>
+      <td>Similarity Estimation</td>
+      <td>O(k)</td>
+      <td>±1/√k</td>
+      <td>Set similarity calculation</td>
+    </tr>
+    <tr>
+      <td><strong>T-Digest</strong></td>
+      <td>Quantile Estimation</td>
+      <td>O(δ)</td>
+      <td>±ε</td>
+      <td>Distribution statistics estimation</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="algorithm-combination-strategies">Algorithm Combination Strategies</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Combination</th>
+      <th>Purpose</th>
+      <th>Use Cases</th>
+      <th>Performance Benefits</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>HLL + Count-Min</strong></td>
+      <td>Cardinality + Frequency</td>
+      <td>Real-time trend analysis</td>
+      <td>Memory efficiency</td>
+    </tr>
+    <tr>
+      <td><strong>HLL + Bloom Filter</strong></td>
+      <td>Deduplication + Counting</td>
+      <td>Streaming data processing</td>
+      <td>Processing speed improvement</td>
+    </tr>
+    <tr>
+      <td><strong>HLL + MinHash</strong></td>
+      <td>Similarity + Counting</td>
+      <td>User segment analysis</td>
+      <td>Accuracy improvement</td>
+    </tr>
+    <tr>
+      <td><strong>Count-Min + Bloom</strong></td>
+      <td>Frequency + Deduplication</td>
+      <td>Log analysis systems</td>
+      <td>Storage space savings</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="practical-application-scenarios">Practical Application Scenarios</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ProbabilisticAnalyticsEngine</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">hll_registry</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">count_min_sketches</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">bloom_filters</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">min_hash_registry</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_analytics_pipeline</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup analytics pipeline</span><span class="sh">"""</span>
+        
+        <span class="n">pipeline_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">user_analytics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">:</span> <span class="mi">14</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_width</span><span class="sh">'</span><span class="p">:</span> <span class="mi">16384</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">bloom_capacity</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000000</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">bloom_error_rate</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.01</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">content_analytics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_width</span><span class="sh">'</span><span class="p">:</span> <span class="mi">8192</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">bloom_capacity</span><span class="sh">'</span><span class="p">:</span> <span class="mi">500000</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">bloom_error_rate</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.005</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">real_time_analytics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_width</span><span class="sh">'</span><span class="p">:</span> <span class="mi">4096</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">bloom_capacity</span><span class="sh">'</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">bloom_error_rate</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.02</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">pipeline_config</span>
+    
+    <span class="k">def</span> <span class="nf">initialize_structures</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Initialize probabilistic structures</span><span class="sh">"""</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">hll_registry</span><span class="p">[</span><span class="n">namespace</span><span class="p">]</span> <span class="o">=</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">])</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">count_min_sketches</span><span class="p">[</span><span class="n">namespace</span><span class="p">]</span> <span class="o">=</span> <span class="nc">CountMinSketch</span><span class="p">(</span>
+            <span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">],</span> 
+            <span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">count_min_width</span><span class="sh">'</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">bloom_filters</span><span class="p">[</span><span class="n">namespace</span><span class="p">]</span> <span class="o">=</span> <span class="nc">BloomFilter</span><span class="p">(</span>
+            <span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">bloom_capacity</span><span class="sh">'</span><span class="p">],</span> 
+            <span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">bloom_error_rate</span><span class="sh">'</span><span class="p">]</span>
+        <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">hll</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">hll_registry</span><span class="p">[</span><span class="n">namespace</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">count_min</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">count_min_sketches</span><span class="p">[</span><span class="n">namespace</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">bloom</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">bloom_filters</span><span class="p">[</span><span class="n">namespace</span><span class="p">]</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="analysis-with-count-min-sketch">🔢 Analysis with Count-Min Sketch</h2>
+
+<h3 id="count-min-sketch-overview">Count-Min Sketch Overview</h3>
+
+<p>Count-Min Sketch is a probabilistic data structure for estimating element frequencies in streaming data.</p>
+
+<h4 id="basic-structure-and-principles">Basic Structure and Principles</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Description</th>
+      <th>Size</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Hash Functions</strong></td>
+      <td>d independent hash functions</td>
+      <td>d</td>
+      <td>Map elements to w buckets</td>
+    </tr>
+    <tr>
+      <td><strong>Bucket Array</strong></td>
+      <td>2D array of size d×w</td>
+      <td>d×w</td>
+      <td>Store frequency counters</td>
+    </tr>
+    <tr>
+      <td><strong>Depth (d)</strong></td>
+      <td>Number of hash functions</td>
+      <td>4-8</td>
+      <td>Control accuracy</td>
+    </tr>
+    <tr>
+      <td><strong>Width (w)</strong></td>
+      <td>Number of buckets per hash function</td>
+      <td>2^k</td>
+      <td>Control memory usage</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="count-min-sketch-implementation">Count-Min Sketch Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">hashlib</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="k">class</span> <span class="nc">CountMinSketch</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">16384</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">depth</span> <span class="o">=</span> <span class="n">depth</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">sketch</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">((</span><span class="n">depth</span><span class="p">,</span> <span class="n">width</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="p">.</span><span class="n">uint32</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">hash_functions</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_generate_hash_functions</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">_generate_hash_functions</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate hash functions</span><span class="sh">"""</span>
+        <span class="n">hash_funcs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">depth</span><span class="p">):</span>
+            <span class="c1"># Simple hash function generation (use more sophisticated methods in practice)
+</span>            <span class="k">def</span> <span class="nf">hash_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">i</span><span class="p">):</span>
+                <span class="k">return</span> <span class="nf">int</span><span class="p">(</span><span class="n">hashlib</span><span class="p">.</span><span class="nf">md5</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">seed</span><span class="si">}</span><span class="sh">"</span><span class="p">.</span><span class="nf">encode</span><span class="p">()).</span><span class="nf">hexdigest</span><span class="p">(),</span> <span class="mi">16</span><span class="p">)</span> <span class="o">%</span> <span class="n">self</span><span class="p">.</span><span class="n">width</span>
+            <span class="n">hash_funcs</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">hash_func</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">hash_funcs</span>
+    
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Add element</span><span class="sh">"""</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">hash_func</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">hash_functions</span><span class="p">):</span>
+            <span class="n">bucket</span> <span class="o">=</span> <span class="nf">hash_func</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">sketch</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">bucket</span><span class="p">]</span> <span class="o">+=</span> <span class="n">count</span>
+    
+    <span class="k">def</span> <span class="nf">estimate</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Estimate frequency</span><span class="sh">"""</span>
+        <span class="n">estimates</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">hash_func</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">hash_functions</span><span class="p">):</span>
+            <span class="n">bucket</span> <span class="o">=</span> <span class="nf">hash_func</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            <span class="n">estimates</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sketch</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">bucket</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nf">min</span><span class="p">(</span><span class="n">estimates</span><span class="p">)</span>  <span class="c1"># Return minimum value (prevent overestimation)
+</span>    
+    <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other_sketch</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Merge with another sketch</span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">depth</span> <span class="o">!=</span> <span class="n">other_sketch</span><span class="p">.</span><span class="n">depth</span> <span class="ow">or</span> <span class="n">self</span><span class="p">.</span><span class="n">width</span> <span class="o">!=</span> <span class="n">other_sketch</span><span class="p">.</span><span class="n">width</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sh">"</span><span class="s">Sketch sizes do not match</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">sketch</span> <span class="o">+=</span> <span class="n">other_sketch</span><span class="p">.</span><span class="n">sketch</span>
+        <span class="k">return</span> <span class="n">self</span>
+</code></pre></div></div>
+
+<h3 id="hyperloglog-and-count-min-sketch-combination">HyperLogLog and Count-Min Sketch Combination</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">HLLCountMinAnalyzer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">hll_precision</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">cm_depth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">cm_width</span><span class="o">=</span><span class="mi">16384</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">hll</span> <span class="o">=</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="n">hll_precision</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">count_min</span> <span class="o">=</span> <span class="nc">CountMinSketch</span><span class="p">(</span><span class="n">cm_depth</span><span class="p">,</span> <span class="n">cm_width</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">unique_elements</span> <span class="o">=</span> <span class="nf">set</span><span class="p">()</span>  <span class="c1"># For accurate tracking (optional)
+</span>    
+    <span class="k">def</span> <span class="nf">process_stream</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Process stream data</span><span class="sh">"""</span>
+        
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">unique_count</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">frequency_estimates</span><span class="sh">'</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="sh">'</span><span class="s">top_elements</span><span class="sh">'</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="sh">'</span><span class="s">statistics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{}</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">data_stream</span><span class="p">:</span>
+            <span class="c1"># Add to HyperLogLog (unique count estimation)
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">hll</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            
+            <span class="c1"># Add to Count-Min Sketch (frequency estimation)
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">count_min</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            
+            <span class="c1"># Accurate tracking (optional)
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">unique_elements</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate results
+</span>        <span class="n">results</span><span class="p">[</span><span class="sh">'</span><span class="s">unique_count</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">hll</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+        <span class="n">results</span><span class="p">[</span><span class="sh">'</span><span class="s">exact_unique_count</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">unique_elements</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="sh">'</span><span class="s">error_rate</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="nf">abs</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="sh">'</span><span class="s">unique_count</span><span class="sh">'</span><span class="p">]</span> <span class="o">-</span> <span class="n">results</span><span class="p">[</span><span class="sh">'</span><span class="s">exact_unique_count</span><span class="sh">'</span><span class="p">])</span> <span class="o">/</span> <span class="n">results</span><span class="p">[</span><span class="sh">'</span><span class="s">exact_unique_count</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">results</span>
+    
+    <span class="k">def</span> <span class="nf">get_frequency_analysis</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Frequency analysis</span><span class="sh">"""</span>
+        
+        <span class="n">frequency_analysis</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
+            <span class="n">estimated_freq</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">count_min</span><span class="p">.</span><span class="nf">estimate</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            <span class="n">frequency_analysis</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">estimated_frequency</span><span class="sh">'</span><span class="p">:</span> <span class="n">estimated_freq</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">confidence_interval</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_confidence_interval</span><span class="p">(</span><span class="n">estimated_freq</span><span class="p">)</span>
+            <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">frequency_analysis</span>
+    
+    <span class="k">def</span> <span class="nf">_calculate_confidence_interval</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">estimate</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Calculate confidence interval</span><span class="sh">"""</span>
+        <span class="c1"># Count-Min Sketch standard error approximation
+</span>        <span class="n">standard_error</span> <span class="o">=</span> <span class="n">estimate</span> <span class="o">*</span> <span class="mf">0.1</span>  <span class="c1"># Simple approximation
+</span>        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">lower_bound</span><span class="sh">'</span><span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">estimate</span> <span class="o">-</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">standard_error</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">upper_bound</span><span class="sh">'</span><span class="p">:</span> <span class="n">estimate</span> <span class="o">+</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">standard_error</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">confidence_level</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.95</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="bloom-filter-and-deduplication">🌸 Bloom Filter and Deduplication</h2>
+
+<h3 id="bloom-filter-overview">Bloom Filter Overview</h3>
+
+<p>Bloom Filter is a probabilistic data structure for testing element membership, optimized for deduplication and existence checking.</p>
+
+<h4 id="bloom-filter-structure">Bloom Filter Structure</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Description</th>
+      <th>Size</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Bit Array</strong></td>
+      <td>Array of m bits</td>
+      <td>m bits</td>
+      <td>Store element existence information</td>
+    </tr>
+    <tr>
+      <td><strong>Hash Functions</strong></td>
+      <td>k independent hash functions</td>
+      <td>k</td>
+      <td>Map elements to bit positions</td>
+    </tr>
+    <tr>
+      <td><strong>Capacity (n)</strong></td>
+      <td>Expected number of elements</td>
+      <td>User defined</td>
+      <td>Control False Positive probability</td>
+    </tr>
+    <tr>
+      <td><strong>Error Rate (p)</strong></td>
+      <td>False Positive probability</td>
+      <td>User defined</td>
+      <td>Accuracy vs memory tradeoff</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="bloom-filter-implementation">Bloom Filter Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">hashlib</span>
+<span class="kn">import</span> <span class="n">math</span>
+
+<span class="k">class</span> <span class="nc">BloomFilter</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">capacity</span><span class="p">,</span> <span class="n">error_rate</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">capacity</span> <span class="o">=</span> <span class="n">capacity</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">error_rate</span> <span class="o">=</span> <span class="n">error_rate</span>
+        
+        <span class="c1"># Calculate optimal parameters
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_size</span><span class="p">(</span><span class="n">capacity</span><span class="p">,</span> <span class="n">error_rate</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">hash_count</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_hash_count</span><span class="p">(</span><span class="n">capacity</span><span class="p">,</span> <span class="n">error_rate</span><span class="p">)</span>
+        
+        <span class="c1"># Initialize bit array
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">bit_array</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">]</span> <span class="o">*</span> <span class="n">self</span><span class="p">.</span><span class="n">size</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">hash_functions</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_generate_hash_functions</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">_calculate_size</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Calculate bit array size</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="nf">int</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="n">p</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">_calculate_hash_count</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Calculate number of hash functions</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="nf">int</span><span class="p">((</span><span class="n">self</span><span class="p">.</span><span class="n">size</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">_generate_hash_functions</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate hash functions</span><span class="sh">"""</span>
+        <span class="n">hash_funcs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">hash_count</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">hash_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">i</span><span class="p">):</span>
+                <span class="k">return</span> <span class="nf">int</span><span class="p">(</span><span class="n">hashlib</span><span class="p">.</span><span class="nf">sha256</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">seed</span><span class="si">}</span><span class="sh">"</span><span class="p">.</span><span class="nf">encode</span><span class="p">()).</span><span class="nf">hexdigest</span><span class="p">(),</span> <span class="mi">16</span><span class="p">)</span> <span class="o">%</span> <span class="n">self</span><span class="p">.</span><span class="n">size</span>
+            <span class="n">hash_funcs</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">hash_func</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">hash_funcs</span>
+    
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Add element</span><span class="sh">"""</span>
+        <span class="k">for</span> <span class="n">hash_func</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">hash_functions</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="nf">hash_func</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">bit_array</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    
+    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Membership test</span><span class="sh">"""</span>
+        <span class="k">for</span> <span class="n">hash_func</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">hash_functions</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="nf">hash_func</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">self</span><span class="p">.</span><span class="n">bit_array</span><span class="p">[</span><span class="n">index</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    
+    <span class="k">def</span> <span class="nf">false_positive_rate</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Calculate current False Positive probability</span><span class="sh">"""</span>
+        <span class="c1"># More sophisticated calculation needed in practice
+</span>        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">error_rate</span>
+</code></pre></div></div>
+
+<h3 id="hyperloglog-and-bloom-filter-combination">HyperLogLog and Bloom Filter Combination</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">HLLBloomDeduplicator</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">hll_precision</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">bloom_capacity</span><span class="o">=</span><span class="mi">1000000</span><span class="p">,</span> <span class="n">bloom_error_rate</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">hll</span> <span class="o">=</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="n">hll_precision</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span> <span class="o">=</span> <span class="nc">BloomFilter</span><span class="p">(</span><span class="n">bloom_capacity</span><span class="p">,</span> <span class="n">bloom_error_rate</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">processed_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">duplicate_count</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">def</span> <span class="nf">process_with_deduplication</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Process stream with deduplication</span><span class="sh">"""</span>
+        
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">total_processed</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">unique_processed</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">duplicates_skipped</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">estimated_unique_count</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">deduplication_rate</span><span class="sh">'</span><span class="p">:</span> <span class="mf">0.0</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">data_stream</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="sh">'</span><span class="s">total_processed</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+            <span class="c1"># Check for duplicates using Bloom Filter
+</span>            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="nf">contains</span><span class="p">(</span><span class="n">element</span><span class="p">):</span>
+                <span class="n">results</span><span class="p">[</span><span class="sh">'</span><span class="s">duplicates_skipped</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">duplicate_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+            
+            <span class="c1"># Process new element
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">hll</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="sh">'</span><span class="s">unique_processed</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="c1"># Calculate results
+</span>        <span class="n">results</span><span class="p">[</span><span class="sh">'</span><span class="s">estimated_unique_count</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">hll</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+        <span class="n">results</span><span class="p">[</span><span class="sh">'</span><span class="s">deduplication_rate</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="sh">'</span><span class="s">duplicates_skipped</span><span class="sh">'</span><span class="p">]</span> <span class="o">/</span> <span class="n">results</span><span class="p">[</span><span class="sh">'</span><span class="s">total_processed</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">results</span>
+    
+    <span class="k">def</span> <span class="nf">get_deduplication_stats</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Get deduplication statistics</span><span class="sh">"""</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">bloom_filter_size</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="n">size</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">bloom_filter_hash_count</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="n">hash_count</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">false_positive_rate</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="nf">false_positive_rate</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">memory_usage_bytes</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="n">size</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span>  <span class="c1"># Convert bits to bytes
+</span>            <span class="sh">'</span><span class="s">estimated_unique_elements</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">hll</span><span class="p">.</span><span class="nf">count</span><span class="p">(),</span>
+            <span class="sh">'</span><span class="s">duplicate_ratio</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">duplicate_count</span> <span class="o">/</span> <span class="nf">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">processed_count</span><span class="p">)</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="streaming-analytics-and-real-time-processing">⚡ Streaming Analytics and Real-time Processing</h2>
+
+<h3 id="streaming-analytics-architecture">Streaming Analytics Architecture</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Technology Stack</th>
+      <th>Role</th>
+      <th>Scalability</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Stream Collection</strong></td>
+      <td>Apache Kafka, AWS Kinesis</td>
+      <td>Data collection and buffering</td>
+      <td>Horizontal scaling</td>
+    </tr>
+    <tr>
+      <td><strong>Stream Processing</strong></td>
+      <td>Apache Flink, Apache Storm</td>
+      <td>Real-time data processing</td>
+      <td>Horizontal scaling</td>
+    </tr>
+    <tr>
+      <td><strong>Probabilistic Structures</strong></td>
+      <td>HyperLogLog, Count-Min, Bloom</td>
+      <td>Memory-efficient analysis</td>
+      <td>Memory optimization</td>
+    </tr>
+    <tr>
+      <td><strong>Result Storage</strong></td>
+      <td>Redis, Apache Cassandra</td>
+      <td>Real-time result storage</td>
+      <td>Horizontal scaling</td>
+    </tr>
+    <tr>
+      <td><strong>Visualization</strong></td>
+      <td>Grafana, Apache Superset</td>
+      <td>Real-time dashboard</td>
+      <td>Horizontal scaling</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="real-time-analytics-pipeline">Real-time Analytics Pipeline</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">StreamingAnalyticsPipeline</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">analyzers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">window_size</span> <span class="o">=</span> <span class="n">config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">window_size</span><span class="sh">'</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>  <span class="c1"># 60-second window
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">slide_size</span> <span class="o">=</span> <span class="n">config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">slide_size</span><span class="sh">'</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>    <span class="c1"># 10-second slide
+</span>    
+    <span class="k">def</span> <span class="nf">setup_analyzers</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup analyzers</span><span class="sh">"""</span>
+        
+        <span class="n">analyzer_configs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">user_analytics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">:</span> <span class="mi">14</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_width</span><span class="sh">'</span><span class="p">:</span> <span class="mi">16384</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">bloom_capacity</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000000</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">content_analytics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_width</span><span class="sh">'</span><span class="p">:</span> <span class="mi">8192</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">bloom_capacity</span><span class="sh">'</span><span class="p">:</span> <span class="mi">500000</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">geographic_analytics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_width</span><span class="sh">'</span><span class="p">:</span> <span class="mi">4096</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">bloom_capacity</span><span class="sh">'</span><span class="p">:</span> <span class="mi">100000</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">analyzer_configs</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">analyzers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nc">HLLCountMinAnalyzer</span><span class="p">(</span>
+                <span class="n">hll_precision</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">],</span>
+                <span class="n">cm_depth</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">],</span>
+                <span class="n">cm_width</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">count_min_width</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_streaming_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Process streaming data</span><span class="sh">"""</span>
+        
+        <span class="n">window_results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">current_window</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">data_point</span> <span class="ow">in</span> <span class="n">data_stream</span><span class="p">:</span>
+            <span class="n">current_window</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">data_point</span><span class="p">)</span>
+            
+            <span class="c1"># Process when window is full
+</span>            <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">current_window</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">self</span><span class="p">.</span><span class="n">window_size</span><span class="p">:</span>
+                <span class="n">window_result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_process_window</span><span class="p">(</span><span class="n">current_window</span><span class="p">)</span>
+                <span class="n">window_results</span><span class="p">[</span><span class="n">data_point</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">]]</span> <span class="o">=</span> <span class="n">window_result</span>
+                
+                <span class="c1"># Update sliding window
+</span>                <span class="n">current_window</span> <span class="o">=</span> <span class="n">current_window</span><span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">slide_size</span><span class="p">:]</span>
+        
+        <span class="k">return</span> <span class="n">window_results</span>
+    
+    <span class="k">def</span> <span class="nf">_process_window</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">window_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Process window data</span><span class="sh">"""</span>
+        
+        <span class="n">window_result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">window_data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">],</span>
+            <span class="sh">'</span><span class="s">window_size</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">window_data</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">analytics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{}</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">analyzer_name</span><span class="p">,</span> <span class="n">analyzer</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">analyzers</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="c1"># Filter data for each analyzer
+</span>            <span class="n">filtered_data</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_filter_data_for_analyzer</span><span class="p">(</span><span class="n">window_data</span><span class="p">,</span> <span class="n">analyzer_name</span><span class="p">)</span>
+            
+            <span class="c1"># Execute analysis
+</span>            <span class="n">analysis_result</span> <span class="o">=</span> <span class="n">analyzer</span><span class="p">.</span><span class="nf">process_stream</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">)</span>
+            <span class="n">window_result</span><span class="p">[</span><span class="sh">'</span><span class="s">analytics</span><span class="sh">'</span><span class="p">][</span><span class="n">analyzer_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">analysis_result</span>
+        
+        <span class="k">return</span> <span class="n">window_result</span>
+    
+    <span class="k">def</span> <span class="nf">_filter_data_for_analyzer</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">analyzer_name</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Filter data for analyzer</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="n">analyzer_name</span> <span class="o">==</span> <span class="sh">'</span><span class="s">user_analytics</span><span class="sh">'</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">if</span> <span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">item</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">analyzer_name</span> <span class="o">==</span> <span class="sh">'</span><span class="s">content_analytics</span><span class="sh">'</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="sh">'</span><span class="s">content_id</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">if</span> <span class="sh">'</span><span class="s">content_id</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">item</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">analyzer_name</span> <span class="o">==</span> <span class="sh">'</span><span class="s">geographic_analytics</span><span class="sh">'</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">if</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">item</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">data</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="advanced-bi-analytics-techniques">📊 Advanced BI Analytics Techniques</h2>
+
+<h3 id="multi-dimensional-analysis-strategy">Multi-dimensional Analysis Strategy</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Analysis Dimension</th>
+      <th>Probabilistic Structure</th>
+      <th>Metrics</th>
+      <th>Use Cases</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Time Dimension</strong></td>
+      <td>HLL + Count-Min</td>
+      <td>Unique users by time, frequency</td>
+      <td>Trend analysis</td>
+    </tr>
+    <tr>
+      <td><strong>Geographic Dimension</strong></td>
+      <td>HLL + Bloom</td>
+      <td>Unique users by region, deduplication</td>
+      <td>Geographic analysis</td>
+    </tr>
+    <tr>
+      <td><strong>Device Dimension</strong></td>
+      <td>HLL + MinHash</td>
+      <td>Users by device, similarity</td>
+      <td>Cross-device analysis</td>
+    </tr>
+    <tr>
+      <td><strong>Content Dimension</strong></td>
+      <td>Count-Min + Bloom</td>
+      <td>Content views, deduplication</td>
+      <td>Content performance analysis</td>
+    </tr>
+    <tr>
+      <td><strong>User Segment</strong></td>
+      <td>HLL + Count-Min + Bloom</td>
+      <td>Unique users by segment, frequency</td>
+      <td>Targeting analysis</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="advanced-analytics-engine">Advanced Analytics Engine</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">AdvancedBIAnalyticsEngine</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">dimensional_analyzers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cross_dimensional_analyzers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">temporal_analyzers</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_dimensional_analysis</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup multi-dimensional analysis</span><span class="sh">"""</span>
+        
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">time</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">granularity</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">hour</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">day</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">week</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">month</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">:</span> <span class="mi">3</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">geography</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">granularity</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">country</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">region</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">city</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">:</span> <span class="mi">2</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">device</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">granularity</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">os</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">browser</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">:</span> <span class="mi">2</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">content</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">granularity</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">category</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">author</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">:</span> <span class="mi">14</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">:</span> <span class="mi">4</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">dim_name</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">dimensions</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">dimensional_analyzers</span><span class="p">[</span><span class="n">dim_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            
+            <span class="k">for</span> <span class="n">granularity</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">granularity</span><span class="sh">'</span><span class="p">]:</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">dimensional_analyzers</span><span class="p">[</span><span class="n">dim_name</span><span class="p">][</span><span class="n">granularity</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">hll</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">]),</span>
+                    <span class="sh">'</span><span class="s">count_min</span><span class="sh">'</span><span class="p">:</span> <span class="nc">CountMinSketch</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">],</span> <span class="mi">8192</span><span class="p">),</span>
+                    <span class="sh">'</span><span class="s">bloom</span><span class="sh">'</span><span class="p">:</span> <span class="nc">BloomFilter</span><span class="p">(</span><span class="mi">100000</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+                <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">analyze_cross_dimensional</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Cross-dimensional analysis</span><span class="sh">"""</span>
+        
+        <span class="n">cross_analysis</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c1"># Time × Geography analysis
+</span>        <span class="n">time_geo_analysis</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_analyze_time_geography</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">cross_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">time_geography</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_geo_analysis</span>
+        
+        <span class="c1"># Device × Content analysis
+</span>        <span class="n">device_content_analysis</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_analyze_device_content</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">cross_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">device_content</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_content_analysis</span>
+        
+        <span class="c1"># User × Time analysis
+</span>        <span class="n">user_time_analysis</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_analyze_user_time</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">cross_analysis</span><span class="p">[</span><span class="sh">'</span><span class="s">user_time</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">user_time_analysis</span>
+        
+        <span class="k">return</span> <span class="n">cross_analysis</span>
+    
+    <span class="k">def</span> <span class="nf">_analyze_time_geography</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Time × Geography analysis</span><span class="sh">"""</span>
+        
+        <span class="n">time_geo_results</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">time_key</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">].</span><span class="nf">strftime</span><span class="p">(</span><span class="sh">'</span><span class="s">%Y-%m-%d-%H</span><span class="sh">'</span><span class="p">)</span>
+            <span class="n">geo_key</span> <span class="o">=</span> <span class="n">item</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">country</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">unknown</span><span class="sh">'</span><span class="p">)</span>
+            <span class="n">user_id</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="sh">'</span><span class="s">user_id</span><span class="sh">'</span><span class="p">]</span>
+            
+            <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">time_key</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">geo_key</span><span class="si">}</span><span class="sh">"</span>
+            
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">time_geo_results</span><span class="p">:</span>
+                <span class="n">time_geo_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">hll</span><span class="sh">'</span><span class="p">:</span> <span class="nc">HyperLogLog</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+                    <span class="sh">'</span><span class="s">count_min</span><span class="sh">'</span><span class="p">:</span> <span class="nc">CountMinSketch</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4096</span><span class="p">)</span>
+                <span class="p">}</span>
+            
+            <span class="n">time_geo_results</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="sh">'</span><span class="s">hll</span><span class="sh">'</span><span class="p">].</span><span class="nf">add</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+            <span class="n">time_geo_results</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="sh">'</span><span class="s">count_min</span><span class="sh">'</span><span class="p">].</span><span class="nf">add</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+        
+        <span class="c1"># Aggregate results
+</span>        <span class="n">aggregated_results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">analyzers</span> <span class="ow">in</span> <span class="n">time_geo_results</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="n">time_part</span><span class="p">,</span> <span class="n">geo_part</span> <span class="o">=</span> <span class="n">key</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sh">'</span><span class="s">_</span><span class="sh">'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">aggregated_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">time</span><span class="sh">'</span><span class="p">:</span> <span class="n">time_part</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">geography</span><span class="sh">'</span><span class="p">:</span> <span class="n">geo_part</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">unique_users</span><span class="sh">'</span><span class="p">:</span> <span class="n">analyzers</span><span class="p">[</span><span class="sh">'</span><span class="s">hll</span><span class="sh">'</span><span class="p">].</span><span class="nf">count</span><span class="p">(),</span>
+                <span class="sh">'</span><span class="s">total_events</span><span class="sh">'</span><span class="p">:</span> <span class="nf">sum</span><span class="p">(</span><span class="n">analyzers</span><span class="p">[</span><span class="sh">'</span><span class="s">count_min</span><span class="sh">'</span><span class="p">].</span><span class="n">sketch</span><span class="p">.</span><span class="nf">flatten</span><span class="p">())</span>
+            <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">aggregated_results</span>
+    
+    <span class="k">def</span> <span class="nf">generate_insights</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">analysis_results</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate insights</span><span class="sh">"""</span>
+        
+        <span class="n">insights</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">trend_analysis</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_analyze_trends</span><span class="p">(</span><span class="n">analysis_results</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">anomaly_detection</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_detect_anomalies</span><span class="p">(</span><span class="n">analysis_results</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">segmentation_insights</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_analyze_segmentation</span><span class="p">(</span><span class="n">analysis_results</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">performance_metrics</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_performance_metrics</span><span class="p">(</span><span class="n">analysis_results</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">insights</span>
+    
+    <span class="k">def</span> <span class="nf">_analyze_trends</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Trend analysis</span><span class="sh">"""</span>
+        
+        <span class="n">trends</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">user_growth</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_growth_rate</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="sh">'</span><span class="s">unique_users</span><span class="sh">'</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">engagement_trends</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_calculate_engagement_trends</span><span class="p">(</span><span class="n">results</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">geographic_expansion</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_analyze_geographic_expansion</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">trends</span>
+    
+    <span class="k">def</span> <span class="nf">_detect_anomalies</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Anomaly detection</span><span class="sh">"""</span>
+        
+        <span class="n">anomalies</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">spike_detection</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_detect_spikes</span><span class="p">(</span><span class="n">results</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">drop_detection</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_detect_drops</span><span class="p">(</span><span class="n">results</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">pattern_anomalies</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_detect_pattern_anomalies</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">anomalies</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="practical-project-integrated-analytics-platform">🚀 Practical Project: Integrated Analytics Platform</h2>
+
+<h3 id="project-overview">Project Overview</h3>
+
+<p>Build an integrated analytics platform for a large-scale e-commerce platform.</p>
+
+<h4 id="system-architecture">System Architecture</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Component</th>
+      <th>Technology Stack</th>
+      <th>Scalability</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Data Collection</strong></td>
+      <td>Stream Collectors</td>
+      <td>Apache Kafka, AWS Kinesis</td>
+      <td>Horizontal scaling</td>
+      <td>Real-time data collection</td>
+    </tr>
+    <tr>
+      <td><strong>Stream Processing</strong></td>
+      <td>Real-time Processing Engine</td>
+      <td>Apache Flink, Apache Storm</td>
+      <td>Horizontal scaling</td>
+      <td>Real-time data processing</td>
+    </tr>
+    <tr>
+      <td><strong>Probabilistic Analytics</strong></td>
+      <td>Analytics Engine</td>
+      <td>HyperLogLog, Count-Min, Bloom</td>
+      <td>Memory optimization</td>
+      <td>Efficient analysis</td>
+    </tr>
+    <tr>
+      <td><strong>Result Storage</strong></td>
+      <td>Storage</td>
+      <td>Redis, Apache Cassandra</td>
+      <td>Horizontal scaling</td>
+      <td>Real-time result storage</td>
+    </tr>
+    <tr>
+      <td><strong>API Services</strong></td>
+      <td>REST API</td>
+      <td>FastAPI, Node.js</td>
+      <td>Horizontal scaling</td>
+      <td>Analytics result provision</td>
+    </tr>
+    <tr>
+      <td><strong>Visualization</strong></td>
+      <td>Dashboard</td>
+      <td>React, D3.js, Grafana</td>
+      <td>Horizontal scaling</td>
+      <td>Real-time visualization</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="integrated-analytics-platform-implementation">Integrated Analytics Platform Implementation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">IntegratedAnalyticsPlatform</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">stream_processors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">analytics_engines</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">storage_backends</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">api_services</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">setup_platform</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Setup platform</span><span class="sh">"""</span>
+        
+        <span class="n">platform_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">streaming</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">kafka_brokers</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">localhost:9092</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">topics</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">user_events</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">content_events</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">transaction_events</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">consumer_groups</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">analytics_consumers</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">analytics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">real_time</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">bloom_capacity</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1000000</span>
+                <span class="p">},</span>
+                <span class="sh">'</span><span class="s">batch</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">hll_precision</span><span class="sh">'</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">count_min_depth</span><span class="sh">'</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">bloom_capacity</span><span class="sh">'</span><span class="p">:</span> <span class="mi">10000000</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">storage</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">redis</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">host</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">localhost</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">port</span><span class="sh">'</span><span class="p">:</span> <span class="mi">6379</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">db</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span>
+                <span class="p">},</span>
+                <span class="sh">'</span><span class="s">cassandra</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">'</span><span class="s">hosts</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">localhost</span><span class="sh">'</span><span class="p">],</span>
+                    <span class="sh">'</span><span class="s">keyspace</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">analytics</span><span class="sh">'</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">platform_config</span>
+    
+    <span class="k">def</span> <span class="nf">initialize_analytics_engines</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Initialize analytics engines</span><span class="sh">"""</span>
+        
+        <span class="n">engines</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">user_analytics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">real_time</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">metrics</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">unique_users</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">user_frequency</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">user_segments</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">dimensions</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">time</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">geography</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">device</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">content_analytics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">real_time</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">metrics</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">unique_content</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">content_views</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">content_engagement</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">dimensions</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">time</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">category</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">author</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">transaction_analytics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">batch</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">metrics</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">unique_transactions</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">transaction_amounts</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">conversion_rates</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">dimensions</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span><span class="sh">'</span><span class="s">time</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">geography</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">payment_method</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">engine_name</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">engines</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">analytics_engines</span><span class="p">[</span><span class="n">engine_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_create_analytics_engine</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_create_analytics_engine</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Create analytics engine</span><span class="sh">"""</span>
+        
+        <span class="k">if</span> <span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">]</span> <span class="o">==</span> <span class="sh">'</span><span class="s">real_time</span><span class="sh">'</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nc">RealTimeAnalyticsEngine</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">]</span> <span class="o">==</span> <span class="sh">'</span><span class="s">batch</span><span class="sh">'</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nc">BatchAnalyticsEngine</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Unsupported engine type: </span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_streaming_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_stream</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Process streaming data</span><span class="sh">"""</span>
+        
+        <span class="n">processing_results</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">processed_count</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">analytics_results</span><span class="sh">'</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="sh">'</span><span class="s">errors</span><span class="sh">'</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="sh">'</span><span class="s">performance_metrics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{}</span>
+        <span class="p">}</span>
+        
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">data_point</span> <span class="ow">in</span> <span class="n">data_stream</span><span class="p">:</span>
+                <span class="n">processing_results</span><span class="p">[</span><span class="sh">'</span><span class="s">processed_count</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                
+                <span class="c1"># Pass data to each analytics engine
+</span>                <span class="k">for</span> <span class="n">engine_name</span><span class="p">,</span> <span class="n">engine</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">analytics_engines</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">result</span> <span class="o">=</span> <span class="n">engine</span><span class="p">.</span><span class="nf">process</span><span class="p">(</span><span class="n">data_point</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">engine_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">processing_results</span><span class="p">[</span><span class="sh">'</span><span class="s">analytics_results</span><span class="sh">'</span><span class="p">]:</span>
+                            <span class="n">processing_results</span><span class="p">[</span><span class="sh">'</span><span class="s">analytics_results</span><span class="sh">'</span><span class="p">][</span><span class="n">engine_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">processing_results</span><span class="p">[</span><span class="sh">'</span><span class="s">analytics_results</span><span class="sh">'</span><span class="p">][</span><span class="n">engine_name</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">processing_results</span><span class="p">[</span><span class="sh">'</span><span class="s">errors</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">({</span>
+                            <span class="sh">'</span><span class="s">engine</span><span class="sh">'</span><span class="p">:</span> <span class="n">engine_name</span><span class="p">,</span>
+                            <span class="sh">'</span><span class="s">error</span><span class="sh">'</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+                        <span class="p">})</span>
+            
+            <span class="c1"># Calculate performance metrics
+</span>            <span class="n">processing_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+            <span class="n">processing_results</span><span class="p">[</span><span class="sh">'</span><span class="s">performance_metrics</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">total_processing_time</span><span class="sh">'</span><span class="p">:</span> <span class="n">processing_time</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">throughput</span><span class="sh">'</span><span class="p">:</span> <span class="n">processing_results</span><span class="p">[</span><span class="sh">'</span><span class="s">processed_count</span><span class="sh">'</span><span class="p">]</span> <span class="o">/</span> <span class="n">processing_time</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">error_rate</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">processing_results</span><span class="p">[</span><span class="sh">'</span><span class="s">errors</span><span class="sh">'</span><span class="p">])</span> <span class="o">/</span> <span class="n">processing_results</span><span class="p">[</span><span class="sh">'</span><span class="s">processed_count</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">}</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">processing_results</span><span class="p">[</span><span class="sh">'</span><span class="s">errors</span><span class="sh">'</span><span class="p">].</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">system_error</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">error</span><span class="sh">'</span><span class="p">:</span> <span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">processing_results</span>
+    
+    <span class="k">def</span> <span class="nf">generate_analytics_report</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">time_range</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate analytics report</span><span class="sh">"""</span>
+        
+        <span class="n">report</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">time_range</span><span class="sh">'</span><span class="p">:</span> <span class="n">time_range</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">summary</span><span class="sh">'</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="sh">'</span><span class="s">detailed_analysis</span><span class="sh">'</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="sh">'</span><span class="s">insights</span><span class="sh">'</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="sh">'</span><span class="s">recommendations</span><span class="sh">'</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Collect data from each analytics engine
+</span>        <span class="k">for</span> <span class="n">engine_name</span><span class="p">,</span> <span class="n">engine</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">analytics_engines</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="n">engine_data</span> <span class="o">=</span> <span class="n">engine</span><span class="p">.</span><span class="nf">get_analytics</span><span class="p">(</span><span class="n">time_range</span><span class="p">)</span>
+            <span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">detailed_analysis</span><span class="sh">'</span><span class="p">][</span><span class="n">engine_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">engine_data</span>
+        
+        <span class="c1"># Perform comprehensive analysis
+</span>        <span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">summary</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_generate_summary</span><span class="p">(</span><span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">detailed_analysis</span><span class="sh">'</span><span class="p">])</span>
+        <span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">insights</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_generate_insights</span><span class="p">(</span><span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">detailed_analysis</span><span class="sh">'</span><span class="p">])</span>
+        <span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">recommendations</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_generate_recommendations</span><span class="p">(</span><span class="n">report</span><span class="p">[</span><span class="sh">'</span><span class="s">insights</span><span class="sh">'</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">report</span>
+    
+    <span class="k">def</span> <span class="nf">_generate_summary</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">detailed_analysis</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate summary information</span><span class="sh">"""</span>
+        
+        <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">total_unique_users</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">total_events</span><span class="sh">'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">top_metrics</span><span class="sh">'</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="sh">'</span><span class="s">growth_rates</span><span class="sh">'</span><span class="p">:</span> <span class="p">{}</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">engine_name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">detailed_analysis</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="sh">'</span><span class="s">unique_users</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">summary</span><span class="p">[</span><span class="sh">'</span><span class="s">total_unique_users</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">unique_users</span><span class="sh">'</span><span class="p">]</span>
+            <span class="k">if</span> <span class="sh">'</span><span class="s">total_events</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">summary</span><span class="p">[</span><span class="sh">'</span><span class="s">total_events</span><span class="sh">'</span><span class="p">]</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">total_events</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">summary</span>
+    
+    <span class="k">def</span> <span class="nf">_generate_insights</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">detailed_analysis</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate insights</span><span class="sh">"""</span>
+        
+        <span class="n">insights</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">user_behavior</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_analyze_user_behavior</span><span class="p">(</span><span class="n">detailed_analysis</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">content_performance</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_analyze_content_performance</span><span class="p">(</span><span class="n">detailed_analysis</span><span class="p">),</span>
+            <span class="sh">'</span><span class="s">business_metrics</span><span class="sh">'</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">_analyze_business_metrics</span><span class="p">(</span><span class="n">detailed_analysis</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">insights</span>
+    
+    <span class="k">def</span> <span class="nf">_generate_recommendations</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">insights</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Generate recommendations</span><span class="sh">"""</span>
+        
+        <span class="n">recommendations</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># User behavior-based recommendations
+</span>        <span class="k">if</span> <span class="n">insights</span><span class="p">[</span><span class="sh">'</span><span class="s">user_behavior</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">engagement_trend</span><span class="sh">'</span><span class="p">]</span> <span class="o">==</span> <span class="sh">'</span><span class="s">declining</span><span class="sh">'</span><span class="p">:</span>
+            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">category</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">user_engagement</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">priority</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">high</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">recommendation</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Need to establish content strategy to improve user engagement</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">action_items</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">'</span><span class="s">Introduce personalized content recommendation system</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">Execute targeted marketing campaigns by user segment</span><span class="sh">'</span>
+                <span class="p">]</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Content performance-based recommendations
+</span>        <span class="k">if</span> <span class="n">insights</span><span class="p">[</span><span class="sh">'</span><span class="s">content_performance</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">top_performing_category</span><span class="sh">'</span><span class="p">]:</span>
+            <span class="n">recommendations</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                <span class="sh">'</span><span class="s">category</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">content_strategy</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">priority</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">medium</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">recommendation</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Expand </span><span class="si">{</span><span class="n">insights</span><span class="p">[</span><span class="sh">'</span><span class="s">content_performance</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">top_performing_category</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s"> category content</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">action_items</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="sh">'</span><span class="s">Analyze high-performing content types</span><span class="sh">'</span><span class="p">,</span>
+                    <span class="sh">'</span><span class="s">Establish content production plan for similar content</span><span class="sh">'</span>
+                <span class="p">]</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">recommendations</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="learning-summary">📚 Learning Summary</h2>
+
+<h3 id="key-concepts-summary">Key Concepts Summary</h3>
+
+<ol>
+  <li><strong>Advanced Probabilistic Algorithms</strong>
+    <ul>
+      <li>Count-Min Sketch: Frequency estimation</li>
+      <li>Bloom Filter: Deduplication and membership testing</li>
+      <li>MinHash: Set similarity calculation</li>
+      <li>T-Digest: Quantile estimation</li>
+    </ul>
+  </li>
+  <li><strong>Algorithm Combination Strategies</strong>
+    <ul>
+      <li>HyperLogLog + Count-Min: Cardinality + frequency analysis</li>
+      <li>HyperLogLog + Bloom Filter: Deduplication + counting</li>
+      <li>Multi-algorithm combinations for accuracy and efficiency balance</li>
+    </ul>
+  </li>
+  <li><strong>Streaming Analytics and Real-time Processing</strong>
+    <ul>
+      <li>Sliding window-based real-time analysis</li>
+      <li>Memory-efficient stream processing</li>
+      <li>Scalable architecture design</li>
+    </ul>
+  </li>
+  <li><strong>Advanced BI Analytics Techniques</strong>
+    <ul>
+      <li>Multi-dimensional analysis strategies</li>
+      <li>Cross-dimensional analysis</li>
+      <li>Trend analysis and anomaly detection</li>
+    </ul>
+  </li>
+  <li><strong>Integrated Analytics Platform</strong>
+    <ul>
+      <li>Real-time + batch processing hybrid</li>
+      <li>Scalable microservice architecture</li>
+      <li>Automated insight generation</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="practical-application-guide">Practical Application Guide</h3>
+
+<ol>
+  <li><strong>System Design Considerations</strong>
+    <ul>
+      <li>Analyze data volume and accuracy requirements</li>
+      <li>Balance memory usage and processing performance</li>
+      <li>Consider scalability and maintainability</li>
+    </ul>
+  </li>
+  <li><strong>Algorithm Selection Criteria</strong>
+    <ul>
+      <li>Cardinality estimation: HyperLogLog</li>
+      <li>Frequency analysis: Count-Min Sketch</li>
+      <li>Deduplication: Bloom Filter</li>
+      <li>Similarity analysis: MinHash</li>
+    </ul>
+  </li>
+  <li><strong>Performance Optimization Strategies</strong>
+    <ul>
+      <li>Set appropriate precision levels</li>
+      <li>Choose memory-efficient structures</li>
+      <li>Utilize parallel processing and caching</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="next-steps">Next Steps</h3>
+
+<p>We’ve completed the Modern BI Engineering series. We’ve covered all aspects of building modern BI systems using HyperLogLog and probabilistic algorithms.</p>
+
+<p><strong>Key Learning Points:</strong></p>
+<ul>
+  <li>✅ HyperLogLog principles and practical applications</li>
+  <li>✅ Advanced probabilistic algorithm combinations</li>
+  <li>✅ Streaming analytics and real-time processing systems</li>
+  <li>✅ Multi-dimensional analysis and advanced BI techniques</li>
+  <li>✅ Integrated analytics platform construction</li>
+</ul>
+
+<p><strong>Recommended Next Series:</strong></p>
+<ul>
+  <li><strong>Real-time Data Pipelines</strong>: Real-time processing using Apache Kafka and Flink</li>
+  <li><strong>Data Visualization Mastery</strong>: Advanced visualization using D3.js and Tableau</li>
+  <li><strong>ML-based BI</strong>: Predictive analytics and automated insight generation</li>
+</ul>
+
+<p>We’ve completed the complete journey of building modern BI systems using HyperLogLog and probabilistic algorithms! 🎉</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+      
+        
+      
+      
+      
+      
+      
+        
+        
+        <a href="/bi-engineering/2025/09/25/hyperloglog-advanced-probabilistic-algorithms.html" class="nav-link next">
+          다음: Part 3: HyperLogLog와 고급 확률적 알고리즘 - 현대적 BI 분석의 완성 →
+        </a>
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/bi-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
