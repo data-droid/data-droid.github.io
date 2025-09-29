@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="데이터 엔지니어가 다루는 기술 블로그">
+
+
+
+<title>Part 1: Time Series Database 기초와 아키텍처 - 시계열 데이터의 핵심 이해 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 1: Time Series Database 기초와 아키텍처 - 시계열 데이터의 핵심 이해">
+<meta property="og:description" content="데이터 엔지니어가 다루는 기술 블로그">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2025/09/27/time-series-database-fundamentals.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 1: Time Series Database 기초와 아키텍처 - 시계열 데이터의 핵심 이해">
+<meta name="twitter:description" content="데이터 엔지니어가 다루는 기술 블로그">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2025/09/27/time-series-database-fundamentals.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2025-09-27-time-series-database-fundamentals.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 27일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 1: Time Series Database 기초와 아키텍처 - 시계열 데이터의 핵심 이해</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Time-Series-Database</span>
+      
+        <span class="tag">TDB</span>
+      
+        <span class="tag">InfluxDB</span>
+      
+        <span class="tag">TimescaleDB</span>
+      
+        <span class="tag">시계열데이터</span>
+      
+        <span class="tag">IoT</span>
+      
+        <span class="tag">모니터링</span>
+      
+        <span class="tag">실시간분석</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Time series database mastery 시리즈</span>
+      <span class="series-order">Part 2</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 45분</span>
+      
+      
+        <span class="difficulty">📊 중급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="part-1-time-series-database-기초와-아키텍처---시계열-데이터의-핵심-이해">Part 1: Time Series Database 기초와 아키텍처 - 시계열 데이터의 핵심 이해</h1>
+
+<blockquote>
+  <p>시계열 데이터의 특성부터 주요 TDB 솔루션 비교, 아키텍처 이해, 그리고 실무 프로젝트까지 Time Series Database의 모든 기초를 완전히 정복합니다.</p>
+</blockquote>
+
+<h2 id="목차">📋 목차</h2>
+
+<ol>
+  <li><a href="#시계열-데이터와-tdb-개요">시계열 데이터와 TDB 개요</a></li>
+  <li><a href="#주요-tdb-솔루션-비교-분석">주요 TDB 솔루션 비교 분석</a></li>
+  <li><a href="#tdb-아키텍처와-저장-방식">TDB 아키텍처와 저장 방식</a></li>
+  <li><a href="#tdb-성능-특성과-최적화-원리">TDB 성능 특성과 최적화 원리</a></li>
+  <li><a href="#실무-프로젝트-iot-센서-데이터-수집-시스템">실무 프로젝트: IoT 센서 데이터 수집 시스템</a></li>
+  <li><a href="#학습-요약">학습 요약</a></li>
+</ol>
+
+<hr />
+
+<h2 id="시계열-데이터와-tdb-개요">🕐 시계열 데이터와 TDB 개요</h2>
+
+<h3 id="시계열-데이터의-특성">시계열 데이터의 특성</h3>
+
+<p>시계열 데이터는 시간 순서대로 기록된 데이터로, 다음과 같은 고유한 특성을 가집니다.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>특성</th>
+      <th>설명</th>
+      <th>예시</th>
+      <th>영향</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>시간 기반 정렬</strong></td>
+      <td>데이터가 시간 순서로 생성됨</td>
+      <td>센서 데이터, 로그, 지표</td>
+      <td>순차적 접근 최적화 가능</td>
+    </tr>
+    <tr>
+      <td><strong>고빈도 생성</strong></td>
+      <td>짧은 간격으로 대량 생성</td>
+      <td>IoT 센서 (초당 수천 개), 웹 로그</td>
+      <td>높은 쓰기 처리량 필요</td>
+    </tr>
+    <tr>
+      <td><strong>불변성</strong></td>
+      <td>한번 기록된 데이터는 변경되지 않음</td>
+      <td>센서 측정값, 거래 기록</td>
+      <td>읽기 전용 최적화 가능</td>
+    </tr>
+    <tr>
+      <td><strong>압축 가능성</strong></td>
+      <td>연속된 값들이 유사한 패턴</td>
+      <td>온도, 압력, CPU 사용률</td>
+      <td>효율적 압축 알고리즘 적용</td>
+    </tr>
+    <tr>
+      <td><strong>보존 정책</strong></td>
+      <td>오래된 데이터는 삭제 또는 아카이브</td>
+      <td>최근 30일 데이터만 유지</td>
+      <td>자동화된 데이터 라이프사이클</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="전통적-데이터베이스의-한계">전통적 데이터베이스의 한계</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>문제점</th>
+      <th>설명</th>
+      <th>시계열 데이터에서의 영향</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>인덱스 오버헤드</strong></td>
+      <td>시간별 인덱스 관리 비용</td>
+      <td>초당 수만 건 쓰기 시 성능 저하</td>
+    </tr>
+    <tr>
+      <td><strong>저장 공간 비효율</strong></td>
+      <td>행 기반 저장 방식</td>
+      <td>압축률 낮음, 저장 비용 증가</td>
+    </tr>
+    <tr>
+      <td><strong>쿼리 복잡성</strong></td>
+      <td>시간 범위 쿼리의 복잡한 구문</td>
+      <td>개발 생산성 저하</td>
+    </tr>
+    <tr>
+      <td><strong>확장성 한계</strong></td>
+      <td>단일 노드 중심 설계</td>
+      <td>대용량 시계열 데이터 처리 한계</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="tdb의-핵심-장점">TDB의 핵심 장점</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>특성</th>
+      <th>TDB</th>
+      <th>전통적 DB</th>
+      <th>개선 효과</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>쓰기 최적화</strong></td>
+      <td>시간 기반 순차 쓰기</td>
+      <td>랜덤 쓰기 패턴</td>
+      <td>10-100x 처리량 향상</td>
+    </tr>
+    <tr>
+      <td><strong>압축 효율</strong></td>
+      <td>10:1 ~ 100:1</td>
+      <td>2:1 ~ 3:1</td>
+      <td>5-30x 저장 공간 절약</td>
+    </tr>
+    <tr>
+      <td><strong>쿼리 성능</strong></td>
+      <td>시간 범위 쿼리 최적화</td>
+      <td>복잡한 SQL 필요</td>
+      <td>10-100x 응답 속도 향상</td>
+    </tr>
+    <tr>
+      <td><strong>저장 효율</strong></td>
+      <td>열 기반 압축 저장</td>
+      <td>행 기반 저장</td>
+      <td>높은 압축률 달성</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 생명주기</strong></td>
+      <td>자동화된 보존 정책</td>
+      <td>수동 관리 필요</td>
+      <td>운영 효율성 향상</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="성능-비교-분석">성능 비교 분석</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>메트릭</th>
+      <th>전통적 DB</th>
+      <th>TDB</th>
+      <th>개선율</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>쓰기 처리량</strong></td>
+      <td>1K-10K writes/sec</td>
+      <td>100K-1M writes/sec</td>
+      <td><strong>10-100x</strong></td>
+    </tr>
+    <tr>
+      <td><strong>압축률</strong></td>
+      <td>2:1 ~ 3:1</td>
+      <td>10:1 ~ 100:1</td>
+      <td><strong>5-30x</strong></td>
+    </tr>
+    <tr>
+      <td><strong>쿼리 응답시간</strong></td>
+      <td>복잡한 SQL, 느린 응답</td>
+      <td>간단한 시간 범위 쿼리, 빠른 응답</td>
+      <td><strong>10-100x</strong></td>
+    </tr>
+    <tr>
+      <td><strong>저장 비용</strong></td>
+      <td>높은 저장 비용</td>
+      <td>압축으로 비용 절약</td>
+      <td><strong>50-90% 절약</strong></td>
+    </tr>
+    <tr>
+      <td><strong>운영 복잡도</strong></td>
+      <td>수동 관리 필요</td>
+      <td>자동화된 관리</td>
+      <td><strong>운영 효율성 대폭 향상</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="주요-tdb-솔루션-비교-분석">🔍 주요 TDB 솔루션 비교 분석</h2>
+
+<h3 id="tdb-솔루션-분류">TDB 솔루션 분류</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>분류</th>
+      <th>솔루션</th>
+      <th>특징</th>
+      <th>사용 사례</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>전용 TDB</strong></td>
+      <td>InfluxDB, TimescaleDB</td>
+      <td>시계열 전용 설계</td>
+      <td>IoT, 모니터링, 금융 데이터</td>
+    </tr>
+    <tr>
+      <td><strong>확장형 DB</strong></td>
+      <td>ClickHouse, Apache Druid</td>
+      <td>분석 DB + 시계열</td>
+      <td>대용량 분석, 실시간 대시보드</td>
+    </tr>
+    <tr>
+      <td><strong>메트릭 중심</strong></td>
+      <td>Prometheus, VictoriaMetrics</td>
+      <td>메트릭 수집/저장</td>
+      <td>시스템 모니터링, 알림</td>
+    </tr>
+    <tr>
+      <td><strong>클라우드 서비스</strong></td>
+      <td>AWS Timestream, Azure Time Series</td>
+      <td>관리형 서비스</td>
+      <td>클라우드 기반 애플리케이션</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="상세-솔루션-비교">상세 솔루션 비교</h3>
+
+<h4 id="1-influxdb">1. InfluxDB</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>항목</th>
+      <th>InfluxDB 1.x</th>
+      <th>InfluxDB 2.x</th>
+      <th>특징</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>라이센스</strong></td>
+      <td>오픈소스 + 상용</td>
+      <td>오픈소스 + 상용</td>
+      <td>상용 버전은 클러스터링 지원</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 모델</strong></td>
+      <td>Line Protocol</td>
+      <td>Line Protocol</td>
+      <td>태그 + 필드 구조</td>
+    </tr>
+    <tr>
+      <td><strong>압축</strong></td>
+      <td>TSM (Time Structured Merge)</td>
+      <td>TSM</td>
+      <td>열 기반 압축</td>
+    </tr>
+    <tr>
+      <td><strong>쿼리 언어</strong></td>
+      <td>InfluxQL</td>
+      <td>Flux</td>
+      <td>Flux는 더 강력한 데이터 처리</td>
+    </tr>
+    <tr>
+      <td><strong>클러스터링</strong></td>
+      <td>상용 버전만</td>
+      <td>상용 버전만</td>
+      <td>수평 확장 지원</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">InfluxDBExample</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">client</span> <span class="o">=</span> <span class="nc">InfluxDBClient</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="sh">'</span><span class="s">localhost</span><span class="sh">'</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="mi">8086</span><span class="p">,</span>
+            <span class="n">username</span><span class="o">=</span><span class="sh">'</span><span class="s">admin</span><span class="sh">'</span><span class="p">,</span>
+            <span class="n">password</span><span class="o">=</span><span class="sh">'</span><span class="s">password</span><span class="sh">'</span>
+        <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">write_sensor_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">sensor_data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">센서 데이터 쓰기 예시</span><span class="sh">"""</span>
+        
+        <span class="c1"># Line Protocol 형식
+</span>        <span class="n">line_protocol</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="sh">"</span><span class="s">measurement</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">tags</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">sensor_id</span><span class="sh">"</span><span class="p">:</span> <span class="n">sensor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">sensor_id</span><span class="sh">'</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">location</span><span class="sh">"</span><span class="p">:</span> <span class="n">sensor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="p">:</span> <span class="n">sensor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">temperature</span><span class="sh">"</span><span class="p">:</span> <span class="n">sensor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">humidity</span><span class="sh">"</span><span class="p">:</span> <span class="n">sensor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">humidity</span><span class="sh">'</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">pressure</span><span class="sh">"</span><span class="p">:</span> <span class="n">sensor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">pressure</span><span class="sh">'</span><span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">time</span><span class="sh">"</span><span class="p">:</span> <span class="n">sensor_data</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">client</span><span class="p">.</span><span class="nf">write_points</span><span class="p">(</span><span class="n">line_protocol</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">query_time_range</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">시간 범위 쿼리 예시</span><span class="sh">"""</span>
+        
+        <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"""</span><span class="s">
+        SELECT mean(temperature), mean(humidity)
+        FROM sensor_data
+        WHERE time &gt;= </span><span class="sh">'</span><span class="si">{</span><span class="n">start_time</span><span class="si">}</span><span class="sh">'</span><span class="s"> AND time &lt;= </span><span class="sh">'</span><span class="si">{</span><span class="n">end_time</span><span class="si">}</span><span class="sh">'</span><span class="s">
+        GROUP BY time(1h), location
+        </span><span class="sh">"""</span>
+        
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">client</span><span class="p">.</span><span class="nf">query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="2-timescaledb">2. TimescaleDB</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>항목</th>
+      <th>TimescaleDB</th>
+      <th>특징</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>기반</strong></td>
+      <td>PostgreSQL 확장</td>
+      <td>SQL 호환성 유지</td>
+    </tr>
+    <tr>
+      <td><strong>하이퍼테이블</strong></td>
+      <td>자동 파티셔닝</td>
+      <td>시간 기반 자동 분할</td>
+    </tr>
+    <tr>
+      <td><strong>압축</strong></td>
+      <td>열 기반 압축</td>
+      <td>PostgreSQL 압축 활용</td>
+    </tr>
+    <tr>
+      <td><strong>쿼리</strong></td>
+      <td>표준 SQL + 시계열 함수</td>
+      <td>기존 SQL 지식 활용 가능</td>
+    </tr>
+    <tr>
+      <td><strong>확장성</strong></td>
+      <td>PostgreSQL 클러스터링</td>
+      <td>수평/수직 확장</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- TimescaleDB 사용 예시</span>
+<span class="c1">-- 1. 하이퍼테이블 생성</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">sensor_data</span> <span class="p">(</span>
+    <span class="nb">time</span> <span class="n">TIMESTAMPTZ</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">sensor_id</span> <span class="nb">INTEGER</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">temperature</span> <span class="nb">DOUBLE</span> <span class="nb">PRECISION</span><span class="p">,</span>
+    <span class="n">humidity</span> <span class="nb">DOUBLE</span> <span class="nb">PRECISION</span><span class="p">,</span>
+    <span class="k">location</span> <span class="nb">TEXT</span>
+<span class="p">);</span>
+
+<span class="k">SELECT</span> <span class="n">create_hypertable</span><span class="p">(</span><span class="s1">'sensor_data'</span><span class="p">,</span> <span class="s1">'time'</span><span class="p">);</span>
+
+<span class="c1">-- 2. 데이터 삽입</span>
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">sensor_data</span> <span class="k">VALUES</span> 
+    <span class="p">(</span><span class="n">NOW</span><span class="p">(),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">25</span><span class="p">.</span><span class="mi">5</span><span class="p">,</span> <span class="mi">60</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'room1'</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">NOW</span><span class="p">(),</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">26</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">58</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'room2'</span><span class="p">);</span>
+
+<span class="c1">-- 3. 시계열 쿼리</span>
+<span class="k">SELECT</span> 
+    <span class="n">time_bucket</span><span class="p">(</span><span class="s1">'1 hour'</span><span class="p">,</span> <span class="nb">time</span><span class="p">)</span> <span class="k">AS</span> <span class="n">hour</span><span class="p">,</span>
+    <span class="k">location</span><span class="p">,</span>
+    <span class="k">avg</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span> <span class="k">as</span> <span class="n">avg_temp</span><span class="p">,</span>
+    <span class="k">max</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span> <span class="k">as</span> <span class="n">max_temp</span>
+<span class="k">FROM</span> <span class="n">sensor_data</span> 
+<span class="k">WHERE</span> <span class="nb">time</span> <span class="o">&gt;</span> <span class="n">NOW</span><span class="p">()</span> <span class="o">-</span> <span class="n">INTERVAL</span> <span class="s1">'24 hours'</span>
+<span class="k">GROUP</span> <span class="k">BY</span> <span class="n">hour</span><span class="p">,</span> <span class="k">location</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">hour</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="3-prometheus">3. Prometheus</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>항목</th>
+      <th>Prometheus</th>
+      <th>특징</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>목적</strong></td>
+      <td>메트릭 수집/저장/쿼리</td>
+      <td>모니터링 전용</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 모델</strong></td>
+      <td>메트릭 + 라벨</td>
+      <td>시계열 + 메타데이터</td>
+    </tr>
+    <tr>
+      <td><strong>저장</strong></td>
+      <td>로컬 SSD 최적화</td>
+      <td>단일 노드 저장</td>
+    </tr>
+    <tr>
+      <td><strong>쿼리</strong></td>
+      <td>PromQL</td>
+      <td>시계열 쿼리 전용</td>
+    </tr>
+    <tr>
+      <td><strong>확장성</strong></td>
+      <td>Federation, Remote Storage</td>
+      <td>분산 아키텍처</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Prometheus 설정 예시</span>
+<span class="na">global</span><span class="pi">:</span>
+  <span class="na">scrape_interval</span><span class="pi">:</span> <span class="s">15s</span>
+  <span class="na">evaluation_interval</span><span class="pi">:</span> <span class="s">15s</span>
+
+<span class="na">rule_files</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s2">"</span><span class="s">alert_rules.yml"</span>
+
+<span class="na">scrape_configs</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">job_name</span><span class="pi">:</span> <span class="s1">'</span><span class="s">node-exporter'</span>
+    <span class="na">static_configs</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">targets</span><span class="pi">:</span> <span class="pi">[</span><span class="s1">'</span><span class="s">localhost:9100'</span><span class="pi">]</span>
+    <span class="na">scrape_interval</span><span class="pi">:</span> <span class="s">5s</span>
+    <span class="na">metrics_path</span><span class="pi">:</span> <span class="s">/metrics</span>
+
+  <span class="pi">-</span> <span class="na">job_name</span><span class="pi">:</span> <span class="s1">'</span><span class="s">application-metrics'</span>
+    <span class="na">static_configs</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">targets</span><span class="pi">:</span> <span class="pi">[</span><span class="s1">'</span><span class="s">app:8080'</span><span class="pi">]</span>
+    <span class="na">scrape_interval</span><span class="pi">:</span> <span class="s">10s</span>
+</code></pre></div></div>
+
+<h3 id="솔루션-선택-가이드">솔루션 선택 가이드</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>사용 사례</th>
+      <th>추천 솔루션</th>
+      <th>이유</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>IoT 센서 데이터</strong></td>
+      <td>InfluxDB, TimescaleDB</td>
+      <td>높은 쓰기 처리량, 압축 효율</td>
+    </tr>
+    <tr>
+      <td><strong>시스템 모니터링</strong></td>
+      <td>Prometheus</td>
+      <td>메트릭 수집 최적화, 알림 통합</td>
+    </tr>
+    <tr>
+      <td><strong>금융 데이터</strong></td>
+      <td>TimescaleDB</td>
+      <td>ACID 보장, SQL 호환성</td>
+    </tr>
+    <tr>
+      <td><strong>대용량 분석</strong></td>
+      <td>ClickHouse, Druid</td>
+      <td>열 기반 저장, 빠른 집계</td>
+    </tr>
+    <tr>
+      <td><strong>클라우드 기반</strong></td>
+      <td>AWS Timestream, Azure TS</td>
+      <td>관리형 서비스, 자동 확장</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="tdb-아키텍처와-저장-방식">🏗️ TDB 아키텍처와 저장 방식</h2>
+
+<h3 id="tdb-아키텍처-패턴">TDB 아키텍처 패턴</h3>
+
+<h4 id="1-단일-노드-아키텍처">1. 단일 노드 아키텍처</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>구성요소</th>
+      <th>역할</th>
+      <th>특징</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Ingestion Layer</strong></td>
+      <td>데이터 수집</td>
+      <td>HTTP API, 메시지 큐 연결</td>
+    </tr>
+    <tr>
+      <td><strong>Storage Engine</strong></td>
+      <td>데이터 저장</td>
+      <td>압축, 인덱싱, WAL</td>
+    </tr>
+    <tr>
+      <td><strong>Query Engine</strong></td>
+      <td>쿼리 처리</td>
+      <td>시간 범위 최적화</td>
+    </tr>
+    <tr>
+      <td><strong>Retention Manager</strong></td>
+      <td>데이터 생명주기</td>
+      <td>자동 삭제/아카이브</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="단일-노드-tdb-구성요소">단일 노드 TDB 구성요소</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>계층</th>
+      <th>구성요소</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Ingestion</strong></td>
+      <td>HTTP API</td>
+      <td>REST API for data ingestion</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Message Queue</td>
+      <td>Kafka, RabbitMQ integration</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Batch Processing</td>
+      <td>Bulk data import</td>
+    </tr>
+    <tr>
+      <td><strong>Storage</strong></td>
+      <td>WAL</td>
+      <td>Write-Ahead Logging</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Compression</td>
+      <td>Columnar compression</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Indexing</td>
+      <td>Time-based indexing</td>
+    </tr>
+    <tr>
+      <td><strong>Query</strong></td>
+      <td>Optimization</td>
+      <td>Time range query optimization</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Aggregation</td>
+      <td>Built-in aggregation functions</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Caching</td>
+      <td>Query result caching</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="데이터-처리-흐름">데이터 처리 흐름</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>단계</th>
+      <th>처리 과정</th>
+      <th>설명</th>
+      <th>최적화 요소</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1단계</strong></td>
+      <td>데이터 수신 (Ingestion Layer)</td>
+      <td>HTTP API, 메시지 큐를 통한 데이터 수집</td>
+      <td>배치 처리, 연결 풀링</td>
+    </tr>
+    <tr>
+      <td><strong>2단계</strong></td>
+      <td>형식 검증 및 전처리</td>
+      <td>데이터 유효성 검사, 형식 변환</td>
+      <td>빠른 검증 알고리즘</td>
+    </tr>
+    <tr>
+      <td><strong>3단계</strong></td>
+      <td>WAL에 쓰기 로그 기록</td>
+      <td>Write-Ahead Logging으로 내구성 보장</td>
+      <td>순차 쓰기 최적화</td>
+    </tr>
+    <tr>
+      <td><strong>4단계</strong></td>
+      <td>메모리 버퍼에 임시 저장</td>
+      <td>빠른 응답을 위한 메모리 캐싱</td>
+      <td>버퍼 크기 최적화</td>
+    </tr>
+    <tr>
+      <td><strong>5단계</strong></td>
+      <td>배치 단위로 디스크에 플러시</td>
+      <td>효율적인 디스크 I/O</td>
+      <td>배치 크기 조정</td>
+    </tr>
+    <tr>
+      <td><strong>6단계</strong></td>
+      <td>압축 및 인덱싱 수행</td>
+      <td>저장 공간 절약 및 쿼리 최적화</td>
+      <td>압축 알고리즘 선택</td>
+    </tr>
+    <tr>
+      <td><strong>7단계</strong></td>
+      <td>쿼리 엔진에서 접근 가능</td>
+      <td>사용자 쿼리 처리 준비 완료</td>
+      <td>인덱스 최적화</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-분산-아키텍처">2. 분산 아키텍처</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>구성요소</th>
+      <th>역할</th>
+      <th>특징</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Load Balancer</strong></td>
+      <td>요청 분산</td>
+      <td>여러 노드에 부하 분산</td>
+    </tr>
+    <tr>
+      <td><strong>Coordinator</strong></td>
+      <td>클러스터 관리</td>
+      <td>메타데이터, 라우팅</td>
+    </tr>
+    <tr>
+      <td><strong>Storage Nodes</strong></td>
+      <td>데이터 저장</td>
+      <td>샤딩된 데이터 저장</td>
+    </tr>
+    <tr>
+      <td><strong>Query Coordinator</strong></td>
+      <td>분산 쿼리</td>
+      <td>여러 노드 결과 병합</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="저장-방식-비교">저장 방식 비교</h3>
+
+<h4 id="1-행-기반-vs-열-기반-저장">1. 행 기반 vs 열 기반 저장</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>방식</th>
+      <th>장점</th>
+      <th>단점</th>
+      <th>사용 사례</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>행 기반</strong></td>
+      <td>단일 레코드 접근 빠름</td>
+      <td>압축률 낮음, 집계 느림</td>
+      <td>OLTP, 트랜잭션</td>
+    </tr>
+    <tr>
+      <td><strong>열 기반</strong></td>
+      <td>압축률 높음, 집계 빠름</td>
+      <td>단일 레코드 접근 느림</td>
+      <td>OLAP, 분석, 시계열</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="저장-구조-비교">저장 구조 비교</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>저장 방식</th>
+      <th>데이터 구조</th>
+      <th>압축률</th>
+      <th>쿼리 성능</th>
+      <th>특징</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>행 기반</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">[timestamp1, sensor_id1, temp1, humidity1]</code><br /><code class="language-plaintext highlighter-rouge">[timestamp2, sensor_id2, temp2, humidity2]</code><br /><code class="language-plaintext highlighter-rouge">[timestamp3, sensor_id3, temp3, humidity3]</code></td>
+      <td>2:1 ~ 5:1</td>
+      <td>단일 레코드: 빠름<br />집계: 느림</td>
+      <td>각 행이 연속 저장</td>
+    </tr>
+    <tr>
+      <td><strong>열 기반</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">timestamps: [timestamp1, timestamp2, timestamp3]</code><br /><code class="language-plaintext highlighter-rouge">sensor_ids: [sensor_id1, sensor_id2, sensor_id3]</code><br /><code class="language-plaintext highlighter-rouge">temperatures: [temp1, temp2, temp3]</code><br /><code class="language-plaintext highlighter-rouge">humidities: [humidity1, humidity2, humidity3]</code></td>
+      <td>10:1 ~ 100:1</td>
+      <td>단일 레코드: 느림<br />집계: 빠름</td>
+      <td>각 컬럼이 연속 저장</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-압축-알고리즘">2. 압축 알고리즘</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>알고리즘</th>
+      <th>압축률</th>
+      <th>속도</th>
+      <th>용도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>LZ4</strong></td>
+      <td>중간</td>
+      <td>매우 빠름</td>
+      <td>실시간 압축</td>
+    </tr>
+    <tr>
+      <td><strong>ZSTD</strong></td>
+      <td>높음</td>
+      <td>빠름</td>
+      <td>균형잡힌 성능</td>
+    </tr>
+    <tr>
+      <td><strong>GZIP</strong></td>
+      <td>높음</td>
+      <td>느림</td>
+      <td>높은 압축률 필요</td>
+    </tr>
+    <tr>
+      <td><strong>Delta Compression</strong></td>
+      <td>매우 높음</td>
+      <td>빠름</td>
+      <td>시계열 전용</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="압축-알고리즘-상세-비교">압축 알고리즘 상세 비교</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>알고리즘</th>
+      <th>원리</th>
+      <th>예시</th>
+      <th>압축률</th>
+      <th>속도</th>
+      <th>최적 용도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Delta Compression</strong></td>
+      <td>연속된 값의 차이만 저장</td>
+      <td>원본: [100, 102, 101, 103, 102]<br />압축: [100, +2, -1, +2, -1]</td>
+      <td>50:1 ~ 1000:1</td>
+      <td>빠름</td>
+      <td>시계열 데이터</td>
+    </tr>
+    <tr>
+      <td><strong>LZ4</strong></td>
+      <td>중복 패턴 압축</td>
+      <td>일반적인 압축 알고리즘</td>
+      <td>3:1 ~ 10:1</td>
+      <td>매우 빠름</td>
+      <td>실시간 압축</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="압축-효율성-분석">압축 효율성 분석</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>데이터 특성</th>
+      <th>압축률 영향</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>변동성 (Volatility)</strong></td>
+      <td>낮을수록 압축률 향상</td>
+      <td>연속된 값이 유사하면 압축 효율 증가</td>
+    </tr>
+    <tr>
+      <td><strong>패턴 (Pattern)</strong></td>
+      <td>반복 패턴이 있으면 압축률 향상</td>
+      <td>주기적 또는 예측 가능한 패턴</td>
+    </tr>
+    <tr>
+      <td><strong>정밀도 (Precision)</strong></td>
+      <td>정밀도가 낮을수록 압축률 향상</td>
+      <td>소수점 자릿수가 적으면 압축 효율 증가</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="추천-압축-알고리즘">추천 압축 알고리즘</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>데이터 특성</th>
+      <th>추천 알고리즘</th>
+      <th>이유</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>낮은 변동성</strong></td>
+      <td>Delta Compression</td>
+      <td>연속 값의 차이가 작아 압축률 최고</td>
+    </tr>
+    <tr>
+      <td><strong>높은 변동성</strong></td>
+      <td>LZ4 or ZSTD</td>
+      <td>일반적인 압축으로 적절한 효율</td>
+    </tr>
+    <tr>
+      <td><strong>실시간 처리</strong></td>
+      <td>LZ4</td>
+      <td>빠른 압축/해제 속도</td>
+    </tr>
+    <tr>
+      <td><strong>저장 최적화</strong></td>
+      <td>ZSTD or GZIP</td>
+      <td>높은 압축률로 저장 공간 절약</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="tdb-성능-특성과-최적화-원리">⚡ TDB 성능 특성과 최적화 원리</h2>
+
+<h3 id="쓰기-성능-최적화">쓰기 성능 최적화</h3>
+
+<h4 id="1-배치-쓰기-batch-writing">1. 배치 쓰기 (Batch Writing)</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>방식</th>
+      <th>설명</th>
+      <th>성능 향상</th>
+      <th>구현 예시</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>메모리 버퍼</strong></td>
+      <td>임시 메모리에 배치 저장</td>
+      <td>10-100x</td>
+      <td>WAL + 메모리 큐</td>
+    </tr>
+    <tr>
+      <td><strong>압축 배치</strong></td>
+      <td>여러 포인트 압축 후 저장</td>
+      <td>5-20x</td>
+      <td>압축 알고리즘 적용</td>
+    </tr>
+    <tr>
+      <td><strong>인덱스 지연</strong></td>
+      <td>배치 단위로 인덱스 업데이트</td>
+      <td>3-10x</td>
+      <td>배치 인덱싱</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="최적화된-쓰기-처리-전략">최적화된 쓰기 처리 전략</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>최적화 방식</th>
+      <th>설명</th>
+      <th>장점</th>
+      <th>성능 향상</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>메모리 버퍼링</strong></td>
+      <td>메모리 버퍼에 배치 저장</td>
+      <td>디스크 I/O 횟수 감소, 압축 효율성 향상, 인덱스 업데이트 최적화</td>
+      <td>10-100x</td>
+    </tr>
+    <tr>
+      <td><strong>압축 배칭</strong></td>
+      <td>여러 포인트를 함께 압축</td>
+      <td>압축률 향상, 압축 오버헤드 감소, 저장 공간 절약</td>
+      <td>5-20x</td>
+    </tr>
+    <tr>
+      <td><strong>인덱스 지연</strong></td>
+      <td>인덱스 업데이트 지연</td>
+      <td>쓰기 지연시간 감소, 인덱스 조각화 방지, 배치 처리 효율성</td>
+      <td>3-10x</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-압축-최적화">2. 압축 최적화</h4>
+
+<h4 id="시계열-특화-압축-전략">시계열 특화 압축 전략</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>압축 기법</th>
+      <th>설명</th>
+      <th>적용 시나리오</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Delta Encoding</strong></td>
+      <td>연속 값의 차이 저장</td>
+      <td>천천히 변화하는 센서 데이터</td>
+    </tr>
+    <tr>
+      <td><strong>Run Length Encoding</strong></td>
+      <td>연속된 동일 값 압축</td>
+      <td>상수 값이 많은 데이터</td>
+    </tr>
+    <tr>
+      <td><strong>Dictionary Compression</strong></td>
+      <td>반복되는 값 사전 압축</td>
+      <td>반복 패턴이 있는 데이터</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="압축-효과-분석">압축 효과 분석</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>데이터 패턴</th>
+      <th>최적 압축 기법</th>
+      <th>효과</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>상수 값 (Constant Values)</strong></td>
+      <td>RLE (Run Length Encoding)</td>
+      <td>연속된 동일 값 압축</td>
+    </tr>
+    <tr>
+      <td><strong>선형 트렌드 (Linear Trends)</strong></td>
+      <td>Delta Encoding</td>
+      <td>연속 값의 차이 저장</td>
+    </tr>
+    <tr>
+      <td><strong>반복 패턴 (Repetitive Patterns)</strong></td>
+      <td>Dictionary Compression</td>
+      <td>반복되는 값 사전 압축</td>
+    </tr>
+    <tr>
+      <td><strong>랜덤 값 (Random Values)</strong></td>
+      <td>일반 압축 (LZ4, ZSTD)</td>
+      <td>일반적인 압축 알고리즘</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="실제-데이터-타입별-압축률">실제 데이터 타입별 압축률</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>데이터 타입</th>
+      <th>압축률</th>
+      <th>특징</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>온도 센서</strong></td>
+      <td>20:1 ~ 50:1</td>
+      <td>천천히 변화, 높은 압축률</td>
+    </tr>
+    <tr>
+      <td><strong>CPU 사용률</strong></td>
+      <td>10:1 ~ 30:1</td>
+      <td>중간 변동성, 적당한 압축률</td>
+    </tr>
+    <tr>
+      <td><strong>네트워크 트래픽</strong></td>
+      <td>5:1 ~ 15:1</td>
+      <td>높은 변동성, 낮은 압축률</td>
+    </tr>
+    <tr>
+      <td><strong>에러 로그</strong></td>
+      <td>2:1 ~ 5:1</td>
+      <td>랜덤성 높음, 낮은 압축률</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="읽기-성능-최적화">읽기 성능 최적화</h3>
+
+<h4 id="1-인덱싱-전략">1. 인덱싱 전략</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>인덱스 타입</th>
+      <th>설명</th>
+      <th>성능 특성</th>
+      <th>사용 사례</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>시간 인덱스</strong></td>
+      <td>시간 범위 기반</td>
+      <td>시간 쿼리 최적화</td>
+      <td>범위 쿼리</td>
+    </tr>
+    <tr>
+      <td><strong>태그 인덱스</strong></td>
+      <td>메타데이터 기반</td>
+      <td>필터링 최적화</td>
+      <td>다차원 쿼리</td>
+    </tr>
+    <tr>
+      <td><strong>복합 인덱스</strong></td>
+      <td>시간 + 태그</td>
+      <td>복합 조건 최적화</td>
+      <td>복잡한 쿼리</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="인덱스-타입별-특성">인덱스 타입별 특성</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>인덱스 타입</th>
+      <th>구조</th>
+      <th>장점</th>
+      <th>메모리 사용량</th>
+      <th>유지보수</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Time Index</strong></td>
+      <td>B+ Tree on timestamp</td>
+      <td>시간 범위 쿼리 O(log n)</td>
+      <td>중간</td>
+      <td>낮음</td>
+    </tr>
+    <tr>
+      <td><strong>Tag Index</strong></td>
+      <td>Inverted index on tags</td>
+      <td>태그 필터링 O(1)</td>
+      <td>높음</td>
+      <td>높음</td>
+    </tr>
+    <tr>
+      <td><strong>Composite Index</strong></td>
+      <td>Multi-column index</td>
+      <td>복합 조건 최적화</td>
+      <td>매우 높음</td>
+      <td>매우 높음</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="쿼리-패턴-기반-인덱싱-추천">쿼리 패턴 기반 인덱싱 추천</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>쿼리 패턴</th>
+      <th>주요 인덱스</th>
+      <th>보조 인덱스</th>
+      <th>최적화 전략</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>시간 범위 쿼리</strong></td>
+      <td>Time index</td>
+      <td>Tag index for filtering</td>
+      <td>파티셔닝 + 시간 인덱스</td>
+    </tr>
+    <tr>
+      <td><strong>태그 필터링</strong></td>
+      <td>Tag index</td>
+      <td>Time index for range</td>
+      <td>태그 카디널리티 고려</td>
+    </tr>
+    <tr>
+      <td><strong>집계 쿼리</strong></td>
+      <td>Time index + pre-aggregation</td>
+      <td>Materialized views</td>
+      <td>시간 윈도우 기반 집계</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-쿼리-최적화">2. 쿼리 최적화</h4>
+
+<h4 id="쿼리-최적화-기법">쿼리 최적화 기법</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>최적화 기법</th>
+      <th>설명</th>
+      <th>효과</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Predicate Pushdown</strong></td>
+      <td>조건을 스토리지 레이어로 푸시</td>
+      <td>불필요한 데이터 스캔 방지</td>
+    </tr>
+    <tr>
+      <td><strong>Column Pruning</strong></td>
+      <td>필요한 컬럼만 읽기</td>
+      <td>I/O 최적화</td>
+    </tr>
+    <tr>
+      <td><strong>Time Range Optimization</strong></td>
+      <td>시간 범위 기반 파티션 프루닝</td>
+      <td>관련 파티션만 스캔</td>
+    </tr>
+    <tr>
+      <td><strong>Parallel Execution</strong></td>
+      <td>여러 파티션 병렬 처리</td>
+      <td>처리 속도 향상</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="쿼리-최적화-전략">쿼리 최적화 전략</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>쿼리 타입</th>
+      <th>최적화 전략</th>
+      <th>예시 쿼리</th>
+      <th>성능 향상</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>시간 범위 쿼리</strong></td>
+      <td>파티션 프루닝 + 인덱스 활용</td>
+      <td><code class="language-plaintext highlighter-rouge">SELECT avg(temperature) FROM sensor_data WHERE time &gt;= '2025-01-01' AND time &lt; '2025-01-02'</code></td>
+      <td><strong>10-100x</strong></td>
+    </tr>
+    <tr>
+      <td><strong>집계 쿼리</strong></td>
+      <td>Pre-aggregation + 캐싱</td>
+      <td><code class="language-plaintext highlighter-rouge">SELECT time_bucket('1h', time), avg(temperature) FROM sensor_data GROUP BY time_bucket('1h', time)</code></td>
+      <td><strong>5-50x</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="최적화-기법-설명">최적화 기법 설명</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>기법</th>
+      <th>설명</th>
+      <th>효과</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>파티션 프루닝</strong></td>
+      <td>해당 날짜 파티션만 스캔</td>
+      <td>불필요한 데이터 스캔 제거</td>
+    </tr>
+    <tr>
+      <td><strong>Pre-aggregation</strong></td>
+      <td>시간 윈도우 기반 미리 계산</td>
+      <td>실시간 집계 연산 최소화</td>
+    </tr>
+    <tr>
+      <td><strong>캐싱</strong></td>
+      <td>자주 사용되는 결과 저장</td>
+      <td>반복 쿼리 응답 시간 단축</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="실무-프로젝트-iot-센서-데이터-수집-시스템">🚀 실무 프로젝트: IoT 센서 데이터 수집 시스템</h2>
+
+<h3 id="프로젝트-개요">프로젝트 개요</h3>
+
+<p>대규모 IoT 센서 네트워크에서 실시간으로 데이터를 수집, 저장, 분석하는 시스템을 구축합니다.</p>
+
+<h4 id="시스템-요구사항">시스템 요구사항</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>요구사항</th>
+      <th>사양</th>
+      <th>목표</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>센서 수</strong></td>
+      <td>10,000개 센서</td>
+      <td>전 세계 분산 배치</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 생성량</strong></td>
+      <td>1M 포인트/초</td>
+      <td>실시간 처리</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 보존</strong></td>
+      <td>1년간 저장</td>
+      <td>장기 트렌드 분석</td>
+    </tr>
+    <tr>
+      <td><strong>응답 시간</strong></td>
+      <td>&lt; 100ms</td>
+      <td>실시간 대시보드</td>
+    </tr>
+    <tr>
+      <td><strong>가용성</strong></td>
+      <td>99.9%</td>
+      <td>24/7 운영</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="시스템-아키텍처">시스템 아키텍처</h3>
+
+<h4 id="시스템-아키텍처-구성">시스템 아키텍처 구성</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>계층</th>
+      <th>구성요소</th>
+      <th>기술 스택</th>
+      <th>특징</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>데이터 수집</strong></td>
+      <td>MQTT Broker, Message Queue, Data Ingestion</td>
+      <td>Eclipse Mosquitto, Apache Kafka, InfluxDB</td>
+      <td>수평 확장 가능</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 저장</strong></td>
+      <td>Time Series DB, Data Compression, Retention Policy</td>
+      <td>InfluxDB Cluster, TSM Compression, Automated Cleanup</td>
+      <td>압축률 50:1 달성</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 처리</strong></td>
+      <td>Real-time Analytics, Alert Engine, Data Aggregation</td>
+      <td>Apache Flink, Custom Alert Rules, Time Window Functions</td>
+      <td>&lt; 100ms 응답시간</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 시각화</strong></td>
+      <td>Dashboard, Real-time Charts, Alert Management</td>
+      <td>Grafana, WebSocket, Push Notifications</td>
+      <td>실시간 모니터링</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="데이터-모델-설계">데이터 모델 설계</h4>
+
+<p><strong>Measurement</strong>: <code class="language-plaintext highlighter-rouge">sensor_data</code></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>구분</th>
+      <th>필드명</th>
+      <th>설명</th>
+      <th>데이터 타입</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Tags</strong></td>
+      <td>sensor_id</td>
+      <td>고유 센서 식별자</td>
+      <td>String</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>location</td>
+      <td>센서 위치 (건물, 층, 구역)</td>
+      <td>String</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>sensor_type</td>
+      <td>센서 유형 (온도, 습도, 압력)</td>
+      <td>String</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>manufacturer</td>
+      <td>제조사</td>
+      <td>String</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>firmware_version</td>
+      <td>펌웨어 버전</td>
+      <td>String</td>
+    </tr>
+    <tr>
+      <td><strong>Fields</strong></td>
+      <td>value</td>
+      <td>측정값</td>
+      <td>Float</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>quality</td>
+      <td>데이터 품질 점수 (0-100)</td>
+      <td>Integer</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>battery_level</td>
+      <td>배터리 잔량 (%)</td>
+      <td>Float</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>signal_strength</td>
+      <td>신호 강도 (dBm)</td>
+      <td>Float</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="데이터-보존-정책">데이터 보존 정책</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>데이터 타입</th>
+      <th>보존 기간</th>
+      <th>용도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>원시 데이터</strong></td>
+      <td>30일</td>
+      <td>실시간 분석, 디버깅</td>
+    </tr>
+    <tr>
+      <td><strong>시간별 집계</strong></td>
+      <td>1년</td>
+      <td>트렌드 분석, 성능 모니터링</td>
+    </tr>
+    <tr>
+      <td><strong>일별 집계</strong></td>
+      <td>5년</td>
+      <td>장기 트렌드, 비즈니스 인텔리전스</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="데이터-수집-파이프라인-구현">데이터 수집 파이프라인 구현</h3>
+
+<h4 id="파이프라인-구성요소">파이프라인 구성요소</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>구성요소</th>
+      <th>역할</th>
+      <th>기술 스택</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>MQTT Broker</strong></td>
+      <td>센서 데이터 수집</td>
+      <td>Eclipse Mosquitto</td>
+    </tr>
+    <tr>
+      <td><strong>Kafka Producer</strong></td>
+      <td>메시지 큐잉</td>
+      <td>Apache Kafka</td>
+    </tr>
+    <tr>
+      <td><strong>InfluxDB Client</strong></td>
+      <td>시계열 데이터 저장</td>
+      <td>InfluxDB</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="파이프라인-설정">파이프라인 설정</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>구성요소</th>
+      <th>설정</th>
+      <th>값</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>MQTT</strong></td>
+      <td>Broker Host</td>
+      <td>mqtt-broker.company.com:1883</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Topics</td>
+      <td>sensors/+/temperature, sensors/+/humidity, sensors/+/pressure</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>QoS</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td><strong>Kafka</strong></td>
+      <td>Bootstrap Servers</td>
+      <td>kafka1:9092, kafka2:9092</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Topic</td>
+      <td>sensor-data-raw</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Partitions</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Replication Factor</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td><strong>InfluxDB</strong></td>
+      <td>Host</td>
+      <td>influxdb-cluster.company.com:8086</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Database</td>
+      <td>iot_sensors</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Retention Policy</td>
+      <td>30_days</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Batch Size</td>
+      <td>5000</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Flush Interval</td>
+      <td>1000ms</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="센서-데이터-검증-규칙">센서 데이터 검증 규칙</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>검증 항목</th>
+      <th>규칙</th>
+      <th>임계값</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>온도 센서</strong></td>
+      <td>값 범위</td>
+      <td>-50°C ~ 100°C</td>
+    </tr>
+    <tr>
+      <td><strong>습도 센서</strong></td>
+      <td>값 범위</td>
+      <td>0% ~ 100%</td>
+    </tr>
+    <tr>
+      <td><strong>압력 센서</strong></td>
+      <td>값 범위</td>
+      <td>800hPa ~ 1200hPa</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 품질</strong></td>
+      <td>품질 점수</td>
+      <td>≥ 80</td>
+    </tr>
+    <tr>
+      <td><strong>배터리 레벨</strong></td>
+      <td>배터리 잔량</td>
+      <td>≥ 10%</td>
+    </tr>
+    <tr>
+      <td><strong>신호 강도</strong></td>
+      <td>신호 강도</td>
+      <td>≥ -80dBm</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="실시간-분석-및-알림-시스템">실시간 분석 및 알림 시스템</h3>
+
+<h4 id="집계-윈도우-설정">집계 윈도우 설정</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>윈도우 크기</th>
+      <th>시간(초)</th>
+      <th>용도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1분</strong></td>
+      <td>60</td>
+      <td>실시간 모니터링</td>
+    </tr>
+    <tr>
+      <td><strong>5분</strong></td>
+      <td>300</td>
+      <td>단기 트렌드 분석</td>
+    </tr>
+    <tr>
+      <td><strong>1시간</strong></td>
+      <td>3600</td>
+      <td>중기 패턴 분석</td>
+    </tr>
+    <tr>
+      <td><strong>1일</strong></td>
+      <td>86400</td>
+      <td>장기 트렌드 분석</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="알림-규칙-설정">알림 규칙 설정</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>규칙명</th>
+      <th>조건</th>
+      <th>심각도</th>
+      <th>알림 채널</th>
+      <th>쿨다운</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>온도 이상</strong></td>
+      <td>temperature &gt; 35 OR temperature &lt; -10</td>
+      <td>CRITICAL</td>
+      <td>email, sms, slack</td>
+      <td>5분</td>
+    </tr>
+    <tr>
+      <td><strong>배터리 부족</strong></td>
+      <td>battery_level &lt; 20</td>
+      <td>WARNING</td>
+      <td>email</td>
+      <td>1시간</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 품질</strong></td>
+      <td>quality &lt; 80</td>
+      <td>WARNING</td>
+      <td>slack</td>
+      <td>30분</td>
+    </tr>
+    <tr>
+      <td><strong>센서 오프라인</strong></td>
+      <td>no_data_received &gt; 300초</td>
+      <td>CRITICAL</td>
+      <td>email, sms</td>
+      <td>10분</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="실시간-분석-처리-흐름">실시간 분석 처리 흐름</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>처리 단계</th>
+      <th>설명</th>
+      <th>출력</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>즉시 알림</strong></td>
+      <td>실시간 조건 검사</td>
+      <td>알림 이벤트</td>
+    </tr>
+    <tr>
+      <td><strong>집계 메트릭</strong></td>
+      <td>시간 윈도우 기반 계산</td>
+      <td>평균, 최대/최소, 분산</td>
+    </tr>
+    <tr>
+      <td><strong>트렌드 분석</strong></td>
+      <td>패턴 및 이상 탐지</td>
+      <td>트렌드 지표</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="집계-메트릭-종류">집계 메트릭 종류</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>메트릭</th>
+      <th>계산 방법</th>
+      <th>윈도우 크기</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>이동 평균</strong></td>
+      <td>연속 값들의 평균</td>
+      <td>1분, 5분</td>
+    </tr>
+    <tr>
+      <td><strong>최대/최소</strong></td>
+      <td>시간 범위 내 극값</td>
+      <td>1시간</td>
+    </tr>
+    <tr>
+      <td><strong>분산</strong></td>
+      <td>값들의 변동성</td>
+      <td>5분</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="성능-모니터링과-최적화">성능 모니터링과 최적화</h3>
+
+<h4 id="성능-임계값-설정">성능 임계값 설정</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>메트릭</th>
+      <th>임계값</th>
+      <th>단위</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Ingestion Rate</strong></td>
+      <td>1,000,000</td>
+      <td>points/second</td>
+      <td>데이터 수집 처리량</td>
+    </tr>
+    <tr>
+      <td><strong>Query Response Time</strong></td>
+      <td>0.1</td>
+      <td>seconds</td>
+      <td>쿼리 응답 시간</td>
+    </tr>
+    <tr>
+      <td><strong>Storage Utilization</strong></td>
+      <td>0.8</td>
+      <td>80%</td>
+      <td>저장 공간 사용률</td>
+    </tr>
+    <tr>
+      <td><strong>Memory Usage</strong></td>
+      <td>0.85</td>
+      <td>85%</td>
+      <td>메모리 사용률</td>
+    </tr>
+    <tr>
+      <td><strong>CPU Usage</strong></td>
+      <td>0.8</td>
+      <td>80%</td>
+      <td>CPU 사용률</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="성능-모니터링-메트릭">성능 모니터링 메트릭</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>모니터링 영역</th>
+      <th>메트릭</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Ingestion</strong></td>
+      <td>Current Rate, Peak Rate, Failed Writes, Queue Depth</td>
+      <td>데이터 수집 성능</td>
+    </tr>
+    <tr>
+      <td><strong>Query</strong></td>
+      <td>Response Time, Throughput, Slow Queries, Cache Hit Rate</td>
+      <td>쿼리 성능</td>
+    </tr>
+    <tr>
+      <td><strong>Storage</strong></td>
+      <td>Disk Usage, Compression Ratio, Retention Effectiveness, Index Size</td>
+      <td>저장 효율성</td>
+    </tr>
+    <tr>
+      <td><strong>Resource</strong></td>
+      <td>Memory Usage, CPU Usage, Network I/O, Disk I/O</td>
+      <td>시스템 리소스</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="자동-최적화-전략">자동 최적화 전략</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>최적화 타입</th>
+      <th>조건</th>
+      <th>액션</th>
+      <th>예상 개선 효과</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>쓰기 최적화</strong></td>
+      <td>처리량 임계값 초과</td>
+      <td>배치 크기 증가, 압축 강화</td>
+      <td>20-30% 처리량 향상</td>
+    </tr>
+    <tr>
+      <td><strong>쿼리 최적화</strong></td>
+      <td>응답 시간 임계값 초과</td>
+      <td>인덱스 추가, Pre-aggregation</td>
+      <td>50-70% 응답 시간 단축</td>
+    </tr>
+    <tr>
+      <td><strong>저장 최적화</strong></td>
+      <td>저장 공간 임계값 초과</td>
+      <td>보존 정책 조정, 압축 강화</td>
+      <td>30-50% 저장 공간 절약</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="학습-요약">📚 학습 요약</h2>
+
+<h3 id="핵심-개념-정리">핵심 개념 정리</h3>
+
+<ol>
+  <li><strong>시계열 데이터의 특성</strong>
+    <ul>
+      <li>시간 기반 정렬, 고빈도 생성, 불변성</li>
+      <li>압축 가능성, 보존 정책 필요성</li>
+      <li>전통적 데이터베이스의 한계 극복</li>
+    </ul>
+  </li>
+  <li><strong>주요 TDB 솔루션</strong>
+    <ul>
+      <li><strong>InfluxDB</strong>: 시계열 전용, 높은 성능</li>
+      <li><strong>TimescaleDB</strong>: PostgreSQL 기반, SQL 호환</li>
+      <li><strong>Prometheus</strong>: 메트릭 중심, 모니터링 최적화</li>
+      <li><strong>클라우드 서비스</strong>: 관리형 솔루션</li>
+    </ul>
+  </li>
+  <li><strong>TDB 아키텍처</strong>
+    <ul>
+      <li>단일 노드 vs 분산 아키텍처</li>
+      <li>행 기반 vs 열 기반 저장</li>
+      <li>압축 알고리즘과 인덱싱 전략</li>
+    </ul>
+  </li>
+  <li><strong>성능 최적화</strong>
+    <ul>
+      <li>배치 쓰기와 압축 최적화</li>
+      <li>시간 기반 인덱싱과 쿼리 최적화</li>
+      <li>실시간 분석과 알림 시스템</li>
+    </ul>
+  </li>
+  <li><strong>실무 적용</strong>
+    <ul>
+      <li>IoT 센서 데이터 수집 시스템</li>
+      <li>실시간 분석과 대시보드</li>
+      <li>성능 모니터링과 자동 최적화</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="다음-단계">다음 단계</h3>
+
+<p><strong>Part 2에서는 다룰 내용:</strong></p>
+<ul>
+  <li>TDB 고급 기능과 최적화 기법</li>
+  <li>분산 TDB 클러스터 구축</li>
+  <li>압축 알고리즘과 데이터 보존 정책</li>
+  <li>대규모 모니터링 시스템 실무 프로젝트</li>
+</ul>
+
+<p><strong>핵심 학습 포인트:</strong></p>
+<ul>
+  <li>✅ 시계열 데이터의 고유한 특성 이해</li>
+  <li>✅ 주요 TDB 솔루션의 장단점 비교</li>
+  <li>✅ TDB 아키텍처와 저장 방식 이해</li>
+  <li>✅ 성능 최적화 원리와 실무 적용</li>
+  <li>✅ IoT 센서 데이터 수집 시스템 구축</li>
+</ul>
+
+<p>Time Series Database의 기초를 완전히 정복했습니다! 🎉</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+          
+          
+      
+      
+      
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
