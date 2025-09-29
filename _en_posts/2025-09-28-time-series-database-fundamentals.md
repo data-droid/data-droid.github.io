@@ -7,7 +7,7 @@ category: data-engineering
 tags: [Time-Series-Database, TDB, InfluxDB, TimescaleDB, Prometheus, IoT, Real-time-Analytics, Data-Architecture]
 series: time-series-database-master
 series_order: 1
-date: 2025-09-27
+date: 2025-09-28
 author: Data Droid
 lang: en
 reading_time: "50 min"
