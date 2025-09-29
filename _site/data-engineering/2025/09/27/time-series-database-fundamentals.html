@@ -1398,6 +1398,669 @@
 
 <h2 id="실무-프로젝트-iot-센서-데이터-수집-시스템">🚀 실무 프로젝트: IoT 센서 데이터 수집 시스템</h2>
 
+<h3 id="실습-influxdb-설치-및-기본-설정">실습: InfluxDB 설치 및 기본 설정</h3>
+
+<h4 id="1-influxdb-설치-및-초기-설정">1. InfluxDB 설치 및 초기 설정</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="c"># influxdb-setup.sh</span>
+
+<span class="nb">echo</span> <span class="s2">"🚀 InfluxDB 설치 및 설정 시작..."</span>
+
+<span class="c"># Docker를 이용한 InfluxDB 설치</span>
+docker run <span class="nt">-d</span> <span class="se">\</span>
+  <span class="nt">--name</span> influxdb <span class="se">\</span>
+  <span class="nt">-p</span> 8086:8086 <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">DOCKER_INFLUXDB_INIT_MODE</span><span class="o">=</span>setup <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">DOCKER_INFLUXDB_INIT_USERNAME</span><span class="o">=</span>admin <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">DOCKER_INFLUXDB_INIT_PASSWORD</span><span class="o">=</span>admin123 <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">DOCKER_INFLUXDB_INIT_ORG</span><span class="o">=</span>myorg <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">DOCKER_INFLUXDB_INIT_BUCKET</span><span class="o">=</span>mybucket <span class="se">\</span>
+  influxdb:2.7-alpine
+
+<span class="c"># 서비스 시작 대기</span>
+<span class="nb">echo</span> <span class="s2">"⏳ InfluxDB 시작 대기 중..."</span>
+<span class="nb">sleep </span>10
+
+<span class="c"># 헬스 체크</span>
+<span class="nb">echo</span> <span class="s2">"🔍 InfluxDB 상태 확인..."</span>
+curl <span class="nt">-f</span> http://localhost:8086/health
+
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> <span class="nt">-eq</span> 0 <span class="o">]</span><span class="p">;</span> <span class="k">then
+    </span><span class="nb">echo</span> <span class="s2">"✅ InfluxDB가 성공적으로 시작되었습니다!"</span>
+    <span class="nb">echo</span> <span class="s2">"🌐 웹 UI: http://localhost:8086"</span>
+    <span class="nb">echo</span> <span class="s2">"👤 사용자명: admin"</span>
+    <span class="nb">echo</span> <span class="s2">"🔑 비밀번호: admin123"</span>
+<span class="k">else
+    </span><span class="nb">echo</span> <span class="s2">"❌ InfluxDB 시작에 실패했습니다."</span>
+    <span class="nb">exit </span>1
+<span class="k">fi</span>
+</code></pre></div></div>
+
+<h4 id="2-python-클라이언트를-이용한-데이터-수집">2. Python 클라이언트를 이용한 데이터 수집</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># sensor_data_collector.py
+</span><span class="kn">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="n">random</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="n">influxdb_client</span> <span class="kn">import</span> <span class="n">InfluxDBClient</span><span class="p">,</span> <span class="n">Point</span>
+<span class="kn">from</span> <span class="n">influxdb_client.client.write_api</span> <span class="kn">import</span> <span class="n">SYNCHRONOUS</span>
+<span class="kn">import</span> <span class="n">logging</span>
+
+<span class="k">class</span> <span class="nc">SensorDataCollector</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="c1"># InfluxDB 클라이언트 설정
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">client</span> <span class="o">=</span> <span class="nc">InfluxDBClient</span><span class="p">(</span>
+            <span class="n">url</span><span class="o">=</span><span class="sh">"</span><span class="s">http://localhost:8086</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">token</span><span class="o">=</span><span class="sh">"</span><span class="s">admin-token</span><span class="sh">"</span><span class="p">,</span>  <span class="c1"># 실제 토큰으로 교체 필요
+</span>            <span class="n">org</span><span class="o">=</span><span class="sh">"</span><span class="s">myorg</span><span class="sh">"</span>
+        <span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">write_api</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">client</span><span class="p">.</span><span class="nf">write_api</span><span class="p">(</span><span class="n">write_options</span><span class="o">=</span><span class="n">SYNCHRONOUS</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">query_api</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">client</span><span class="p">.</span><span class="nf">query_api</span><span class="p">()</span>
+        
+        <span class="c1"># 로깅 설정
+</span>        <span class="n">logging</span><span class="p">.</span><span class="nf">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="p">.</span><span class="n">INFO</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="p">.</span><span class="nf">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">generate_sensor_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">sensor_id</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">sensor_type</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">센서 데이터 생성 시뮬레이터</span><span class="sh">"""</span>
+        
+        <span class="c1"># 센서 타입별 데이터 범위 설정
+</span>        <span class="n">ranges</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="p">:</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">35</span><span class="p">),</span>    <span class="c1"># 온도 (섭씨)
+</span>            <span class="sh">'</span><span class="s">humidity</span><span class="sh">'</span><span class="p">:</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">80</span><span class="p">),</span>       <span class="c1"># 습도 (%)
+</span>            <span class="sh">'</span><span class="s">pressure</span><span class="sh">'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1030</span><span class="p">),</span>   <span class="c1"># 기압 (hPa)
+</span>            <span class="sh">'</span><span class="s">vibration</span><span class="sh">'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>        <span class="c1"># 진동 (mm/s)
+</span>        <span class="p">}</span>
+        
+        <span class="n">base_value</span> <span class="o">=</span> <span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="o">*</span><span class="n">ranges</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">sensor_type</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)))</span>
+        
+        <span class="c1"># 시간에 따른 변화 시뮬레이션 (사인파)
+</span>        <span class="n">time_factor</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">/</span> <span class="mi">3600</span>  <span class="c1"># 시간 단위
+</span>        <span class="n">variation</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="nf">abs</span><span class="p">(</span><span class="n">base_value</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">)</span>
+        
+        <span class="n">value</span> <span class="o">=</span> <span class="n">base_value</span> <span class="o">+</span> <span class="n">variation</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">measurement</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">sensor_data</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">tags</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">sensor_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">sensor_id</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="n">location</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">:</span> <span class="n">sensor_type</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">status</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">active</span><span class="sh">'</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">fields</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">:</span> <span class="nf">round</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">quality</span><span class="sh">'</span><span class="p">:</span> <span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">85</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">battery_level</span><span class="sh">'</span><span class="p">:</span> <span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">signal_strength</span><span class="sh">'</span><span class="p">:</span> <span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">80</span><span class="p">,</span> <span class="o">-</span><span class="mi">30</span><span class="p">)</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">utcnow</span><span class="p">()</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">write_sensor_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_points</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">센서 데이터를 InfluxDB에 저장</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">data_points</span><span class="p">:</span>
+                <span class="n">point</span> <span class="o">=</span> <span class="nc">Point</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">measurement</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">tag</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor_id</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">tags</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">sensor_id</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">tag</span><span class="p">(</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">tags</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">tag</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">tags</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">tag</span><span class="p">(</span><span class="sh">'</span><span class="s">status</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">tags</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">status</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">fields</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">'</span><span class="s">quality</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">fields</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">quality</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">'</span><span class="s">battery_level</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">fields</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">battery_level</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">'</span><span class="s">signal_strength</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">fields</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">signal_strength</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">time</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">])</span>
+                
+                <span class="n">points</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+            
+            <span class="c1"># 배치 쓰기
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">write_api</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="n">points</span><span class="p">)</span>
+            
+            <span class="n">self</span><span class="p">.</span><span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✅ </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="si">}</span><span class="s">개의 데이터 포인트가 성공적으로 저장되었습니다.</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">❌ 데이터 저장 실패: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+    
+    <span class="k">def</span> <span class="nf">query_sensor_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">sensor_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">센서 데이터 쿼리</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Flux 쿼리 구성
+</span>            <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">'''</span><span class="s">
+            from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">)
+            |&gt; range(start: -</span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s">h)
+            |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="s">)
+            </span><span class="sh">'''</span>
+            
+            <span class="k">if</span> <span class="n">sensor_type</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">+=</span> <span class="sa">f</span><span class="sh">'</span><span class="s">|&gt; filter(fn: (r) =&gt; r.sensor_type == </span><span class="sh">"</span><span class="si">{</span><span class="n">sensor_type</span><span class="si">}</span><span class="sh">"</span><span class="s">)</span><span class="se">\n</span><span class="sh">'</span>
+            
+            <span class="k">if</span> <span class="n">location</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">+=</span> <span class="sa">f</span><span class="sh">'</span><span class="s">|&gt; filter(fn: (r) =&gt; r.location == </span><span class="sh">"</span><span class="si">{</span><span class="n">location</span><span class="si">}</span><span class="sh">"</span><span class="s">)</span><span class="se">\n</span><span class="sh">'</span>
+            
+            <span class="n">query</span> <span class="o">+=</span> <span class="sh">'</span><span class="s">|&gt; sort(columns: [</span><span class="sh">"</span><span class="s">_time</span><span class="sh">"</span><span class="s">], desc: true)</span><span class="se">\n</span><span class="sh">'</span>
+            <span class="n">query</span> <span class="o">+=</span> <span class="sh">'</span><span class="s">|&gt; limit(n: 100)</span><span class="sh">'</span>
+            
+            <span class="c1"># 쿼리 실행
+</span>            <span class="n">result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">query_api</span><span class="p">.</span><span class="nf">query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+            
+            <span class="c1"># 결과 변환
+</span>            <span class="n">data_points</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">table</span><span class="p">.</span><span class="n">records</span><span class="p">:</span>
+                    <span class="n">data_points</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                        <span class="sh">'</span><span class="s">time</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="nf">get_time</span><span class="p">(),</span>
+                        <span class="sh">'</span><span class="s">measurement</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="nf">get_measurement</span><span class="p">(),</span>
+                        <span class="sh">'</span><span class="s">field</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="nf">get_field</span><span class="p">(),</span>
+                        <span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="nf">get_value</span><span class="p">(),</span>
+                        <span class="sh">'</span><span class="s">sensor_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="n">values</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor_id</span><span class="sh">'</span><span class="p">),</span>
+                        <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="n">values</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">),</span>
+                        <span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="n">values</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">)</span>
+                    <span class="p">})</span>
+            
+            <span class="k">return</span> <span class="n">data_points</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">❌ 데이터 쿼리 실패: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span>
+    
+    <span class="k">def</span> <span class="nf">get_statistics</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">sensor_type</span><span class="p">,</span> <span class="n">hours</span><span class="o">=</span><span class="mi">24</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">센서 데이터 통계 조회</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">'''</span><span class="s">
+            from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">)
+            |&gt; range(start: -</span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s">h)
+            |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r.sensor_type == </span><span class="sh">"</span><span class="si">{</span><span class="n">sensor_type</span><span class="si">}</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r._field == </span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="s">)
+            |&gt; group(columns: [</span><span class="sh">"</span><span class="s">location</span><span class="sh">"</span><span class="s">])
+            |&gt; mean()
+            |&gt; yield(name: </span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="s">)
+            
+            from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">)
+            |&gt; range(start: -</span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s">h)
+            |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r.sensor_type == </span><span class="sh">"</span><span class="si">{</span><span class="n">sensor_type</span><span class="si">}</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r._field == </span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="s">)
+            |&gt; group(columns: [</span><span class="sh">"</span><span class="s">location</span><span class="sh">"</span><span class="s">])
+            |&gt; max()
+            |&gt; yield(name: </span><span class="sh">"</span><span class="s">max</span><span class="sh">"</span><span class="s">)
+            
+            from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">)
+            |&gt; range(start: -</span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s">h)
+            |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r.sensor_type == </span><span class="sh">"</span><span class="si">{</span><span class="n">sensor_type</span><span class="si">}</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r._field == </span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="s">)
+            |&gt; group(columns: [</span><span class="sh">"</span><span class="s">location</span><span class="sh">"</span><span class="s">])
+            |&gt; min()
+            |&gt; yield(name: </span><span class="sh">"</span><span class="s">min</span><span class="sh">"</span><span class="s">)
+            </span><span class="sh">'''</span>
+            
+            <span class="n">result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">query_api</span><span class="p">.</span><span class="nf">query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+            
+            <span class="n">stats</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">table_name</span> <span class="o">=</span> <span class="n">table</span><span class="p">.</span><span class="n">name</span>
+                <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">table</span><span class="p">.</span><span class="n">records</span><span class="p">:</span>
+                    <span class="n">location</span> <span class="o">=</span> <span class="n">record</span><span class="p">.</span><span class="n">values</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">location</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
+                        <span class="n">stats</span><span class="p">[</span><span class="n">location</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">stats</span><span class="p">[</span><span class="n">location</span><span class="p">][</span><span class="n">table_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span><span class="p">.</span><span class="nf">get_value</span><span class="p">()</span>
+            
+            <span class="k">return</span> <span class="n">stats</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">❌ 통계 조회 실패: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">run_data_collection</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">duration_minutes</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">데이터 수집 실행</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">🔄 </span><span class="si">{</span><span class="n">duration_minutes</span><span class="si">}</span><span class="s">분간 센서 데이터 수집 시작...</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># 센서 설정
+</span>        <span class="n">sensors</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">sensor_001</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">seoul</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="p">},</span>
+            <span class="p">{</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">sensor_002</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">seoul</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">humidity</span><span class="sh">'</span><span class="p">},</span>
+            <span class="p">{</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">sensor_003</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">busan</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="p">},</span>
+            <span class="p">{</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">sensor_004</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">busan</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">pressure</span><span class="sh">'</span><span class="p">},</span>
+            <span class="p">{</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">sensor_005</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">daegu</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">vibration</span><span class="sh">'</span><span class="p">},</span>
+        <span class="p">]</span>
+        
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">start_time</span> <span class="o">+</span> <span class="p">(</span><span class="n">duration_minutes</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+        
+        <span class="k">while</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">end_time</span><span class="p">:</span>
+            <span class="c1"># 각 센서에서 데이터 생성
+</span>            <span class="n">data_points</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">sensor</span> <span class="ow">in</span> <span class="n">sensors</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">generate_sensor_data</span><span class="p">(</span>
+                    <span class="n">sensor</span><span class="p">[</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">],</span> 
+                    <span class="n">sensor</span><span class="p">[</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">],</span> 
+                    <span class="n">sensor</span><span class="p">[</span><span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">data_points</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            
+            <span class="c1"># 데이터 저장
+</span>            <span class="n">self</span><span class="p">.</span><span class="nf">write_sensor_data</span><span class="p">(</span><span class="n">data_points</span><span class="p">)</span>
+            
+            <span class="c1"># 5초 대기
+</span>            <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">✅ 데이터 수집 완료!</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># 수집된 데이터 통계 출력
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">print_collection_summary</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">print_collection_summary</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">수집 요약 정보 출력</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">📊 데이터 수집 요약</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=</span><span class="sh">"</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+        
+        <span class="n">sensor_types</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">humidity</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">pressure</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">vibration</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="k">for</span> <span class="n">sensor_type</span> <span class="ow">in</span> <span class="n">sensor_types</span><span class="p">:</span>
+            <span class="n">stats</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_statistics</span><span class="p">(</span><span class="n">sensor_type</span><span class="p">,</span> <span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">stats</span><span class="p">:</span>
+                <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">📈 </span><span class="si">{</span><span class="n">sensor_type</span><span class="p">.</span><span class="nf">upper</span><span class="p">()</span><span class="si">}</span><span class="s"> 센서 통계 (최근 1시간):</span><span class="sh">"</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">location</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+                    <span class="n">mean_val</span> <span class="o">=</span> <span class="n">values</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">mean</span><span class="sh">'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="n">max_val</span> <span class="o">=</span> <span class="n">values</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">max</span><span class="sh">'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="n">min_val</span> <span class="o">=</span> <span class="n">values</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">min</span><span class="sh">'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">   </span><span class="si">{</span><span class="n">location</span><span class="si">}</span><span class="s">: 평균=</span><span class="si">{</span><span class="n">mean_val</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">, 최대=</span><span class="si">{</span><span class="n">max_val</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">, 최소=</span><span class="si">{</span><span class="n">min_val</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 실행 예제
+</span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">collector</span> <span class="o">=</span> <span class="nc">SensorDataCollector</span><span class="p">()</span>
+    
+    <span class="c1"># 데이터 수집 실행 (5분간)
+</span>    <span class="n">collector</span><span class="p">.</span><span class="nf">run_data_collection</span><span class="p">(</span><span class="n">duration_minutes</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    
+    <span class="c1"># 최근 데이터 조회
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">🔍 최근 온도 센서 데이터:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">recent_data</span> <span class="o">=</span> <span class="n">collector</span><span class="p">.</span><span class="nf">query_sensor_data</span><span class="p">(</span><span class="n">sensor_type</span><span class="o">=</span><span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="p">,</span> <span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">recent_data</span><span class="p">[:</span><span class="mi">5</span><span class="p">]:</span>  <span class="c1"># 최근 5개만 출력
+</span>        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">   </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">time</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="3-timescaledb-비교-실습">3. TimescaleDB 비교 실습</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># timescale_comparison.py
+</span><span class="kn">import</span> <span class="n">psycopg2</span>
+<span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="n">random</span>
+
+<span class="k">class</span> <span class="nc">TimescaleComparison</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="c1"># TimescaleDB 연결
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">conn</span> <span class="o">=</span> <span class="n">psycopg2</span><span class="p">.</span><span class="nf">connect</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="sh">"</span><span class="s">localhost</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">database</span><span class="o">=</span><span class="sh">"</span><span class="s">timeseries</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">user</span><span class="o">=</span><span class="sh">"</span><span class="s">postgres</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">password</span><span class="o">=</span><span class="sh">"</span><span class="s">postgres</span><span class="sh">"</span>
+        <span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cur</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">conn</span><span class="p">.</span><span class="nf">cursor</span><span class="p">()</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="nf">setup_timescale</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">setup_timescale</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">TimescaleDB 초기 설정</span><span class="sh">"""</span>
+        <span class="c1"># TimescaleDB 확장 활성화
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"</span><span class="s">CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># 센서 데이터 테이블 생성
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+            CREATE TABLE IF NOT EXISTS sensor_data (
+                time TIMESTAMPTZ NOT NULL,
+                sensor_id TEXT NOT NULL,
+                location TEXT NOT NULL,
+                sensor_type TEXT NOT NULL,
+                value DOUBLE PRECISION NOT NULL,
+                quality INTEGER NOT NULL,
+                battery_level INTEGER NOT NULL,
+                signal_strength INTEGER NOT NULL
+            );
+        </span><span class="sh">"""</span><span class="p">)</span>
+        
+        <span class="c1"># 하이퍼테이블로 변환
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+            SELECT create_hypertable(</span><span class="sh">'</span><span class="s">sensor_data</span><span class="sh">'</span><span class="s">, </span><span class="sh">'</span><span class="s">time</span><span class="sh">'</span><span class="s">, 
+                                   if_not_exists =&gt; TRUE);
+        </span><span class="sh">"""</span><span class="p">)</span>
+        
+        <span class="c1"># 인덱스 생성
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+            CREATE INDEX IF NOT EXISTS idx_sensor_data_sensor_type 
+            ON sensor_data (sensor_type, time DESC);
+        </span><span class="sh">"""</span><span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">conn</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">✅ TimescaleDB 설정 완료</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">insert_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">num_records</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">대량 데이터 삽입 테스트</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">📝 </span><span class="si">{</span><span class="n">num_records</span><span class="si">}</span><span class="s">개 레코드 삽입 테스트...</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+        
+        <span class="c1"># 배치 삽입
+</span>        <span class="n">insert_query</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+            INSERT INTO sensor_data 
+            (time, sensor_id, location, sensor_type, value, quality, battery_level, signal_strength)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+        </span><span class="sh">"""</span>
+        
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_records</span><span class="p">):</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">utcnow</span><span class="p">()</span> <span class="o">-</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">.</span><span class="nf">append</span><span class="p">((</span>
+                <span class="n">timestamp</span><span class="p">,</span>
+                <span class="sa">f</span><span class="sh">'</span><span class="s">sensor_</span><span class="si">{</span><span class="n">i</span> <span class="o">%</span> <span class="mi">100</span><span class="si">:</span><span class="mi">03</span><span class="n">d</span><span class="si">}</span><span class="sh">'</span><span class="p">,</span>
+                <span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">([</span><span class="sh">'</span><span class="s">seoul</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">busan</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">daegu</span><span class="sh">'</span><span class="p">]),</span>
+                <span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">([</span><span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">humidity</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">pressure</span><span class="sh">'</span><span class="p">]),</span>
+                <span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+                <span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">80</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+                <span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+                <span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">80</span><span class="p">,</span> <span class="o">-</span><span class="mi">30</span><span class="p">)</span>
+            <span class="p">))</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">executemany</span><span class="p">(</span><span class="n">insert_query</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">conn</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+        
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✅ 삽입 완료: </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">초 (</span><span class="si">{</span><span class="n">num_records</span><span class="o">/</span><span class="n">duration</span><span class="si">:</span><span class="p">.</span><span class="mi">0</span><span class="n">f</span><span class="si">}</span><span class="s"> records/sec)</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">duration</span>
+    
+    <span class="k">def</span> <span class="nf">query_performance_test</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">쿼리 성능 테스트</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">🔍 쿼리 성능 테스트...</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="n">queries</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">최근 1시간 데이터</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">:</span> <span class="sh">"""</span><span class="s">
+                    SELECT * FROM sensor_data 
+                    WHERE time &gt;= NOW() - INTERVAL </span><span class="sh">'</span><span class="s">1 hour</span><span class="sh">'</span><span class="s"> 
+                    ORDER BY time DESC 
+                    LIMIT 100;
+                </span><span class="sh">"""</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">온도 센서 평균값</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">:</span> <span class="sh">"""</span><span class="s">
+                    SELECT location, AVG(value) as avg_temp
+                    FROM sensor_data 
+                    WHERE sensor_type = </span><span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="s"> 
+                    AND time &gt;= NOW() - INTERVAL </span><span class="sh">'</span><span class="s">1 hour</span><span class="sh">'</span><span class="s">
+                    GROUP BY location;
+                </span><span class="sh">"""</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">시간 윈도우 집계</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">:</span> <span class="sh">"""</span><span class="s">
+                    SELECT time_bucket(</span><span class="sh">'</span><span class="s">5 minutes</span><span class="sh">'</span><span class="s">, time) as bucket,
+                           AVG(value) as avg_value
+                    FROM sensor_data 
+                    WHERE time &gt;= NOW() - INTERVAL </span><span class="sh">'</span><span class="s">1 hour</span><span class="sh">'</span><span class="s">
+                    GROUP BY bucket
+                    ORDER BY bucket;
+                </span><span class="sh">"""</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+        
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">for</span> <span class="n">query_info</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+            
+            <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="n">query_info</span><span class="p">[</span><span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">])</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">fetchall</span><span class="p">()</span>
+            
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+            <span class="n">duration</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+            
+            <span class="n">results</span><span class="p">[</span><span class="n">query_info</span><span class="p">[</span><span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">duration</span><span class="sh">'</span><span class="p">:</span> <span class="n">duration</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">rows</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+            <span class="p">}</span>
+            
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">   </span><span class="si">{</span><span class="n">query_info</span><span class="p">[</span><span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="p">.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="s">초 (</span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="si">}</span><span class="s"> rows)</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">results</span>
+    
+    <span class="k">def</span> <span class="nf">compression_test</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">압축 테스트</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">🗜️ 압축 테스트...</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># 압축 활성화
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+            ALTER TABLE sensor_data SET (
+                timescaledb.compress,
+                timescaledb.compress_segmentby = </span><span class="sh">'</span><span class="s">sensor_type, location</span><span class="sh">'</span><span class="s">
+            );
+        </span><span class="sh">"""</span><span class="p">)</span>
+        
+        <span class="c1"># 압축 정책 설정
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+            SELECT add_compression_policy(</span><span class="sh">'</span><span class="s">sensor_data</span><span class="sh">'</span><span class="s">, INTERVAL </span><span class="sh">'</span><span class="s">7 days</span><span class="sh">'</span><span class="s">);
+        </span><span class="sh">"""</span><span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">conn</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+        
+        <span class="c1"># 압축 통계 조회
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+            SELECT 
+                schemaname, tablename, 
+                pg_size_pretty(pg_total_relation_size(schemaname||</span><span class="sh">'</span><span class="s">.</span><span class="sh">'</span><span class="s">||tablename)) as size
+            FROM pg_tables 
+            WHERE tablename = </span><span class="sh">'</span><span class="s">sensor_data</span><span class="sh">'</span><span class="s">;
+        </span><span class="sh">"""</span><span class="p">)</span>
+        
+        <span class="n">size_info</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">fetchone</span><span class="p">()</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">   테이블 크기: </span><span class="si">{</span><span class="n">size_info</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">size_info</span>
+    
+    <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">정리</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">conn</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+
+<span class="c1"># 성능 비교 실행
+</span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">🚀 TimescaleDB vs InfluxDB 성능 비교</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=</span><span class="sh">"</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+    
+    <span class="c1"># TimescaleDB 테스트
+</span>    <span class="n">tsdb</span> <span class="o">=</span> <span class="nc">TimescaleComparison</span><span class="p">()</span>
+    
+    <span class="c1"># 데이터 삽입 성능
+</span>    <span class="n">insert_time</span> <span class="o">=</span> <span class="n">tsdb</span><span class="p">.</span><span class="nf">insert_data</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+    
+    <span class="c1"># 쿼리 성능
+</span>    <span class="n">query_results</span> <span class="o">=</span> <span class="n">tsdb</span><span class="p">.</span><span class="nf">query_performance_test</span><span class="p">()</span>
+    
+    <span class="c1"># 압축 테스트
+</span>    <span class="n">compression_info</span> <span class="o">=</span> <span class="n">tsdb</span><span class="p">.</span><span class="nf">compression_test</span><span class="p">()</span>
+    
+    <span class="n">tsdb</span><span class="p">.</span><span class="nf">cleanup</span><span class="p">()</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">📊 성능 비교 결과:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">   TimescaleDB 삽입: </span><span class="si">{</span><span class="n">insert_time</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">초</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">   쿼리 성능:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">query_results</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">     </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="sh">'</span><span class="s">duration</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="s">초</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="4-prometheus-메트릭-수집-실습">4. Prometheus 메트릭 수집 실습</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># prometheus_metrics.py
+</span><span class="kn">from</span> <span class="n">prometheus_client</span> <span class="kn">import</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">Histogram</span><span class="p">,</span> <span class="n">Gauge</span><span class="p">,</span> <span class="n">start_http_server</span>
+<span class="kn">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="n">requests</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="c1"># Prometheus 메트릭 정의
+</span><span class="n">sensor_data_total</span> <span class="o">=</span> <span class="nc">Counter</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor_data_points_total</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Total sensor data points collected</span><span class="sh">'</span><span class="p">,</span> <span class="p">[</span><span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">])</span>
+<span class="n">data_quality_gauge</span> <span class="o">=</span> <span class="nc">Gauge</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor_data_quality</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Sensor data quality score</span><span class="sh">'</span><span class="p">,</span> <span class="p">[</span><span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">])</span>
+<span class="n">battery_level_gauge</span> <span class="o">=</span> <span class="nc">Gauge</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor_battery_level</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Sensor battery level</span><span class="sh">'</span><span class="p">,</span> <span class="p">[</span><span class="sh">'</span><span class="s">sensor_id</span><span class="sh">'</span><span class="p">])</span>
+<span class="n">collection_duration</span> <span class="o">=</span> <span class="nc">Histogram</span><span class="p">(</span><span class="sh">'</span><span class="s">data_collection_duration_seconds</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Time spent collecting data</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">PrometheusMetricsCollector</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">influxdb_url</span><span class="o">=</span><span class="sh">"</span><span class="s">http://localhost:8086</span><span class="sh">"</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">influxdb_url</span> <span class="o">=</span> <span class="n">influxdb_url</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">Authorization</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Token admin-token</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">Content-Type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">application/json</span><span class="sh">'</span>
+        <span class="p">}</span>
+    
+    <span class="nd">@collection_duration.time</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">collect_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">InfluxDB에서 메트릭 수집</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 최근 5분간의 데이터 쿼리
+</span>            <span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'''</span><span class="s">
+                from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">)
+                |&gt; range(start: -5m)
+                |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="s">)
+                |&gt; group(columns: [</span><span class="sh">"</span><span class="s">sensor_type</span><span class="sh">"</span><span class="s">, </span><span class="sh">"</span><span class="s">location</span><span class="sh">"</span><span class="s">])
+                |&gt; count()
+                </span><span class="sh">'''</span>
+            <span class="p">}</span>
+            
+            <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span>
+                <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">influxdb_url</span><span class="si">}</span><span class="s">/api/v2/query</span><span class="sh">"</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">json</span><span class="o">=</span><span class="n">query</span>
+            <span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+                
+                <span class="c1"># 메트릭 업데이트
+</span>                <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">result</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">results</span><span class="sh">'</span><span class="p">,</span> <span class="p">[{}])[</span><span class="mi">0</span><span class="p">].</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">series</span><span class="sh">'</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">table</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">values</span><span class="sh">'</span><span class="p">,</span> <span class="p">[]):</span>
+                        <span class="n">sensor_type</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># sensor_type 태그
+</span>                        <span class="n">location</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>     <span class="c1"># location 태그
+</span>                        <span class="n">count</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>        <span class="c1"># 카운트 값
+</span>                        
+                        <span class="n">sensor_data_total</span><span class="p">.</span><span class="nf">labels</span><span class="p">(</span>
+                            <span class="n">sensor_type</span><span class="o">=</span><span class="n">sensor_type</span><span class="p">,</span>
+                            <span class="n">location</span><span class="o">=</span><span class="n">location</span>
+                        <span class="p">).</span><span class="nf">inc</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+                
+                <span class="c1"># 품질 점수 메트릭
+</span>                <span class="n">self</span><span class="p">.</span><span class="nf">collect_quality_metrics</span><span class="p">()</span>
+                
+                <span class="c1"># 배터리 레벨 메트릭
+</span>                <span class="n">self</span><span class="p">.</span><span class="nf">collect_battery_metrics</span><span class="p">()</span>
+                
+                <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✅ 메트릭 수집 완료: </span><span class="si">{</span><span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">❌ 메트릭 수집 실패: </span><span class="si">{</span><span class="n">response</span><span class="p">.</span><span class="n">status_code</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">❌ 메트릭 수집 오류: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">collect_quality_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">품질 점수 메트릭 수집</span><span class="sh">"""</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'''</span><span class="s">
+            from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">)
+            |&gt; range(start: -5m)
+            |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r._field == </span><span class="sh">"</span><span class="s">quality</span><span class="sh">"</span><span class="s">)
+            |&gt; group(columns: [</span><span class="sh">"</span><span class="s">sensor_type</span><span class="sh">"</span><span class="s">, </span><span class="sh">"</span><span class="s">location</span><span class="sh">"</span><span class="s">])
+            |&gt; mean()
+            </span><span class="sh">'''</span>
+        <span class="p">}</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span>
+                <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">influxdb_url</span><span class="si">}</span><span class="s">/api/v2/query</span><span class="sh">"</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">json</span><span class="o">=</span><span class="n">query</span>
+            <span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+                
+                <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">result</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">results</span><span class="sh">'</span><span class="p">,</span> <span class="p">[{}])[</span><span class="mi">0</span><span class="p">].</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">series</span><span class="sh">'</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">table</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">values</span><span class="sh">'</span><span class="p">,</span> <span class="p">[]):</span>
+                        <span class="n">sensor_type</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">location</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">quality</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                        
+                        <span class="n">data_quality_gauge</span><span class="p">.</span><span class="nf">labels</span><span class="p">(</span>
+                            <span class="n">sensor_type</span><span class="o">=</span><span class="n">sensor_type</span><span class="p">,</span>
+                            <span class="n">location</span><span class="o">=</span><span class="n">location</span>
+                        <span class="p">).</span><span class="nf">set</span><span class="p">(</span><span class="n">quality</span><span class="p">)</span>
+                        
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">품질 메트릭 수집 오류: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">collect_battery_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">배터리 레벨 메트릭 수집</span><span class="sh">"""</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'''</span><span class="s">
+            from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">)
+            |&gt; range(start: -5m)
+            |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r._field == </span><span class="sh">"</span><span class="s">battery_level</span><span class="sh">"</span><span class="s">)
+            |&gt; group(columns: [</span><span class="sh">"</span><span class="s">sensor_id</span><span class="sh">"</span><span class="s">])
+            |&gt; last()
+            </span><span class="sh">'''</span>
+        <span class="p">}</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span>
+                <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">influxdb_url</span><span class="si">}</span><span class="s">/api/v2/query</span><span class="sh">"</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">json</span><span class="o">=</span><span class="n">query</span>
+            <span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+                
+                <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">result</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">results</span><span class="sh">'</span><span class="p">,</span> <span class="p">[{}])[</span><span class="mi">0</span><span class="p">].</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">series</span><span class="sh">'</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">table</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">values</span><span class="sh">'</span><span class="p">,</span> <span class="p">[]):</span>
+                        <span class="n">sensor_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">battery_level</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                        
+                        <span class="n">battery_level_gauge</span><span class="p">.</span><span class="nf">labels</span><span class="p">(</span>
+                            <span class="n">sensor_id</span><span class="o">=</span><span class="n">sensor_id</span>
+                        <span class="p">).</span><span class="nf">set</span><span class="p">(</span><span class="n">battery_level</span><span class="p">)</span>
+                        
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">배터리 메트릭 수집 오류: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">run_metrics_server</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8000</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메트릭 서버 실행</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">🌐 Prometheus 메트릭 서버 시작: http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s">/metrics</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">start_http_server</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">collect_metrics</span><span class="p">()</span>
+            <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>  <span class="c1"># 30초마다 수집
+</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">collector</span> <span class="o">=</span> <span class="nc">PrometheusMetricsCollector</span><span class="p">()</span>
+    <span class="n">collector</span><span class="p">.</span><span class="nf">run_metrics_server</span><span class="p">()</span>
+</code></pre></div></div>
+
 <h3 id="프로젝트-개요">프로젝트 개요</h3>
 
 <p>대규모 IoT 센서 네트워크에서 실시간으로 데이터를 수집, 저장, 분석하는 시스템을 구축합니다.</p>

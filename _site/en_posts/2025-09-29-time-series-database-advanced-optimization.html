@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Complete guide to advanced TDB features, distributed architecture, high availability, and performance tuning for production environments.">
+
+
+
+<title>Part 2: Time Series Database Advanced Features and Optimization - Building Production-grade TDB Systems - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 2: Time Series Database Advanced Features and Optimization - Building Production-grade TDB Systems">
+<meta property="og:description" content="Complete guide to advanced TDB features, distributed architecture, high availability, and performance tuning for production environments.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2025-09-29-time-series-database-advanced-optimization.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 2: Time Series Database Advanced Features and Optimization - Building Production-grade TDB Systems">
+<meta name="twitter:description" content="Complete guide to advanced TDB features, distributed architecture, high availability, and performance tuning for production environments.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2025/09/29/time-series-database-advanced-optimization.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2025-09-29-time-series-database-advanced-optimization.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 29일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 2: Time Series Database Advanced Features and Optimization - Building Production-grade TDB Systems</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Time-Series-Database</span>
+      
+        <span class="tag">Advanced-Optimization</span>
+      
+        <span class="tag">Distributed-Architecture</span>
+      
+        <span class="tag">High-Availability</span>
+      
+        <span class="tag">Performance-Tuning</span>
+      
+        <span class="tag">Production</span>
+      
+        <span class="tag">Clustering</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Time series database master 시리즈</span>
+      <span class="series-order">Part 3</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 55 min</span>
+      
+      
+        <span class="difficulty">📊 Advanced</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h2 id="-introduction">🌟 Introduction</h2>
+
+<p>In Part 1, we learned the fundamentals and architecture of TDB. Now in Part 2, we’ll dive deep into advanced features and optimization techniques used in real production environments.</p>
+
+<h3 id="what-youll-learn">What You’ll Learn</h3>
+
+<ul>
+  <li><strong>Advanced TDB Features</strong>: Sharding, replication, backup and recovery strategies</li>
+  <li><strong>Distributed Architecture</strong>: Cluster configuration and load balancing</li>
+  <li><strong>High Availability Design</strong>: Fault tolerance and zero-downtime services</li>
+  <li><strong>Performance Optimization</strong>: Query tuning and index optimization</li>
+  <li><strong>Practical Project</strong>: Large-scale IoT platform construction</li>
+</ul>
+
+<hr />
+
+<h2 id="advanced-tdb-features-and-architecture">🚀 Advanced TDB Features and Architecture</h2>
+
+<h3 id="distributed-architecture-patterns">Distributed Architecture Patterns</h3>
+
+<h4 id="1-sharding-strategy">1. Sharding Strategy</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Sharding Method</th>
+      <th>Description</th>
+      <th>Advantages</th>
+      <th>Disadvantages</th>
+      <th>Use Cases</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Time-based Sharding</strong></td>
+      <td>Data partitioning by time range</td>
+      <td>Query performance optimization, compression efficiency</td>
+      <td>Uneven data distribution</td>
+      <td>IoT sensor data</td>
+    </tr>
+    <tr>
+      <td><strong>Hash-based Sharding</strong></td>
+      <td>Data partitioning by hash value</td>
+      <td>Even data distribution</td>
+      <td>Complex time range queries</td>
+      <td>Log data</td>
+    </tr>
+    <tr>
+      <td><strong>Tag-based Sharding</strong></td>
+      <td>Partitioning by metadata tags</td>
+      <td>Business logic optimization</td>
+      <td>Possible shard imbalance</td>
+      <td>Multi-tenant systems</td>
+    </tr>
+    <tr>
+      <td><strong>Composite Sharding</strong></td>
+      <td>Time + hash/tag combination</td>
+      <td>Balanced performance</td>
+      <td>Complex management</td>
+      <td>Large-scale systems</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-replication-strategy">2. Replication Strategy</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Replication Method</th>
+      <th>Description</th>
+      <th>Consistency</th>
+      <th>Availability</th>
+      <th>Performance</th>
+      <th>Complexity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Master-Slave</strong></td>
+      <td>Single master, multiple slaves</td>
+      <td>Strong</td>
+      <td>Medium</td>
+      <td>High</td>
+      <td>Low</td>
+    </tr>
+    <tr>
+      <td><strong>Master-Master</strong></td>
+      <td>Bidirectional replication</td>
+      <td>Weak</td>
+      <td>High</td>
+      <td>Medium</td>
+      <td>Medium</td>
+    </tr>
+    <tr>
+      <td><strong>Multi-Leader</strong></td>
+      <td>Multiple masters</td>
+      <td>Weak</td>
+      <td>High</td>
+      <td>High</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td><strong>Leaderless</strong></td>
+      <td>All nodes equal</td>
+      <td>Medium</td>
+      <td>High</td>
+      <td>High</td>
+      <td>High</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="3-backup-and-recovery-strategy">3. Backup and Recovery Strategy</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Backup Type</th>
+      <th>Frequency</th>
+      <th>Retention Period</th>
+      <th>Recovery Time</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Full Backup</strong></td>
+      <td>Weekly</td>
+      <td>1 year</td>
+      <td>1-4 hours</td>
+      <td>Disaster recovery</td>
+    </tr>
+    <tr>
+      <td><strong>Incremental Backup</strong></td>
+      <td>Daily</td>
+      <td>3 months</td>
+      <td>30 minutes - 2 hours</td>
+      <td>Daily recovery</td>
+    </tr>
+    <tr>
+      <td><strong>Differential Backup</strong></td>
+      <td>Daily</td>
+      <td>1 month</td>
+      <td>1-3 hours</td>
+      <td>Intermediate recovery</td>
+    </tr>
+    <tr>
+      <td><strong>Snapshot</strong></td>
+      <td>Real-time</td>
+      <td>7 days</td>
+      <td>5-30 minutes</td>
+      <td>Fast recovery</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="advanced-performance-optimization-techniques">⚡ Advanced Performance Optimization Techniques</h2>
+
+<h3 id="query-optimization-strategy">Query Optimization Strategy</h3>
+
+<h4 id="1-index-optimization">1. Index Optimization</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Index Type</th>
+      <th>Creation Condition</th>
+      <th>Performance Effect</th>
+      <th>Maintenance Cost</th>
+      <th>Recommended Scenario</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Single Column Index</strong></td>
+      <td>Frequently used columns</td>
+      <td>Medium</td>
+      <td>Low</td>
+      <td>Simple queries</td>
+    </tr>
+    <tr>
+      <td><strong>Composite Index</strong></td>
+      <td>Multiple column conditions</td>
+      <td>High</td>
+      <td>Medium</td>
+      <td>Complex queries</td>
+    </tr>
+    <tr>
+      <td><strong>Partial Index</strong></td>
+      <td>Conditional index</td>
+      <td>High</td>
+      <td>Low</td>
+      <td>Filtered data</td>
+    </tr>
+    <tr>
+      <td><strong>Function Index</strong></td>
+      <td>Computed value index</td>
+      <td>High</td>
+      <td>High</td>
+      <td>Transformed queries</td>
+    </tr>
+    <tr>
+      <td><strong>Bitmap Index</strong></td>
+      <td>Low cardinality columns</td>
+      <td>Very High</td>
+      <td>Medium</td>
+      <td>Categorical data</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-query-pattern-optimization">2. Query Pattern Optimization</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Optimization Technique</th>
+      <th>Description</th>
+      <th>Performance Improvement</th>
+      <th>Implementation Complexity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Partition Pruning</strong></td>
+      <td>Scan only relevant partitions</td>
+      <td>10-100x</td>
+      <td>Low</td>
+    </tr>
+    <tr>
+      <td><strong>Column Pruning</strong></td>
+      <td>Read only necessary columns</td>
+      <td>2-10x</td>
+      <td>Low</td>
+    </tr>
+    <tr>
+      <td><strong>Predicate Pushdown</strong></td>
+      <td>Push conditions to storage layer</td>
+      <td>5-50x</td>
+      <td>Medium</td>
+    </tr>
+    <tr>
+      <td><strong>Join Optimization</strong></td>
+      <td>Efficient join algorithms</td>
+      <td>3-20x</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td><strong>Subquery Optimization</strong></td>
+      <td>Convert subqueries to joins</td>
+      <td>2-15x</td>
+      <td>Medium</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="3-memory-optimization">3. Memory Optimization</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Memory Area</th>
+      <th>Optimization Strategy</th>
+      <th>Effect</th>
+      <th>Monitoring Metrics</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Buffer Pool</strong></td>
+      <td>Cache hit ratio optimization</td>
+      <td>5-20x</td>
+      <td>Buffer Hit Ratio</td>
+    </tr>
+    <tr>
+      <td><strong>Query Cache</strong></td>
+      <td>Cache frequently used queries</td>
+      <td>10-100x</td>
+      <td>Cache Hit Ratio</td>
+    </tr>
+    <tr>
+      <td><strong>Index Cache</strong></td>
+      <td>Keep hot indexes in memory</td>
+      <td>3-15x</td>
+      <td>Index Cache Hit</td>
+    </tr>
+    <tr>
+      <td><strong>Compression Cache</strong></td>
+      <td>Cache compressed data</td>
+      <td>2-8x</td>
+      <td>Compression Ratio</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="distributed-tdb-cluster-construction">🏗️ Distributed TDB Cluster Construction</h2>
+
+<h3 id="cluster-architecture-design">Cluster Architecture Design</h3>
+
+<h4 id="1-node-configuration-strategy">1. Node Configuration Strategy</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Node Role</th>
+      <th>Hardware Requirements</th>
+      <th>Count</th>
+      <th>Responsibilities</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Query Node</strong></td>
+      <td>CPU intensive, medium memory</td>
+      <td>3-5 nodes</td>
+      <td>Query processing, result aggregation</td>
+    </tr>
+    <tr>
+      <td><strong>Data Node</strong></td>
+      <td>Large storage, high I/O</td>
+      <td>5-10 nodes</td>
+      <td>Data storage, compression</td>
+    </tr>
+    <tr>
+      <td><strong>Metadata Node</strong></td>
+      <td>Stable storage</td>
+      <td>3 nodes</td>
+      <td>Cluster metadata</td>
+    </tr>
+    <tr>
+      <td><strong>Load Balancer</strong></td>
+      <td>Network optimization</td>
+      <td>2 nodes</td>
+      <td>Traffic distribution</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-network-design">2. Network Design</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Network Area</th>
+      <th>Bandwidth Requirements</th>
+      <th>Latency</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Client-Cluster</strong></td>
+      <td>1-10 Gbps</td>
+      <td>&lt; 5ms</td>
+      <td>User queries</td>
+    </tr>
+    <tr>
+      <td><strong>Inter-node Communication</strong></td>
+      <td>10-100 Gbps</td>
+      <td>&lt; 1ms</td>
+      <td>Data replication, synchronization</td>
+    </tr>
+    <tr>
+      <td><strong>Storage Network</strong></td>
+      <td>10-40 Gbps</td>
+      <td>&lt; 2ms</td>
+      <td>Data I/O</td>
+    </tr>
+    <tr>
+      <td><strong>Management Network</strong></td>
+      <td>1 Gbps</td>
+      <td>&lt; 10ms</td>
+      <td>Monitoring, management</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="3-data-placement-strategy">3. Data Placement Strategy</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Placement Strategy</th>
+      <th>Description</th>
+      <th>Advantages</th>
+      <th>Disadvantages</th>
+      <th>Use Cases</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Round Robin</strong></td>
+      <td>Sequential data distribution</td>
+      <td>Even load</td>
+      <td>Poor locality</td>
+      <td>Uniform workload</td>
+    </tr>
+    <tr>
+      <td><strong>Hash-based</strong></td>
+      <td>Placement by hash value</td>
+      <td>Predictable placement</td>
+      <td>Possible hotspots</td>
+      <td>Key-value based</td>
+    </tr>
+    <tr>
+      <td><strong>Range-based</strong></td>
+      <td>Grouping consecutive data</td>
+      <td>Locality optimization</td>
+      <td>Uneven load</td>
+      <td>Time-based data</td>
+    </tr>
+    <tr>
+      <td><strong>Region-based</strong></td>
+      <td>Geographic location grouping</td>
+      <td>Latency optimization</td>
+      <td>Complex management</td>
+      <td>Global services</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="high-availability-and-disaster-recovery">🔧 High Availability and Disaster Recovery</h2>
+
+<h3 id="disaster-recovery-strategy">Disaster Recovery Strategy</h3>
+
+<h4 id="1-failure-type-response">1. Failure Type Response</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Failure Type</th>
+      <th>Frequency</th>
+      <th>Impact</th>
+      <th>Recovery Time</th>
+      <th>Response Strategy</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Node Failure</strong></td>
+      <td>Medium</td>
+      <td>Medium</td>
+      <td>1-5 minutes</td>
+      <td>Automatic failover</td>
+    </tr>
+    <tr>
+      <td><strong>Network Partition</strong></td>
+      <td>Low</td>
+      <td>High</td>
+      <td>5-30 minutes</td>
+      <td>Quorum-based decisions</td>
+    </tr>
+    <tr>
+      <td><strong>Data Corruption</strong></td>
+      <td>Low</td>
+      <td>High</td>
+      <td>1-24 hours</td>
+      <td>Backup recovery</td>
+    </tr>
+    <tr>
+      <td><strong>Full Cluster</strong></td>
+      <td>Very Low</td>
+      <td>Very High</td>
+      <td>1-72 hours</td>
+      <td>Disaster recovery</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-zero-downtime-service-implementation">2. Zero-Downtime Service Implementation</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Implementation Technique</th>
+      <th>Description</th>
+      <th>Downtime</th>
+      <th>Complexity</th>
+      <th>Cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Rolling Update</strong></td>
+      <td>Sequential node updates</td>
+      <td>0 seconds</td>
+      <td>Medium</td>
+      <td>Low</td>
+    </tr>
+    <tr>
+      <td><strong>Blue-Green Deployment</strong></td>
+      <td>Complete environment replacement</td>
+      <td>1-5 minutes</td>
+      <td>High</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td><strong>Canary Deployment</strong></td>
+      <td>Gradual traffic migration</td>
+      <td>0 seconds</td>
+      <td>High</td>
+      <td>Medium</td>
+    </tr>
+    <tr>
+      <td><strong>A/B Testing</strong></td>
+      <td>Version-based traffic splitting</td>
+      <td>0 seconds</td>
+      <td>Very High</td>
+      <td>High</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="3-monitoring-and-alerting">3. Monitoring and Alerting</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Monitoring Level</th>
+      <th>Metrics</th>
+      <th>Threshold</th>
+      <th>Alert Channel</th>
+      <th>Response Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>System Level</strong></td>
+      <td>CPU, Memory, Disk</td>
+      <td>80%</td>
+      <td>PagerDuty, Slack</td>
+      <td>Immediate</td>
+    </tr>
+    <tr>
+      <td><strong>Application Level</strong></td>
+      <td>Query response time, throughput</td>
+      <td>95th percentile</td>
+      <td>Email, Slack</td>
+      <td>5 minutes</td>
+    </tr>
+    <tr>
+      <td><strong>Business Level</strong></td>
+      <td>Data accuracy, availability</td>
+      <td>99.9%</td>
+      <td>SMS, Phone</td>
+      <td>15 minutes</td>
+    </tr>
+    <tr>
+      <td><strong>User Experience</strong></td>
+      <td>Page loading time</td>
+      <td>3 seconds</td>
+      <td>Dashboard</td>
+      <td>1 hour</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="practical-project-large-scale-iot-platform-construction">📊 Practical Project: Large-scale IoT Platform Construction</h2>
+
+<h3 id="project-overview">Project Overview</h3>
+
+<p>Build a large-scale platform that collects and analyzes real-time data from over 1 million IoT devices distributed across 50 countries worldwide.</p>
+
+<h4 id="system-requirements">System Requirements</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Requirement</th>
+      <th>Specification</th>
+      <th>Target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Device Count</strong></td>
+      <td>1,000,000+ devices</td>
+      <td>Global IoT devices</td>
+    </tr>
+    <tr>
+      <td><strong>Data Volume</strong></td>
+      <td>10M+ points/second</td>
+      <td>Real-time large-scale processing</td>
+    </tr>
+    <tr>
+      <td><strong>Response Time</strong></td>
+      <td>&lt; 50ms</td>
+      <td>Global real-time service</td>
+    </tr>
+    <tr>
+      <td><strong>Availability</strong></td>
+      <td>99.99%</td>
+      <td>Enterprise-grade stability</td>
+    </tr>
+    <tr>
+      <td><strong>Scalability</strong></td>
+      <td>Horizontal scaling</td>
+      <td>Unlimited scaling capability</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="architecture-design">Architecture Design</h3>
+
+<h4 id="1-global-distributed-architecture">1. Global Distributed Architecture</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Region</th>
+      <th>Data Center</th>
+      <th>Node Count</th>
+      <th>Capacity</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Asia</strong></td>
+      <td>Seoul, Singapore, Tokyo</td>
+      <td>50 nodes</td>
+      <td>500TB</td>
+      <td>Asia regional data</td>
+    </tr>
+    <tr>
+      <td><strong>Europe</strong></td>
+      <td>London, Frankfurt, Amsterdam</td>
+      <td>40 nodes</td>
+      <td>400TB</td>
+      <td>Europe regional data</td>
+    </tr>
+    <tr>
+      <td><strong>America</strong></td>
+      <td>Virginia, California, Oregon</td>
+      <td>60 nodes</td>
+      <td>600TB</td>
+      <td>America regional data</td>
+    </tr>
+    <tr>
+      <td><strong>Global</strong></td>
+      <td>Global CDN</td>
+      <td>100 nodes</td>
+      <td>1PB</td>
+      <td>Global replication and caching</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-data-flow-design">2. Data Flow Design</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Stage</th>
+      <th>Process</th>
+      <th>Technology Stack</th>
+      <th>Performance Target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Collection</strong></td>
+      <td>Global device data collection</td>
+      <td>MQTT, Kafka, InfluxDB</td>
+      <td>10M points/sec</td>
+    </tr>
+    <tr>
+      <td><strong>Preprocessing</strong></td>
+      <td>Data validation and transformation</td>
+      <td>Apache Flink, Kafka Streams</td>
+      <td>&lt; 100ms latency</td>
+    </tr>
+    <tr>
+      <td><strong>Storage</strong></td>
+      <td>Distributed time series storage</td>
+      <td>InfluxDB Cluster, Apache Druid</td>
+      <td>50:1 compression ratio</td>
+    </tr>
+    <tr>
+      <td><strong>Analysis</strong></td>
+      <td>Real-time analysis and aggregation</td>
+      <td>Apache Spark, ClickHouse</td>
+      <td>&lt; 1 second response</td>
+    </tr>
+    <tr>
+      <td><strong>Visualization</strong></td>
+      <td>Real-time dashboards</td>
+      <td>Grafana, Apache Superset</td>
+      <td>&lt; 500ms rendering</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="3-high-availability-implementation">3. High Availability Implementation</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Redundancy Method</th>
+      <th>Recovery Time</th>
+      <th>Monitoring</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Load Balancer</strong></td>
+      <td>Active-Standby</td>
+      <td>30 seconds</td>
+      <td>Health Check</td>
+    </tr>
+    <tr>
+      <td><strong>Database</strong></td>
+      <td>Master-Slave + Read Replica</td>
+      <td>1 minute</td>
+      <td>Replication Lag</td>
+    </tr>
+    <tr>
+      <td><strong>Message Queue</strong></td>
+      <td>Cluster Mode</td>
+      <td>2 minutes</td>
+      <td>Partition Health</td>
+    </tr>
+    <tr>
+      <td><strong>Cache</strong></td>
+      <td>Redis Cluster</td>
+      <td>10 seconds</td>
+      <td>Cluster Status</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="performance-optimization-implementation">Performance Optimization Implementation</h3>
+
+<h4 id="1-query-optimization">1. Query Optimization</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Optimization Area</th>
+      <th>Implementation Method</th>
+      <th>Performance Improvement</th>
+      <th>Monitoring</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Index Optimization</strong></td>
+      <td>Composite index, partial index</td>
+      <td>10-50x</td>
+      <td>Index Usage Stats</td>
+    </tr>
+    <tr>
+      <td><strong>Query Caching</strong></td>
+      <td>Redis, Memcached</td>
+      <td>100-1000x</td>
+      <td>Cache Hit Ratio</td>
+    </tr>
+    <tr>
+      <td><strong>Partition Pruning</strong></td>
+      <td>Time-based partitioning</td>
+      <td>5-20x</td>
+      <td>Partition Scan Stats</td>
+    </tr>
+    <tr>
+      <td><strong>Parallel Processing</strong></td>
+      <td>Distributed query execution</td>
+      <td>3-10x</td>
+      <td>Query Execution Time</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-storage-optimization">2. Storage Optimization</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Optimization Technique</th>
+      <th>Implementation Method</th>
+      <th>Effect</th>
+      <th>Cost Savings</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Compression Optimization</strong></td>
+      <td>ZSTD, Delta Encoding</td>
+      <td>50:1 compression ratio</td>
+      <td>95% storage savings</td>
+    </tr>
+    <tr>
+      <td><strong>Retention Policy</strong></td>
+      <td>Automatic data lifecycle</td>
+      <td>90% data reduction</td>
+      <td>90% cost savings</td>
+    </tr>
+    <tr>
+      <td><strong>Cold Storage</strong></td>
+      <td>S3, Glacier archive</td>
+      <td>99% cost savings</td>
+      <td>Long-term storage optimization</td>
+    </tr>
+    <tr>
+      <td><strong>Data Deduplication</strong></td>
+      <td>Identify and remove duplicate data</td>
+      <td>30% storage space savings</td>
+      <td>Operational cost savings</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="monitoring-and-operations">Monitoring and Operations</h3>
+
+<h4 id="1-comprehensive-monitoring-dashboard">1. Comprehensive Monitoring Dashboard</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Monitoring Area</th>
+      <th>Key Metrics</th>
+      <th>Threshold</th>
+      <th>Alert Rules</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>System Performance</strong></td>
+      <td>CPU, Memory, Disk, Network</td>
+      <td>80% usage</td>
+      <td>Immediate alert</td>
+    </tr>
+    <tr>
+      <td><strong>Data Quality</strong></td>
+      <td>Data accuracy, completeness, consistency</td>
+      <td>99.9% quality</td>
+      <td>Alert within 15 minutes</td>
+    </tr>
+    <tr>
+      <td><strong>Business Metrics</strong></td>
+      <td>Device online rate, data collection rate</td>
+      <td>99% availability</td>
+      <td>Alert within 5 minutes</td>
+    </tr>
+    <tr>
+      <td><strong>User Experience</strong></td>
+      <td>Query response time, dashboard loading</td>
+      <td>&lt; 1 second</td>
+      <td>Alert within 1 hour</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-automated-operations">2. Automated Operations</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Operation Area</th>
+      <th>Automation Function</th>
+      <th>Trigger Condition</th>
+      <th>Execution Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Scaling</strong></td>
+      <td>Automatic node addition/removal</td>
+      <td>CPU &gt; 80% for 5 minutes</td>
+      <td>20% capacity increase</td>
+    </tr>
+    <tr>
+      <td><strong>Backup</strong></td>
+      <td>Automatic backup and validation</td>
+      <td>Daily at 2 AM</td>
+      <td>Backup completion notification</td>
+    </tr>
+    <tr>
+      <td><strong>Disaster Recovery</strong></td>
+      <td>Automatic failover</td>
+      <td>Node failure detection</td>
+      <td>Recovery within 1 minute</td>
+    </tr>
+    <tr>
+      <td><strong>Performance Tuning</strong></td>
+      <td>Automatic index optimization</td>
+      <td>Query performance degradation</td>
+      <td>50% performance improvement</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="advanced-optimization-techniques">🎯 Advanced Optimization Techniques</h2>
+
+<h3 id="memory-optimization">Memory Optimization</h3>
+
+<h4 id="1-memory-pool-management">1. Memory Pool Management</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Memory Area</th>
+      <th>Size</th>
+      <th>Purpose</th>
+      <th>Optimization Strategy</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Buffer Pool</strong></td>
+      <td>70% of system memory</td>
+      <td>Data page caching</td>
+      <td>LRU algorithm</td>
+    </tr>
+    <tr>
+      <td><strong>Query Cache</strong></td>
+      <td>10% of system memory</td>
+      <td>Query result caching</td>
+      <td>TTL-based expiration</td>
+    </tr>
+    <tr>
+      <td><strong>Index Cache</strong></td>
+      <td>15% of system memory</td>
+      <td>Index page caching</td>
+      <td>Hot index priority</td>
+    </tr>
+    <tr>
+      <td><strong>Temporary Memory</strong></td>
+      <td>5% of system memory</td>
+      <td>Sorting, hash joins</td>
+      <td>Dynamic allocation</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-garbage-collection-optimization">2. Garbage Collection Optimization</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>GC Strategy</th>
+      <th>Description</th>
+      <th>Advantages</th>
+      <th>Disadvantages</th>
+      <th>Application Scenario</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Serial GC</strong></td>
+      <td>Single-threaded GC</td>
+      <td>Low overhead</td>
+      <td>Long pauses</td>
+      <td>Small systems</td>
+    </tr>
+    <tr>
+      <td><strong>Parallel GC</strong></td>
+      <td>Multi-threaded GC</td>
+      <td>Fast processing</td>
+      <td>High CPU usage</td>
+      <td>Medium-scale systems</td>
+    </tr>
+    <tr>
+      <td><strong>G1 GC</strong></td>
+      <td>Region-based GC</td>
+      <td>Predictable pauses</td>
+      <td>Complex tuning</td>
+      <td>Large-scale systems</td>
+    </tr>
+    <tr>
+      <td><strong>ZGC</strong></td>
+      <td>Low-latency GC</td>
+      <td>Very short pauses</td>
+      <td>High memory usage</td>
+      <td>Real-time systems</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="network-optimization">Network Optimization</h3>
+
+<h4 id="1-protocol-optimization">1. Protocol Optimization</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Protocol</th>
+      <th>Optimization Technique</th>
+      <th>Performance Improvement</th>
+      <th>Implementation Complexity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>TCP</strong></td>
+      <td>TCP_NODELAY, SO_REUSEADDR</td>
+      <td>20-50%</td>
+      <td>Low</td>
+    </tr>
+    <tr>
+      <td><strong>HTTP/2</strong></td>
+      <td>Multiplexing, header compression</td>
+      <td>30-70%</td>
+      <td>Medium</td>
+    </tr>
+    <tr>
+      <td><strong>gRPC</strong></td>
+      <td>Binary protocol, streaming</td>
+      <td>50-100%</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td><strong>UDP</strong></td>
+      <td>Custom protocol</td>
+      <td>100-300%</td>
+      <td>Very High</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-compression-optimization">2. Compression Optimization</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Compression Level</th>
+      <th>Compression Ratio</th>
+      <th>Processing Speed</th>
+      <th>CPU Usage</th>
+      <th>Application Scenario</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>No Compression</strong></td>
+      <td>1:1</td>
+      <td>Fastest</td>
+      <td>0%</td>
+      <td>Real-time processing</td>
+    </tr>
+    <tr>
+      <td><strong>Fast Compression</strong></td>
+      <td>2:1 ~ 5:1</td>
+      <td>Fast</td>
+      <td>10-20%</td>
+      <td>General purpose</td>
+    </tr>
+    <tr>
+      <td><strong>Balanced Compression</strong></td>
+      <td>5:1 ~ 10:1</td>
+      <td>Medium</td>
+      <td>30-50%</td>
+      <td>Storage optimization</td>
+    </tr>
+    <tr>
+      <td><strong>Maximum Compression</strong></td>
+      <td>10:1 ~ 50:1</td>
+      <td>Slow</td>
+      <td>70-90%</td>
+      <td>Long-term storage</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="troubleshooting-and-problem-solving">🔍 Troubleshooting and Problem Solving</h2>
+
+<h3 id="common-performance-issues">Common Performance Issues</h3>
+
+<h4 id="1-query-performance-issues">1. Query Performance Issues</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Issue Type</th>
+      <th>Symptoms</th>
+      <th>Cause</th>
+      <th>Solution</th>
+      <th>Prevention</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Slow Queries</strong></td>
+      <td>Response time &gt; 5 seconds</td>
+      <td>Inappropriate indexes</td>
+      <td>Add/modify indexes</td>
+      <td>Query profiling</td>
+    </tr>
+    <tr>
+      <td><strong>Memory Shortage</strong></td>
+      <td>OOM errors</td>
+      <td>Large joins/sorts</td>
+      <td>Increase memory, optimize queries</td>
+      <td>Resource monitoring</td>
+    </tr>
+    <tr>
+      <td><strong>Lock Contention</strong></td>
+      <td>Deadlocks, increased wait time</td>
+      <td>Concurrency issues</td>
+      <td>Optimize transactions</td>
+      <td>Lock monitoring</td>
+    </tr>
+    <tr>
+      <td><strong>Network Bottleneck</strong></td>
+      <td>High network latency</td>
+      <td>Insufficient bandwidth</td>
+      <td>Network upgrade</td>
+      <td>Bandwidth monitoring</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-storage-space-issues">2. Storage Space Issues</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Issue Type</th>
+      <th>Symptoms</th>
+      <th>Cause</th>
+      <th>Solution</th>
+      <th>Prevention</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Disk Shortage</strong></td>
+      <td>Disk usage &gt; 90%</td>
+      <td>Data growth</td>
+      <td>Compression, retention policy</td>
+      <td>Capacity planning</td>
+    </tr>
+    <tr>
+      <td><strong>Index Bloat</strong></td>
+      <td>Index size increase</td>
+      <td>Inefficient indexes</td>
+      <td>Index reorganization</td>
+      <td>Index monitoring</td>
+    </tr>
+    <tr>
+      <td><strong>Fragmentation</strong></td>
+      <td>Performance degradation</td>
+      <td>Disk fragmentation</td>
+      <td>Disk defragmentation</td>
+      <td>Regular maintenance</td>
+    </tr>
+    <tr>
+      <td><strong>Backup Failure</strong></td>
+      <td>Insufficient backup space</td>
+      <td>Backup size increase</td>
+      <td>Compressed backup</td>
+      <td>Backup policy optimization</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="disaster-recovery-procedures">Disaster Recovery Procedures</h3>
+
+<h4 id="1-failure-detection-and-analysis">1. Failure Detection and Analysis</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Stage</th>
+      <th>Task</th>
+      <th>Responsible</th>
+      <th>Time</th>
+      <th>Deliverable</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Detection</strong></td>
+      <td>Alert reception, status check</td>
+      <td>On-call engineer</td>
+      <td>1 minute</td>
+      <td>Incident report</td>
+    </tr>
+    <tr>
+      <td><strong>Analysis</strong></td>
+      <td>Log analysis, root cause identification</td>
+      <td>Senior engineer</td>
+      <td>15 minutes</td>
+      <td>Root cause analysis</td>
+    </tr>
+    <tr>
+      <td><strong>Response</strong></td>
+      <td>Apply temporary solution</td>
+      <td>Full team</td>
+      <td>30 minutes</td>
+      <td>Service recovery</td>
+    </tr>
+    <tr>
+      <td><strong>Recovery</strong></td>
+      <td>Implement fundamental solution</td>
+      <td>Development team</td>
+      <td>2 hours</td>
+      <td>Complete recovery</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-post-incident-analysis-and-improvement">2. Post-incident Analysis and Improvement</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Stage</th>
+      <th>Task</th>
+      <th>Duration</th>
+      <th>Output</th>
+      <th>Improvements</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Post-mortem</strong></td>
+      <td>Incident cause analysis, impact assessment</td>
+      <td>1 week</td>
+      <td>Incident report</td>
+      <td>Root cause identification</td>
+    </tr>
+    <tr>
+      <td><strong>Improvement Plan</strong></td>
+      <td>Establish recurrence prevention measures</td>
+      <td>2 weeks</td>
+      <td>Improvement roadmap</td>
+      <td>System strengthening</td>
+    </tr>
+    <tr>
+      <td><strong>Implementation</strong></td>
+      <td>Monitoring and automation improvements</td>
+      <td>1 month</td>
+      <td>Improved system</td>
+      <td>Stability enhancement</td>
+    </tr>
+    <tr>
+      <td><strong>Validation</strong></td>
+      <td>Testing and review</td>
+      <td>2 weeks</td>
+      <td>Validation report</td>
+      <td>Quality assurance</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="learning-summary">📚 Learning Summary</h2>
+
+<h3 id="key-concepts-review">Key Concepts Review</h3>
+
+<ol>
+  <li><strong>Advanced TDB Features</strong>
+    <ul>
+      <li>Sharding, replication, backup and recovery strategies</li>
+      <li>Distributed architecture and clustering</li>
+      <li>High availability and zero-downtime services</li>
+    </ul>
+  </li>
+  <li><strong>Performance Optimization</strong>
+    <ul>
+      <li>Index optimization and query tuning</li>
+      <li>Memory and network optimization</li>
+      <li>Compression and storage optimization</li>
+    </ul>
+  </li>
+  <li><strong>Practical Application</strong>
+    <ul>
+      <li>Large-scale IoT platform construction</li>
+      <li>Global distributed architecture</li>
+      <li>Automated operations and monitoring</li>
+    </ul>
+  </li>
+  <li><strong>Problem Solving</strong>
+    <ul>
+      <li>Performance issue diagnosis and resolution</li>
+      <li>Disaster recovery procedures</li>
+      <li>Continuous improvement</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="next-steps">Next Steps</h3>
+
+<p><strong>What we’ll cover in Part 3:</strong></p>
+<ul>
+  <li>TDB integration with other systems</li>
+  <li>Cloud-native TDB architecture</li>
+  <li>Latest TDB trends and future outlook</li>
+  <li>Practical project completion and deployment</li>
+</ul>
+
+<hr />
+
+<h2 id="-key-takeaways">🎯 Key Takeaways</h2>
+
+<ol>
+  <li><strong>Distributed Architecture is Key</strong>: For large-scale systems, distributed design that overcomes single-node limitations is essential</li>
+  <li><strong>Performance Optimization is Continuous</strong>: Continuous optimization and tuning are necessary as the system grows</li>
+  <li><strong>High Availability is a Business Requirement</strong>: Service continuity is a core element of business success</li>
+  <li><strong>Monitoring and Automation</strong>: Proactive monitoring and automated operations are the core of stability</li>
+  <li><strong>Importance of Practical Experience</strong>: The combination of theory and actual operational experience creates expertise</li>
+</ol>
+
+<p>Through advanced TDB features and optimization techniques, you can build the capabilities to construct production-grade systems. Now let’s cover final integration and deployment in Part 3! 🚀</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+      
+      
+      
+      
+      
+        
+        
+        <a href="/data-engineering/2025/09/29/time-series-database-integration-deployment.html" class="nav-link next">
+          다음: Part 3: Time Series Database 통합과 배포 - 현대적 TDB 생태계 완성 →
+        </a>
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

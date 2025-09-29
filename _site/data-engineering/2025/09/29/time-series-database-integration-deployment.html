@@ -1,0 +1,2367 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="TDB와 다른 시스템과의 통합부터 클라우드 네이티브 아키텍처, 최신 트렌드, 그리고 실제 프로덕션 배포까지 현대적 TDB 생태계의 완성된 모습을 다룹니다.">
+
+
+
+<title>Part 3: Time Series Database 통합과 배포 - 현대적 TDB 생태계 완성 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Part 3: Time Series Database 통합과 배포 - 현대적 TDB 생태계 완성">
+<meta property="og:description" content="TDB와 다른 시스템과의 통합부터 클라우드 네이티브 아키텍처, 최신 트렌드, 그리고 실제 프로덕션 배포까지 현대적 TDB 생태계의 완성된 모습을 다룹니다.">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2025/09/29/time-series-database-integration-deployment.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 3: Time Series Database 통합과 배포 - 현대적 TDB 생태계 완성">
+<meta name="twitter:description" content="TDB와 다른 시스템과의 통합부터 클라우드 네이티브 아키텍처, 최신 트렌드, 그리고 실제 프로덕션 배포까지 현대적 TDB 생태계의 완성된 모습을 다룹니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2025/09/29/time-series-database-integration-deployment.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2025-09-29-time-series-database-integration-deployment.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 09월 29일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Part 3: Time Series Database 통합과 배포 - 현대적 TDB 생태계 완성</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">TimeSeriesDatabase</span>
+      
+        <span class="tag">시스템통합</span>
+      
+        <span class="tag">클라우드네이티브</span>
+      
+        <span class="tag">프로덕션배포</span>
+      
+        <span class="tag">현대적아키텍처</span>
+      
+        <span class="tag">마이크로서비스</span>
+      
+        <span class="tag">DevOps</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Time series database master 시리즈</span>
+      <span class="series-order">Part 4</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 60분</span>
+      
+      
+        <span class="difficulty">📊 고급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h2 id="-소개">🌟 소개</h2>
+
+<p>Part 1과 Part 2에서 TDB의 기초부터 고급 최적화까지 학습했습니다. 이제 Part 3에서는 현대적 TDB 생태계의 완성된 모습을 다뤄보겠습니다.</p>
+
+<h3 id="이번-포스트에서-배울-내용">이번 포스트에서 배울 내용</h3>
+
+<ul>
+  <li><strong>시스템 통합</strong>: TDB와 다른 시스템과의 연동</li>
+  <li><strong>클라우드 네이티브</strong>: Kubernetes 기반 TDB 배포</li>
+  <li><strong>최신 트렌드</strong>: Edge Computing, AI/ML 통합</li>
+  <li><strong>프로덕션 배포</strong>: 실제 서비스 배포 전략</li>
+  <li><strong>완성된 프로젝트</strong>: 전체 TDB 시스템 구축</li>
+</ul>
+
+<hr />
+
+<h2 id="tdb와-다른-시스템-통합">🔗 TDB와 다른 시스템 통합</h2>
+
+<h3 id="데이터-파이프라인-통합">데이터 파이프라인 통합</h3>
+
+<h4 id="1-실시간-스트리밍-통합">1. 실시간 스트리밍 통합</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>통합 대상</th>
+      <th>기술 스택</th>
+      <th>통합 방식</th>
+      <th>성능 목표</th>
+      <th>복잡도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Apache Kafka</strong></td>
+      <td>Kafka Connect, InfluxDB Sink</td>
+      <td>실시간 스트림 처리</td>
+      <td>&lt; 100ms 지연</td>
+      <td>중간</td>
+    </tr>
+    <tr>
+      <td><strong>Apache Flink</strong></td>
+      <td>Flink InfluxDB Connector</td>
+      <td>스트림 처리 엔진</td>
+      <td>&lt; 50ms 지연</td>
+      <td>높음</td>
+    </tr>
+    <tr>
+      <td><strong>Apache Spark</strong></td>
+      <td>Spark InfluxDB Connector</td>
+      <td>배치 + 스트림 처리</td>
+      <td>&lt; 1초 지연</td>
+      <td>중간</td>
+    </tr>
+    <tr>
+      <td><strong>Apache Pulsar</strong></td>
+      <td>Pulsar IO Connector</td>
+      <td>분산 메시징</td>
+      <td>&lt; 10ms 지연</td>
+      <td>중간</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-데이터베이스-통합">2. 데이터베이스 통합</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>데이터베이스</th>
+      <th>통합 방식</th>
+      <th>동기화 방식</th>
+      <th>일관성</th>
+      <th>성능</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>PostgreSQL</strong></td>
+      <td>TimescaleDB 확장</td>
+      <td>실시간 동기화</td>
+      <td>강함</td>
+      <td>높음</td>
+    </tr>
+    <tr>
+      <td><strong>MySQL</strong></td>
+      <td>CDC (Change Data Capture)</td>
+      <td>근실시간 동기화</td>
+      <td>중간</td>
+      <td>중간</td>
+    </tr>
+    <tr>
+      <td><strong>MongoDB</strong></td>
+      <td>Change Streams</td>
+      <td>실시간 동기화</td>
+      <td>약함</td>
+      <td>높음</td>
+    </tr>
+    <tr>
+      <td><strong>ClickHouse</strong></td>
+      <td>MaterializedView</td>
+      <td>배치 동기화</td>
+      <td>강함</td>
+      <td>매우 높음</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="3-클라우드-서비스-통합">3. 클라우드 서비스 통합</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>클라우드 서비스</th>
+      <th>통합 방식</th>
+      <th>관리 방식</th>
+      <th>비용 효율</th>
+      <th>확장성</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>AWS Timestream</strong></td>
+      <td>네이티브 서비스</td>
+      <td>완전 관리형</td>
+      <td>높음</td>
+      <td>자동</td>
+    </tr>
+    <tr>
+      <td><strong>Azure Time Series Insights</strong></td>
+      <td>PaaS 서비스</td>
+      <td>반관리형</td>
+      <td>중간</td>
+      <td>자동</td>
+    </tr>
+    <tr>
+      <td><strong>Google Cloud IoT Core</strong></td>
+      <td>GCP 서비스</td>
+      <td>완전 관리형</td>
+      <td>높음</td>
+      <td>자동</td>
+    </tr>
+    <tr>
+      <td><strong>Snowflake</strong></td>
+      <td>외부 테이블</td>
+      <td>하이브리드</td>
+      <td>낮음</td>
+      <td>수동</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="api-및-마이크로서비스-통합">API 및 마이크로서비스 통합</h3>
+
+<h4 id="1-rest-api-통합">1. REST API 통합</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>API 패턴</th>
+      <th>설명</th>
+      <th>구현 방식</th>
+      <th>성능</th>
+      <th>보안</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>GraphQL</strong></td>
+      <td>유연한 쿼리 API</td>
+      <td>Schema 정의</td>
+      <td>중간</td>
+      <td>강함</td>
+    </tr>
+    <tr>
+      <td><strong>RESTful API</strong></td>
+      <td>표준 REST 인터페이스</td>
+      <td>OpenAPI 스펙</td>
+      <td>높음</td>
+      <td>강함</td>
+    </tr>
+    <tr>
+      <td><strong>gRPC</strong></td>
+      <td>고성능 RPC</td>
+      <td>Protocol Buffers</td>
+      <td>매우 높음</td>
+      <td>강함</td>
+    </tr>
+    <tr>
+      <td><strong>WebSocket</strong></td>
+      <td>실시간 양방향 통신</td>
+      <td>실시간 스트림</td>
+      <td>높음</td>
+      <td>중간</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-서비스-메시-통합">2. 서비스 메시 통합</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>서비스 메시</th>
+      <th>설명</th>
+      <th>통합 방식</th>
+      <th>관찰성</th>
+      <th>보안</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Istio</strong></td>
+      <td>서비스 메시 플랫폼</td>
+      <td>Sidecar 패턴</td>
+      <td>매우 높음</td>
+      <td>매우 강함</td>
+    </tr>
+    <tr>
+      <td><strong>Linkerd</strong></td>
+      <td>경량 서비스 메시</td>
+      <td>프록시 기반</td>
+      <td>높음</td>
+      <td>강함</td>
+    </tr>
+    <tr>
+      <td><strong>Consul Connect</strong></td>
+      <td>서비스 네트워킹</td>
+      <td>프록시 기반</td>
+      <td>중간</td>
+      <td>강함</td>
+    </tr>
+    <tr>
+      <td><strong>AWS App Mesh</strong></td>
+      <td>AWS 네이티브</td>
+      <td>Envoy 프록시</td>
+      <td>높음</td>
+      <td>강함</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="클라우드-네이티브-tdb-아키텍처">☁️ 클라우드 네이티브 TDB 아키텍처</h2>
+
+<h3 id="실습-완전한-tdb-마이크로서비스-아키텍처-구현">실습: 완전한 TDB 마이크로서비스 아키텍처 구현</h3>
+
+<h4 id="1-마이크로서비스-구조-설계">1. 마이크로서비스 구조 설계</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># microservices/timeseries-service/main.py
+</span><span class="kn">from</span> <span class="n">fastapi</span> <span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">HTTPException</span><span class="p">,</span> <span class="n">Depends</span>
+<span class="kn">from</span> <span class="n">influxdb_client</span> <span class="kn">import</span> <span class="n">InfluxDBClient</span>
+<span class="kn">from</span> <span class="n">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span> <span class="n">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="n">asyncio</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="n">logging</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="nc">FastAPI</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">Time Series Service</span><span class="sh">"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="sh">"</span><span class="s">1.0.0</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 설정
+</span><span class="n">INFLUXDB_URL</span> <span class="o">=</span> <span class="sh">"</span><span class="s">http://influxdb:8086</span><span class="sh">"</span>
+<span class="n">INFLUXDB_TOKEN</span> <span class="o">=</span> <span class="sh">"</span><span class="s">admin-token</span><span class="sh">"</span>
+<span class="n">INFLUXDB_ORG</span> <span class="o">=</span> <span class="sh">"</span><span class="s">myorg</span><span class="sh">"</span>
+<span class="n">INFLUXDB_BUCKET</span> <span class="o">=</span> <span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span>
+
+<span class="c1"># InfluxDB 클라이언트
+</span><span class="n">influx_client</span> <span class="o">=</span> <span class="nc">InfluxDBClient</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">=</span><span class="n">INFLUXDB_URL</span><span class="p">,</span>
+    <span class="n">token</span><span class="o">=</span><span class="n">INFLUXDB_TOKEN</span><span class="p">,</span>
+    <span class="n">org</span><span class="o">=</span><span class="n">INFLUXDB_ORG</span>
+<span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">TimeSeriesData</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">measurement</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">tags</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">fields</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="k">class</span> <span class="nc">QueryRequest</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">start</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">stop</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">measurement</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">filters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">aggregation</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="k">class</span> <span class="nc">TimeSeriesService</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">InfluxDBClient</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">write_api</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="nf">write_api</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">query_api</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="nf">query_api</span><span class="p">()</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">write_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">TimeSeriesData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sh">"""</span><span class="s">시계열 데이터 쓰기</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">measurement</span><span class="sh">"</span><span class="p">:</span> <span class="n">data</span><span class="p">.</span><span class="n">measurement</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">tags</span><span class="sh">"</span><span class="p">:</span> <span class="n">data</span><span class="p">.</span><span class="n">tags</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="n">data</span><span class="p">.</span><span class="n">fields</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">time</span><span class="sh">"</span><span class="p">:</span> <span class="n">data</span><span class="p">.</span><span class="n">timestamp</span> <span class="ow">or</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">utcnow</span><span class="p">()</span>
+            <span class="p">}</span>
+            
+            <span class="n">self</span><span class="p">.</span><span class="n">write_api</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span>
+                <span class="n">bucket</span><span class="o">=</span><span class="n">INFLUXDB_BUCKET</span><span class="p">,</span>
+                <span class="n">record</span><span class="o">=</span><span class="n">point</span>
+            <span class="p">)</span>
+            
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">데이터 쓰기 실패: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">query_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">QueryRequest</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+        <span class="sh">"""</span><span class="s">시계열 데이터 쿼리</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Flux 쿼리 구성
+</span>            <span class="n">flux_query</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">'''</span><span class="s">
+            from(bucket: </span><span class="sh">"</span><span class="si">{</span><span class="n">INFLUXDB_BUCKET</span><span class="si">}</span><span class="sh">"</span><span class="s">)
+            |&gt; range(start: </span><span class="si">{</span><span class="n">request</span><span class="p">.</span><span class="n">start</span><span class="p">.</span><span class="nf">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s">, stop: </span><span class="si">{</span><span class="n">request</span><span class="p">.</span><span class="n">stop</span><span class="p">.</span><span class="nf">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="si">{</span><span class="n">request</span><span class="p">.</span><span class="n">measurement</span><span class="si">}</span><span class="sh">"</span><span class="s">)
+            </span><span class="sh">'''</span>
+            
+            <span class="c1"># 필터 추가
+</span>            <span class="k">if</span> <span class="n">request</span><span class="p">.</span><span class="n">filters</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">request</span><span class="p">.</span><span class="n">filters</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+                    <span class="n">flux_query</span> <span class="o">+=</span> <span class="sa">f</span><span class="sh">'</span><span class="s">|&gt; filter(fn: (r) =&gt; r.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s"> == </span><span class="sh">"</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="sh">"</span><span class="s">)</span><span class="se">\n</span><span class="sh">'</span>
+            
+            <span class="c1"># 집계 추가
+</span>            <span class="k">if</span> <span class="n">request</span><span class="p">.</span><span class="n">aggregation</span><span class="p">:</span>
+                <span class="n">flux_query</span> <span class="o">+=</span> <span class="sa">f</span><span class="sh">'</span><span class="s">|&gt; </span><span class="si">{</span><span class="n">request</span><span class="p">.</span><span class="n">aggregation</span><span class="si">}</span><span class="s">()</span><span class="se">\n</span><span class="sh">'</span>
+            
+            <span class="c1"># 쿼리 실행
+</span>            <span class="n">result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">query_api</span><span class="p">.</span><span class="nf">query</span><span class="p">(</span><span class="n">flux_query</span><span class="p">)</span>
+            
+            <span class="c1"># 결과 변환
+</span>            <span class="n">data_points</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">table</span><span class="p">.</span><span class="n">records</span><span class="p">:</span>
+                    <span class="n">data_points</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                        <span class="sh">"</span><span class="s">time</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="nf">get_time</span><span class="p">(),</span>
+                        <span class="sh">"</span><span class="s">measurement</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="nf">get_measurement</span><span class="p">(),</span>
+                        <span class="sh">"</span><span class="s">field</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="nf">get_field</span><span class="p">(),</span>
+                        <span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="nf">get_value</span><span class="p">(),</span>
+                        <span class="sh">"</span><span class="s">tags</span><span class="sh">"</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="n">values</span>
+                    <span class="p">})</span>
+            
+            <span class="k">return</span> <span class="n">data_points</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">데이터 쿼리 실패: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="nc">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+<span class="c1"># 서비스 인스턴스
+</span><span class="n">ts_service</span> <span class="o">=</span> <span class="nc">TimeSeriesService</span><span class="p">(</span><span class="n">influx_client</span><span class="p">)</span>
+
+<span class="nd">@app.post</span><span class="p">(</span><span class="sh">"</span><span class="s">/data</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">write_timeseries_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">TimeSeriesData</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">시계열 데이터 쓰기 엔드포인트</span><span class="sh">"""</span>
+    <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">ts_service</span><span class="p">.</span><span class="nf">write_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">success</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">message</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">데이터가 성공적으로 저장되었습니다</span><span class="sh">"</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="nc">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sh">"</span><span class="s">데이터 저장 실패</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="nd">@app.post</span><span class="p">(</span><span class="sh">"</span><span class="s">/query</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">query_timeseries_data</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">QueryRequest</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">시계열 데이터 쿼리 엔드포인트</span><span class="sh">"""</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">ts_service</span><span class="p">.</span><span class="nf">query_data</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">success</span><span class="sh">"</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">data</span><span class="sh">"</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="p">}</span>
+
+<span class="nd">@app.get</span><span class="p">(</span><span class="sh">"</span><span class="s">/health</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">health_check</span><span class="p">():</span>
+    <span class="sh">"""</span><span class="s">헬스 체크</span><span class="sh">"""</span>
+    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">healthy</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">:</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">utcnow</span><span class="p">()}</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="n">uvicorn</span>
+    <span class="n">uvicorn</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="sh">"</span><span class="s">0.0.0.0</span><span class="sh">"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8000</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="2-docker-compose로-전체-스택-배포">2. Docker Compose로 전체 스택 배포</h4>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># docker-compose.yml</span>
+<span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3.8'</span>
+
+<span class="na">services</span><span class="pi">:</span>
+  <span class="c1"># InfluxDB 클러스터</span>
+  <span class="na">influxdb</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">influxdb:2.7-alpine</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">influxdb</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">8086:8086"</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">DOCKER_INFLUXDB_INIT_MODE=setup</span>
+      <span class="pi">-</span> <span class="s">DOCKER_INFLUXDB_INIT_USERNAME=admin</span>
+      <span class="pi">-</span> <span class="s">DOCKER_INFLUXDB_INIT_PASSWORD=admin123</span>
+      <span class="pi">-</span> <span class="s">DOCKER_INFLUXDB_INIT_ORG=myorg</span>
+      <span class="pi">-</span> <span class="s">DOCKER_INFLUXDB_INIT_BUCKET=mybucket</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">influxdb_data:/var/lib/influxdb2</span>
+      <span class="pi">-</span> <span class="s">influxdb_config:/etc/influxdb2</span>
+    <span class="na">networks</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">timeseries-network</span>
+
+  <span class="c1"># TimescaleDB (비교용)</span>
+  <span class="na">timescaledb</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">timescale/timescaledb:latest-pg15</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">timescaledb</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">5432:5432"</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">POSTGRES_DB=timeseries</span>
+      <span class="pi">-</span> <span class="s">POSTGRES_USER=postgres</span>
+      <span class="pi">-</span> <span class="s">POSTGRES_PASSWORD=postgres</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">timescaledb_data:/var/lib/postgresql/data</span>
+    <span class="na">networks</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">timeseries-network</span>
+
+  <span class="c1"># Kafka (스트리밍 데이터)</span>
+  <span class="na">zookeeper</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">confluentinc/cp-zookeeper:latest</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="na">ZOOKEEPER_CLIENT_PORT</span><span class="pi">:</span> <span class="m">2181</span>
+      <span class="na">ZOOKEEPER_TICK_TIME</span><span class="pi">:</span> <span class="m">2000</span>
+    <span class="na">networks</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">timeseries-network</span>
+
+  <span class="na">kafka</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">confluentinc/cp-kafka:latest</span>
+    <span class="na">depends_on</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">zookeeper</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">9092:9092"</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="na">KAFKA_BROKER_ID</span><span class="pi">:</span> <span class="m">1</span>
+      <span class="na">KAFKA_ZOOKEEPER_CONNECT</span><span class="pi">:</span> <span class="s">zookeeper:2181</span>
+      <span class="na">KAFKA_ADVERTISED_LISTENERS</span><span class="pi">:</span> <span class="s">PLAINTEXT://kafka:9092</span>
+      <span class="na">KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR</span><span class="pi">:</span> <span class="m">1</span>
+    <span class="na">networks</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">timeseries-network</span>
+
+  <span class="c1"># Time Series Service</span>
+  <span class="na">timeseries-service</span><span class="pi">:</span>
+    <span class="na">build</span><span class="pi">:</span> <span class="s">./microservices/timeseries-service</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">timeseries-service</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">8000:8000"</span>
+    <span class="na">depends_on</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">influxdb</span>
+      <span class="pi">-</span> <span class="s">kafka</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">INFLUXDB_URL=http://influxdb:8086</span>
+      <span class="pi">-</span> <span class="s">INFLUXDB_TOKEN=admin-token</span>
+      <span class="pi">-</span> <span class="s">KAFKA_BROKERS=kafka:9092</span>
+    <span class="na">networks</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">timeseries-network</span>
+
+  <span class="c1"># Data Ingestion Service</span>
+  <span class="na">data-ingestion</span><span class="pi">:</span>
+    <span class="na">build</span><span class="pi">:</span> <span class="s">./microservices/data-ingestion</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">data-ingestion</span>
+    <span class="na">depends_on</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">kafka</span>
+      <span class="pi">-</span> <span class="s">influxdb</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">KAFKA_BROKERS=kafka:9092</span>
+      <span class="pi">-</span> <span class="s">INFLUXDB_URL=http://influxdb:8086</span>
+    <span class="na">networks</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">timeseries-network</span>
+
+  <span class="c1"># Analytics Service</span>
+  <span class="na">analytics-service</span><span class="pi">:</span>
+    <span class="na">build</span><span class="pi">:</span> <span class="s">./microservices/analytics-service</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">analytics-service</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">8001:8001"</span>
+    <span class="na">depends_on</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">influxdb</span>
+      <span class="pi">-</span> <span class="s">timescaledb</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">INFLUXDB_URL=http://influxdb:8086</span>
+      <span class="pi">-</span> <span class="s">TIMESCALEDB_URL=postgresql://postgres:postgres@timescaledb:5432/timeseries</span>
+    <span class="na">networks</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">timeseries-network</span>
+
+  <span class="c1"># Grafana (시각화)</span>
+  <span class="na">grafana</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">grafana/grafana:latest</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">grafana</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">3000:3000"</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">GF_SECURITY_ADMIN_PASSWORD=admin</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">grafana_data:/var/lib/grafana</span>
+      <span class="pi">-</span> <span class="s">./grafana/dashboards:/etc/grafana/provisioning/dashboards</span>
+      <span class="pi">-</span> <span class="s">./grafana/datasources:/etc/grafana/provisioning/datasources</span>
+    <span class="na">networks</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">timeseries-network</span>
+
+  <span class="c1"># Prometheus (모니터링)</span>
+  <span class="na">prometheus</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">prom/prometheus:latest</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">prometheus</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">9090:9090"</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml</span>
+      <span class="pi">-</span> <span class="s">prometheus_data:/prometheus</span>
+    <span class="na">networks</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">timeseries-network</span>
+
+<span class="na">volumes</span><span class="pi">:</span>
+  <span class="na">influxdb_data</span><span class="pi">:</span>
+  <span class="na">influxdb_config</span><span class="pi">:</span>
+  <span class="na">timescaledb_data</span><span class="pi">:</span>
+  <span class="na">grafana_data</span><span class="pi">:</span>
+  <span class="na">prometheus_data</span><span class="pi">:</span>
+
+<span class="na">networks</span><span class="pi">:</span>
+  <span class="na">timeseries-network</span><span class="pi">:</span>
+    <span class="na">driver</span><span class="pi">:</span> <span class="s">bridge</span>
+</code></pre></div></div>
+
+<h4 id="3-데이터-수집-및-처리-파이프라인">3. 데이터 수집 및 처리 파이프라인</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># microservices/data-ingestion/main.py
+</span><span class="kn">import</span> <span class="n">asyncio</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">import</span> <span class="n">logging</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="n">kafka</span> <span class="kn">import</span> <span class="n">KafkaConsumer</span><span class="p">,</span> <span class="n">KafkaProducer</span>
+<span class="kn">from</span> <span class="n">influxdb_client</span> <span class="kn">import</span> <span class="n">InfluxDBClient</span>
+<span class="kn">import</span> <span class="n">random</span>
+
+<span class="k">class</span> <span class="nc">DataIngestionPipeline</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">kafka_consumer</span> <span class="o">=</span> <span class="nc">KafkaConsumer</span><span class="p">(</span>
+            <span class="sh">'</span><span class="s">sensor-data</span><span class="sh">'</span><span class="p">,</span>
+            <span class="n">bootstrap_servers</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">kafka:9092</span><span class="sh">'</span><span class="p">],</span>
+            <span class="n">value_deserializer</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="nf">decode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">)),</span>
+            <span class="n">group_id</span><span class="o">=</span><span class="sh">'</span><span class="s">data-ingestion-group</span><span class="sh">'</span>
+        <span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">kafka_producer</span> <span class="o">=</span> <span class="nc">KafkaProducer</span><span class="p">(</span>
+            <span class="n">bootstrap_servers</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">kafka:9092</span><span class="sh">'</span><span class="p">],</span>
+            <span class="n">value_serializer</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">x</span><span class="p">).</span><span class="nf">encode</span><span class="p">(</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">)</span>
+        <span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">influx_client</span> <span class="o">=</span> <span class="nc">InfluxDBClient</span><span class="p">(</span>
+            <span class="n">url</span><span class="o">=</span><span class="sh">"</span><span class="s">http://influxdb:8086</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">token</span><span class="o">=</span><span class="sh">"</span><span class="s">admin-token</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">org</span><span class="o">=</span><span class="sh">"</span><span class="s">myorg</span><span class="sh">"</span>
+        <span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">write_api</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">influx_client</span><span class="p">.</span><span class="nf">write_api</span><span class="p">()</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">generate_sensor_data</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">센서 데이터 생성 시뮬레이터</span><span class="sh">"""</span>
+        <span class="n">sensor_types</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">humidity</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">pressure</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">vibration</span><span class="sh">'</span><span class="p">]</span>
+        <span class="n">locations</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s">seoul</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">busan</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">daegu</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">incheon</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">utcnow</span><span class="p">().</span><span class="nf">isoformat</span><span class="p">(),</span>
+                <span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">:</span> <span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">sensor_types</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">locations</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">:</span> <span class="nf">round</span><span class="p">(</span><span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">quality</span><span class="sh">'</span><span class="p">:</span> <span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">80</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+            <span class="p">}</span>
+            
+            <span class="c1"># Kafka로 전송
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">kafka_producer</span><span class="p">.</span><span class="nf">send</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor-data</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            
+            <span class="k">await</span> <span class="n">asyncio</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># 1초마다 데이터 생성
+</span>    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">process_kafka_data</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Kafka에서 데이터를 읽어서 InfluxDB에 저장</span><span class="sh">"""</span>
+        <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">kafka_consumer</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">message</span><span class="p">.</span><span class="n">value</span>
+                
+                <span class="c1"># 데이터 검증
+</span>                <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="nf">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+                    <span class="c1"># InfluxDB에 저장
+</span>                    <span class="k">await</span> <span class="n">self</span><span class="p">.</span><span class="nf">store_to_influxdb</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                    
+                    <span class="c1"># 분석용으로 처리된 데이터 전송
+</span>                    <span class="n">processed_data</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">process_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                    <span class="n">self</span><span class="p">.</span><span class="n">kafka_producer</span><span class="p">.</span><span class="nf">send</span><span class="p">(</span><span class="sh">'</span><span class="s">processed-data</span><span class="sh">'</span><span class="p">,</span> <span class="n">processed_data</span><span class="p">)</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="p">.</span><span class="nf">warning</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">유효하지 않은 데이터: </span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                    
+            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logging</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">데이터 처리 오류: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">validate_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">데이터 유효성 검증</span><span class="sh">"""</span>
+        <span class="n">required_fields</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">quality</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nf">all</span><span class="p">(</span><span class="n">field</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">required_fields</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        
+        <span class="c1"># 값 범위 검증
+</span>        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">50</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">quality</span><span class="sh">'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">quality</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        
+        <span class="k">return</span> <span class="bp">True</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">store_to_influxdb</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">InfluxDB에 데이터 저장</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">"</span><span class="s">measurement</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="p">,</span>
+                <span class="sh">"</span><span class="s">tags</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">sensor_type</span><span class="sh">"</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">location</span><span class="sh">"</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">],</span>
+                    <span class="sh">"</span><span class="s">quality</span><span class="sh">"</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">quality</span><span class="sh">'</span><span class="p">]</span>
+                <span class="p">},</span>
+                <span class="sh">"</span><span class="s">time</span><span class="sh">"</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">]</span>
+            <span class="p">}</span>
+            
+            <span class="n">self</span><span class="p">.</span><span class="n">write_api</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span>
+                <span class="n">bucket</span><span class="o">=</span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="p">,</span>
+                <span class="n">record</span><span class="o">=</span><span class="n">point</span>
+            <span class="p">)</span>
+            
+            <span class="n">logging</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">데이터 저장 완료: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s"> at </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">InfluxDB 저장 실패: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">process_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">데이터 처리 및 변환</span><span class="sh">"""</span>
+        <span class="n">processed</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="nf">copy</span><span class="p">()</span>
+        
+        <span class="c1"># 이상치 탐지
+</span>        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">35</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">15</span><span class="p">:</span>
+            <span class="n">processed</span><span class="p">[</span><span class="sh">'</span><span class="s">anomaly</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">processed</span><span class="p">[</span><span class="sh">'</span><span class="s">anomaly_type</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">outlier</span><span class="sh">'</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">processed</span><span class="p">[</span><span class="sh">'</span><span class="s">anomaly</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="c1"># 품질 점수 기반 분류
+</span>        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">quality</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">95</span><span class="p">:</span>
+            <span class="n">processed</span><span class="p">[</span><span class="sh">'</span><span class="s">quality_level</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">excellent</span><span class="sh">'</span>
+        <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">quality</span><span class="sh">'</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">85</span><span class="p">:</span>
+            <span class="n">processed</span><span class="p">[</span><span class="sh">'</span><span class="s">quality_level</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">good</span><span class="sh">'</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">processed</span><span class="p">[</span><span class="sh">'</span><span class="s">quality_level</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">poor</span><span class="sh">'</span>
+        
+        <span class="n">processed</span><span class="p">[</span><span class="sh">'</span><span class="s">processed_at</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">utcnow</span><span class="p">().</span><span class="nf">isoformat</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="n">processed</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">파이프라인 실행</span><span class="sh">"""</span>
+        <span class="n">logging</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">데이터 수집 파이프라인 시작...</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># 병렬 실행
+</span>        <span class="k">await</span> <span class="n">asyncio</span><span class="p">.</span><span class="nf">gather</span><span class="p">(</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">generate_sensor_data</span><span class="p">(),</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">process_kafka_data</span><span class="p">()</span>
+        <span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">logging</span><span class="p">.</span><span class="nf">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="p">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="nc">DataIngestionPipeline</span><span class="p">()</span>
+    <span class="n">asyncio</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">pipeline</span><span class="p">.</span><span class="nf">run</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h4 id="4-성능-모니터링-대시보드">4. 성능 모니터링 대시보드</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># microservices/monitoring/main.py
+</span><span class="kn">from</span> <span class="n">prometheus_client</span> <span class="kn">import</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">Histogram</span><span class="p">,</span> <span class="n">Gauge</span><span class="p">,</span> <span class="n">start_http_server</span>
+<span class="kn">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="n">asyncio</span>
+<span class="kn">import</span> <span class="n">aiohttp</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="c1"># Prometheus 메트릭 정의
+</span><span class="n">write_requests_total</span> <span class="o">=</span> <span class="nc">Counter</span><span class="p">(</span><span class="sh">'</span><span class="s">influxdb_write_requests_total</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Total write requests</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">write_request_duration</span> <span class="o">=</span> <span class="nc">Histogram</span><span class="p">(</span><span class="sh">'</span><span class="s">influxdb_write_request_duration_seconds</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Write request duration</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">query_requests_total</span> <span class="o">=</span> <span class="nc">Counter</span><span class="p">(</span><span class="sh">'</span><span class="s">influxdb_query_requests_total</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Total query requests</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">query_request_duration</span> <span class="o">=</span> <span class="nc">Histogram</span><span class="p">(</span><span class="sh">'</span><span class="s">influxdb_query_request_duration_seconds</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Query request duration</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">data_points_total</span> <span class="o">=</span> <span class="nc">Counter</span><span class="p">(</span><span class="sh">'</span><span class="s">data_points_processed_total</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Total data points processed</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">system_health</span> <span class="o">=</span> <span class="nc">Gauge</span><span class="p">(</span><span class="sh">'</span><span class="s">system_health_score</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">System health score (0-100)</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">TDBMonitoring</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">influx_url</span> <span class="o">=</span> <span class="sh">"</span><span class="s">http://influxdb:8086</span><span class="sh">"</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">Authorization</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Token admin-token</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">Content-Type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">application/json</span><span class="sh">'</span>
+        <span class="p">}</span>
+    
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">collect_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메트릭 수집</span><span class="sh">"""</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># InfluxDB 상태 확인
+</span>                <span class="k">async</span> <span class="k">with</span> <span class="n">aiohttp</span><span class="p">.</span><span class="nc">ClientSession</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+                    <span class="c1"># 헬스 체크
+</span>                    <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">influx_url</span><span class="si">}</span><span class="s">/health</span><span class="sh">"</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">headers</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                            <span class="n">system_health</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">system_health</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+                    
+                    <span class="c1"># 데이터 포인트 수 확인
+</span>                    <span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">) |&gt; range(start: -1h) |&gt; count()</span><span class="sh">'</span>
+                    <span class="p">}</span>
+                    
+                    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+                    <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">influx_url</span><span class="si">}</span><span class="s">/api/v2/query</span><span class="sh">"</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">headers</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">query</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                        <span class="n">duration</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+                        
+                        <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                            <span class="n">query_requests_total</span><span class="p">.</span><span class="nf">inc</span><span class="p">()</span>
+                            <span class="n">query_request_duration</span><span class="p">.</span><span class="nf">observe</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+                            
+                            <span class="c1"># 결과에서 카운트 추출
+</span>                            <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="sh">'</span><span class="s">results</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="sh">'</span><span class="s">results</span><span class="sh">'</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="sh">'</span><span class="s">series</span><span class="sh">'</span><span class="p">]:</span>
+                                    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">table</span><span class="p">[</span><span class="sh">'</span><span class="s">values</span><span class="sh">'</span><span class="p">]:</span>
+                                        <span class="n">count</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span>
+                                        <span class="n">data_points_total</span><span class="p">.</span><span class="nf">inc</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+                
+                <span class="c1"># 30초마다 메트릭 수집
+</span>                <span class="k">await</span> <span class="n">asyncio</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+                
+            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">메트릭 수집 오류: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                <span class="n">system_health</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">await</span> <span class="n">asyncio</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+
+<span class="c1"># 메트릭 서버 시작
+</span><span class="nf">start_http_server</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span>
+
+<span class="c1"># 모니터링 시작
+</span><span class="n">monitor</span> <span class="o">=</span> <span class="nc">TDBMonitoring</span><span class="p">()</span>
+<span class="n">asyncio</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">monitor</span><span class="p">.</span><span class="nf">collect_metrics</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h3 id="kubernetes-기반-배포">Kubernetes 기반 배포</h3>
+
+<h4 id="1-컨테이너화-전략">1. 컨테이너화 전략</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>구성요소</th>
+      <th>컨테이너 이미지</th>
+      <th>리소스 요구사항</th>
+      <th>스케일링 전략</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>InfluxDB</strong></td>
+      <td>influxdb:2.7-alpine</td>
+      <td>CPU: 2 cores, Memory: 4GB</td>
+      <td>수평 확장</td>
+    </tr>
+    <tr>
+      <td><strong>TimescaleDB</strong></td>
+      <td>timescale/timescaledb:latest</td>
+      <td>CPU: 4 cores, Memory: 8GB</td>
+      <td>수직 확장</td>
+    </tr>
+    <tr>
+      <td><strong>Prometheus</strong></td>
+      <td>prom/prometheus:latest</td>
+      <td>CPU: 1 core, Memory: 2GB</td>
+      <td>수평 확장</td>
+    </tr>
+    <tr>
+      <td><strong>Grafana</strong></td>
+      <td>grafana/grafana:latest</td>
+      <td>CPU: 1 core, Memory: 1GB</td>
+      <td>수평 확장</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-kubernetes-리소스-구성">2. Kubernetes 리소스 구성</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>리소스 타입</th>
+      <th>구성</th>
+      <th>용도</th>
+      <th>관리 방식</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Deployment</strong></td>
+      <td>Stateless 서비스</td>
+      <td>API 서버, 웹 인터페이스</td>
+      <td>Rolling Update</td>
+    </tr>
+    <tr>
+      <td><strong>StatefulSet</strong></td>
+      <td>Stateful 서비스</td>
+      <td>데이터베이스, 메시지 큐</td>
+      <td>Ordered Deployment</td>
+    </tr>
+    <tr>
+      <td><strong>DaemonSet</strong></td>
+      <td>노드별 서비스</td>
+      <td>로그 수집, 모니터링</td>
+      <td>모든 노드 배포</td>
+    </tr>
+    <tr>
+      <td><strong>Job/CronJob</strong></td>
+      <td>배치 작업</td>
+      <td>데이터 마이그레이션, 백업</td>
+      <td>일회성/주기적 실행</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="3-스토리지-전략">3. 스토리지 전략</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>스토리지 타입</th>
+      <th>용도</th>
+      <th>성능</th>
+      <th>비용</th>
+      <th>지속성</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>SSD Persistent Volume</strong></td>
+      <td>핫 데이터</td>
+      <td>높음</td>
+      <td>높음</td>
+      <td>높음</td>
+    </tr>
+    <tr>
+      <td><strong>HDD Persistent Volume</strong></td>
+      <td>웜 데이터</td>
+      <td>중간</td>
+      <td>중간</td>
+      <td>높음</td>
+    </tr>
+    <tr>
+      <td><strong>Object Storage</strong></td>
+      <td>콜드 데이터</td>
+      <td>낮음</td>
+      <td>낮음</td>
+      <td>매우 높음</td>
+    </tr>
+    <tr>
+      <td><strong>Memory Storage</strong></td>
+      <td>캐시 데이터</td>
+      <td>매우 높음</td>
+      <td>높음</td>
+      <td>없음</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="helm-차트-배포">Helm 차트 배포</h3>
+
+<h4 id="1-차트-구조">1. 차트 구조</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>차트 구성</th>
+      <th>설명</th>
+      <th>관리 범위</th>
+      <th>업데이트 방식</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Core Charts</strong></td>
+      <td>기본 TDB 서비스</td>
+      <td>핵심 기능</td>
+      <td>수동</td>
+    </tr>
+    <tr>
+      <td><strong>Addon Charts</strong></td>
+      <td>확장 기능</td>
+      <td>모니터링, 백업</td>
+      <td>자동</td>
+    </tr>
+    <tr>
+      <td><strong>Custom Charts</strong></td>
+      <td>비즈니스 로직</td>
+      <td>애플리케이션</td>
+      <td>CI/CD</td>
+    </tr>
+    <tr>
+      <td><strong>Dependency Charts</strong></td>
+      <td>의존성 서비스</td>
+      <td>인프라</td>
+      <td>버전 관리</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-배포-전략">2. 배포 전략</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>배포 방식</th>
+      <th>설명</th>
+      <th>다운타임</th>
+      <th>롤백 시간</th>
+      <th>복잡도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Blue-Green</strong></td>
+      <td>전체 환경 교체</td>
+      <td>1-5분</td>
+      <td>즉시</td>
+      <td>높음</td>
+    </tr>
+    <tr>
+      <td><strong>Canary</strong></td>
+      <td>점진적 트래픽 이동</td>
+      <td>0초</td>
+      <td>1-5분</td>
+      <td>높음</td>
+    </tr>
+    <tr>
+      <td><strong>Rolling Update</strong></td>
+      <td>순차적 업데이트</td>
+      <td>0초</td>
+      <td>5-10분</td>
+      <td>중간</td>
+    </tr>
+    <tr>
+      <td><strong>A/B Testing</strong></td>
+      <td>버전별 테스트</td>
+      <td>0초</td>
+      <td>즉시</td>
+      <td>매우 높음</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="최신-tdb-트렌드와-기술">🚀 최신 TDB 트렌드와 기술</h2>
+
+<h3 id="edge-computing-통합">Edge Computing 통합</h3>
+
+<h4 id="1-edge-tdb-아키텍처">1. Edge TDB 아키텍처</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Edge 계층</th>
+      <th>역할</th>
+      <th>기술 스택</th>
+      <th>처리 용량</th>
+      <th>지연시간</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Device Edge</strong></td>
+      <td>센서 데이터 수집</td>
+      <td>InfluxDB Edge, SQLite</td>
+      <td>1K points/sec</td>
+      <td>&lt; 1ms</td>
+    </tr>
+    <tr>
+      <td><strong>Gateway Edge</strong></td>
+      <td>로컬 집계 처리</td>
+      <td>InfluxDB OSS, Redis</td>
+      <td>10K points/sec</td>
+      <td>&lt; 10ms</td>
+    </tr>
+    <tr>
+      <td><strong>Regional Edge</strong></td>
+      <td>지역별 데이터 처리</td>
+      <td>TimescaleDB, PostgreSQL</td>
+      <td>100K points/sec</td>
+      <td>&lt; 100ms</td>
+    </tr>
+    <tr>
+      <td><strong>Cloud Edge</strong></td>
+      <td>전역 데이터 통합</td>
+      <td>Cloud TDB Services</td>
+      <td>1M+ points/sec</td>
+      <td>&lt; 1초</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-하이브리드-아키텍처">2. 하이브리드 아키텍처</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>아키텍처 패턴</th>
+      <th>설명</th>
+      <th>장점</th>
+      <th>단점</th>
+      <th>적용 사례</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Edge-First</strong></td>
+      <td>Edge에서 주요 처리</td>
+      <td>낮은 지연시간, 오프라인 동작</td>
+      <td>복잡한 관리</td>
+      <td>IoT 센서</td>
+    </tr>
+    <tr>
+      <td><strong>Cloud-First</strong></td>
+      <td>클라우드 중심 처리</td>
+      <td>단순한 관리, 높은 처리량</td>
+      <td>높은 지연시간</td>
+      <td>웹 애플리케이션</td>
+    </tr>
+    <tr>
+      <td><strong>Hybrid</strong></td>
+      <td>Edge와 클라우드 조합</td>
+      <td>균형잡힌 성능</td>
+      <td>복잡한 동기화</td>
+      <td>스마트 시티</td>
+    </tr>
+    <tr>
+      <td><strong>Multi-Cloud</strong></td>
+      <td>다중 클라우드 사용</td>
+      <td>벤더 락인 방지</td>
+      <td>높은 복잡도</td>
+      <td>엔터프라이즈</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="aiml-통합">AI/ML 통합</h3>
+
+<h4 id="1-실시간-ml-파이프라인">1. 실시간 ML 파이프라인</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>ML 단계</th>
+      <th>기술 스택</th>
+      <th>처리 방식</th>
+      <th>지연시간</th>
+      <th>정확도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>데이터 수집</strong></td>
+      <td>Kafka, InfluxDB</td>
+      <td>스트리밍</td>
+      <td>&lt; 10ms</td>
+      <td>100%</td>
+    </tr>
+    <tr>
+      <td><strong>특성 추출</strong></td>
+      <td>Apache Flink, Python</td>
+      <td>실시간 처리</td>
+      <td>&lt; 100ms</td>
+      <td>95%</td>
+    </tr>
+    <tr>
+      <td><strong>모델 추론</strong></td>
+      <td>TensorFlow Serving, ONNX</td>
+      <td>실시간 추론</td>
+      <td>&lt; 50ms</td>
+      <td>90%</td>
+    </tr>
+    <tr>
+      <td><strong>결과 저장</strong></td>
+      <td>InfluxDB, Redis</td>
+      <td>실시간 저장</td>
+      <td>&lt; 10ms</td>
+      <td>100%</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-시계열-예측-모델">2. 시계열 예측 모델</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>모델 타입</th>
+      <th>설명</th>
+      <th>정확도</th>
+      <th>처리 속도</th>
+      <th>메모리 사용량</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>ARIMA</strong></td>
+      <td>전통적 통계 모델</td>
+      <td>70-80%</td>
+      <td>빠름</td>
+      <td>낮음</td>
+    </tr>
+    <tr>
+      <td><strong>LSTM</strong></td>
+      <td>딥러닝 모델</td>
+      <td>80-90%</td>
+      <td>중간</td>
+      <td>중간</td>
+    </tr>
+    <tr>
+      <td><strong>Transformer</strong></td>
+      <td>어텐션 기반 모델</td>
+      <td>85-95%</td>
+      <td>느림</td>
+      <td>높음</td>
+    </tr>
+    <tr>
+      <td><strong>Prophet</strong></td>
+      <td>Facebook 시계열 모델</td>
+      <td>75-85%</td>
+      <td>중간</td>
+      <td>낮음</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="서버리스-tdb">서버리스 TDB</h3>
+
+<h4 id="1-서버리스-아키텍처">1. 서버리스 아키텍처</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>서비스 타입</th>
+      <th>설명</th>
+      <th>사용 사례</th>
+      <th>비용 모델</th>
+      <th>확장성</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>AWS Lambda + Timestream</strong></td>
+      <td>서버리스 함수 + TDB</td>
+      <td>실시간 알림</td>
+      <td>실행 시간</td>
+      <td>자동</td>
+    </tr>
+    <tr>
+      <td><strong>Azure Functions + Time Series</strong></td>
+      <td>서버리스 + 시계열 DB</td>
+      <td>IoT 데이터 처리</td>
+      <td>실행 시간</td>
+      <td>자동</td>
+    </tr>
+    <tr>
+      <td><strong>Google Cloud Functions + BigQuery</strong></td>
+      <td>서버리스 + 분석 DB</td>
+      <td>배치 분석</td>
+      <td>실행 시간</td>
+      <td>자동</td>
+    </tr>
+    <tr>
+      <td><strong>Knative + InfluxDB</strong></td>
+      <td>서버리스 플랫폼</td>
+      <td>마이크로서비스</td>
+      <td>리소스 사용량</td>
+      <td>수동</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-이벤트-기반-아키텍처">2. 이벤트 기반 아키텍처</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>이벤트 패턴</th>
+      <th>설명</th>
+      <th>구현 방식</th>
+      <th>장점</th>
+      <th>단점</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Event Sourcing</strong></td>
+      <td>모든 상태 변경을 이벤트로 저장</td>
+      <td>Event Store + TDB</td>
+      <td>완전한 감사 추적</td>
+      <td>복잡한 구현</td>
+    </tr>
+    <tr>
+      <td><strong>CQRS</strong></td>
+      <td>명령과 쿼리 분리</td>
+      <td>Write DB + Read DB</td>
+      <td>성능 최적화</td>
+      <td>데이터 일관성</td>
+    </tr>
+    <tr>
+      <td><strong>Saga Pattern</strong></td>
+      <td>분산 트랜잭션 관리</td>
+      <td>이벤트 기반 조정</td>
+      <td>높은 가용성</td>
+      <td>복잡한 복구</td>
+    </tr>
+    <tr>
+      <td><strong>Event Streaming</strong></td>
+      <td>실시간 이벤트 처리</td>
+      <td>Kafka + TDB</td>
+      <td>실시간 처리</td>
+      <td>메시지 순서 보장</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="프로덕션-배포-전략">🏗️ 프로덕션 배포 전략</h2>
+
+<h3 id="배포-환경-구성">배포 환경 구성</h3>
+
+<h4 id="1-환경별-구성">1. 환경별 구성</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>환경</th>
+      <th>목적</th>
+      <th>구성</th>
+      <th>데이터</th>
+      <th>접근 권한</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Development</strong></td>
+      <td>개발 및 테스트</td>
+      <td>최소 구성</td>
+      <td>샘플 데이터</td>
+      <td>개발자 전용</td>
+    </tr>
+    <tr>
+      <td><strong>Staging</strong></td>
+      <td>통합 테스트</td>
+      <td>프로덕션 유사</td>
+      <td>프로덕션 복사본</td>
+      <td>QA 팀</td>
+    </tr>
+    <tr>
+      <td><strong>Production</strong></td>
+      <td>실제 서비스</td>
+      <td>완전 구성</td>
+      <td>실제 데이터</td>
+      <td>제한적 접근</td>
+    </tr>
+    <tr>
+      <td><strong>Disaster Recovery</strong></td>
+      <td>재해 복구</td>
+      <td>백업 구성</td>
+      <td>백업 데이터</td>
+      <td>운영팀</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-인프라-구성">2. 인프라 구성</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>인프라 영역</th>
+      <th>Development</th>
+      <th>Staging</th>
+      <th>Production</th>
+      <th>DR</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>서버 수</strong></td>
+      <td>3대</td>
+      <td>5대</td>
+      <td>20대</td>
+      <td>10대</td>
+    </tr>
+    <tr>
+      <td><strong>CPU/서버</strong></td>
+      <td>2 cores</td>
+      <td>4 cores</td>
+      <td>8 cores</td>
+      <td>4 cores</td>
+    </tr>
+    <tr>
+      <td><strong>Memory/서버</strong></td>
+      <td>4GB</td>
+      <td>8GB</td>
+      <td>32GB</td>
+      <td>16GB</td>
+    </tr>
+    <tr>
+      <td><strong>Storage/서버</strong></td>
+      <td>100GB</td>
+      <td>500GB</td>
+      <td>2TB</td>
+      <td>1TB</td>
+    </tr>
+    <tr>
+      <td><strong>네트워크</strong></td>
+      <td>1Gbps</td>
+      <td>10Gbps</td>
+      <td>40Gbps</td>
+      <td>10Gbps</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="cicd-파이프라인">CI/CD 파이프라인</h3>
+
+<h4 id="1-파이프라인-단계">1. 파이프라인 단계</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>단계</th>
+      <th>작업</th>
+      <th>도구</th>
+      <th>시간</th>
+      <th>승인</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Build</strong></td>
+      <td>코드 컴파일, 테스트</td>
+      <td>Jenkins, GitLab CI</td>
+      <td>5분</td>
+      <td>자동</td>
+    </tr>
+    <tr>
+      <td><strong>Test</strong></td>
+      <td>단위/통합 테스트</td>
+      <td>JUnit, TestNG</td>
+      <td>10분</td>
+      <td>자동</td>
+    </tr>
+    <tr>
+      <td><strong>Security Scan</strong></td>
+      <td>보안 취약점 검사</td>
+      <td>SonarQube, OWASP</td>
+      <td>15분</td>
+      <td>자동</td>
+    </tr>
+    <tr>
+      <td><strong>Deploy</strong></td>
+      <td>환경별 배포</td>
+      <td>Helm, ArgoCD</td>
+      <td>20분</td>
+      <td>수동</td>
+    </tr>
+    <tr>
+      <td><strong>Verify</strong></td>
+      <td>배포 검증</td>
+      <td>Smoke Tests</td>
+      <td>5분</td>
+      <td>자동</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-배포-자동화">2. 배포 자동화</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>자동화 영역</th>
+      <th>도구</th>
+      <th>트리거</th>
+      <th>실행 시간</th>
+      <th>롤백</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>코드 배포</strong></td>
+      <td>GitLab CI/CD</td>
+      <td>Git Push</td>
+      <td>10분</td>
+      <td>자동</td>
+    </tr>
+    <tr>
+      <td><strong>인프라 배포</strong></td>
+      <td>Terraform</td>
+      <td>코드 변경</td>
+      <td>30분</td>
+      <td>수동</td>
+    </tr>
+    <tr>
+      <td><strong>데이터베이스 마이그레이션</strong></td>
+      <td>Flyway</td>
+      <td>스키마 변경</td>
+      <td>5분</td>
+      <td>수동</td>
+    </tr>
+    <tr>
+      <td><strong>모니터링 설정</strong></td>
+      <td>Prometheus</td>
+      <td>서비스 배포</td>
+      <td>2분</td>
+      <td>자동</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="모니터링-및-관찰성">모니터링 및 관찰성</h3>
+
+<h4 id="1-관찰성-3요소">1. 관찰성 3요소</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>관찰성 요소</th>
+      <th>도구</th>
+      <th>수집 주기</th>
+      <th>보존 기간</th>
+      <th>알림</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>메트릭</strong></td>
+      <td>Prometheus</td>
+      <td>15초</td>
+      <td>30일</td>
+      <td>임계값 초과</td>
+    </tr>
+    <tr>
+      <td><strong>로그</strong></td>
+      <td>ELK Stack</td>
+      <td>실시간</td>
+      <td>90일</td>
+      <td>에러 패턴</td>
+    </tr>
+    <tr>
+      <td><strong>트레이스</strong></td>
+      <td>Jaeger</td>
+      <td>요청별</td>
+      <td>7일</td>
+      <td>지연시간 초과</td>
+    </tr>
+    <tr>
+      <td><strong>이벤트</strong></td>
+      <td>EventBridge</td>
+      <td>실시간</td>
+      <td>30일</td>
+      <td>중요 이벤트</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-알림-및-대응">2. 알림 및 대응</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>알림 레벨</th>
+      <th>조건</th>
+      <th>채널</th>
+      <th>응답 시간</th>
+      <th>대응자</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Critical</strong></td>
+      <td>서비스 중단</td>
+      <td>PagerDuty, SMS</td>
+      <td>5분</td>
+      <td>온콜 엔지니어</td>
+    </tr>
+    <tr>
+      <td><strong>Warning</strong></td>
+      <td>성능 저하</td>
+      <td>Slack, Email</td>
+      <td>15분</td>
+      <td>개발팀</td>
+    </tr>
+    <tr>
+      <td><strong>Info</strong></td>
+      <td>상태 변경</td>
+      <td>Dashboard</td>
+      <td>1시간</td>
+      <td>운영팀</td>
+    </tr>
+    <tr>
+      <td><strong>Debug</strong></td>
+      <td>상세 정보</td>
+      <td>로그 시스템</td>
+      <td>24시간</td>
+      <td>개발자</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="완성된-프로젝트-글로벌-iot-플랫폼">🎯 완성된 프로젝트: 글로벌 IoT 플랫폼</h2>
+
+<h3 id="전체-시스템-아키텍처">전체 시스템 아키텍처</h3>
+
+<h4 id="1-시스템-개요">1. 시스템 개요</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>구성 요소</th>
+      <th>기술 스택</th>
+      <th>역할</th>
+      <th>처리 용량</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Edge Gateway</strong></td>
+      <td>Kubernetes, InfluxDB Edge</td>
+      <td>로컬 데이터 수집</td>
+      <td>100K points/sec</td>
+    </tr>
+    <tr>
+      <td><strong>Message Queue</strong></td>
+      <td>Apache Kafka</td>
+      <td>글로벌 메시지 전달</td>
+      <td>1M messages/sec</td>
+    </tr>
+    <tr>
+      <td><strong>Stream Processing</strong></td>
+      <td>Apache Flink</td>
+      <td>실시간 데이터 처리</td>
+      <td>500K events/sec</td>
+    </tr>
+    <tr>
+      <td><strong>Time Series DB</strong></td>
+      <td>InfluxDB Cluster</td>
+      <td>시계열 데이터 저장</td>
+      <td>10M points/sec</td>
+    </tr>
+    <tr>
+      <td><strong>Analytics Engine</strong></td>
+      <td>Apache Spark</td>
+      <td>배치 분석</td>
+      <td>1TB/hour</td>
+    </tr>
+    <tr>
+      <td><strong>Visualization</strong></td>
+      <td>Grafana, Apache Superset</td>
+      <td>데이터 시각화</td>
+      <td>1K users</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-글로벌-배포-전략">2. 글로벌 배포 전략</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>지역</th>
+      <th>데이터센터</th>
+      <th>노드 수</th>
+      <th>용량</th>
+      <th>지연시간</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>아시아</strong></td>
+      <td>서울, 싱가포르, 도쿄</td>
+      <td>50개</td>
+      <td>1PB</td>
+      <td>&lt; 50ms</td>
+    </tr>
+    <tr>
+      <td><strong>유럽</strong></td>
+      <td>런던, 프랑크푸르트</td>
+      <td>40개</td>
+      <td>800TB</td>
+      <td>&lt; 30ms</td>
+    </tr>
+    <tr>
+      <td><strong>미국</strong></td>
+      <td>버지니아, 캘리포니아</td>
+      <td>60개</td>
+      <td>1.2PB</td>
+      <td>&lt; 40ms</td>
+    </tr>
+    <tr>
+      <td><strong>글로벌 CDN</strong></td>
+      <td>CloudFlare, AWS CloudFront</td>
+      <td>100개</td>
+      <td>500TB</td>
+      <td>&lt; 20ms</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="성능-및-확장성">성능 및 확장성</h3>
+
+<h4 id="1-성능-벤치마크">1. 성능 벤치마크</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>성능 지표</th>
+      <th>목표</th>
+      <th>실제 성능</th>
+      <th>개선율</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>데이터 수집</strong></td>
+      <td>10M points/sec</td>
+      <td>12M points/sec</td>
+      <td>120%</td>
+    </tr>
+    <tr>
+      <td><strong>쿼리 응답시간</strong></td>
+      <td>&lt; 100ms</td>
+      <td>&lt; 80ms</td>
+      <td>125%</td>
+    </tr>
+    <tr>
+      <td><strong>가용성</strong></td>
+      <td>99.9%</td>
+      <td>99.95%</td>
+      <td>105%</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 정확성</strong></td>
+      <td>99.99%</td>
+      <td>99.995%</td>
+      <td>100.5%</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-확장성-테스트">2. 확장성 테스트</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>부하 테스트</th>
+      <th>시나리오</th>
+      <th>결과</th>
+      <th>한계점</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>데이터 수집</strong></td>
+      <td>20M points/sec</td>
+      <td>성공</td>
+      <td>네트워크 대역폭</td>
+    </tr>
+    <tr>
+      <td><strong>동시 쿼리</strong></td>
+      <td>10K concurrent users</td>
+      <td>성공</td>
+      <td>CPU 리소스</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 볼륨</strong></td>
+      <td>10PB 저장</td>
+      <td>성공</td>
+      <td>스토리지 비용</td>
+    </tr>
+    <tr>
+      <td><strong>지역 확장</strong></td>
+      <td>100개 지역</td>
+      <td>성공</td>
+      <td>관리 복잡도</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="운영-및-유지보수">운영 및 유지보수</h3>
+
+<h4 id="1-운영-자동화">1. 운영 자동화</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>운영 영역</th>
+      <th>자동화 수준</th>
+      <th>도구</th>
+      <th>효과</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>배포</strong></td>
+      <td>95%</td>
+      <td>ArgoCD, Helm</td>
+      <td>배포 시간 90% 단축</td>
+    </tr>
+    <tr>
+      <td><strong>모니터링</strong></td>
+      <td>100%</td>
+      <td>Prometheus, Grafana</td>
+      <td>장애 감지 시간 95% 단축</td>
+    </tr>
+    <tr>
+      <td><strong>백업</strong></td>
+      <td>100%</td>
+      <td>Velero, Restic</td>
+      <td>백업 성공률 99.9%</td>
+    </tr>
+    <tr>
+      <td><strong>스케일링</strong></td>
+      <td>90%</td>
+      <td>HPA, VPA</td>
+      <td>리소스 사용률 최적화</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-비용-최적화">2. 비용 최적화</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>최적화 영역</th>
+      <th>최적화 전략</th>
+      <th>절약 효과</th>
+      <th>구현 복잡도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>스토리지</strong></td>
+      <td>압축, 보존 정책</td>
+      <td>70% 비용 절약</td>
+      <td>중간</td>
+    </tr>
+    <tr>
+      <td><strong>컴퓨팅</strong></td>
+      <td>오토스케일링, 스팟 인스턴스</td>
+      <td>40% 비용 절약</td>
+      <td>높음</td>
+    </tr>
+    <tr>
+      <td><strong>네트워크</strong></td>
+      <td>CDN, 압축</td>
+      <td>60% 비용 절약</td>
+      <td>낮음</td>
+    </tr>
+    <tr>
+      <td><strong>라이선스</strong></td>
+      <td>오픈소스 우선</td>
+      <td>80% 비용 절약</td>
+      <td>중간</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="tdb-미래-전망">🔮 TDB 미래 전망</h2>
+
+<h3 id="기술-트렌드">기술 트렌드</h3>
+
+<h4 id="1-차세대-tdb-기술">1. 차세대 TDB 기술</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>기술 분야</th>
+      <th>현재</th>
+      <th>5년 후</th>
+      <th>10년 후</th>
+      <th>주요 변화</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>저장 기술</strong></td>
+      <td>SSD 기반</td>
+      <td>NVMe, 3D XPoint</td>
+      <td>DNA 저장, 양자 저장</td>
+      <td>1000x 용량 증가</td>
+    </tr>
+    <tr>
+      <td><strong>처리 기술</strong></td>
+      <td>CPU 기반</td>
+      <td>GPU 가속</td>
+      <td>양자 컴퓨팅</td>
+      <td>10000x 성능 향상</td>
+    </tr>
+    <tr>
+      <td><strong>네트워크</strong></td>
+      <td>100Gbps</td>
+      <td>400Gbps</td>
+      <td>1Tbps</td>
+      <td>10x 속도 향상</td>
+    </tr>
+    <tr>
+      <td><strong>압축</strong></td>
+      <td>10:1</td>
+      <td>100:1</td>
+      <td>1000:1</td>
+      <td>100x 효율성 향상</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-아키텍처-진화">2. 아키텍처 진화</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>아키텍처 패턴</th>
+      <th>현재</th>
+      <th>미래</th>
+      <th>장점</th>
+      <th>도전 과제</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>중앙집중식</strong></td>
+      <td>클라우드 중심</td>
+      <td>Edge-First</td>
+      <td>낮은 지연시간</td>
+      <td>복잡한 관리</td>
+    </tr>
+    <tr>
+      <td><strong>분산</strong></td>
+      <td>마이크로서비스</td>
+      <td>서버리스</td>
+      <td>높은 확장성</td>
+      <td>동기화 복잡성</td>
+    </tr>
+    <tr>
+      <td><strong>하이브리드</strong></td>
+      <td>클라우드 + 온프레미스</td>
+      <td>Multi-Cloud + Edge</td>
+      <td>유연성</td>
+      <td>통합 복잡성</td>
+    </tr>
+    <tr>
+      <td><strong>자율</strong></td>
+      <td>자동화</td>
+      <td>AI 기반 자율 운영</td>
+      <td>운영 효율성</td>
+      <td>신뢰성 확보</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="비즈니스-영향">비즈니스 영향</h3>
+
+<h4 id="1-산업별-적용-확산">1. 산업별 적용 확산</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>산업 분야</th>
+      <th>현재 적용률</th>
+      <th>5년 후 예상</th>
+      <th>주요 동력</th>
+      <th>기술 요구사항</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>제조업</strong></td>
+      <td>30%</td>
+      <td>80%</td>
+      <td>스마트 팩토리</td>
+      <td>실시간 제어</td>
+    </tr>
+    <tr>
+      <td><strong>의료</strong></td>
+      <td>20%</td>
+      <td>70%</td>
+      <td>원격 의료</td>
+      <td>정확성, 보안</td>
+    </tr>
+    <tr>
+      <td><strong>금융</strong></td>
+      <td>60%</td>
+      <td>95%</td>
+      <td>실시간 거래</td>
+      <td>낮은 지연시간</td>
+    </tr>
+    <tr>
+      <td><strong>에너지</strong></td>
+      <td>40%</td>
+      <td>90%</td>
+      <td>스마트 그리드</td>
+      <td>예측 분석</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2-새로운-비즈니스-모델">2. 새로운 비즈니스 모델</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>비즈니스 모델</th>
+      <th>설명</th>
+      <th>수익 구조</th>
+      <th>성장 잠재력</th>
+      <th>기술 요구사항</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Data-as-a-Service</strong></td>
+      <td>데이터 판매</td>
+      <td>구독 기반</td>
+      <td>높음</td>
+      <td>데이터 품질</td>
+    </tr>
+    <tr>
+      <td><strong>Analytics-as-a-Service</strong></td>
+      <td>분석 서비스</td>
+      <td>사용량 기반</td>
+      <td>매우 높음</td>
+      <td>AI/ML 기술</td>
+    </tr>
+    <tr>
+      <td><strong>Platform-as-a-Service</strong></td>
+      <td>플랫폼 제공</td>
+      <td>수수료 기반</td>
+      <td>높음</td>
+      <td>통합 플랫폼</td>
+    </tr>
+    <tr>
+      <td><strong>Edge-as-a-Service</strong></td>
+      <td>Edge 인프라</td>
+      <td>리소스 기반</td>
+      <td>중간</td>
+      <td>Edge 기술</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="학습-요약">📚 학습 요약</h2>
+
+<h3 id="전체-시리즈-복습">전체 시리즈 복습</h3>
+
+<ol>
+  <li><strong>Part 1: 기초와 아키텍처</strong>
+    <ul>
+      <li>TDB 기본 개념과 특성</li>
+      <li>주요 솔루션 비교 분석</li>
+      <li>성능 최적화 원리</li>
+      <li>실무 프로젝트 기초</li>
+    </ul>
+  </li>
+  <li><strong>Part 2: 고급 기능과 최적화</strong>
+    <ul>
+      <li>분산 아키텍처와 클러스터링</li>
+      <li>고가용성과 장애 복구</li>
+      <li>성능 튜닝 고급 기법</li>
+      <li>대규모 시스템 구축</li>
+    </ul>
+  </li>
+  <li><strong>Part 3: 통합과 배포</strong>
+    <ul>
+      <li>시스템 간 통합 전략</li>
+      <li>클라우드 네이티브 아키텍처</li>
+      <li>최신 기술 트렌드</li>
+      <li>프로덕션 배포 완성</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="핵심-역량-습득">핵심 역량 습득</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>역량 영역</th>
+      <th>습득 내용</th>
+      <th>실무 적용</th>
+      <th>지속적 학습</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>아키텍처 설계</strong></td>
+      <td>TDB 시스템 설계 원리</td>
+      <td>프로젝트 설계</td>
+      <td>최신 트렌드 추적</td>
+    </tr>
+    <tr>
+      <td><strong>성능 최적화</strong></td>
+      <td>쿼리 튜닝, 인덱스 최적화</td>
+      <td>시스템 튜닝</td>
+      <td>벤치마크 지속</td>
+    </tr>
+    <tr>
+      <td><strong>운영 관리</strong></td>
+      <td>모니터링, 자동화</td>
+      <td>운영 효율성</td>
+      <td>DevOps 도구 학습</td>
+    </tr>
+    <tr>
+      <td><strong>문제 해결</strong></td>
+      <td>트러블슈팅, 장애 대응</td>
+      <td>신속한 대응</td>
+      <td>경험 축적</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="다음-학습-방향">다음 학습 방향</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>학습 영역</th>
+      <th>추천 주제</th>
+      <th>학습 방법</th>
+      <th>실무 적용</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>심화 기술</strong></td>
+      <td>특정 TDB 솔루션 마스터</td>
+      <td>공식 문서, 튜토리얼</td>
+      <td>사이드 프로젝트</td>
+    </tr>
+    <tr>
+      <td><strong>확장 기술</strong></td>
+      <td>AI/ML, Edge Computing</td>
+      <td>온라인 강의, 연구 논문</td>
+      <td>프로토타입 개발</td>
+    </tr>
+    <tr>
+      <td><strong>운영 기술</strong></td>
+      <td>DevOps, SRE</td>
+      <td>실무 경험, 인증 취득</td>
+      <td>운영 환경 구축</td>
+    </tr>
+    <tr>
+      <td><strong>비즈니스</strong></td>
+      <td>도메인 지식, 비즈니스 이해</td>
+      <td>업계 분석, 네트워킹</td>
+      <td>비즈니스 가치 창출</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="-최종-핵심-포인트">🎯 최종 핵심 포인트</h2>
+
+<ol>
+  <li><strong>TDB는 단순한 저장소가 아님</strong>: 현대적 데이터 플랫폼의 핵심 구성요소</li>
+  <li><strong>통합이 핵심</strong>: 다른 시스템과의 효과적인 통합이 성공의 열쇠</li>
+  <li><strong>클라우드 네이티브는 필수</strong>: 현대적 배포와 운영을 위한 필수 요소</li>
+  <li><strong>지속적 진화</strong>: 기술 트렌드를 따라가는 지속적 학습이 필요</li>
+  <li><strong>비즈니스 가치 중심</strong>: 기술보다 비즈니스 문제 해결에 집중</li>
+</ol>
+
+<p>Time Series Database 시리즈를 통해 현대적 TDB 시스템을 구축하고 운영할 수 있는 완전한 역량을 갖추었습니다. 이제 이 지식을 바탕으로 실제 프로젝트에서 혁신적인 데이터 솔루션을 만들어보세요! 🚀</p>
+
+<p><strong>축하합니다! TDB 마스터가 되었습니다!</strong> 🎉</p>
+
+<hr />
+
+<h2 id="-추가-학습-자료">📖 추가 학습 자료</h2>
+
+<h3 id="추천-도서">추천 도서</h3>
+<ul>
+  <li>“Designing Data-Intensive Applications” by Martin Kleppmann</li>
+  <li>“Time Series Databases” by Ted Dunning &amp; Ellen Friedman</li>
+  <li>“Site Reliability Engineering” by Google</li>
+</ul>
+
+<h3 id="유용한-리소스">유용한 리소스</h3>
+<ul>
+  <li><a href="https://docs.influxdata.com/">InfluxDB 공식 문서</a></li>
+  <li><a href="https://docs.timescale.com/">TimescaleDB 튜토리얼</a></li>
+  <li><a href="https://prometheus.io/docs/">Prometheus 모니터링 가이드</a></li>
+</ul>
+
+<h3 id="커뮤니티-참여">커뮤니티 참여</h3>
+<ul>
+  <li>InfluxDB Community Forum</li>
+  <li>TimescaleDB Slack</li>
+  <li>Prometheus Users Mailing List</li>
+</ul>
+
+<p><strong>지속적인 학습과 실무 경험을 통해 TDB 전문가로 성장하세요!</strong> 🌟</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+          
+          
+      
+      
+        
+        
+        <a href="/data-engineering/2025/09/29/time-series-database-advanced-optimization.html" class="nav-link prev">
+          ← 이전: Part 2: Time Series Database 고급 기능과 최적화 - 프로덕션급 TDB 시스템 구축
+        </a>
+      
+      
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

@@ -1070,6 +1070,669 @@
 
 <h2 id="practical-project-iot-sensor-data-collection-system">🚀 Practical Project: IoT Sensor Data Collection System</h2>
 
+<h3 id="hands-on-influxdb-installation-and-basic-setup">Hands-on: InfluxDB Installation and Basic Setup</h3>
+
+<h4 id="1-influxdb-installation-and-initial-configuration">1. InfluxDB Installation and Initial Configuration</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="c"># influxdb-setup.sh</span>
+
+<span class="nb">echo</span> <span class="s2">"🚀 Starting InfluxDB installation and setup..."</span>
+
+<span class="c"># Install InfluxDB using Docker</span>
+docker run <span class="nt">-d</span> <span class="se">\</span>
+  <span class="nt">--name</span> influxdb <span class="se">\</span>
+  <span class="nt">-p</span> 8086:8086 <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">DOCKER_INFLUXDB_INIT_MODE</span><span class="o">=</span>setup <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">DOCKER_INFLUXDB_INIT_USERNAME</span><span class="o">=</span>admin <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">DOCKER_INFLUXDB_INIT_PASSWORD</span><span class="o">=</span>admin123 <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">DOCKER_INFLUXDB_INIT_ORG</span><span class="o">=</span>myorg <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">DOCKER_INFLUXDB_INIT_BUCKET</span><span class="o">=</span>mybucket <span class="se">\</span>
+  influxdb:2.7-alpine
+
+<span class="c"># Wait for service startup</span>
+<span class="nb">echo</span> <span class="s2">"⏳ Waiting for InfluxDB to start..."</span>
+<span class="nb">sleep </span>10
+
+<span class="c"># Health check</span>
+<span class="nb">echo</span> <span class="s2">"🔍 Checking InfluxDB status..."</span>
+curl <span class="nt">-f</span> http://localhost:8086/health
+
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> <span class="nt">-eq</span> 0 <span class="o">]</span><span class="p">;</span> <span class="k">then
+    </span><span class="nb">echo</span> <span class="s2">"✅ InfluxDB started successfully!"</span>
+    <span class="nb">echo</span> <span class="s2">"🌐 Web UI: http://localhost:8086"</span>
+    <span class="nb">echo</span> <span class="s2">"👤 Username: admin"</span>
+    <span class="nb">echo</span> <span class="s2">"🔑 Password: admin123"</span>
+<span class="k">else
+    </span><span class="nb">echo</span> <span class="s2">"❌ Failed to start InfluxDB."</span>
+    <span class="nb">exit </span>1
+<span class="k">fi</span>
+</code></pre></div></div>
+
+<h4 id="2-data-collection-using-python-client">2. Data Collection using Python Client</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># sensor_data_collector.py
+</span><span class="kn">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="n">random</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="n">influxdb_client</span> <span class="kn">import</span> <span class="n">InfluxDBClient</span><span class="p">,</span> <span class="n">Point</span>
+<span class="kn">from</span> <span class="n">influxdb_client.client.write_api</span> <span class="kn">import</span> <span class="n">SYNCHRONOUS</span>
+<span class="kn">import</span> <span class="n">logging</span>
+
+<span class="k">class</span> <span class="nc">SensorDataCollector</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="c1"># InfluxDB client configuration
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">client</span> <span class="o">=</span> <span class="nc">InfluxDBClient</span><span class="p">(</span>
+            <span class="n">url</span><span class="o">=</span><span class="sh">"</span><span class="s">http://localhost:8086</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">token</span><span class="o">=</span><span class="sh">"</span><span class="s">admin-token</span><span class="sh">"</span><span class="p">,</span>  <span class="c1"># Replace with actual token
+</span>            <span class="n">org</span><span class="o">=</span><span class="sh">"</span><span class="s">myorg</span><span class="sh">"</span>
+        <span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">write_api</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">client</span><span class="p">.</span><span class="nf">write_api</span><span class="p">(</span><span class="n">write_options</span><span class="o">=</span><span class="n">SYNCHRONOUS</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">query_api</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">client</span><span class="p">.</span><span class="nf">query_api</span><span class="p">()</span>
+        
+        <span class="c1"># Logging configuration
+</span>        <span class="n">logging</span><span class="p">.</span><span class="nf">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="p">.</span><span class="n">INFO</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="p">.</span><span class="nf">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">generate_sensor_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">sensor_id</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">sensor_type</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Sensor data generation simulator</span><span class="sh">"""</span>
+        
+        <span class="c1"># Data ranges by sensor type
+</span>        <span class="n">ranges</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="p">:</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">35</span><span class="p">),</span>    <span class="c1"># Temperature (Celsius)
+</span>            <span class="sh">'</span><span class="s">humidity</span><span class="sh">'</span><span class="p">:</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">80</span><span class="p">),</span>       <span class="c1"># Humidity (%)
+</span>            <span class="sh">'</span><span class="s">pressure</span><span class="sh">'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1030</span><span class="p">),</span>   <span class="c1"># Pressure (hPa)
+</span>            <span class="sh">'</span><span class="s">vibration</span><span class="sh">'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>        <span class="c1"># Vibration (mm/s)
+</span>        <span class="p">}</span>
+        
+        <span class="n">base_value</span> <span class="o">=</span> <span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="o">*</span><span class="n">ranges</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">sensor_type</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)))</span>
+        
+        <span class="c1"># Simulate time-based variation (sine wave)
+</span>        <span class="n">time_factor</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">/</span> <span class="mi">3600</span>  <span class="c1"># Hour units
+</span>        <span class="n">variation</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="nf">abs</span><span class="p">(</span><span class="n">base_value</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">)</span>
+        
+        <span class="n">value</span> <span class="o">=</span> <span class="n">base_value</span> <span class="o">+</span> <span class="n">variation</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">measurement</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">sensor_data</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">tags</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">sensor_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">sensor_id</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="n">location</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">:</span> <span class="n">sensor_type</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">status</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">active</span><span class="sh">'</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">fields</span><span class="sh">'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">:</span> <span class="nf">round</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">quality</span><span class="sh">'</span><span class="p">:</span> <span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">85</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">battery_level</span><span class="sh">'</span><span class="p">:</span> <span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+                <span class="sh">'</span><span class="s">signal_strength</span><span class="sh">'</span><span class="p">:</span> <span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">80</span><span class="p">,</span> <span class="o">-</span><span class="mi">30</span><span class="p">)</span>
+            <span class="p">},</span>
+            <span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">:</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">utcnow</span><span class="p">()</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">write_sensor_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_points</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Store sensor data to InfluxDB</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">data_points</span><span class="p">:</span>
+                <span class="n">point</span> <span class="o">=</span> <span class="nc">Point</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">measurement</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">tag</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor_id</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">tags</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">sensor_id</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">tag</span><span class="p">(</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">tags</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">tag</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">tags</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">tag</span><span class="p">(</span><span class="sh">'</span><span class="s">status</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">tags</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">status</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">fields</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">'</span><span class="s">quality</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">fields</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">quality</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">'</span><span class="s">battery_level</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">fields</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">battery_level</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">field</span><span class="p">(</span><span class="sh">'</span><span class="s">signal_strength</span><span class="sh">'</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">fields</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">signal_strength</span><span class="sh">'</span><span class="p">])</span> \
+                    <span class="p">.</span><span class="nf">time</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">timestamp</span><span class="sh">'</span><span class="p">])</span>
+                
+                <span class="n">points</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+            
+            <span class="c1"># Batch write
+</span>            <span class="n">self</span><span class="p">.</span><span class="n">write_api</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="n">points</span><span class="p">)</span>
+            
+            <span class="n">self</span><span class="p">.</span><span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✅ </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="si">}</span><span class="s"> data points successfully stored.</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">❌ Data storage failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+    
+    <span class="k">def</span> <span class="nf">query_sensor_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">sensor_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Query sensor data</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Build Flux query
+</span>            <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">'''</span><span class="s">
+            from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">)
+            |&gt; range(start: -</span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s">h)
+            |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="s">)
+            </span><span class="sh">'''</span>
+            
+            <span class="k">if</span> <span class="n">sensor_type</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">+=</span> <span class="sa">f</span><span class="sh">'</span><span class="s">|&gt; filter(fn: (r) =&gt; r.sensor_type == </span><span class="sh">"</span><span class="si">{</span><span class="n">sensor_type</span><span class="si">}</span><span class="sh">"</span><span class="s">)</span><span class="se">\n</span><span class="sh">'</span>
+            
+            <span class="k">if</span> <span class="n">location</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">+=</span> <span class="sa">f</span><span class="sh">'</span><span class="s">|&gt; filter(fn: (r) =&gt; r.location == </span><span class="sh">"</span><span class="si">{</span><span class="n">location</span><span class="si">}</span><span class="sh">"</span><span class="s">)</span><span class="se">\n</span><span class="sh">'</span>
+            
+            <span class="n">query</span> <span class="o">+=</span> <span class="sh">'</span><span class="s">|&gt; sort(columns: [</span><span class="sh">"</span><span class="s">_time</span><span class="sh">"</span><span class="s">], desc: true)</span><span class="se">\n</span><span class="sh">'</span>
+            <span class="n">query</span> <span class="o">+=</span> <span class="sh">'</span><span class="s">|&gt; limit(n: 100)</span><span class="sh">'</span>
+            
+            <span class="c1"># Execute query
+</span>            <span class="n">result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">query_api</span><span class="p">.</span><span class="nf">query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+            
+            <span class="c1"># Convert results
+</span>            <span class="n">data_points</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">table</span><span class="p">.</span><span class="n">records</span><span class="p">:</span>
+                    <span class="n">data_points</span><span class="p">.</span><span class="nf">append</span><span class="p">({</span>
+                        <span class="sh">'</span><span class="s">time</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="nf">get_time</span><span class="p">(),</span>
+                        <span class="sh">'</span><span class="s">measurement</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="nf">get_measurement</span><span class="p">(),</span>
+                        <span class="sh">'</span><span class="s">field</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="nf">get_field</span><span class="p">(),</span>
+                        <span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="nf">get_value</span><span class="p">(),</span>
+                        <span class="sh">'</span><span class="s">sensor_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="n">values</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor_id</span><span class="sh">'</span><span class="p">),</span>
+                        <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="n">values</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">),</span>
+                        <span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">:</span> <span class="n">record</span><span class="p">.</span><span class="n">values</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">)</span>
+                    <span class="p">})</span>
+            
+            <span class="k">return</span> <span class="n">data_points</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">❌ Data query failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span>
+    
+    <span class="k">def</span> <span class="nf">get_statistics</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">sensor_type</span><span class="p">,</span> <span class="n">hours</span><span class="o">=</span><span class="mi">24</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Get sensor data statistics</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">'''</span><span class="s">
+            from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">)
+            |&gt; range(start: -</span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s">h)
+            |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r.sensor_type == </span><span class="sh">"</span><span class="si">{</span><span class="n">sensor_type</span><span class="si">}</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r._field == </span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="s">)
+            |&gt; group(columns: [</span><span class="sh">"</span><span class="s">location</span><span class="sh">"</span><span class="s">])
+            |&gt; mean()
+            |&gt; yield(name: </span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="s">)
+            
+            from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">)
+            |&gt; range(start: -</span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s">h)
+            |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r.sensor_type == </span><span class="sh">"</span><span class="si">{</span><span class="n">sensor_type</span><span class="si">}</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r._field == </span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="s">)
+            |&gt; group(columns: [</span><span class="sh">"</span><span class="s">location</span><span class="sh">"</span><span class="s">])
+            |&gt; max()
+            |&gt; yield(name: </span><span class="sh">"</span><span class="s">max</span><span class="sh">"</span><span class="s">)
+            
+            from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">)
+            |&gt; range(start: -</span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s">h)
+            |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r.sensor_type == </span><span class="sh">"</span><span class="si">{</span><span class="n">sensor_type</span><span class="si">}</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r._field == </span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="s">)
+            |&gt; group(columns: [</span><span class="sh">"</span><span class="s">location</span><span class="sh">"</span><span class="s">])
+            |&gt; min()
+            |&gt; yield(name: </span><span class="sh">"</span><span class="s">min</span><span class="sh">"</span><span class="s">)
+            </span><span class="sh">'''</span>
+            
+            <span class="n">result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">query_api</span><span class="p">.</span><span class="nf">query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+            
+            <span class="n">stats</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">table_name</span> <span class="o">=</span> <span class="n">table</span><span class="p">.</span><span class="n">name</span>
+                <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">table</span><span class="p">.</span><span class="n">records</span><span class="p">:</span>
+                    <span class="n">location</span> <span class="o">=</span> <span class="n">record</span><span class="p">.</span><span class="n">values</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">location</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
+                        <span class="n">stats</span><span class="p">[</span><span class="n">location</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">stats</span><span class="p">[</span><span class="n">location</span><span class="p">][</span><span class="n">table_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span><span class="p">.</span><span class="nf">get_value</span><span class="p">()</span>
+            
+            <span class="k">return</span> <span class="n">stats</span>
+            
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">❌ Statistics query failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">run_data_collection</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">duration_minutes</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Run data collection</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">🔄 Starting </span><span class="si">{</span><span class="n">duration_minutes</span><span class="si">}</span><span class="s">-minute sensor data collection...</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># Sensor configuration
+</span>        <span class="n">sensors</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">sensor_001</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">seoul</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="p">},</span>
+            <span class="p">{</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">sensor_002</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">seoul</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">humidity</span><span class="sh">'</span><span class="p">},</span>
+            <span class="p">{</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">sensor_003</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">busan</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="p">},</span>
+            <span class="p">{</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">sensor_004</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">busan</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">pressure</span><span class="sh">'</span><span class="p">},</span>
+            <span class="p">{</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">sensor_005</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">daegu</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">vibration</span><span class="sh">'</span><span class="p">},</span>
+        <span class="p">]</span>
+        
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">start_time</span> <span class="o">+</span> <span class="p">(</span><span class="n">duration_minutes</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+        
+        <span class="k">while</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">end_time</span><span class="p">:</span>
+            <span class="c1"># Generate data from each sensor
+</span>            <span class="n">data_points</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">sensor</span> <span class="ow">in</span> <span class="n">sensors</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">generate_sensor_data</span><span class="p">(</span>
+                    <span class="n">sensor</span><span class="p">[</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">],</span> 
+                    <span class="n">sensor</span><span class="p">[</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">],</span> 
+                    <span class="n">sensor</span><span class="p">[</span><span class="sh">'</span><span class="s">type</span><span class="sh">'</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">data_points</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            
+            <span class="c1"># Store data
+</span>            <span class="n">self</span><span class="p">.</span><span class="nf">write_sensor_data</span><span class="p">(</span><span class="n">data_points</span><span class="p">)</span>
+            
+            <span class="c1"># Wait 5 seconds
+</span>            <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">✅ Data collection completed!</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># Print collection summary
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">print_collection_summary</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">print_collection_summary</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Print collection summary information</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">📊 Data Collection Summary</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=</span><span class="sh">"</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+        
+        <span class="n">sensor_types</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">humidity</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">pressure</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">vibration</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="k">for</span> <span class="n">sensor_type</span> <span class="ow">in</span> <span class="n">sensor_types</span><span class="p">:</span>
+            <span class="n">stats</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_statistics</span><span class="p">(</span><span class="n">sensor_type</span><span class="p">,</span> <span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">stats</span><span class="p">:</span>
+                <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">📈 </span><span class="si">{</span><span class="n">sensor_type</span><span class="p">.</span><span class="nf">upper</span><span class="p">()</span><span class="si">}</span><span class="s"> Sensor Statistics (Last 1 hour):</span><span class="sh">"</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">location</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+                    <span class="n">mean_val</span> <span class="o">=</span> <span class="n">values</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">mean</span><span class="sh">'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="n">max_val</span> <span class="o">=</span> <span class="n">values</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">max</span><span class="sh">'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="n">min_val</span> <span class="o">=</span> <span class="n">values</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">min</span><span class="sh">'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">   </span><span class="si">{</span><span class="n">location</span><span class="si">}</span><span class="s">: avg=</span><span class="si">{</span><span class="n">mean_val</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">, max=</span><span class="si">{</span><span class="n">max_val</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">, min=</span><span class="si">{</span><span class="n">min_val</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Execution example
+</span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">collector</span> <span class="o">=</span> <span class="nc">SensorDataCollector</span><span class="p">()</span>
+    
+    <span class="c1"># Run data collection (5 minutes)
+</span>    <span class="n">collector</span><span class="p">.</span><span class="nf">run_data_collection</span><span class="p">(</span><span class="n">duration_minutes</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    
+    <span class="c1"># Query recent data
+</span>    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">🔍 Recent Temperature Sensor Data:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">recent_data</span> <span class="o">=</span> <span class="n">collector</span><span class="p">.</span><span class="nf">query_sensor_data</span><span class="p">(</span><span class="n">sensor_type</span><span class="o">=</span><span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="p">,</span> <span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">recent_data</span><span class="p">[:</span><span class="mi">5</span><span class="p">]:</span>  <span class="c1"># Print only recent 5
+</span>        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">   </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">time</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="3-timescaledb-comparison-practice">3. TimescaleDB Comparison Practice</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># timescale_comparison.py
+</span><span class="kn">import</span> <span class="n">psycopg2</span>
+<span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="n">random</span>
+
+<span class="k">class</span> <span class="nc">TimescaleComparison</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="c1"># TimescaleDB connection
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">conn</span> <span class="o">=</span> <span class="n">psycopg2</span><span class="p">.</span><span class="nf">connect</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="sh">"</span><span class="s">localhost</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">database</span><span class="o">=</span><span class="sh">"</span><span class="s">timeseries</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">user</span><span class="o">=</span><span class="sh">"</span><span class="s">postgres</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">password</span><span class="o">=</span><span class="sh">"</span><span class="s">postgres</span><span class="sh">"</span>
+        <span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cur</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">conn</span><span class="p">.</span><span class="nf">cursor</span><span class="p">()</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="nf">setup_timescale</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">setup_timescale</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">TimescaleDB initial setup</span><span class="sh">"""</span>
+        <span class="c1"># Enable TimescaleDB extension
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"</span><span class="s">CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># Create sensor data table
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+            CREATE TABLE IF NOT EXISTS sensor_data (
+                time TIMESTAMPTZ NOT NULL,
+                sensor_id TEXT NOT NULL,
+                location TEXT NOT NULL,
+                sensor_type TEXT NOT NULL,
+                value DOUBLE PRECISION NOT NULL,
+                quality INTEGER NOT NULL,
+                battery_level INTEGER NOT NULL,
+                signal_strength INTEGER NOT NULL
+            );
+        </span><span class="sh">"""</span><span class="p">)</span>
+        
+        <span class="c1"># Convert to hypertable
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+            SELECT create_hypertable(</span><span class="sh">'</span><span class="s">sensor_data</span><span class="sh">'</span><span class="s">, </span><span class="sh">'</span><span class="s">time</span><span class="sh">'</span><span class="s">, 
+                                   if_not_exists =&gt; TRUE);
+        </span><span class="sh">"""</span><span class="p">)</span>
+        
+        <span class="c1"># Create indexes
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+            CREATE INDEX IF NOT EXISTS idx_sensor_data_sensor_type 
+            ON sensor_data (sensor_type, time DESC);
+        </span><span class="sh">"""</span><span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">conn</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">✅ TimescaleDB setup completed</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">insert_data</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">num_records</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Bulk data insertion test</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">📝 Testing </span><span class="si">{</span><span class="n">num_records</span><span class="si">}</span><span class="s"> record insertion...</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+        
+        <span class="c1"># Batch insert
+</span>        <span class="n">insert_query</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+            INSERT INTO sensor_data 
+            (time, sensor_id, location, sensor_type, value, quality, battery_level, signal_strength)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+        </span><span class="sh">"""</span>
+        
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_records</span><span class="p">):</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">utcnow</span><span class="p">()</span> <span class="o">-</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">.</span><span class="nf">append</span><span class="p">((</span>
+                <span class="n">timestamp</span><span class="p">,</span>
+                <span class="sa">f</span><span class="sh">'</span><span class="s">sensor_</span><span class="si">{</span><span class="n">i</span> <span class="o">%</span> <span class="mi">100</span><span class="si">:</span><span class="mi">03</span><span class="n">d</span><span class="si">}</span><span class="sh">'</span><span class="p">,</span>
+                <span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">([</span><span class="sh">'</span><span class="s">seoul</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">busan</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">daegu</span><span class="sh">'</span><span class="p">]),</span>
+                <span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">([</span><span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">humidity</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">pressure</span><span class="sh">'</span><span class="p">]),</span>
+                <span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+                <span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">80</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+                <span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+                <span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">80</span><span class="p">,</span> <span class="o">-</span><span class="mi">30</span><span class="p">)</span>
+            <span class="p">))</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">executemany</span><span class="p">(</span><span class="n">insert_query</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">conn</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+        
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✅ Insertion completed: </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s"> seconds (</span><span class="si">{</span><span class="n">num_records</span><span class="o">/</span><span class="n">duration</span><span class="si">:</span><span class="p">.</span><span class="mi">0</span><span class="n">f</span><span class="si">}</span><span class="s"> records/sec)</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">duration</span>
+    
+    <span class="k">def</span> <span class="nf">query_performance_test</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Query performance test</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">🔍 Query performance test...</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="n">queries</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Recent 1 hour data</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">:</span> <span class="sh">"""</span><span class="s">
+                    SELECT * FROM sensor_data 
+                    WHERE time &gt;= NOW() - INTERVAL </span><span class="sh">'</span><span class="s">1 hour</span><span class="sh">'</span><span class="s"> 
+                    ORDER BY time DESC 
+                    LIMIT 100;
+                </span><span class="sh">"""</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Temperature sensor average</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">:</span> <span class="sh">"""</span><span class="s">
+                    SELECT location, AVG(value) as avg_temp
+                    FROM sensor_data 
+                    WHERE sensor_type = </span><span class="sh">'</span><span class="s">temperature</span><span class="sh">'</span><span class="s"> 
+                    AND time &gt;= NOW() - INTERVAL </span><span class="sh">'</span><span class="s">1 hour</span><span class="sh">'</span><span class="s">
+                    GROUP BY location;
+                </span><span class="sh">"""</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Time window aggregation</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">:</span> <span class="sh">"""</span><span class="s">
+                    SELECT time_bucket(</span><span class="sh">'</span><span class="s">5 minutes</span><span class="sh">'</span><span class="s">, time) as bucket,
+                           AVG(value) as avg_value
+                    FROM sensor_data 
+                    WHERE time &gt;= NOW() - INTERVAL </span><span class="sh">'</span><span class="s">1 hour</span><span class="sh">'</span><span class="s">
+                    GROUP BY bucket
+                    ORDER BY bucket;
+                </span><span class="sh">"""</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+        
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">for</span> <span class="n">query_info</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+            
+            <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="n">query_info</span><span class="p">[</span><span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">])</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">fetchall</span><span class="p">()</span>
+            
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+            <span class="n">duration</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+            
+            <span class="n">results</span><span class="p">[</span><span class="n">query_info</span><span class="p">[</span><span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">duration</span><span class="sh">'</span><span class="p">:</span> <span class="n">duration</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">rows</span><span class="sh">'</span><span class="p">:</span> <span class="nf">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+            <span class="p">}</span>
+            
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">   </span><span class="si">{</span><span class="n">query_info</span><span class="p">[</span><span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="p">.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="s"> seconds (</span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="si">}</span><span class="s"> rows)</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">results</span>
+    
+    <span class="k">def</span> <span class="nf">compression_test</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Compression test</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">🗜️ Compression test...</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="c1"># Enable compression
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+            ALTER TABLE sensor_data SET (
+                timescaledb.compress,
+                timescaledb.compress_segmentby = </span><span class="sh">'</span><span class="s">sensor_type, location</span><span class="sh">'</span><span class="s">
+            );
+        </span><span class="sh">"""</span><span class="p">)</span>
+        
+        <span class="c1"># Set compression policy
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+            SELECT add_compression_policy(</span><span class="sh">'</span><span class="s">sensor_data</span><span class="sh">'</span><span class="s">, INTERVAL </span><span class="sh">'</span><span class="s">7 days</span><span class="sh">'</span><span class="s">);
+        </span><span class="sh">"""</span><span class="p">)</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">conn</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+        
+        <span class="c1"># Query compression statistics
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+            SELECT 
+                schemaname, tablename, 
+                pg_size_pretty(pg_total_relation_size(schemaname||</span><span class="sh">'</span><span class="s">.</span><span class="sh">'</span><span class="s">||tablename)) as size
+            FROM pg_tables 
+            WHERE tablename = </span><span class="sh">'</span><span class="s">sensor_data</span><span class="sh">'</span><span class="s">;
+        </span><span class="sh">"""</span><span class="p">)</span>
+        
+        <span class="n">size_info</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">fetchone</span><span class="p">()</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">   Table size: </span><span class="si">{</span><span class="n">size_info</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">size_info</span>
+    
+    <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Cleanup</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">cur</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">conn</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+
+<span class="c1"># Performance comparison execution
+</span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">🚀 TimescaleDB vs InfluxDB Performance Comparison</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">=</span><span class="sh">"</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+    
+    <span class="c1"># TimescaleDB test
+</span>    <span class="n">tsdb</span> <span class="o">=</span> <span class="nc">TimescaleComparison</span><span class="p">()</span>
+    
+    <span class="c1"># Data insertion performance
+</span>    <span class="n">insert_time</span> <span class="o">=</span> <span class="n">tsdb</span><span class="p">.</span><span class="nf">insert_data</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+    
+    <span class="c1"># Query performance
+</span>    <span class="n">query_results</span> <span class="o">=</span> <span class="n">tsdb</span><span class="p">.</span><span class="nf">query_performance_test</span><span class="p">()</span>
+    
+    <span class="c1"># Compression test
+</span>    <span class="n">compression_info</span> <span class="o">=</span> <span class="n">tsdb</span><span class="p">.</span><span class="nf">compression_test</span><span class="p">()</span>
+    
+    <span class="n">tsdb</span><span class="p">.</span><span class="nf">cleanup</span><span class="p">()</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">📊 Performance Comparison Results:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">   TimescaleDB insertion: </span><span class="si">{</span><span class="n">insert_time</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s"> seconds</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">   Query performance:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">query_results</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">     </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="sh">'</span><span class="s">duration</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="s"> seconds</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="4-prometheus-metrics-collection-practice">4. Prometheus Metrics Collection Practice</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># prometheus_metrics.py
+</span><span class="kn">from</span> <span class="n">prometheus_client</span> <span class="kn">import</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">Histogram</span><span class="p">,</span> <span class="n">Gauge</span><span class="p">,</span> <span class="n">start_http_server</span>
+<span class="kn">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="n">requests</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="c1"># Prometheus metrics definition
+</span><span class="n">sensor_data_total</span> <span class="o">=</span> <span class="nc">Counter</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor_data_points_total</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Total sensor data points collected</span><span class="sh">'</span><span class="p">,</span> <span class="p">[</span><span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">])</span>
+<span class="n">data_quality_gauge</span> <span class="o">=</span> <span class="nc">Gauge</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor_data_quality</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Sensor data quality score</span><span class="sh">'</span><span class="p">,</span> <span class="p">[</span><span class="sh">'</span><span class="s">sensor_type</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">location</span><span class="sh">'</span><span class="p">])</span>
+<span class="n">battery_level_gauge</span> <span class="o">=</span> <span class="nc">Gauge</span><span class="p">(</span><span class="sh">'</span><span class="s">sensor_battery_level</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Sensor battery level</span><span class="sh">'</span><span class="p">,</span> <span class="p">[</span><span class="sh">'</span><span class="s">sensor_id</span><span class="sh">'</span><span class="p">])</span>
+<span class="n">collection_duration</span> <span class="o">=</span> <span class="nc">Histogram</span><span class="p">(</span><span class="sh">'</span><span class="s">data_collection_duration_seconds</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Time spent collecting data</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">PrometheusMetricsCollector</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">influxdb_url</span><span class="o">=</span><span class="sh">"</span><span class="s">http://localhost:8086</span><span class="sh">"</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">influxdb_url</span> <span class="o">=</span> <span class="n">influxdb_url</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">Authorization</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Token admin-token</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">Content-Type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">application/json</span><span class="sh">'</span>
+        <span class="p">}</span>
+    
+    <span class="nd">@collection_duration.time</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">collect_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Collect metrics from InfluxDB</span><span class="sh">"""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Query data from last 5 minutes
+</span>            <span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'''</span><span class="s">
+                from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">)
+                |&gt; range(start: -5m)
+                |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="s">)
+                |&gt; group(columns: [</span><span class="sh">"</span><span class="s">sensor_type</span><span class="sh">"</span><span class="s">, </span><span class="sh">"</span><span class="s">location</span><span class="sh">"</span><span class="s">])
+                |&gt; count()
+                </span><span class="sh">'''</span>
+            <span class="p">}</span>
+            
+            <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span>
+                <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">influxdb_url</span><span class="si">}</span><span class="s">/api/v2/query</span><span class="sh">"</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">json</span><span class="o">=</span><span class="n">query</span>
+            <span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+                
+                <span class="c1"># Update metrics
+</span>                <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">result</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">results</span><span class="sh">'</span><span class="p">,</span> <span class="p">[{}])[</span><span class="mi">0</span><span class="p">].</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">series</span><span class="sh">'</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">table</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">values</span><span class="sh">'</span><span class="p">,</span> <span class="p">[]):</span>
+                        <span class="n">sensor_type</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># sensor_type tag
+</span>                        <span class="n">location</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>     <span class="c1"># location tag
+</span>                        <span class="n">count</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>        <span class="c1"># count value
+</span>                        
+                        <span class="n">sensor_data_total</span><span class="p">.</span><span class="nf">labels</span><span class="p">(</span>
+                            <span class="n">sensor_type</span><span class="o">=</span><span class="n">sensor_type</span><span class="p">,</span>
+                            <span class="n">location</span><span class="o">=</span><span class="n">location</span>
+                        <span class="p">).</span><span class="nf">inc</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+                
+                <span class="c1"># Quality score metrics
+</span>                <span class="n">self</span><span class="p">.</span><span class="nf">collect_quality_metrics</span><span class="p">()</span>
+                
+                <span class="c1"># Battery level metrics
+</span>                <span class="n">self</span><span class="p">.</span><span class="nf">collect_battery_metrics</span><span class="p">()</span>
+                
+                <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✅ Metrics collection completed: </span><span class="si">{</span><span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">❌ Metrics collection failed: </span><span class="si">{</span><span class="n">response</span><span class="p">.</span><span class="n">status_code</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+                
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">❌ Metrics collection error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">collect_quality_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Collect quality score metrics</span><span class="sh">"""</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'''</span><span class="s">
+            from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">)
+            |&gt; range(start: -5m)
+            |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r._field == </span><span class="sh">"</span><span class="s">quality</span><span class="sh">"</span><span class="s">)
+            |&gt; group(columns: [</span><span class="sh">"</span><span class="s">sensor_type</span><span class="sh">"</span><span class="s">, </span><span class="sh">"</span><span class="s">location</span><span class="sh">"</span><span class="s">])
+            |&gt; mean()
+            </span><span class="sh">'''</span>
+        <span class="p">}</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span>
+                <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">influxdb_url</span><span class="si">}</span><span class="s">/api/v2/query</span><span class="sh">"</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">json</span><span class="o">=</span><span class="n">query</span>
+            <span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+                
+                <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">result</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">results</span><span class="sh">'</span><span class="p">,</span> <span class="p">[{}])[</span><span class="mi">0</span><span class="p">].</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">series</span><span class="sh">'</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">table</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">values</span><span class="sh">'</span><span class="p">,</span> <span class="p">[]):</span>
+                        <span class="n">sensor_type</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">location</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">quality</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                        
+                        <span class="n">data_quality_gauge</span><span class="p">.</span><span class="nf">labels</span><span class="p">(</span>
+                            <span class="n">sensor_type</span><span class="o">=</span><span class="n">sensor_type</span><span class="p">,</span>
+                            <span class="n">location</span><span class="o">=</span><span class="n">location</span>
+                        <span class="p">).</span><span class="nf">set</span><span class="p">(</span><span class="n">quality</span><span class="p">)</span>
+                        
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Quality metrics collection error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">collect_battery_metrics</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Collect battery level metrics</span><span class="sh">"""</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">query</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'''</span><span class="s">
+            from(bucket: </span><span class="sh">"</span><span class="s">mybucket</span><span class="sh">"</span><span class="s">)
+            |&gt; range(start: -5m)
+            |&gt; filter(fn: (r) =&gt; r._measurement == </span><span class="sh">"</span><span class="s">sensor_data</span><span class="sh">"</span><span class="s">)
+            |&gt; filter(fn: (r) =&gt; r._field == </span><span class="sh">"</span><span class="s">battery_level</span><span class="sh">"</span><span class="s">)
+            |&gt; group(columns: [</span><span class="sh">"</span><span class="s">sensor_id</span><span class="sh">"</span><span class="s">])
+            |&gt; last()
+            </span><span class="sh">'''</span>
+        <span class="p">}</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span>
+                <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">influxdb_url</span><span class="si">}</span><span class="s">/api/v2/query</span><span class="sh">"</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">json</span><span class="o">=</span><span class="n">query</span>
+            <span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+                
+                <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">result</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">results</span><span class="sh">'</span><span class="p">,</span> <span class="p">[{}])[</span><span class="mi">0</span><span class="p">].</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">series</span><span class="sh">'</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">table</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">values</span><span class="sh">'</span><span class="p">,</span> <span class="p">[]):</span>
+                        <span class="n">sensor_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">battery_level</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                        
+                        <span class="n">battery_level_gauge</span><span class="p">.</span><span class="nf">labels</span><span class="p">(</span>
+                            <span class="n">sensor_id</span><span class="o">=</span><span class="n">sensor_id</span>
+                        <span class="p">).</span><span class="nf">set</span><span class="p">(</span><span class="n">battery_level</span><span class="p">)</span>
+                        
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Battery metrics collection error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">run_metrics_server</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8000</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Run metrics server</span><span class="sh">"""</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">🌐 Starting Prometheus metrics server: http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s">/metrics</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">start_http_server</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">collect_metrics</span><span class="p">()</span>
+            <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>  <span class="c1"># Collect every 30 seconds
+</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">collector</span> <span class="o">=</span> <span class="nc">PrometheusMetricsCollector</span><span class="p">()</span>
+    <span class="n">collector</span><span class="p">.</span><span class="nf">run_metrics_server</span><span class="p">()</span>
+</code></pre></div></div>
+
 <h3 id="project-overview">Project Overview</h3>
 
 <p>Build a system that collects, stores, and analyzes data in real-time from a large-scale IoT sensor network.</p>
@@ -1733,14 +2396,18 @@
       
       
       
+        
+      
+        
+      
       
       
       
       
         
         
-        <a href="" class="nav-link next">
-          다음:  →
+        <a href="/data-engineering/2025/09/29/time-series-database-integration-deployment.html" class="nav-link next">
+          다음: Part 3: Time Series Database 통합과 배포 - 현대적 TDB 생태계 완성 →
         </a>
       
     </div>

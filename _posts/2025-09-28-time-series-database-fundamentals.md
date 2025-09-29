@@ -434,6 +434,673 @@ scrape_configs:
 
 ## 🚀 실무 프로젝트: IoT 센서 데이터 수집 시스템 {#실무-프로젝트-iot-센서-데이터-수집-시스템}
 
+### 실습: InfluxDB 설치 및 기본 설정
+
+#### 1. InfluxDB 설치 및 초기 설정
+
+```bash
+#!/bin/bash
+# influxdb-setup.sh
+
+echo "🚀 InfluxDB 설치 및 설정 시작..."
+
+# Docker를 이용한 InfluxDB 설치
+docker run -d \
+  --name influxdb \
+  -p 8086:8086 \
+  -e DOCKER_INFLUXDB_INIT_MODE=setup \
+  -e DOCKER_INFLUXDB_INIT_USERNAME=admin \
+  -e DOCKER_INFLUXDB_INIT_PASSWORD=admin123 \
+  -e DOCKER_INFLUXDB_INIT_ORG=myorg \
+  -e DOCKER_INFLUXDB_INIT_BUCKET=mybucket \
+  influxdb:2.7-alpine
+
+# 서비스 시작 대기
+echo "⏳ InfluxDB 시작 대기 중..."
+sleep 10
+
+# 헬스 체크
+echo "🔍 InfluxDB 상태 확인..."
+curl -f http://localhost:8086/health
+
+if [ $? -eq 0 ]; then
+    echo "✅ InfluxDB가 성공적으로 시작되었습니다!"
+    echo "🌐 웹 UI: http://localhost:8086"
+    echo "👤 사용자명: admin"
+    echo "🔑 비밀번호: admin123"
+else
+    echo "❌ InfluxDB 시작에 실패했습니다."
+    exit 1
+fi
+```
+
+#### 2. Python 클라이언트를 이용한 데이터 수집
+
+```python
+# sensor_data_collector.py
+import time
+import random
+import json
+from datetime import datetime, timedelta
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import SYNCHRONOUS
+import logging
+
+class SensorDataCollector:
+    def __init__(self):
+        # InfluxDB 클라이언트 설정
+        self.client = InfluxDBClient(
+            url="http://localhost:8086",
+            token="admin-token",  # 실제 토큰으로 교체 필요
+            org="myorg"
+        )
+        
+        self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
+        self.query_api = self.client.query_api()
+        
+        # 로깅 설정
+        logging.basicConfig(level=logging.INFO)
+        self.logger = logging.getLogger(__name__)
+    
+    def generate_sensor_data(self, sensor_id, location, sensor_type):
+        """센서 데이터 생성 시뮬레이터"""
+        
+        # 센서 타입별 데이터 범위 설정
+        ranges = {
+            'temperature': (15, 35),    # 온도 (섭씨)
+            'humidity': (30, 80),       # 습도 (%)
+            'pressure': (1000, 1030),   # 기압 (hPa)
+            'vibration': (0, 10)        # 진동 (mm/s)
+        }
+        
+        base_value = random.uniform(*ranges.get(sensor_type, (0, 100)))
+        
+        # 시간에 따른 변화 시뮬레이션 (사인파)
+        time_factor = time.time() / 3600  # 시간 단위
+        variation = 2 * random.uniform(-1, 1) * abs(base_value * 0.1)
+        
+        value = base_value + variation
+        
+        return {
+            'measurement': 'sensor_data',
+            'tags': {
+                'sensor_id': sensor_id,
+                'location': location,
+                'sensor_type': sensor_type,
+                'status': 'active'
+            },
+            'fields': {
+                'value': round(value, 2),
+                'quality': random.randint(85, 100),
+                'battery_level': random.randint(20, 100),
+                'signal_strength': random.randint(-80, -30)
+            },
+            'timestamp': datetime.utcnow()
+        }
+    
+    def write_sensor_data(self, data_points):
+        """센서 데이터를 InfluxDB에 저장"""
+        try:
+            points = []
+            for data in data_points:
+                point = Point(data['measurement']) \
+                    .tag('sensor_id', data['tags']['sensor_id']) \
+                    .tag('location', data['tags']['location']) \
+                    .tag('sensor_type', data['tags']['sensor_type']) \
+                    .tag('status', data['tags']['status']) \
+                    .field('value', data['fields']['value']) \
+                    .field('quality', data['fields']['quality']) \
+                    .field('battery_level', data['fields']['battery_level']) \
+                    .field('signal_strength', data['fields']['signal_strength']) \
+                    .time(data['timestamp'])
+                
+                points.append(point)
+            
+            # 배치 쓰기
+            self.write_api.write(bucket="mybucket", record=points)
+            
+            self.logger.info(f"✅ {len(points)}개의 데이터 포인트가 성공적으로 저장되었습니다.")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"❌ 데이터 저장 실패: {e}")
+            return False
+    
+    def query_sensor_data(self, sensor_type=None, location=None, hours=1):
+        """센서 데이터 쿼리"""
+        try:
+            # Flux 쿼리 구성
+            query = f'''
+            from(bucket: "mybucket")
+            |> range(start: -{hours}h)
+            |> filter(fn: (r) => r._measurement == "sensor_data")
+            '''
+            
+            if sensor_type:
+                query += f'|> filter(fn: (r) => r.sensor_type == "{sensor_type}")\n'
+            
+            if location:
+                query += f'|> filter(fn: (r) => r.location == "{location}")\n'
+            
+            query += '|> sort(columns: ["_time"], desc: true)\n'
+            query += '|> limit(n: 100)'
+            
+            # 쿼리 실행
+            result = self.query_api.query(query)
+            
+            # 결과 변환
+            data_points = []
+            for table in result:
+                for record in table.records:
+                    data_points.append({
+                        'time': record.get_time(),
+                        'measurement': record.get_measurement(),
+                        'field': record.get_field(),
+                        'value': record.get_value(),
+                        'sensor_id': record.values.get('sensor_id'),
+                        'location': record.values.get('location'),
+                        'sensor_type': record.values.get('sensor_type')
+                    })
+            
+            return data_points
+            
+        except Exception as e:
+            self.logger.error(f"❌ 데이터 쿼리 실패: {e}")
+            return []
+    
+    def get_statistics(self, sensor_type, hours=24):
+        """센서 데이터 통계 조회"""
+        try:
+            query = f'''
+            from(bucket: "mybucket")
+            |> range(start: -{hours}h)
+            |> filter(fn: (r) => r._measurement == "sensor_data")
+            |> filter(fn: (r) => r.sensor_type == "{sensor_type}")
+            |> filter(fn: (r) => r._field == "value")
+            |> group(columns: ["location"])
+            |> mean()
+            |> yield(name: "mean")
+            
+            from(bucket: "mybucket")
+            |> range(start: -{hours}h)
+            |> filter(fn: (r) => r._measurement == "sensor_data")
+            |> filter(fn: (r) => r.sensor_type == "{sensor_type}")
+            |> filter(fn: (r) => r._field == "value")
+            |> group(columns: ["location"])
+            |> max()
+            |> yield(name: "max")
+            
+            from(bucket: "mybucket")
+            |> range(start: -{hours}h)
+            |> filter(fn: (r) => r._measurement == "sensor_data")
+            |> filter(fn: (r) => r.sensor_type == "{sensor_type}")
+            |> filter(fn: (r) => r._field == "value")
+            |> group(columns: ["location"])
+            |> min()
+            |> yield(name: "min")
+            '''
+            
+            result = self.query_api.query(query)
+            
+            stats = {}
+            for table in result:
+                table_name = table.name
+                for record in table.records:
+                    location = record.values.get('location')
+                    if location not in stats:
+                        stats[location] = {}
+                    stats[location][table_name] = record.get_value()
+            
+            return stats
+            
+        except Exception as e:
+            self.logger.error(f"❌ 통계 조회 실패: {e}")
+            return {}
+    
+    def run_data_collection(self, duration_minutes=10):
+        """데이터 수집 실행"""
+        self.logger.info(f"🔄 {duration_minutes}분간 센서 데이터 수집 시작...")
+        
+        # 센서 설정
+        sensors = [
+            {'id': 'sensor_001', 'location': 'seoul', 'type': 'temperature'},
+            {'id': 'sensor_002', 'location': 'seoul', 'type': 'humidity'},
+            {'id': 'sensor_003', 'location': 'busan', 'type': 'temperature'},
+            {'id': 'sensor_004', 'location': 'busan', 'type': 'pressure'},
+            {'id': 'sensor_005', 'location': 'daegu', 'type': 'vibration'},
+        ]
+        
+        start_time = time.time()
+        end_time = start_time + (duration_minutes * 60)
+        
+        while time.time() < end_time:
+            # 각 센서에서 데이터 생성
+            data_points = []
+            for sensor in sensors:
+                data = self.generate_sensor_data(
+                    sensor['id'], 
+                    sensor['location'], 
+                    sensor['type']
+                )
+                data_points.append(data)
+            
+            # 데이터 저장
+            self.write_sensor_data(data_points)
+            
+            # 5초 대기
+            time.sleep(5)
+        
+        self.logger.info("✅ 데이터 수집 완료!")
+        
+        # 수집된 데이터 통계 출력
+        self.print_collection_summary()
+    
+    def print_collection_summary(self):
+        """수집 요약 정보 출력"""
+        print("\n📊 데이터 수집 요약")
+        print("=" * 50)
+        
+        sensor_types = ['temperature', 'humidity', 'pressure', 'vibration']
+        
+        for sensor_type in sensor_types:
+            stats = self.get_statistics(sensor_type, hours=1)
+            
+            if stats:
+                print(f"\n📈 {sensor_type.upper()} 센서 통계 (최근 1시간):")
+                for location, values in stats.items():
+                    mean_val = values.get('mean', 0)
+                    max_val = values.get('max', 0)
+                    min_val = values.get('min', 0)
+                    print(f"   {location}: 평균={mean_val:.2f}, 최대={max_val:.2f}, 최소={min_val:.2f}")
+
+# 실행 예제
+if __name__ == "__main__":
+    collector = SensorDataCollector()
+    
+    # 데이터 수집 실행 (5분간)
+    collector.run_data_collection(duration_minutes=5)
+    
+    # 최근 데이터 조회
+    print("\n🔍 최근 온도 센서 데이터:")
+    recent_data = collector.query_sensor_data(sensor_type='temperature', hours=1)
+    
+    for data in recent_data[:5]:  # 최근 5개만 출력
+        print(f"   {data['time']}: {data['location']} - {data['value']}")
+```
+
+#### 3. TimescaleDB 비교 실습
+
+```python
+# timescale_comparison.py
+import psycopg2
+import time
+from datetime import datetime, timedelta
+import random
+
+class TimescaleComparison:
+    def __init__(self):
+        # TimescaleDB 연결
+        self.conn = psycopg2.connect(
+            host="localhost",
+            database="timeseries",
+            user="postgres",
+            password="postgres"
+        )
+        self.cur = self.conn.cursor()
+        
+        self.setup_timescale()
+    
+    def setup_timescale(self):
+        """TimescaleDB 초기 설정"""
+        # TimescaleDB 확장 활성화
+        self.cur.execute("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;")
+        
+        # 센서 데이터 테이블 생성
+        self.cur.execute("""
+            CREATE TABLE IF NOT EXISTS sensor_data (
+                time TIMESTAMPTZ NOT NULL,
+                sensor_id TEXT NOT NULL,
+                location TEXT NOT NULL,
+                sensor_type TEXT NOT NULL,
+                value DOUBLE PRECISION NOT NULL,
+                quality INTEGER NOT NULL,
+                battery_level INTEGER NOT NULL,
+                signal_strength INTEGER NOT NULL
+            );
+        """)
+        
+        # 하이퍼테이블로 변환
+        self.cur.execute("""
+            SELECT create_hypertable('sensor_data', 'time', 
+                                   if_not_exists => TRUE);
+        """)
+        
+        # 인덱스 생성
+        self.cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_sensor_data_sensor_type 
+            ON sensor_data (sensor_type, time DESC);
+        """)
+        
+        self.conn.commit()
+        print("✅ TimescaleDB 설정 완료")
+    
+    def insert_data(self, num_records=1000):
+        """대량 데이터 삽입 테스트"""
+        print(f"📝 {num_records}개 레코드 삽입 테스트...")
+        
+        start_time = time.time()
+        
+        # 배치 삽입
+        insert_query = """
+            INSERT INTO sensor_data 
+            (time, sensor_id, location, sensor_type, value, quality, battery_level, signal_strength)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+        """
+        
+        data = []
+        for i in range(num_records):
+            timestamp = datetime.utcnow() - timedelta(seconds=i)
+            data.append((
+                timestamp,
+                f'sensor_{i % 100:03d}',
+                random.choice(['seoul', 'busan', 'daegu']),
+                random.choice(['temperature', 'humidity', 'pressure']),
+                random.uniform(20, 30),
+                random.randint(80, 100),
+                random.randint(20, 100),
+                random.randint(-80, -30)
+            ))
+        
+        self.cur.executemany(insert_query, data)
+        self.conn.commit()
+        
+        end_time = time.time()
+        duration = end_time - start_time
+        
+        print(f"✅ 삽입 완료: {duration:.2f}초 ({num_records/duration:.0f} records/sec)")
+        return duration
+    
+    def query_performance_test(self):
+        """쿼리 성능 테스트"""
+        print("🔍 쿼리 성능 테스트...")
+        
+        queries = [
+            {
+                'name': '최근 1시간 데이터',
+                'query': """
+                    SELECT * FROM sensor_data 
+                    WHERE time >= NOW() - INTERVAL '1 hour' 
+                    ORDER BY time DESC 
+                    LIMIT 100;
+                """
+            },
+            {
+                'name': '온도 센서 평균값',
+                'query': """
+                    SELECT location, AVG(value) as avg_temp
+                    FROM sensor_data 
+                    WHERE sensor_type = 'temperature' 
+                    AND time >= NOW() - INTERVAL '1 hour'
+                    GROUP BY location;
+                """
+            },
+            {
+                'name': '시간 윈도우 집계',
+                'query': """
+                    SELECT time_bucket('5 minutes', time) as bucket,
+                           AVG(value) as avg_value
+                    FROM sensor_data 
+                    WHERE time >= NOW() - INTERVAL '1 hour'
+                    GROUP BY bucket
+                    ORDER BY bucket;
+                """
+            }
+        ]
+        
+        results = {}
+        
+        for query_info in queries:
+            start_time = time.time()
+            
+            self.cur.execute(query_info['query'])
+            rows = self.cur.fetchall()
+            
+            end_time = time.time()
+            duration = end_time - start_time
+            
+            results[query_info['name']] = {
+                'duration': duration,
+                'rows': len(rows)
+            }
+            
+            print(f"   {query_info['name']}: {duration:.3f}초 ({len(rows)} rows)")
+        
+        return results
+    
+    def compression_test(self):
+        """압축 테스트"""
+        print("🗜️ 압축 테스트...")
+        
+        # 압축 활성화
+        self.cur.execute("""
+            ALTER TABLE sensor_data SET (
+                timescaledb.compress,
+                timescaledb.compress_segmentby = 'sensor_type, location'
+            );
+        """)
+        
+        # 압축 정책 설정
+        self.cur.execute("""
+            SELECT add_compression_policy('sensor_data', INTERVAL '7 days');
+        """)
+        
+        self.conn.commit()
+        
+        # 압축 통계 조회
+        self.cur.execute("""
+            SELECT 
+                schemaname, tablename, 
+                pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size
+            FROM pg_tables 
+            WHERE tablename = 'sensor_data';
+        """)
+        
+        size_info = self.cur.fetchone()
+        print(f"   테이블 크기: {size_info[2]}")
+        
+        return size_info
+    
+    def cleanup(self):
+        """정리"""
+        self.cur.close()
+        self.conn.close()
+
+# 성능 비교 실행
+if __name__ == "__main__":
+    print("🚀 TimescaleDB vs InfluxDB 성능 비교")
+    print("=" * 50)
+    
+    # TimescaleDB 테스트
+    tsdb = TimescaleComparison()
+    
+    # 데이터 삽입 성능
+    insert_time = tsdb.insert_data(10000)
+    
+    # 쿼리 성능
+    query_results = tsdb.query_performance_test()
+    
+    # 압축 테스트
+    compression_info = tsdb.compression_test()
+    
+    tsdb.cleanup()
+    
+    print("\n📊 성능 비교 결과:")
+    print(f"   TimescaleDB 삽입: {insert_time:.2f}초")
+    print("   쿼리 성능:")
+    for name, result in query_results.items():
+        print(f"     {name}: {result['duration']:.3f}초")
+```
+
+#### 4. Prometheus 메트릭 수집 실습
+
+```python
+# prometheus_metrics.py
+from prometheus_client import Counter, Histogram, Gauge, start_http_server
+import time
+import requests
+import json
+from datetime import datetime
+
+# Prometheus 메트릭 정의
+sensor_data_total = Counter('sensor_data_points_total', 'Total sensor data points collected', ['sensor_type', 'location'])
+data_quality_gauge = Gauge('sensor_data_quality', 'Sensor data quality score', ['sensor_type', 'location'])
+battery_level_gauge = Gauge('sensor_battery_level', 'Sensor battery level', ['sensor_id'])
+collection_duration = Histogram('data_collection_duration_seconds', 'Time spent collecting data')
+
+class PrometheusMetricsCollector:
+    def __init__(self, influxdb_url="http://localhost:8086"):
+        self.influxdb_url = influxdb_url
+        self.headers = {
+            'Authorization': 'Token admin-token',
+            'Content-Type': 'application/json'
+        }
+    
+    @collection_duration.time()
+    def collect_metrics(self):
+        """InfluxDB에서 메트릭 수집"""
+        try:
+            # 최근 5분간의 데이터 쿼리
+            query = {
+                'query': '''
+                from(bucket: "mybucket")
+                |> range(start: -5m)
+                |> filter(fn: (r) => r._measurement == "sensor_data")
+                |> group(columns: ["sensor_type", "location"])
+                |> count()
+                '''
+            }
+            
+            response = requests.post(
+                f"{self.influxdb_url}/api/v2/query",
+                headers=self.headers,
+                json=query
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # 메트릭 업데이트
+                for table in result.get('results', [{}])[0].get('series', []):
+                    for row in table.get('values', []):
+                        sensor_type = row[0]  # sensor_type 태그
+                        location = row[1]     # location 태그
+                        count = row[2]        # 카운트 값
+                        
+                        sensor_data_total.labels(
+                            sensor_type=sensor_type,
+                            location=location
+                        ).inc(count)
+                
+                # 품질 점수 메트릭
+                self.collect_quality_metrics()
+                
+                # 배터리 레벨 메트릭
+                self.collect_battery_metrics()
+                
+                print(f"✅ 메트릭 수집 완료: {datetime.now()}")
+                
+            else:
+                print(f"❌ 메트릭 수집 실패: {response.status_code}")
+                
+        except Exception as e:
+            print(f"❌ 메트릭 수집 오류: {e}")
+    
+    def collect_quality_metrics(self):
+        """품질 점수 메트릭 수집"""
+        query = {
+            'query': '''
+            from(bucket: "mybucket")
+            |> range(start: -5m)
+            |> filter(fn: (r) => r._measurement == "sensor_data")
+            |> filter(fn: (r) => r._field == "quality")
+            |> group(columns: ["sensor_type", "location"])
+            |> mean()
+            '''
+        }
+        
+        try:
+            response = requests.post(
+                f"{self.influxdb_url}/api/v2/query",
+                headers=self.headers,
+                json=query
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                for table in result.get('results', [{}])[0].get('series', []):
+                    for row in table.get('values', []):
+                        sensor_type = row[0]
+                        location = row[1]
+                        quality = row[2]
+                        
+                        data_quality_gauge.labels(
+                            sensor_type=sensor_type,
+                            location=location
+                        ).set(quality)
+                        
+        except Exception as e:
+            print(f"품질 메트릭 수집 오류: {e}")
+    
+    def collect_battery_metrics(self):
+        """배터리 레벨 메트릭 수집"""
+        query = {
+            'query': '''
+            from(bucket: "mybucket")
+            |> range(start: -5m)
+            |> filter(fn: (r) => r._measurement == "sensor_data")
+            |> filter(fn: (r) => r._field == "battery_level")
+            |> group(columns: ["sensor_id"])
+            |> last()
+            '''
+        }
+        
+        try:
+            response = requests.post(
+                f"{self.influxdb_url}/api/v2/query",
+                headers=self.headers,
+                json=query
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                for table in result.get('results', [{}])[0].get('series', []):
+                    for row in table.get('values', []):
+                        sensor_id = row[0]
+                        battery_level = row[2]
+                        
+                        battery_level_gauge.labels(
+                            sensor_id=sensor_id
+                        ).set(battery_level)
+                        
+        except Exception as e:
+            print(f"배터리 메트릭 수집 오류: {e}")
+    
+    def run_metrics_server(self, port=8000):
+        """메트릭 서버 실행"""
+        print(f"🌐 Prometheus 메트릭 서버 시작: http://localhost:{port}/metrics")
+        start_http_server(port)
+        
+        while True:
+            self.collect_metrics()
+            time.sleep(30)  # 30초마다 수집
+
+if __name__ == "__main__":
+    collector = PrometheusMetricsCollector()
+    collector.run_metrics_server()
+```
+
 ### 프로젝트 개요
 
 대규모 IoT 센서 네트워크에서 실시간으로 데이터를 수집, 저장, 분석하는 시스템을 구축합니다.
