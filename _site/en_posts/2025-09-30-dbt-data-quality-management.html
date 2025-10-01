@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Everything about data quality management using dbt and major data platforms. A complete practical guide with Snowflake, BigQuery, Redshift, and more.">
+
+
+
+<title>Complete Guide to Data Quality Management with dbt - Core of Modern Data Pipelines - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Complete Guide to Data Quality Management with dbt - Core of Modern Data Pipelines">
+<meta property="og:description" content="Everything about data quality management using dbt and major data platforms. A complete practical guide with Snowflake, BigQuery, Redshift, and more.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2025-09-30-dbt-data-quality-management.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Complete Guide to Data Quality Management with dbt - Core of Modern Data Pipelines">
+<meta name="twitter:description" content="Everything about data quality management using dbt and major data platforms. A complete practical guide with Snowflake, BigQuery, Redshift, and more.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-quality/2025/09/30/dbt-data-quality-management.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2025-09-30-dbt-data-quality-management.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data quality</span>
+      <span class="post-date">2025년 09월 30일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Complete Guide to Data Quality Management with dbt - Core of Modern Data Pipelines</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">dbt</span>
+      
+        <span class="tag">DataQuality</span>
+      
+        <span class="tag">Snowflake</span>
+      
+        <span class="tag">BigQuery</span>
+      
+        <span class="tag">Redshift</span>
+      
+        <span class="tag">Databricks</span>
+      
+        <span class="tag">dbtCloud</span>
+      
+        <span class="tag">DataPipeline</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Modern data stack 시리즈</span>
+      <span class="series-order">Part 2</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 60 min</span>
+      
+      
+        <span class="difficulty">📊 Intermediate</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="complete-guide-to-data-quality-management-with-dbt---core-of-modern-data-pipelines">Complete Guide to Data Quality Management with dbt - Core of Modern Data Pipelines</h1>
+
+<blockquote>
+  <p>They say <strong>“data is the new oil”</strong>, but unrefined oil is useless. dbt is the core tool of that <strong>data refinery</strong>.</p>
+</blockquote>
+
+<p>In the modern data stack, dbt goes beyond being a simple transformation tool to serve as the <strong>guardian of data quality</strong>. This post covers how to build a complete data quality management system using dbt and major data platforms.</p>
+
+<hr />
+
+<h2 id="-table-of-contents">🎯 Table of Contents</h2>
+
+<ul>
+  <li><a href="#dbt-and-modern-data-stack">dbt and Modern Data Stack</a></li>
+  <li><a href="#dbt-ecosystem-and-major-platforms">dbt Ecosystem and Major Platforms</a></li>
+  <li><a href="#data-quality-testing-framework">Data Quality Testing Framework</a></li>
+  <li><a href="#building-production-data-quality-pipelines">Building Production Data Quality Pipelines</a></li>
+  <li><a href="#advanced-data-quality-strategies">Advanced Data Quality Strategies</a></li>
+  <li><a href="#hands-on-complete-dbt-data-quality-system">Hands-on: Complete dbt Data Quality System</a></li>
+</ul>
+
+<hr />
+
+<h2 id="dbt-and-modern-data-stack">🏗️ dbt and Modern Data Stack</h2>
+
+<h3 id="what-is-dbt">What is dbt?</h3>
+
+<p><strong>dbt (Data Build Tool)</strong> is a SQL-based data transformation tool and a core component of the modern data stack.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Feature</strong></th>
+      <th><strong>Description</strong></th>
+      <th><strong>Benefits</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>SQL-Centric</strong></td>
+      <td>Data transformation using SQL instead of Python/R</td>
+      <td>Easy for analysts to use</td>
+    </tr>
+    <tr>
+      <td><strong>Version Control</strong></td>
+      <td>Code management integrated with Git</td>
+      <td>Easy collaboration and change tracking</td>
+    </tr>
+    <tr>
+      <td><strong>Automated Testing</strong></td>
+      <td>Built-in data quality tests</td>
+      <td>Quality assurance and reliability</td>
+    </tr>
+    <tr>
+      <td><strong>Documentation</strong></td>
+      <td>Auto-generated data documentation</td>
+      <td>Improved team communication</td>
+    </tr>
+    <tr>
+      <td><strong>Modularity</strong></td>
+      <td>Reusable macros</td>
+      <td>Enhanced development efficiency</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="dbts-role-in-modern-data-stack">dbt’s Role in Modern Data Stack</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Raw Data Sources → Data Warehouse → dbt Layer → Analytics Layer
+                                      ↓
+                              Data Quality Tests
+                                      ↓
+                              Documentation
+</code></pre></div></div>
+
+<h3 id="importance-of-data-quality">Importance of Data Quality</h3>
+
+<p>The <strong>cost of bad data</strong> is beyond imagination:</p>
+
+<ul>
+  <li><strong>Decision Errors</strong>: Business losses due to incorrect data</li>
+  <li><strong>Trust Decline</strong>: Loss of team confidence in data</li>
+  <li><strong>Development Delays</strong>: Time spent resolving data issues</li>
+  <li><strong>Compliance Risks</strong>: Data governance issues</li>
+</ul>
+
+<hr />
+
+<h2 id="dbt-ecosystem-and-major-platforms">🌐 dbt Ecosystem and Major Platforms</h2>
+
+<h3 id="major-data-warehouse-platforms">Major Data Warehouse Platforms</h3>
+
+<h4 id="1-snowflake">1. <strong>Snowflake</strong></h4>
+<ul>
+  <li><strong>Features</strong>: Cloud-native, auto-scaling</li>
+  <li><strong>dbt Integration</strong>: Perfect support, optimized connectors</li>
+  <li><strong>Advantages</strong>: Excellent performance, ease of use</li>
+</ul>
+
+<h4 id="2-google-bigquery">2. <strong>Google BigQuery</strong></h4>
+<ul>
+  <li><strong>Features</strong>: Serverless, petabyte scale</li>
+  <li><strong>dbt Integration</strong>: Native support, fast queries</li>
+  <li><strong>Advantages</strong>: Cost efficiency, ML integration</li>
+</ul>
+
+<h4 id="3-amazon-redshift">3. <strong>Amazon Redshift</strong></h4>
+<ul>
+  <li><strong>Features</strong>: Cluster-based, high performance</li>
+  <li><strong>dbt Integration</strong>: Stable support, various options</li>
+  <li><strong>Advantages</strong>: AWS ecosystem integration, mature platform</li>
+</ul>
+
+<h4 id="4-databricks">4. <strong>Databricks</strong></h4>
+<ul>
+  <li><strong>Features</strong>: Lakehouse, ML integration</li>
+  <li><strong>dbt Integration</strong>: Unity Catalog support</li>
+  <li><strong>Advantages</strong>: Data lake + warehouse integration</li>
+</ul>
+
+<h3 id="dbt-execution-environment-comparison">dbt Execution Environment Comparison</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Environment</strong></th>
+      <th><strong>Features</strong></th>
+      <th><strong>Advantages</strong></th>
+      <th><strong>Disadvantages</strong></th>
+      <th><strong>Best For</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>dbt Cloud</strong></td>
+      <td>Cloud-based SaaS</td>
+      <td>Easy setup, UI provided</td>
+      <td>Cost involved</td>
+      <td>Small-medium teams, quick start</td>
+    </tr>
+    <tr>
+      <td><strong>dbt Core</strong></td>
+      <td>Open source, local execution</td>
+      <td>Free, customizable</td>
+      <td>Complex setup</td>
+      <td>Large teams, advanced needs</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="data-quality-testing-framework">🧪 Data Quality Testing Framework</h2>
+
+<h3 id="generic-tests">Generic Tests</h3>
+
+<h4 id="1-not_null-null-value-validation">1. <strong>not_null</strong>: NULL value validation</h4>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># models/schema.yml</span>
+<span class="na">models</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">users</span>
+    <span class="na">columns</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">user_id</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">email</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+</code></pre></div></div>
+
+<h4 id="2-unique-duplicate-value-validation">2. <strong>unique</strong>: Duplicate value validation</h4>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">models</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">users</span>
+    <span class="na">columns</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">user_id</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">unique</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+</code></pre></div></div>
+
+<h4 id="3-accepted_values-allowed-value-validation">3. <strong>accepted_values</strong>: Allowed value validation</h4>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">models</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">orders</span>
+    <span class="na">columns</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">status</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="na">accepted_values</span><span class="pi">:</span>
+              <span class="na">values</span><span class="pi">:</span> <span class="pi">[</span><span class="s1">'</span><span class="s">pending'</span><span class="pi">,</span> <span class="s1">'</span><span class="s">completed'</span><span class="pi">,</span> <span class="s1">'</span><span class="s">cancelled'</span><span class="pi">]</span>
+</code></pre></div></div>
+
+<h4 id="4-relationships-referential-integrity-validation">4. <strong>relationships</strong>: Referential integrity validation</h4>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">models</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">orders</span>
+    <span class="na">columns</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">user_id</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="na">relationships</span><span class="pi">:</span>
+              <span class="na">to</span><span class="pi">:</span> <span class="s">ref('users')</span>
+              <span class="na">field</span><span class="pi">:</span> <span class="s">user_id</span>
+</code></pre></div></div>
+
+<h3 id="custom-tests">Custom Tests</h3>
+
+<h4 id="1-single-test-file">1. <strong>Single test file</strong></h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- tests/assert_positive_amount.sql</span>
+<span class="k">select</span> <span class="o">*</span>
+<span class="k">from</span> <span class="k">ref</span><span class="p">(</span><span class="s1">'orders'</span><span class="p">)</span>
+<span class="k">where</span> <span class="n">amount</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+</code></pre></div></div>
+
+<h4 id="2-macro-based-test">2. <strong>Macro-based test</strong></h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- macros/test_positive_values.sql</span>
+<span class="n">test</span> <span class="n">positive_values</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="k">column_name</span><span class="p">)</span>
+  <span class="k">select</span> <span class="o">*</span>
+  <span class="k">from</span> <span class="n">model</span>
+  <span class="k">where</span> <span class="k">column_name</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+<span class="n">endtest</span>
+</code></pre></div></div>
+
+<h4 id="3-advanced-business-logic-test">3. <strong>Advanced business logic test</strong></h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- tests/assert_revenue_consistency.sql</span>
+<span class="k">with</span> <span class="n">daily_revenue</span> <span class="k">as</span> <span class="p">(</span>
+  <span class="k">select</span> 
+    <span class="n">date_trunc</span><span class="p">(</span><span class="s1">'day'</span><span class="p">,</span> <span class="n">created_at</span><span class="p">)</span> <span class="k">as</span> <span class="nb">date</span><span class="p">,</span>
+    <span class="k">sum</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span> <span class="k">as</span> <span class="n">total_revenue</span>
+  <span class="k">from</span> <span class="k">ref</span><span class="p">(</span><span class="s1">'orders'</span><span class="p">)</span>
+  <span class="k">where</span> <span class="n">status</span> <span class="o">=</span> <span class="s1">'completed'</span>
+  <span class="k">group</span> <span class="k">by</span> <span class="mi">1</span>
+<span class="p">),</span>
+<span class="n">revenue_changes</span> <span class="k">as</span> <span class="p">(</span>
+  <span class="k">select</span> 
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">lag</span><span class="p">(</span><span class="n">total_revenue</span><span class="p">)</span> <span class="n">over</span> <span class="p">(</span><span class="k">order</span> <span class="k">by</span> <span class="nb">date</span><span class="p">)</span> <span class="k">as</span> <span class="n">prev_revenue</span><span class="p">,</span>
+    <span class="k">abs</span><span class="p">(</span><span class="n">total_revenue</span> <span class="o">-</span> <span class="n">lag</span><span class="p">(</span><span class="n">total_revenue</span><span class="p">)</span> <span class="n">over</span> <span class="p">(</span><span class="k">order</span> <span class="k">by</span> <span class="nb">date</span><span class="p">))</span> <span class="o">/</span> 
+    <span class="n">lag</span><span class="p">(</span><span class="n">total_revenue</span><span class="p">)</span> <span class="n">over</span> <span class="p">(</span><span class="k">order</span> <span class="k">by</span> <span class="nb">date</span><span class="p">)</span> <span class="k">as</span> <span class="n">change_rate</span>
+  <span class="k">from</span> <span class="n">daily_revenue</span>
+<span class="p">)</span>
+<span class="k">select</span> <span class="o">*</span>
+<span class="k">from</span> <span class="n">revenue_changes</span>
+<span class="k">where</span> <span class="n">change_rate</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span>  <span class="c1">-- More than 50% dramatic change</span>
+</code></pre></div></div>
+
+<h3 id="test-execution-and-monitoring">Test Execution and Monitoring</h3>
+
+<h4 id="test-execution-commands">Test execution commands</h4>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Run all tests</span>
+dbt <span class="nb">test</span>
+
+<span class="c"># Run tests for specific model only</span>
+dbt <span class="nb">test</span> <span class="nt">--models</span> <span class="nb">users</span>
+
+<span class="c"># Save test results to file</span>
+dbt <span class="nb">test</span> <span class="nt">--store-failures</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="building-production-data-quality-pipelines">🏭 Building Production Data Quality Pipelines</h2>
+
+<h3 id="1-project-structure-design">1. Project Structure Design</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dbt_project/
+├── dbt_project.yml
+├── profiles.yml
+├── models/
+│   ├── staging/
+│   │   ├── stg_users.sql
+│   │   ├── stg_orders.sql
+│   │   └── schema.yml
+│   ├── intermediate/
+│   │   ├── int_user_metrics.sql
+│   │   └── schema.yml
+│   ├── marts/
+│   │   ├── core/
+│   │   │   ├── dim_users.sql
+│   │   │   ├── fact_orders.sql
+│   │   │   └── schema.yml
+│   │   └── marketing/
+│   │       ├── user_segments.sql
+│   │       └── schema.yml
+│   └── data_quality/
+│       ├── dq_summary.sql
+│       └── dq_alerts.sql
+├── tests/
+│   ├── assert_positive_amounts.sql
+│   └── assert_business_rules.sql
+├── macros/
+│   ├── test_positive_values.sql
+│   └── generate_schema_name.sql
+└── snapshots/
+    └── users_snapshot.sql
+</code></pre></div></div>
+
+<h3 id="2-data-quality-metrics-definition">2. Data Quality Metrics Definition</h3>
+
+<h4 id="quality-metrics-classification">Quality Metrics Classification</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Metric Category</strong></th>
+      <th><strong>Measurement</strong></th>
+      <th><strong>Target</strong></th>
+      <th><strong>Threshold</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Completeness</strong></td>
+      <td>NULL value ratio</td>
+      <td>&lt; 5%</td>
+      <td>5%</td>
+    </tr>
+    <tr>
+      <td><strong>Accuracy</strong></td>
+      <td>Data validation failure rate</td>
+      <td>&lt; 1%</td>
+      <td>1%</td>
+    </tr>
+    <tr>
+      <td><strong>Consistency</strong></td>
+      <td>Referential integrity violations</td>
+      <td>0%</td>
+      <td>0%</td>
+    </tr>
+    <tr>
+      <td><strong>Timeliness</strong></td>
+      <td>Data latency</td>
+      <td>&lt; 1 hour</td>
+      <td>1 hour</td>
+    </tr>
+    <tr>
+      <td><strong>Validity</strong></td>
+      <td>Format error ratio</td>
+      <td>&lt; 2%</td>
+      <td>2%</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="3-real-time-quality-monitoring">3. Real-time Quality Monitoring</h3>
+
+<h4 id="alert-system-building">Alert System Building</h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- models/data_quality/dq_alerts.sql</span>
+<span class="k">with</span> <span class="n">quality_violations</span> <span class="k">as</span> <span class="p">(</span>
+  <span class="k">select</span> 
+    <span class="s1">'high_null_rate'</span> <span class="k">as</span> <span class="n">alert_type</span><span class="p">,</span>
+    <span class="s1">'stg_users'</span> <span class="k">as</span> <span class="k">table_name</span><span class="p">,</span>
+    <span class="s1">'user_id'</span> <span class="k">as</span> <span class="k">column_name</span><span class="p">,</span>
+    <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">as</span> <span class="n">violation_count</span><span class="p">,</span>
+    <span class="k">current_timestamp</span> <span class="k">as</span> <span class="n">detected_at</span>
+  <span class="k">from</span> <span class="k">ref</span><span class="p">(</span><span class="s1">'stg_users'</span><span class="p">)</span>
+  <span class="k">where</span> <span class="n">user_id</span> <span class="k">is</span> <span class="k">null</span>
+  <span class="k">having</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">100</span>
+  
+  <span class="k">union</span> <span class="k">all</span>
+  
+  <span class="k">select</span> 
+    <span class="s1">'invalid_email_format'</span> <span class="k">as</span> <span class="n">alert_type</span><span class="p">,</span>
+    <span class="s1">'stg_users'</span> <span class="k">as</span> <span class="k">table_name</span><span class="p">,</span>
+    <span class="s1">'email'</span> <span class="k">as</span> <span class="k">column_name</span><span class="p">,</span>
+    <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">as</span> <span class="n">violation_count</span><span class="p">,</span>
+    <span class="k">current_timestamp</span> <span class="k">as</span> <span class="n">detected_at</span>
+  <span class="k">from</span> <span class="k">ref</span><span class="p">(</span><span class="s1">'stg_users'</span><span class="p">)</span>
+  <span class="k">where</span> <span class="n">email</span> <span class="k">not</span> <span class="k">like</span> <span class="s1">'%@%'</span>
+  <span class="k">having</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">50</span>
+<span class="p">)</span>
+
+<span class="k">select</span> <span class="o">*</span>
+<span class="k">from</span> <span class="n">quality_violations</span>
+<span class="k">where</span> <span class="n">violation_count</span> <span class="o">&gt;</span> <span class="mi">0</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="advanced-data-quality-strategies">🚀 Advanced Data Quality Strategies</h2>
+
+<h3 id="1-data-drift-detection">1. Data Drift Detection</h3>
+
+<h4 id="statistical-drift-detection">Statistical Drift Detection</h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- models/data_quality/drift_detection.sql</span>
+<span class="k">with</span> <span class="n">current_stats</span> <span class="k">as</span> <span class="p">(</span>
+  <span class="k">select</span> 
+    <span class="k">avg</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span> <span class="k">as</span> <span class="n">mean_amount</span><span class="p">,</span>
+    <span class="n">stddev</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span> <span class="k">as</span> <span class="n">std_amount</span><span class="p">,</span>
+    <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">as</span> <span class="n">record_count</span><span class="p">,</span>
+    <span class="k">current_date</span> <span class="k">as</span> <span class="n">measurement_date</span>
+  <span class="k">from</span> <span class="k">ref</span><span class="p">(</span><span class="s1">'fact_orders'</span><span class="p">)</span>
+  <span class="k">where</span> <span class="n">created_at</span> <span class="o">&gt;=</span> <span class="k">current_date</span> <span class="o">-</span> <span class="mi">7</span>
+<span class="p">),</span>
+<span class="n">historical_stats</span> <span class="k">as</span> <span class="p">(</span>
+  <span class="k">select</span> 
+    <span class="k">avg</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span> <span class="k">as</span> <span class="n">mean_amount</span><span class="p">,</span>
+    <span class="n">stddev</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span> <span class="k">as</span> <span class="n">std_amount</span><span class="p">,</span>
+    <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">as</span> <span class="n">record_count</span><span class="p">,</span>
+    <span class="k">current_date</span> <span class="o">-</span> <span class="mi">7</span> <span class="k">as</span> <span class="n">measurement_date</span>
+  <span class="k">from</span> <span class="k">ref</span><span class="p">(</span><span class="s1">'fact_orders'</span><span class="p">)</span>
+  <span class="k">where</span> <span class="n">created_at</span> <span class="o">&gt;=</span> <span class="k">current_date</span> <span class="o">-</span> <span class="mi">14</span>
+    <span class="k">and</span> <span class="n">created_at</span> <span class="o">&lt;</span> <span class="k">current_date</span> <span class="o">-</span> <span class="mi">7</span>
+<span class="p">),</span>
+<span class="n">drift_analysis</span> <span class="k">as</span> <span class="p">(</span>
+  <span class="k">select</span> 
+    <span class="k">c</span><span class="p">.</span><span class="n">mean_amount</span> <span class="k">as</span> <span class="n">current_mean</span><span class="p">,</span>
+    <span class="n">h</span><span class="p">.</span><span class="n">mean_amount</span> <span class="k">as</span> <span class="n">historical_mean</span><span class="p">,</span>
+    <span class="k">abs</span><span class="p">(</span><span class="k">c</span><span class="p">.</span><span class="n">mean_amount</span> <span class="o">-</span> <span class="n">h</span><span class="p">.</span><span class="n">mean_amount</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span><span class="p">.</span><span class="n">mean_amount</span> <span class="k">as</span> <span class="n">mean_drift_ratio</span><span class="p">,</span>
+    <span class="k">c</span><span class="p">.</span><span class="n">std_amount</span> <span class="k">as</span> <span class="n">current_std</span><span class="p">,</span>
+    <span class="n">h</span><span class="p">.</span><span class="n">std_amount</span> <span class="k">as</span> <span class="n">historical_std</span><span class="p">,</span>
+    <span class="k">abs</span><span class="p">(</span><span class="k">c</span><span class="p">.</span><span class="n">std_amount</span> <span class="o">-</span> <span class="n">h</span><span class="p">.</span><span class="n">std_amount</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span><span class="p">.</span><span class="n">std_amount</span> <span class="k">as</span> <span class="n">std_drift_ratio</span><span class="p">,</span>
+    <span class="k">c</span><span class="p">.</span><span class="n">record_count</span> <span class="k">as</span> <span class="n">current_count</span><span class="p">,</span>
+    <span class="n">h</span><span class="p">.</span><span class="n">record_count</span> <span class="k">as</span> <span class="n">historical_count</span><span class="p">,</span>
+    <span class="k">abs</span><span class="p">(</span><span class="k">c</span><span class="p">.</span><span class="n">record_count</span> <span class="o">-</span> <span class="n">h</span><span class="p">.</span><span class="n">record_count</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span><span class="p">.</span><span class="n">record_count</span> <span class="k">as</span> <span class="n">count_drift_ratio</span>
+  <span class="k">from</span> <span class="n">current_stats</span> <span class="k">c</span>
+  <span class="k">cross</span> <span class="k">join</span> <span class="n">historical_stats</span> <span class="n">h</span>
+<span class="p">)</span>
+
+<span class="k">select</span> 
+  <span class="o">*</span><span class="p">,</span>
+  <span class="k">case</span> 
+    <span class="k">when</span> <span class="n">mean_drift_ratio</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">.</span><span class="mi">2</span> <span class="k">or</span> <span class="n">std_drift_ratio</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">.</span><span class="mi">3</span> <span class="k">or</span> <span class="n">count_drift_ratio</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span> 
+    <span class="k">then</span> <span class="s1">'drift_detected'</span>
+    <span class="k">else</span> <span class="s1">'normal'</span>
+  <span class="k">end</span> <span class="k">as</span> <span class="n">drift_status</span>
+<span class="k">from</span> <span class="n">drift_analysis</span>
+</code></pre></div></div>
+
+<h3 id="2-automated-quality-management">2. Automated Quality Management</h3>
+
+<h4 id="cicd-pipeline-integration">CI/CD Pipeline Integration</h4>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># .github/workflows/dbt-quality-check.yml</span>
+<span class="na">name</span><span class="pi">:</span> <span class="s">dbt Data Quality Check</span>
+
+<span class="na">on</span><span class="pi">:</span>
+  <span class="na">pull_request</span><span class="pi">:</span>
+    <span class="na">paths</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">models/**'</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">tests/**'</span>
+
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">quality-check</span><span class="pi">:</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    
+    <span class="na">steps</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v2</span>
+    
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Set up Python</span>
+      <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/setup-python@v2</span>
+      <span class="na">with</span><span class="pi">:</span>
+        <span class="na">python-version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3.8'</span>
+    
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Install dbt</span>
+      <span class="na">run</span><span class="pi">:</span> <span class="s">pip install dbt-snowflake</span>
+    
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run dbt tests</span>
+      <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
+        <span class="s">dbt deps</span>
+        <span class="s">dbt test --store-failures</span>
+</code></pre></div></div>
+
+<h3 id="3-team-collaboration-and-governance">3. Team Collaboration and Governance</h3>
+
+<h4 id="data-contracts">Data Contracts</h4>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># models/schema.yml</span>
+<span class="na">models</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">users</span>
+    <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">User</span><span class="nv"> </span><span class="s">dimension</span><span class="nv"> </span><span class="s">table</span><span class="nv"> </span><span class="s">with</span><span class="nv"> </span><span class="s">complete</span><span class="nv"> </span><span class="s">user</span><span class="nv"> </span><span class="s">information"</span>
+    <span class="na">columns</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">user_id</span>
+        <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Unique</span><span class="nv"> </span><span class="s">identifier</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">each</span><span class="nv"> </span><span class="s">user"</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+          <span class="pi">-</span> <span class="s">unique</span>
+        <span class="na">data_type</span><span class="pi">:</span> <span class="s">integer</span>
+      
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">email</span>
+        <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">User's</span><span class="nv"> </span><span class="s">email</span><span class="nv"> </span><span class="s">address"</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+          <span class="pi">-</span> <span class="s">not_empty_string</span>
+        <span class="na">data_type</span><span class="pi">:</span> <span class="s">string</span>
+      
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">created_at</span>
+        <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Timestamp</span><span class="nv"> </span><span class="s">when</span><span class="nv"> </span><span class="s">user</span><span class="nv"> </span><span class="s">was</span><span class="nv"> </span><span class="s">created"</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+        <span class="na">data_type</span><span class="pi">:</span> <span class="s">timestamp</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="hands-on-complete-dbt-data-quality-system">🛠️ Hands-on: Complete dbt Data Quality System</h2>
+
+<h3 id="1-snowflake--dbt-cloud-setup">1. Snowflake + dbt Cloud Setup</h3>
+
+<h4 id="project-initial-configuration">Project Initial Configuration</h4>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># dbt_project.yml</span>
+<span class="na">name</span><span class="pi">:</span> <span class="s1">'</span><span class="s">ecommerce_data_quality'</span>
+<span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">1.0.0'</span>
+<span class="na">config-version</span><span class="pi">:</span> <span class="m">2</span>
+
+<span class="na">profile</span><span class="pi">:</span> <span class="s1">'</span><span class="s">snowflake_ecommerce'</span>
+
+<span class="na">model-paths</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">models"</span><span class="pi">]</span>
+<span class="na">analysis-paths</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">analysis"</span><span class="pi">]</span>
+<span class="na">test-paths</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">tests"</span><span class="pi">]</span>
+<span class="na">seed-paths</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">data"</span><span class="pi">]</span>
+<span class="na">macro-paths</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">macros"</span><span class="pi">]</span>
+<span class="na">snapshot-paths</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">snapshots"</span><span class="pi">]</span>
+
+<span class="na">target-path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">target"</span>
+<span class="na">clean-targets</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s2">"</span><span class="s">target"</span>
+  <span class="pi">-</span> <span class="s2">"</span><span class="s">dbt_packages"</span>
+
+<span class="na">models</span><span class="pi">:</span>
+  <span class="na">ecommerce_data_quality</span><span class="pi">:</span>
+    <span class="na">staging</span><span class="pi">:</span>
+      <span class="na">materialized</span><span class="pi">:</span> <span class="s">view</span>
+    <span class="na">intermediate</span><span class="pi">:</span>
+      <span class="na">materialized</span><span class="pi">:</span> <span class="s">view</span>
+    <span class="na">marts</span><span class="pi">:</span>
+      <span class="na">materialized</span><span class="pi">:</span> <span class="s">table</span>
+    <span class="na">data_quality</span><span class="pi">:</span>
+      <span class="na">materialized</span><span class="pi">:</span> <span class="s">table</span>
+
+<span class="na">tests</span><span class="pi">:</span>
+  <span class="na">store_failures</span><span class="pi">:</span> <span class="kc">true</span>
+</code></pre></div></div>
+
+<h3 id="2-production-data-modeling-example">2. Production Data Modeling Example</h3>
+
+<h4 id="staging-model">Staging Model</h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- models/staging/stg_users.sql</span>
+<span class="k">select</span> 
+  <span class="n">user_id</span><span class="p">,</span>
+  <span class="n">email</span><span class="p">,</span>
+  <span class="n">first_name</span><span class="p">,</span>
+  <span class="n">last_name</span><span class="p">,</span>
+  <span class="n">phone</span><span class="p">,</span>
+  <span class="n">created_at</span><span class="p">,</span>
+  <span class="n">updated_at</span><span class="p">,</span>
+  <span class="n">is_active</span>
+<span class="k">from</span> <span class="k">source</span><span class="p">(</span><span class="s1">'raw_data'</span><span class="p">,</span> <span class="s1">'users'</span><span class="p">)</span>
+<span class="k">where</span> <span class="n">created_at</span> <span class="k">is</span> <span class="k">not</span> <span class="k">null</span>
+</code></pre></div></div>
+
+<h4 id="intermediate-model">Intermediate Model</h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- models/intermediate/int_user_orders.sql</span>
+<span class="k">with</span> <span class="n">user_orders</span> <span class="k">as</span> <span class="p">(</span>
+  <span class="k">select</span> 
+    <span class="n">u</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+    <span class="n">u</span><span class="p">.</span><span class="n">email</span><span class="p">,</span>
+    <span class="n">u</span><span class="p">.</span><span class="n">created_at</span> <span class="k">as</span> <span class="n">user_created_at</span><span class="p">,</span>
+    <span class="k">count</span><span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="n">order_id</span><span class="p">)</span> <span class="k">as</span> <span class="n">total_orders</span><span class="p">,</span>
+    <span class="k">sum</span><span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="n">amount</span><span class="p">)</span> <span class="k">as</span> <span class="n">total_spent</span><span class="p">,</span>
+    <span class="k">avg</span><span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="n">amount</span><span class="p">)</span> <span class="k">as</span> <span class="n">avg_order_value</span><span class="p">,</span>
+    <span class="k">max</span><span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="n">created_at</span><span class="p">)</span> <span class="k">as</span> <span class="n">last_order_date</span>
+  <span class="k">from</span> <span class="k">ref</span><span class="p">(</span><span class="s1">'stg_users'</span><span class="p">)</span> <span class="n">u</span>
+  <span class="k">left</span> <span class="k">join</span> <span class="k">ref</span><span class="p">(</span><span class="s1">'stg_orders'</span><span class="p">)</span> <span class="n">o</span> <span class="k">on</span> <span class="n">u</span><span class="p">.</span><span class="n">user_id</span> <span class="o">=</span> <span class="n">o</span><span class="p">.</span><span class="n">user_id</span>
+  <span class="k">group</span> <span class="k">by</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span>
+<span class="p">)</span>
+
+<span class="k">select</span> 
+  <span class="o">*</span><span class="p">,</span>
+  <span class="k">case</span> 
+    <span class="k">when</span> <span class="n">total_spent</span> <span class="o">&gt;</span> <span class="mi">1000</span> <span class="k">then</span> <span class="s1">'high_value'</span>
+    <span class="k">when</span> <span class="n">total_spent</span> <span class="o">&gt;</span> <span class="mi">500</span> <span class="k">then</span> <span class="s1">'medium_value'</span>
+    <span class="k">else</span> <span class="s1">'low_value'</span>
+  <span class="k">end</span> <span class="k">as</span> <span class="n">customer_segment</span><span class="p">,</span>
+  
+  <span class="k">case</span> 
+    <span class="k">when</span> <span class="n">last_order_date</span> <span class="o">&gt;=</span> <span class="k">current_date</span> <span class="o">-</span> <span class="mi">30</span> <span class="k">then</span> <span class="s1">'active'</span>
+    <span class="k">when</span> <span class="n">last_order_date</span> <span class="o">&gt;=</span> <span class="k">current_date</span> <span class="o">-</span> <span class="mi">90</span> <span class="k">then</span> <span class="s1">'at_risk'</span>
+    <span class="k">else</span> <span class="s1">'inactive'</span>
+  <span class="k">end</span> <span class="k">as</span> <span class="n">customer_status</span>
+<span class="k">from</span> <span class="n">user_orders</span>
+</code></pre></div></div>
+
+<h4 id="mart-model">Mart Model</h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- models/marts/core/dim_users.sql</span>
+<span class="k">select</span> 
+  <span class="n">user_id</span><span class="p">,</span>
+  <span class="n">email</span><span class="p">,</span>
+  <span class="n">first_name</span><span class="p">,</span>
+  <span class="n">last_name</span><span class="p">,</span>
+  <span class="n">phone</span><span class="p">,</span>
+  <span class="n">user_created_at</span><span class="p">,</span>
+  <span class="n">total_orders</span><span class="p">,</span>
+  <span class="n">total_spent</span><span class="p">,</span>
+  <span class="n">avg_order_value</span><span class="p">,</span>
+  <span class="n">customer_segment</span><span class="p">,</span>
+  <span class="n">customer_status</span><span class="p">,</span>
+  <span class="k">current_timestamp</span> <span class="k">as</span> <span class="n">dbt_updated_at</span>
+<span class="k">from</span> <span class="k">ref</span><span class="p">(</span><span class="s1">'int_user_orders'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-comprehensive-test-suite">3. Comprehensive Test Suite</h3>
+
+<h4 id="schema-tests">Schema Tests</h4>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># models/staging/schema.yml</span>
+<span class="na">version</span><span class="pi">:</span> <span class="m">2</span>
+
+<span class="na">sources</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">raw_data</span>
+    <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Raw</span><span class="nv"> </span><span class="s">data</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">source</span><span class="nv"> </span><span class="s">systems"</span>
+    <span class="na">tables</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">users</span>
+        <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Raw</span><span class="nv"> </span><span class="s">user</span><span class="nv"> </span><span class="s">data"</span>
+        <span class="na">columns</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">user_id</span>
+            <span class="na">tests</span><span class="pi">:</span>
+              <span class="pi">-</span> <span class="s">not_null</span>
+              <span class="pi">-</span> <span class="s">unique</span>
+          <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">email</span>
+            <span class="na">tests</span><span class="pi">:</span>
+              <span class="pi">-</span> <span class="s">not_null</span>
+              <span class="pi">-</span> <span class="s">not_empty_string</span>
+          <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">created_at</span>
+            <span class="na">tests</span><span class="pi">:</span>
+              <span class="pi">-</span> <span class="s">not_null</span>
+
+<span class="na">models</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">stg_users</span>
+    <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Cleaned</span><span class="nv"> </span><span class="s">user</span><span class="nv"> </span><span class="s">data</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">staging</span><span class="nv"> </span><span class="s">layer"</span>
+    <span class="na">columns</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">user_id</span>
+        <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Unique</span><span class="nv"> </span><span class="s">user</span><span class="nv"> </span><span class="s">identifier"</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+          <span class="pi">-</span> <span class="s">unique</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">email</span>
+        <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">User</span><span class="nv"> </span><span class="s">email</span><span class="nv"> </span><span class="s">address"</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+          <span class="pi">-</span> <span class="s">not_empty_string</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">is_active</span>
+        <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">User</span><span class="nv"> </span><span class="s">active</span><span class="nv"> </span><span class="s">status"</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+          <span class="pi">-</span> <span class="na">accepted_values</span><span class="pi">:</span>
+              <span class="na">values</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">true</span><span class="pi">,</span> <span class="nv">false</span><span class="pi">]</span>
+</code></pre></div></div>
+
+<h4 id="business-logic-tests">Business Logic Tests</h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- tests/assert_positive_order_amounts.sql</span>
+<span class="k">select</span> <span class="o">*</span>
+<span class="k">from</span> <span class="k">ref</span><span class="p">(</span><span class="s1">'stg_orders'</span><span class="p">)</span>
+<span class="k">where</span> <span class="n">amount</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+</code></pre></div></div>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- tests/assert_user_order_consistency.sql</span>
+<span class="k">with</span> <span class="n">user_order_check</span> <span class="k">as</span> <span class="p">(</span>
+  <span class="k">select</span> 
+    <span class="n">u</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+    <span class="k">count</span><span class="p">(</span><span class="k">distinct</span> <span class="n">o</span><span class="p">.</span><span class="n">order_id</span><span class="p">)</span> <span class="k">as</span> <span class="n">order_count</span><span class="p">,</span>
+    <span class="k">sum</span><span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="n">amount</span><span class="p">)</span> <span class="k">as</span> <span class="n">total_amount</span>
+  <span class="k">from</span> <span class="k">ref</span><span class="p">(</span><span class="s1">'stg_users'</span><span class="p">)</span> <span class="n">u</span>
+  <span class="k">left</span> <span class="k">join</span> <span class="k">ref</span><span class="p">(</span><span class="s1">'stg_orders'</span><span class="p">)</span> <span class="n">o</span> <span class="k">on</span> <span class="n">u</span><span class="p">.</span><span class="n">user_id</span> <span class="o">=</span> <span class="n">o</span><span class="p">.</span><span class="n">user_id</span>
+  <span class="k">group</span> <span class="k">by</span> <span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="k">select</span> <span class="o">*</span>
+<span class="k">from</span> <span class="n">user_order_check</span>
+<span class="k">where</span> <span class="n">total_amount</span> <span class="o">&lt;</span> <span class="mi">0</span>
+   <span class="k">or</span> <span class="n">order_count</span> <span class="o">&lt;</span> <span class="mi">0</span>
+</code></pre></div></div>
+
+<h3 id="4-data-quality-monitoring-dashboard">4. Data Quality Monitoring Dashboard</h3>
+
+<h4 id="quality-metrics-aggregation">Quality Metrics Aggregation</h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- models/data_quality/quality_metrics_summary.sql</span>
+<span class="k">with</span> <span class="n">test_results</span> <span class="k">as</span> <span class="p">(</span>
+  <span class="k">select</span> 
+    <span class="n">node_name</span><span class="p">,</span>
+    <span class="n">status</span><span class="p">,</span>
+    <span class="n">execution_time</span><span class="p">,</span>
+    <span class="n">rows_affected</span><span class="p">,</span>
+    <span class="n">created_at</span>
+  <span class="k">from</span> <span class="k">ref</span><span class="p">(</span><span class="s1">'test_results'</span><span class="p">)</span>
+  <span class="k">where</span> <span class="n">created_at</span> <span class="o">&gt;=</span> <span class="k">current_date</span> <span class="o">-</span> <span class="mi">7</span>
+<span class="p">),</span>
+
+<span class="n">daily_metrics</span> <span class="k">as</span> <span class="p">(</span>
+  <span class="k">select</span> 
+    <span class="n">date_trunc</span><span class="p">(</span><span class="s1">'day'</span><span class="p">,</span> <span class="n">created_at</span><span class="p">)</span> <span class="k">as</span> <span class="nb">date</span><span class="p">,</span>
+    <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">as</span> <span class="n">total_tests</span><span class="p">,</span>
+    <span class="k">sum</span><span class="p">(</span><span class="k">case</span> <span class="k">when</span> <span class="n">status</span> <span class="o">=</span> <span class="s1">'pass'</span> <span class="k">then</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">end</span><span class="p">)</span> <span class="k">as</span> <span class="n">passed_tests</span><span class="p">,</span>
+    <span class="k">sum</span><span class="p">(</span><span class="k">case</span> <span class="k">when</span> <span class="n">status</span> <span class="o">=</span> <span class="s1">'fail'</span> <span class="k">then</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">end</span><span class="p">)</span> <span class="k">as</span> <span class="n">failed_tests</span><span class="p">,</span>
+    <span class="k">avg</span><span class="p">(</span><span class="n">execution_time</span><span class="p">)</span> <span class="k">as</span> <span class="n">avg_execution_time</span>
+  <span class="k">from</span> <span class="n">test_results</span>
+  <span class="k">group</span> <span class="k">by</span> <span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="k">select</span> 
+  <span class="o">*</span><span class="p">,</span>
+  <span class="n">round</span><span class="p">(</span><span class="n">passed_tests</span> <span class="o">*</span> <span class="mi">100</span><span class="p">.</span><span class="mi">0</span> <span class="o">/</span> <span class="n">total_tests</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">as</span> <span class="n">pass_rate</span><span class="p">,</span>
+  <span class="k">case</span> 
+    <span class="k">when</span> <span class="n">passed_tests</span> <span class="o">*</span> <span class="mi">100</span><span class="p">.</span><span class="mi">0</span> <span class="o">/</span> <span class="n">total_tests</span> <span class="o">&gt;=</span> <span class="mi">95</span> <span class="k">then</span> <span class="s1">'excellent'</span>
+    <span class="k">when</span> <span class="n">passed_tests</span> <span class="o">*</span> <span class="mi">100</span><span class="p">.</span><span class="mi">0</span> <span class="o">/</span> <span class="n">total_tests</span> <span class="o">&gt;=</span> <span class="mi">90</span> <span class="k">then</span> <span class="s1">'good'</span>
+    <span class="k">when</span> <span class="n">passed_tests</span> <span class="o">*</span> <span class="mi">100</span><span class="p">.</span><span class="mi">0</span> <span class="o">/</span> <span class="n">total_tests</span> <span class="o">&gt;=</span> <span class="mi">80</span> <span class="k">then</span> <span class="s1">'warning'</span>
+    <span class="k">else</span> <span class="s1">'critical'</span>
+  <span class="k">end</span> <span class="k">as</span> <span class="n">quality_status</span>
+<span class="k">from</span> <span class="n">daily_metrics</span>
+<span class="k">order</span> <span class="k">by</span> <span class="nb">date</span> <span class="k">desc</span>
+</code></pre></div></div>
+
+<h3 id="5-automated-deployment-and-monitoring">5. Automated Deployment and Monitoring</h3>
+
+<h4 id="operations-monitoring-script">Operations Monitoring Script</h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># scripts/quality_monitor.py
+</span><span class="kn">import</span> <span class="n">requests</span>
+<span class="kn">import</span> <span class="n">json</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="k">class</span> <span class="nc">DataQualityMonitor</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">dbt_cloud_token</span><span class="p">,</span> <span class="n">account_id</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">token</span> <span class="o">=</span> <span class="n">dbt_cloud_token</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">account_id</span> <span class="o">=</span> <span class="n">account_id</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">base_url</span> <span class="o">=</span> <span class="sh">"</span><span class="s">https://cloud.getdbt.com/api/v2</span><span class="sh">"</span>
+    
+    <span class="k">def</span> <span class="nf">get_latest_run</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Get latest dbt run results</span><span class="sh">"""</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">'</span><span class="s">Authorization</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">'</span><span class="s">Token </span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">token</span><span class="si">}</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">Content-Type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">application/json</span><span class="sh">'</span>
+        <span class="p">}</span>
+        
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span>
+            <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">base_url</span><span class="si">}</span><span class="s">/accounts/</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">account_id</span><span class="si">}</span><span class="s">/runs/</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">job_definition_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">job_id</span><span class="p">,</span> <span class="sh">'</span><span class="s">limit</span><span class="sh">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="n">runs</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()[</span><span class="sh">'</span><span class="s">data</span><span class="sh">'</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">runs</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">runs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">check_quality_status</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Check data quality status</span><span class="sh">"""</span>
+        <span class="n">run</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_latest_run</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">run</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="sh">'</span><span class="s">status</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">error</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">No recent runs found</span><span class="sh">'</span><span class="p">}</span>
+        
+        <span class="n">run_id</span> <span class="o">=</span> <span class="n">run</span><span class="p">[</span><span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">]</span>
+        
+        <span class="c1"># Get test results
+</span>        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span>
+            <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">base_url</span><span class="si">}</span><span class="s">/accounts/</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">account_id</span><span class="si">}</span><span class="s">/runs/</span><span class="si">{</span><span class="n">run_id</span><span class="si">}</span><span class="s">/</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">Authorization</span><span class="sh">'</span><span class="p">:</span> <span class="sa">f</span><span class="sh">'</span><span class="s">Token </span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">token</span><span class="si">}</span><span class="sh">'</span><span class="p">}</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="n">run_details</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()[</span><span class="sh">'</span><span class="s">data</span><span class="sh">'</span><span class="p">]</span>
+            
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="sh">'</span><span class="s">status</span><span class="sh">'</span><span class="p">:</span> <span class="n">run_details</span><span class="p">[</span><span class="sh">'</span><span class="s">status</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">finished_at</span><span class="sh">'</span><span class="p">:</span> <span class="n">run_details</span><span class="p">[</span><span class="sh">'</span><span class="s">finished_at</span><span class="sh">'</span><span class="p">],</span>
+                <span class="sh">'</span><span class="s">job_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">job_id</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">run_id</span><span class="sh">'</span><span class="p">:</span> <span class="n">run_id</span>
+            <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="p">{</span><span class="sh">'</span><span class="s">status</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">error</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Failed to fetch run details</span><span class="sh">'</span><span class="p">}</span>
+    
+    <span class="k">def</span> <span class="nf">send_alert</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="sh">'</span><span class="s">info</span><span class="sh">'</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Send alerts (Slack, Email, etc.)</span><span class="sh">"""</span>
+        <span class="c1"># Slack webhook or email sending logic
+</span>        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">[</span><span class="si">{</span><span class="n">severity</span><span class="p">.</span><span class="nf">upper</span><span class="p">()</span><span class="si">}</span><span class="s">] </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Usage example
+</span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">monitor</span> <span class="o">=</span> <span class="nc">DataQualityMonitor</span><span class="p">(</span>
+        <span class="n">dbt_cloud_token</span><span class="o">=</span><span class="sh">"</span><span class="s">your_token</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">account_id</span><span class="o">=</span><span class="sh">"</span><span class="s">your_account_id</span><span class="sh">"</span>
+    <span class="p">)</span>
+    
+    <span class="n">quality_status</span> <span class="o">=</span> <span class="n">monitor</span><span class="p">.</span><span class="nf">check_quality_status</span><span class="p">(</span><span class="sh">"</span><span class="s">your_job_id</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">quality_status</span><span class="p">[</span><span class="sh">'</span><span class="s">status</span><span class="sh">'</span><span class="p">]</span> <span class="o">==</span> <span class="sh">'</span><span class="s">error</span><span class="sh">'</span><span class="p">:</span>
+        <span class="n">monitor</span><span class="p">.</span><span class="nf">send_alert</span><span class="p">(</span>
+            <span class="sa">f</span><span class="sh">"</span><span class="s">Data quality check failed: </span><span class="si">{</span><span class="n">quality_status</span><span class="p">[</span><span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> 
+            <span class="sh">'</span><span class="s">critical</span><span class="sh">'</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">monitor</span><span class="p">.</span><span class="nf">send_alert</span><span class="p">(</span>
+            <span class="sa">f</span><span class="sh">"</span><span class="s">Data quality check completed: </span><span class="si">{</span><span class="n">quality_status</span><span class="p">[</span><span class="sh">'</span><span class="s">status</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> 
+            <span class="sh">'</span><span class="s">info</span><span class="sh">'</span>
+        <span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="learning-summary">📊 Learning Summary</h2>
+
+<h3 id="key-points">Key Points</h3>
+
+<ol>
+  <li><strong>dbt is the core tool for data quality</strong>
+    <ul>
+      <li>SQL-based approach makes it easy for analysts to use</li>
+      <li>Automated testing and documentation ensure reliability</li>
+    </ul>
+  </li>
+  <li><strong>Platform-specific optimization strategies</strong>
+    <ul>
+      <li>Leverage characteristics of each platform (Snowflake, BigQuery, Redshift)</li>
+      <li>dbt Cloud vs dbt Core selection criteria</li>
+    </ul>
+  </li>
+  <li><strong>Systematic quality management</strong>
+    <ul>
+      <li>Step-by-step approach from basic to custom tests</li>
+      <li>Real-time monitoring and alert system building</li>
+    </ul>
+  </li>
+  <li><strong>Team collaboration and governance</strong>
+    <ul>
+      <li>Clear quality standards through data contracts</li>
+      <li>Automation through CI/CD pipeline integration</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="next-steps">Next Steps</h3>
+
+<ul>
+  <li><strong>dbt Package Utilization</strong>: Extended functionality with dbt-utils, dbt-expectations</li>
+  <li><strong>Advanced Monitoring</strong>: Integration with external monitoring tools like Grafana, DataDog</li>
+  <li><strong>ML Integration</strong>: Building ML models for data quality anomaly detection</li>
+</ul>
+
+<hr />
+
+<blockquote>
+  <p><strong>“Good data makes good decisions. dbt is the most powerful tool to ensure that good data.”</strong></p>
+</blockquote>
+
+<p>Now you’re ready to build a reliable data quality management system using dbt. In the modern data stack, data quality is not optional but essential. Use dbt to ensure data quality and gain better business insights!</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+      
+      
+      
+      
+        
+        
+        <a href="/data-quality/2025/09/30/dbt-data-quality-management.html" class="nav-link next">
+          다음: dbt를 활용한 데이터 품질 관리 완전 가이드 - 현대적 데이터 파이프라인의 핵심 →
+        </a>
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-quality/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
