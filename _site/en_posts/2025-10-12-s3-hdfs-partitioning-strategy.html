@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Why yyyy/mm/dd partitioning from HDFS era causes performance issues in S3, and S3-optimized partitioning strategies with actual query performance comparisons.">
+
+
+
+<title>S3 vs HDFS Partitioning Strategy - Optimizing Data Lake for the Cloud Era - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="S3 vs HDFS Partitioning Strategy - Optimizing Data Lake for the Cloud Era">
+<meta property="og:description" content="Why yyyy/mm/dd partitioning from HDFS era causes performance issues in S3, and S3-optimized partitioning strategies with actual query performance comparisons.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2025-10-12-s3-hdfs-partitioning-strategy.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="S3 vs HDFS Partitioning Strategy - Optimizing Data Lake for the Cloud Era">
+<meta name="twitter:description" content="Why yyyy/mm/dd partitioning from HDFS era causes performance issues in S3, and S3-optimized partitioning strategies with actual query performance comparisons.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2025/10/12/s3-hdfs-partitioning-strategy.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2025-10-12-s3-hdfs-partitioning-strategy.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 10월 12일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">S3 vs HDFS Partitioning Strategy - Optimizing Data Lake for the Cloud Era</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">S3</span>
+      
+        <span class="tag">HDFS</span>
+      
+        <span class="tag">Partitioning</span>
+      
+        <span class="tag">DataLake</span>
+      
+        <span class="tag">CloudStorage</span>
+      
+        <span class="tag">Spark</span>
+      
+        <span class="tag">Athena</span>
+      
+        <span class="tag">Performance</span>
+      
+        <span class="tag">Optimization</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Cloud data architecture 시리즈</span>
+      <span class="series-order">Part 2</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 50 min</span>
+      
+      
+        <span class="difficulty">📊 Intermediate</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="️-s3-vs-hdfs-partitioning-strategy---optimizing-data-lake-for-the-cloud-era">🗄️ S3 vs HDFS Partitioning Strategy - Optimizing Data Lake for the Cloud Era</h1>
+
+<blockquote>
+  <p><strong>“Past best practices can become today’s anti-patterns”</strong> - What you must know about partitioning strategy changes when migrating from HDFS to S3</p>
+</blockquote>
+
+<p>When migrating data lakes from on-premise HDFS to cloud S3, many teams maintain the existing <code class="language-plaintext highlighter-rouge">yyyy/mm/dd</code> partitioning structure. However, this can cause serious performance degradation due to S3’s architectural characteristics. This post provides practical guidance that can be applied directly to production environments by understanding the fundamental differences between HDFS and S3, S3-optimized partitioning strategies, and actual query performance comparisons.</p>
+
+<hr />
+
+<h2 id="-table-of-contents">📚 Table of Contents</h2>
+
+<ul>
+  <li><a href="#hdfs-era-partitioning-strategy">HDFS Era Partitioning Strategy</a></li>
+  <li><a href="#fundamental-differences-of-s3">Fundamental Differences of S3</a></li>
+  <li><a href="#s3-partitioning-anti-patterns">S3 Partitioning Anti-patterns</a></li>
+  <li><a href="#s3-optimized-partitioning-strategy">S3 Optimized Partitioning Strategy</a></li>
+  <li><a href="#actual-query-performance-comparison">Actual Query Performance Comparison</a></li>
+  <li><a href="#production-migration-guide">Production Migration Guide</a></li>
+  <li><a href="#learning-summary">Learning Summary</a></li>
+</ul>
+
+<hr />
+
+<h2 id="hdfs-era-partitioning-strategy">🏛️ HDFS Era Partitioning Strategy</h2>
+
+<h3 id="understanding-hdfs-architecture">Understanding HDFS Architecture</h3>
+
+<p>HDFS was designed as a <strong>hierarchical file system</strong>.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Component</strong></th>
+      <th><strong>Role</strong></th>
+      <th><strong>Characteristics</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>NameNode</strong></td>
+      <td>Metadata management</td>
+      <td>Stores directory structure in memory</td>
+    </tr>
+    <tr>
+      <td><strong>DataNode</strong></td>
+      <td>Actual data storage</td>
+      <td>Local disk-based block storage</td>
+    </tr>
+    <tr>
+      <td><strong>Block</strong></td>
+      <td>Data unit</td>
+      <td>128MB default size, maintains replicas</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="why-yyyymmdd-was-suitable">Why yyyy/mm/dd Was Suitable</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Typical partition structure in HDFS</span>
+/data/events/
+  └── <span class="nv">year</span><span class="o">=</span>2024/
+      └── <span class="nv">month</span><span class="o">=</span>01/
+          └── <span class="nv">day</span><span class="o">=</span>15/
+              ├── part-00000.parquet
+              ├── part-00001.parquet
+              └── part-00002.parquet
+</code></pre></div></div>
+
+<h4 id="1-namenode-metadata-efficiency"><strong>1. NameNode Metadata Efficiency</strong></h4>
+<ul>
+  <li><strong>Directory Structure</strong>: Tree structure for metadata management</li>
+  <li><strong>Memory Usage</strong>: ~150 bytes per directory/file</li>
+  <li><strong>Hierarchical Traversal</strong>: Fast search with O(log n) time complexity</li>
+</ul>
+
+<h4 id="2-hive-partition-pruning"><strong>2. Hive Partition Pruning</strong></h4>
+<ul>
+  <li><strong>Dynamic Partitioning</strong>: Automatic partitioning by date</li>
+  <li><strong>Metastore</strong>: Caches partition metadata</li>
+  <li><strong>Query Optimization</strong>: Excludes unnecessary partitions with WHERE clause</li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Efficient query in Hive</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">events</span>
+<span class="k">WHERE</span> <span class="nb">year</span> <span class="o">=</span> <span class="mi">2024</span> <span class="k">AND</span> <span class="k">month</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">AND</span> <span class="k">day</span> <span class="o">=</span> <span class="mi">15</span><span class="p">;</span>
+<span class="c1">-- NameNode can immediately navigate to that directory</span>
+</code></pre></div></div>
+
+<h4 id="3-local-disk-characteristics"><strong>3. Local Disk Characteristics</strong></h4>
+<ul>
+  <li><strong>Sequential Reading</strong>: Fast directory structure traversal</li>
+  <li><strong>Block Locality</strong>: DataNode processes local data first</li>
+  <li><strong>Network Cost</strong>: Minimized</li>
+</ul>
+
+<h3 id="hdfs-partitioning-best-practices">HDFS Partitioning Best Practices</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Strategy</strong></th>
+      <th><strong>Description</strong></th>
+      <th><strong>Advantages</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Time-based</strong></td>
+      <td>yyyy/mm/dd or yyyy/mm/dd/hh</td>
+      <td>Efficient time-series data processing</td>
+    </tr>
+    <tr>
+      <td><strong>Hierarchical Structure</strong></td>
+      <td>Nested directories by category</td>
+      <td>Structured metadata</td>
+    </tr>
+    <tr>
+      <td><strong>Partition Count</strong></td>
+      <td>Thousands to tens of thousands possible</td>
+      <td>OK as long as NameNode memory is sufficient</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="fundamental-differences-of-s3">☁️ Fundamental Differences of S3</h2>
+
+<h3 id="s3-is-object-storage">S3 is Object Storage</h3>
+
+<p>S3 is <strong>Key-Value object storage, not a file system</strong>.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Characteristic</strong></th>
+      <th><strong>HDFS</strong></th>
+      <th><strong>S3</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Storage Method</strong></td>
+      <td>Hierarchical file system</td>
+      <td>Flat namespace (Key-Value)</td>
+    </tr>
+    <tr>
+      <td><strong>Directory</strong></td>
+      <td>Actual directories exist</td>
+      <td>Directories are conceptual (part of Key)</td>
+    </tr>
+    <tr>
+      <td><strong>Metadata</strong></td>
+      <td>NameNode memory</td>
+      <td>Distributed metadata store</td>
+    </tr>
+    <tr>
+      <td><strong>Access Method</strong></td>
+      <td>File path</td>
+      <td>Object Key</td>
+    </tr>
+    <tr>
+      <td><strong>List Operation</strong></td>
+      <td>Fast (local disk)</td>
+      <td>Slow (network API calls)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="s3-internal-structure">S3 Internal Structure</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># "Directories" don't actually exist in S3
+# Everything is a Key-Value pair
+</span><span class="n">s3</span><span class="p">:</span><span class="o">//</span><span class="n">bucket</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">events</span><span class="o">/</span><span class="n">year</span><span class="o">=</span><span class="mi">2024</span><span class="o">/</span><span class="n">month</span><span class="o">=</span><span class="mi">01</span><span class="o">/</span><span class="n">day</span><span class="o">=</span><span class="mi">15</span><span class="o">/</span><span class="n">part</span><span class="o">-</span><span class="mf">00000.</span><span class="n">parquet</span>
+<span class="c1"># This is actually just one long Key
+</span></code></pre></div></div>
+
+<h4 id="cost-of-s3-list-operations"><strong>Cost of S3 List Operations</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">boto3</span>
+
+<span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="p">.</span><span class="nf">client</span><span class="p">(</span><span class="sh">'</span><span class="s">s3</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># Finding data for a specific date in yyyy/mm/dd structure
+# 1. List year=2024 -&gt; API call 1
+# 2. List month=01 -&gt; API call 1
+# 3. List day=15 -&gt; API call 1
+# Total 3 API calls + network latency
+</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">s3</span><span class="p">.</span><span class="nf">list_objects_v2</span><span class="p">(</span>
+    <span class="n">Bucket</span><span class="o">=</span><span class="sh">'</span><span class="s">my-bucket</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">Prefix</span><span class="o">=</span><span class="sh">'</span><span class="s">data/events/year=2024/month=01/day=15/</span><span class="sh">'</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="s3-performance-characteristics">S3 Performance Characteristics</h3>
+
+<h4 id="1-request-rate-limits"><strong>1. Request Rate Limits</strong></h4>
+<ul>
+  <li><strong>Throughput per Prefix</strong>: 3,500 PUT/COPY/POST/DELETE, 5,500 GET/HEAD requests/second</li>
+  <li><strong>Deep Directory Structure</strong>: Concentrated on same prefix, causing bottlenecks</li>
+  <li><strong>Performance Degradation</strong>: Rapid increase in response time with many List operations</li>
+</ul>
+
+<h4 id="2-list-operation-overhead"><strong>2. List Operation Overhead</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Operation</strong></th>
+      <th><strong>HDFS</strong></th>
+      <th><strong>S3</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Single Directory List</strong></td>
+      <td>~1ms (local)</td>
+      <td>~100-300ms (network)</td>
+    </tr>
+    <tr>
+      <td><strong>Depth 3 Traversal</strong></td>
+      <td>~3ms</td>
+      <td>~300-900ms</td>
+    </tr>
+    <tr>
+      <td><strong>1,000 Objects List</strong></td>
+      <td>~10ms</td>
+      <td>~1-2 seconds</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="3-eventually-consistent-characteristics"><strong>3. Eventually Consistent Characteristics</strong></h4>
+<ul>
+  <li><strong>Read-after-write</strong>: New objects have immediate consistency guaranteed (since December 2020)</li>
+  <li><strong>Overwrite/Delete</strong>: Eventual consistency (slight delay possible)</li>
+  <li><strong>List Operation</strong>: Latest changes may not be immediately reflected</li>
+</ul>
+
+<hr />
+
+<h2 id="s3-partitioning-anti-patterns">⚠️ S3 Partitioning Anti-patterns</h2>
+
+<h3 id="anti-pattern-1-excessively-deep-hierarchical-structure">Anti-pattern #1: Excessively Deep Hierarchical Structure</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Anti-pattern: Using HDFS style as-is</span>
+s3://bucket/data/events/
+  └── <span class="nv">year</span><span class="o">=</span>2024/
+      └── <span class="nv">month</span><span class="o">=</span>01/
+          └── <span class="nv">day</span><span class="o">=</span>15/
+              └── <span class="nv">hour</span><span class="o">=</span>10/
+                  ├── part-00000.parquet
+                  └── part-00001.parquet
+</code></pre></div></div>
+
+<h4 id="problems"><strong>Problems</strong></h4>
+<ul>
+  <li><strong>List Operation Explosion</strong>: API call needed for each level</li>
+  <li><strong>Network Latency</strong>: Cumulative round-trip time for 4-5 calls</li>
+  <li><strong>Query Delay</strong>: Spark/Athena spends excessive time on partition exploration</li>
+</ul>
+
+<h4 id="actual-impact"><strong>Actual Impact</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Measuring partition discovery time in Spark
+</span><span class="kn">import</span> <span class="n">time</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data/events/year=2024/month=01/day=15/</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Partition discovery: </span><span class="si">{</span><span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">s</span><span class="sh">"</span><span class="p">)</span>
+<span class="c1"># Result: Partition discovery: 5.43s (deep structure)
+# vs
+# Result: Partition discovery: 0.87s (simple structure)
+</span></code></pre></div></div>
+
+<h3 id="anti-pattern-2-small-files-problem">Anti-pattern #2: Small Files Problem</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Anti-pattern: Creating small files per hour</span>
+s3://bucket/data/events/date<span class="o">=</span>2024-01-15/
+  ├── <span class="nv">hour</span><span class="o">=</span>00/
+  │   ├── part-00000.parquet <span class="o">(</span>2MB<span class="o">)</span>
+  │   ├── part-00001.parquet <span class="o">(</span>1.5MB<span class="o">)</span>
+  │   └── part-00002.parquet <span class="o">(</span>3MB<span class="o">)</span>
+  ├── <span class="nv">hour</span><span class="o">=</span>01/
+  │   ├── part-00000.parquet <span class="o">(</span>2.3MB<span class="o">)</span>
+  │   └── part-00001.parquet <span class="o">(</span>1.8MB<span class="o">)</span>
+  ...
+</code></pre></div></div>
+
+<h4 id="problems-1"><strong>Problems</strong></h4>
+<ul>
+  <li><strong>GET Request Explosion</strong>: Separate HTTP request per small file</li>
+  <li><strong>I/O Overhead</strong>: Repeated file open/close operations</li>
+  <li><strong>Metadata Cost</strong>: Number of files × metadata size</li>
+  <li><strong>Query Performance</strong>: Spark executors processing numerous files</li>
+</ul>
+
+<h4 id="small-files-impact"><strong>Small Files Impact</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>File Size</strong></th>
+      <th><strong>File Count</strong></th>
+      <th><strong>Total Data</strong></th>
+      <th><strong>Spark Read Time</strong></th>
+      <th><strong>S3 Cost</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>128MB</td>
+      <td>1,000</td>
+      <td>128GB</td>
+      <td>45s</td>
+      <td>Baseline</td>
+    </tr>
+    <tr>
+      <td>10MB</td>
+      <td>13,000</td>
+      <td>128GB</td>
+      <td>4min 20s</td>
+      <td>1.8x</td>
+    </tr>
+    <tr>
+      <td>1MB</td>
+      <td>130,000</td>
+      <td>128GB</td>
+      <td>12min 35s</td>
+      <td>3.2x</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="anti-pattern-3-prefix-hotspot">Anti-pattern #3: Prefix Hotspot</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Anti-pattern: Concentration on same prefix</span>
+s3://bucket/data/events/2024-01-15/
+  ├── event-000001.parquet
+  ├── event-000002.parquet
+  ├── event-000003.parquet
+  ...
+  └── event-999999.parquet
+</code></pre></div></div>
+
+<h4 id="problems-2"><strong>Problems</strong></h4>
+<ul>
+  <li><strong>Request Rate Limit</strong>: Request concentration on same prefix</li>
+  <li><strong>Performance Degradation</strong>: Reaching 3,500/5,500 RPS limit</li>
+  <li><strong>Parallel Processing Limitation</strong>: Degraded distributed read performance</li>
+</ul>
+
+<hr />
+
+<h2 id="s3-optimized-partitioning-strategy">🚀 S3 Optimized Partitioning Strategy</h2>
+
+<h3 id="strategy-1-simple-and-shallow-structure">Strategy #1: Simple and Shallow Structure</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Optimized: Single-level yyyy-mm-dd or yyyymmdd</span>
+s3://bucket/data/events/date<span class="o">=</span>2024-01-15/
+  ├── part-00000-uuid.snappy.parquet <span class="o">(</span>128MB<span class="o">)</span>
+  ├── part-00001-uuid.snappy.parquet <span class="o">(</span>128MB<span class="o">)</span>
+  └── part-00002-uuid.snappy.parquet <span class="o">(</span>128MB<span class="o">)</span>
+</code></pre></div></div>
+
+<h4 id="advantages"><strong>Advantages</strong></h4>
+<ul>
+  <li><strong>Minimize List Operations</strong>: 1-2 API calls</li>
+  <li><strong>Fast Partition Discovery</strong>: Reduced network round trips</li>
+  <li><strong>Predictable Performance</strong>: Consistent response time</li>
+</ul>
+
+<h4 id="spark-configuration"><strong>Spark Configuration</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Create simple partition structure in Spark
+</span><span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">partitionBy</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data/events/</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Prepare date column in yyyy-mm-dd format
+</span><span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">date_format</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">,</span> <span class="nf">date_format</span><span class="p">(</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">yyyy-MM-dd</span><span class="sh">"</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h3 id="strategy-2-maintain-appropriate-file-size">Strategy #2: Maintain Appropriate File Size</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>File Size</strong></th>
+      <th><strong>Recommendation</strong></th>
+      <th><strong>Reason</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>&lt; 10MB</strong></td>
+      <td>❌ Too small</td>
+      <td>Small files problem</td>
+    </tr>
+    <tr>
+      <td><strong>10-64MB</strong></td>
+      <td>⚠️ Small</td>
+      <td>Prefer larger if possible</td>
+    </tr>
+    <tr>
+      <td><strong>64-256MB</strong></td>
+      <td>✅ Optimal</td>
+      <td>Recommended range</td>
+    </tr>
+    <tr>
+      <td><strong>256-512MB</strong></td>
+      <td>✅ Good</td>
+      <td>Suitable for large-scale processing</td>
+    </tr>
+    <tr>
+      <td><strong>&gt; 512MB</strong></td>
+      <td>⚠️ Large</td>
+      <td>Increased processing time per file</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="file-size-optimization"><strong>File Size Optimization</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Control file size in Spark
+</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.files.maxRecordsPerFile</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">)</span>
+<span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.files.maxPartitionBytes</span><span class="sh">"</span><span class="p">,</span> <span class="mi">134217728</span><span class="p">)</span>  <span class="c1"># 128MB
+</span>
+<span class="c1"># Adjust file count with repartition
+</span><span class="n">df</span><span class="p">.</span><span class="nf">repartition</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> \
+    <span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">partitionBy</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data/events/</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="compaction-job"><strong>Compaction Job</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Merge small files into large files
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">S3 Compaction</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># Read existing small files
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data/events/date=2024-01-15/</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Calculate appropriate partition count
+</span><span class="n">num_partitions</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nf">int</span><span class="p">(</span><span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1000000</span><span class="p">))</span>  <span class="c1"># 1M records per partition
+</span>
+<span class="c1"># Rewrite with appropriate partition count
+</span><span class="n">df</span><span class="p">.</span><span class="nf">repartition</span><span class="p">(</span><span class="n">num_partitions</span><span class="p">)</span> \
+    <span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data/events-compacted/date=2024-01-15/</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="strategy-3-prefix-distribution">Strategy #3: Prefix Distribution</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Optimized: Distribute prefix for improved parallel processing</span>
+s3://bucket/data/events/
+  ├── <span class="nb">date</span><span class="o">=</span>2024-01-15/shard<span class="o">=</span>0/
+  │   ├── part-00000.parquet
+  │   └── part-00001.parquet
+  ├── <span class="nb">date</span><span class="o">=</span>2024-01-15/shard<span class="o">=</span>1/
+  │   ├── part-00000.parquet
+  │   └── part-00001.parquet
+  ...
+</code></pre></div></div>
+
+<h4 id="shard-based-partitioning"><strong>Shard-based Partitioning</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Create hash-based shard
+</span><span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="nb">hash</span><span class="p">,</span> <span class="nb">abs</span><span class="p">,</span> <span class="n">col</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">shard</span><span class="sh">"</span><span class="p">,</span> <span class="nf">abs</span><span class="p">(</span><span class="nf">hash</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">)))</span> <span class="o">%</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">partitionBy</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">shard</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data/events/</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="strategy-4-date-format-selection">Strategy #4: Date Format Selection</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Format</strong></th>
+      <th><strong>Example</strong></th>
+      <th><strong>Pros/Cons</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>yyyy/mm/dd</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">2024/01/15</code></td>
+      <td>❌ 3 levels, many List operations</td>
+    </tr>
+    <tr>
+      <td><strong>yyyy-mm-dd</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">2024-01-15</code></td>
+      <td>✅ 1 level, good readability</td>
+    </tr>
+    <tr>
+      <td><strong>yyyymmdd</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">20240115</code></td>
+      <td>✅ 1 level, concise</td>
+    </tr>
+    <tr>
+      <td><strong>yyyy-mm</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">2024-01</code></td>
+      <td>⚠️ For monthly aggregation</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="date-partition-creation"><strong>Date Partition Creation</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">date_format</span>
+
+<span class="c1"># yyyy-mm-dd format (recommended)
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">,</span> <span class="nf">date_format</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">yyyy-MM-dd</span><span class="sh">"</span><span class="p">))</span>
+
+<span class="c1"># yyyymmdd format (more concise)
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">,</span> <span class="nf">date_format</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">yyyyMMdd</span><span class="sh">"</span><span class="p">))</span>
+
+<span class="c1"># Partitioning
+</span><span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">partitionBy</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data/events/</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="actual-query-performance-comparison">📊 Actual Query Performance Comparison</h2>
+
+<h3 id="test-environment">Test Environment</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Item</strong></th>
+      <th><strong>Configuration</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Data Size</strong></td>
+      <td>1TB (1 billion records)</td>
+    </tr>
+    <tr>
+      <td><strong>Period</strong></td>
+      <td>365 days</td>
+    </tr>
+    <tr>
+      <td><strong>Spark Version</strong></td>
+      <td>3.4.0</td>
+    </tr>
+    <tr>
+      <td><strong>Instance</strong></td>
+      <td>r5.4xlarge × 10</td>
+    </tr>
+    <tr>
+      <td><strong>File Format</strong></td>
+      <td>Parquet (Snappy compression)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="scenario-1-single-date-query">Scenario 1: Single Date Query</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Query: Retrieve data for a specific date</span>
+<span class="k">SELECT</span> <span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">),</span> <span class="k">AVG</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
+<span class="k">FROM</span> <span class="n">events</span>
+<span class="k">WHERE</span> <span class="nb">date</span> <span class="o">=</span> <span class="s1">'2024-01-15'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="performance-comparison"><strong>Performance Comparison</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Partition Structure</strong></th>
+      <th><strong>File Count</strong></th>
+      <th><strong>Partition Discovery</strong></th>
+      <th><strong>Data Read</strong></th>
+      <th><strong>Total Time</strong></th>
+      <th><strong>Improvement</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>yyyy/mm/dd</strong></td>
+      <td>720 (2MB)</td>
+      <td>5.4s</td>
+      <td>48.3s</td>
+      <td><strong>53.7s</strong></td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td><strong>yyyy-mm-dd</strong></td>
+      <td>24 (128MB)</td>
+      <td>0.9s</td>
+      <td>12.1s</td>
+      <td><strong>13.0s</strong></td>
+      <td><strong>4.1x</strong></td>
+    </tr>
+    <tr>
+      <td><strong>yyyymmdd</strong></td>
+      <td>24 (128MB)</td>
+      <td>0.8s</td>
+      <td>12.2s</td>
+      <td><strong>13.0s</strong></td>
+      <td><strong>4.1x</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="detailed-metrics"><strong>Detailed Metrics</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># yyyy/mm/dd structure (anti-pattern)
+</span><span class="p">{</span>
+  <span class="sh">"</span><span class="s">partition_discovery_ms</span><span class="sh">"</span><span class="p">:</span> <span class="mi">5430</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">s3_list_calls</span><span class="sh">"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">s3_get_calls</span><span class="sh">"</span><span class="p">:</span> <span class="mi">720</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">network_latency_ms</span><span class="sh">"</span><span class="p">:</span> <span class="mi">18200</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">data_read_mb</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2880</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">executor_time_s</span><span class="sh">"</span><span class="p">:</span> <span class="mf">48.3</span>
+<span class="p">}</span>
+
+<span class="c1"># yyyy-mm-dd structure (optimized)
+</span><span class="p">{</span>
+  <span class="sh">"</span><span class="s">partition_discovery_ms</span><span class="sh">"</span><span class="p">:</span> <span class="mi">870</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">s3_list_calls</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">s3_get_calls</span><span class="sh">"</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">network_latency_ms</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2400</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">data_read_mb</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3072</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">executor_time_s</span><span class="sh">"</span><span class="p">:</span> <span class="mf">12.1</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="scenario-2-7-day-range-query">Scenario 2: 7-Day Range Query</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Query: Analyze last 7 days of data</span>
+<span class="k">SELECT</span> <span class="nb">date</span><span class="p">,</span> <span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">),</span> <span class="k">SUM</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
+<span class="k">FROM</span> <span class="n">events</span>
+<span class="k">WHERE</span> <span class="nb">date</span> <span class="k">BETWEEN</span> <span class="s1">'2024-01-15'</span> <span class="k">AND</span> <span class="s1">'2024-01-21'</span>
+<span class="k">GROUP</span> <span class="k">BY</span> <span class="nb">date</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="performance-comparison-1"><strong>Performance Comparison</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Partition Structure</strong></th>
+      <th><strong>File Count</strong></th>
+      <th><strong>Partition Discovery</strong></th>
+      <th><strong>Data Read</strong></th>
+      <th><strong>Total Time</strong></th>
+      <th><strong>Improvement</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>yyyy/mm/dd</strong></td>
+      <td>5,040</td>
+      <td>38.2s</td>
+      <td>4min 23s</td>
+      <td><strong>5min 1s</strong></td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td><strong>yyyy-mm-dd</strong></td>
+      <td>168</td>
+      <td>6.1s</td>
+      <td>1min 24s</td>
+      <td><strong>1min 30s</strong></td>
+      <td><strong>3.3x</strong></td>
+    </tr>
+    <tr>
+      <td><strong>yyyy-mm-dd + shard</strong></td>
+      <td>168</td>
+      <td>5.9s</td>
+      <td>58.2s</td>
+      <td><strong>1min 4s</strong></td>
+      <td><strong>4.7x</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="scenario-3-full-table-scan">Scenario 3: Full Table Scan</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Query: Aggregate entire data (no partition pruning)</span>
+<span class="k">SELECT</span> <span class="n">user_id</span><span class="p">,</span> <span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+<span class="k">FROM</span> <span class="n">events</span>
+<span class="k">GROUP</span> <span class="k">BY</span> <span class="n">user_id</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="performance-comparison-2"><strong>Performance Comparison</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Partition Structure</strong></th>
+      <th><strong>File Count</strong></th>
+      <th><strong>Partition Discovery</strong></th>
+      <th><strong>Data Read</strong></th>
+      <th><strong>Total Time</strong></th>
+      <th><strong>Improvement</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>yyyy/mm/dd</strong></td>
+      <td>262,800</td>
+      <td>6min 32s</td>
+      <td>24min 18s</td>
+      <td><strong>30min 50s</strong></td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td><strong>yyyy-mm-dd</strong></td>
+      <td>8,760</td>
+      <td>1min 48s</td>
+      <td>18min 52s</td>
+      <td><strong>20min 40s</strong></td>
+      <td><strong>1.5x</strong></td>
+    </tr>
+    <tr>
+      <td><strong>yyyy-mm-dd (compacted)</strong></td>
+      <td>4,380</td>
+      <td>52.3s</td>
+      <td>15min 23s</td>
+      <td><strong>16min 15s</strong></td>
+      <td><strong>1.9x</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="athena-query-cost-comparison">Athena Query Cost Comparison</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Execute same query in Athena</span>
+<span class="k">SELECT</span> <span class="o">*</span>
+<span class="k">FROM</span> <span class="n">events</span>
+<span class="k">WHERE</span> <span class="nb">date</span> <span class="o">=</span> <span class="s1">'2024-01-15'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Partition Structure</strong></th>
+      <th><strong>Scanned Data</strong></th>
+      <th><strong>Execution Time</strong></th>
+      <th><strong>Cost (per query)</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>yyyy/mm/dd</strong></td>
+      <td>3.2 GB</td>
+      <td>8.3s</td>
+      <td>$0.016</td>
+    </tr>
+    <tr>
+      <td><strong>yyyy-mm-dd</strong></td>
+      <td>3.0 GB</td>
+      <td>2.1s</td>
+      <td>$0.015</td>
+    </tr>
+    <tr>
+      <td><strong>No Partition</strong></td>
+      <td>1,024 GB</td>
+      <td>1min 34s</td>
+      <td>$5.12</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Improvement Effect</strong>: <strong>74% cost savings</strong> with partition optimization (vs no partition)</p>
+
+<hr />
+
+<h2 id="production-migration-guide">🔧 Production Migration Guide</h2>
+
+<h3 id="step-1-analyze-current-state">Step 1: Analyze Current State</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Analyze existing partition structure
+</span><span class="kn">import</span> <span class="n">boto3</span>
+<span class="kn">from</span> <span class="n">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="p">.</span><span class="nf">client</span><span class="p">(</span><span class="sh">'</span><span class="s">s3</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">paginator</span> <span class="o">=</span> <span class="n">s3</span><span class="p">.</span><span class="nf">get_paginator</span><span class="p">(</span><span class="sh">'</span><span class="s">list_objects_v2</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="n">bucket</span> <span class="o">=</span> <span class="sh">'</span><span class="s">my-bucket</span><span class="sh">'</span>
+<span class="n">prefix</span> <span class="o">=</span> <span class="sh">'</span><span class="s">data/events/</span><span class="sh">'</span>
+
+<span class="c1"># Aggregate file count and size per partition
+</span><span class="n">stats</span> <span class="o">=</span> <span class="nf">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="sh">"</span><span class="s">size</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+
+<span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="n">paginator</span><span class="p">.</span><span class="nf">paginate</span><span class="p">(</span><span class="n">Bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">Prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">page</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">Contents</span><span class="sh">'</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="c1"># Extract partition (e.g., year=2024/month=01/day=15)
+</span>        <span class="n">parts</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="sh">'</span><span class="s">Key</span><span class="sh">'</span><span class="p">].</span><span class="nf">split</span><span class="p">(</span><span class="sh">'</span><span class="s">/</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">partition</span> <span class="o">=</span> <span class="sh">'</span><span class="s">/</span><span class="sh">'</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">parts</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        
+        <span class="n">stats</span><span class="p">[</span><span class="n">partition</span><span class="p">][</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">stats</span><span class="p">[</span><span class="n">partition</span><span class="p">][</span><span class="sh">"</span><span class="s">size</span><span class="sh">"</span><span class="p">]</span> <span class="o">+=</span> <span class="n">obj</span><span class="p">[</span><span class="sh">'</span><span class="s">Size</span><span class="sh">'</span><span class="p">]</span>
+
+<span class="c1"># Output statistics
+</span><span class="k">for</span> <span class="n">partition</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nf">sorted</span><span class="p">(</span><span class="n">stats</span><span class="p">.</span><span class="nf">items</span><span class="p">()):</span>
+    <span class="n">avg_size_mb</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="sh">"</span><span class="s">size</span><span class="sh">"</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">]</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">partition</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="sh">'</span><span class="s">count</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s"> files, avg </span><span class="si">{</span><span class="n">avg_size_mb</span><span class="si">:</span><span class="p">.</span><span class="mi">1</span><span class="n">f</span><span class="si">}</span><span class="s">MB</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="analysis-result-example"><strong>Analysis Result Example</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>year=2024/month=01/day=15: 720 files, avg 2.3MB  ❌ Small files problem
+year=2024/month=01/day=16: 680 files, avg 2.5MB  ❌
+year=2024/month=01/day=17: 740 files, avg 2.1MB  ❌
+
+Recommendation: Consolidation to 128MB files needed
+</code></pre></div></div>
+
+<h3 id="step-2-migration-planning">Step 2: Migration Planning</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Task</strong></th>
+      <th><strong>Duration</strong></th>
+      <th><strong>Downtime</strong></th>
+      <th><strong>Priority</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Partition Structure Redesign</strong></td>
+      <td>1-2 weeks</td>
+      <td>None</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td><strong>Compaction Job</strong></td>
+      <td>Depends on data volume</td>
+      <td>None</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td><strong>Parallel Migration</strong></td>
+      <td>3-4 weeks</td>
+      <td>None</td>
+      <td>Medium</td>
+    </tr>
+    <tr>
+      <td><strong>Query/Application Modification</strong></td>
+      <td>2-3 weeks</td>
+      <td>Planned deployment</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td><strong>Validation and Monitoring</strong></td>
+      <td>1-2 weeks</td>
+      <td>None</td>
+      <td>High</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="step-3-migration-script">Step 3: Migration Script</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">date_format</span><span class="p">,</span> <span class="nb">abs</span><span class="p">,</span> <span class="nb">hash</span><span class="p">,</span> <span class="n">col</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">S3 Partition Migration</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.sources.partitionOverwriteMode</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">dynamic</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># Read existing data
+</span><span class="n">source_path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">s3://bucket/data/events-old/year=*/month=*/day=*/</span><span class="sh">"</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="n">source_path</span><span class="p">)</span>
+
+<span class="c1"># Create new date column
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">,</span> <span class="nf">date_format</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">),</span> <span class="sh">"</span><span class="s">yyyy-MM-dd</span><span class="sh">"</span><span class="p">))</span>
+
+<span class="c1"># Add shard (optional)
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">shard</span><span class="sh">"</span><span class="p">,</span> <span class="nf">abs</span><span class="p">(</span><span class="nf">hash</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">)))</span> <span class="o">%</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Optimize file size
+</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.files.maxPartitionBytes</span><span class="sh">"</span><span class="p">,</span> <span class="mi">134217728</span><span class="p">)</span>  <span class="c1"># 128MB
+</span>
+<span class="c1"># Calculate appropriate partition count
+</span><span class="n">total_size_gb</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span> <span class="o">*</span> <span class="mi">500</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span>  <span class="c1"># ~500 bytes per record
+</span><span class="n">num_partitions</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">total_size_gb</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span>  <span class="c1"># Based on 128MB files
+</span>
+<span class="c1"># Save with new structure
+</span><span class="n">df</span><span class="p">.</span><span class="nf">repartition</span><span class="p">(</span><span class="n">num_partitions</span><span class="p">,</span> <span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">partitionBy</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data/events-new/</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="step-4-incremental-migration">Step 4: Incremental Migration</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Incremental migration by date
+</span><span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="n">start_date</span> <span class="o">=</span> <span class="nf">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">end_date</span> <span class="o">=</span> <span class="nf">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">)</span>
+<span class="n">current_date</span> <span class="o">=</span> <span class="n">start_date</span>
+
+<span class="k">while</span> <span class="n">current_date</span> <span class="o">&lt;=</span> <span class="n">end_date</span><span class="p">:</span>
+    <span class="n">year</span> <span class="o">=</span> <span class="n">current_date</span><span class="p">.</span><span class="n">year</span>
+    <span class="n">month</span> <span class="o">=</span> <span class="n">current_date</span><span class="p">.</span><span class="n">month</span>
+    <span class="n">day</span> <span class="o">=</span> <span class="n">current_date</span><span class="p">.</span><span class="n">day</span>
+    <span class="n">date_str</span> <span class="o">=</span> <span class="n">current_date</span><span class="p">.</span><span class="nf">strftime</span><span class="p">(</span><span class="sh">"</span><span class="s">%Y-%m-%d</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Processing </span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s">...</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># Read data for specific date
+</span>    <span class="n">old_path</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">s3://bucket/data/events-old/year=</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s">/month=</span><span class="si">{</span><span class="n">month</span><span class="si">:</span><span class="mi">02</span><span class="n">d</span><span class="si">}</span><span class="s">/day=</span><span class="si">{</span><span class="n">day</span><span class="si">:</span><span class="mi">02</span><span class="n">d</span><span class="si">}</span><span class="s">/</span><span class="sh">"</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="n">old_path</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">,</span> <span class="nf">lit</span><span class="p">(</span><span class="n">date_str</span><span class="p">))</span>
+        
+        <span class="c1"># Optimize file size
+</span>        <span class="n">num_files</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nf">int</span><span class="p">(</span><span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1000000</span><span class="p">))</span>  <span class="c1"># 1M records per file
+</span>        
+        <span class="n">df</span><span class="p">.</span><span class="nf">repartition</span><span class="p">(</span><span class="n">num_files</span><span class="p">)</span> \
+            <span class="p">.</span><span class="n">write</span> \
+            <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">s3://bucket/data/events-new/date=</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s">/</span><span class="sh">"</span><span class="p">)</span>
+        
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✓ </span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s"> completed</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✗ </span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s"> failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="n">current_date</span> <span class="o">+=</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="step-5-validation">Step 5: Validation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Migration validation script
+</span><span class="k">def</span> <span class="nf">validate_migration</span><span class="p">(</span><span class="n">old_path</span><span class="p">,</span> <span class="n">new_path</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+    <span class="c1"># Compare record counts
+</span>    <span class="n">old_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">old_path</span><span class="si">}</span><span class="s">/year=</span><span class="si">{</span><span class="n">date</span><span class="p">.</span><span class="n">year</span><span class="si">}</span><span class="s">/month=</span><span class="si">{</span><span class="n">date</span><span class="p">.</span><span class="n">month</span><span class="si">:</span><span class="mi">02</span><span class="n">d</span><span class="si">}</span><span class="s">/day=</span><span class="si">{</span><span class="n">date</span><span class="p">.</span><span class="n">day</span><span class="si">:</span><span class="mi">02</span><span class="n">d</span><span class="si">}</span><span class="s">/</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">new_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">new_path</span><span class="si">}</span><span class="s">/date=</span><span class="si">{</span><span class="n">date</span><span class="p">.</span><span class="nf">strftime</span><span class="p">(</span><span class="sh">'</span><span class="s">%Y-%m-%d</span><span class="sh">'</span><span class="p">)</span><span class="si">}</span><span class="s">/</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="n">old_count</span> <span class="o">=</span> <span class="n">old_df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+    <span class="n">new_count</span> <span class="o">=</span> <span class="n">new_df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+    
+    <span class="c1"># Compare checksums (sampling)
+</span>    <span class="n">old_checksum</span> <span class="o">=</span> <span class="n">old_df</span><span class="p">.</span><span class="nf">sample</span><span class="p">(</span><span class="mf">0.01</span><span class="p">).</span><span class="nf">selectExpr</span><span class="p">(</span><span class="sh">"</span><span class="s">sum(hash(*))</span><span class="sh">"</span><span class="p">).</span><span class="nf">collect</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">new_checksum</span> <span class="o">=</span> <span class="n">new_df</span><span class="p">.</span><span class="nf">sample</span><span class="p">(</span><span class="mf">0.01</span><span class="p">).</span><span class="nf">selectExpr</span><span class="p">(</span><span class="sh">"</span><span class="s">sum(hash(*))</span><span class="sh">"</span><span class="p">).</span><span class="nf">collect</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="c1"># Result
+</span>    <span class="k">if</span> <span class="n">old_count</span> <span class="o">==</span> <span class="n">new_count</span> <span class="ow">and</span> <span class="n">old_checksum</span> <span class="o">==</span> <span class="n">new_checksum</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✓ </span><span class="si">{</span><span class="n">date</span><span class="si">}</span><span class="s">: Valid (</span><span class="si">{</span><span class="n">old_count</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="s"> records)</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✗ </span><span class="si">{</span><span class="n">date</span><span class="si">}</span><span class="s">: Invalid (old: </span><span class="si">{</span><span class="n">old_count</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="s">, new: </span><span class="si">{</span><span class="n">new_count</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="s">)</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+<span class="c1"># Validate entire period
+</span><span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="n">start_date</span> <span class="o">=</span> <span class="nf">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">end_date</span> <span class="o">=</span> <span class="nf">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">)</span>
+<span class="n">current_date</span> <span class="o">=</span> <span class="n">start_date</span>
+
+<span class="k">while</span> <span class="n">current_date</span> <span class="o">&lt;=</span> <span class="n">end_date</span><span class="p">:</span>
+    <span class="nf">validate_migration</span><span class="p">(</span>
+        <span class="sh">"</span><span class="s">s3://bucket/data/events-old</span><span class="sh">"</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">s3://bucket/data/events-new</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">current_date</span>
+    <span class="p">)</span>
+    <span class="n">current_date</span> <span class="o">+=</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="step-6-query-performance-monitoring">Step 6: Query Performance Monitoring</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Collect CloudWatch metrics
+</span><span class="kn">import</span> <span class="n">boto3</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="n">cloudwatch</span> <span class="o">=</span> <span class="n">boto3</span><span class="p">.</span><span class="nf">client</span><span class="p">(</span><span class="sh">'</span><span class="s">cloudwatch</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># Monitor Athena query execution time
+</span><span class="n">response</span> <span class="o">=</span> <span class="n">cloudwatch</span><span class="p">.</span><span class="nf">get_metric_statistics</span><span class="p">(</span>
+    <span class="n">Namespace</span><span class="o">=</span><span class="sh">'</span><span class="s">AWS/Athena</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">MetricName</span><span class="o">=</span><span class="sh">'</span><span class="s">EngineExecutionTime</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">Dimensions</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">{</span><span class="sh">'</span><span class="s">Name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">WorkGroup</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Value</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">primary</span><span class="sh">'</span><span class="p">}</span>
+    <span class="p">],</span>
+    <span class="n">StartTime</span><span class="o">=</span><span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">-</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="p">),</span>
+    <span class="n">EndTime</span><span class="o">=</span><span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">(),</span>
+    <span class="n">Period</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>
+    <span class="n">Statistics</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">Average</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Maximum</span><span class="sh">'</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="c1"># Analyze results
+</span><span class="k">for</span> <span class="n">datapoint</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="sh">'</span><span class="s">Datapoints</span><span class="sh">'</span><span class="p">]:</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">datapoint</span><span class="p">[</span><span class="sh">'</span><span class="s">Timestamp</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s">: </span><span class="sh">"</span>
+          <span class="sa">f</span><span class="sh">"</span><span class="s">Avg=</span><span class="si">{</span><span class="n">datapoint</span><span class="p">[</span><span class="sh">'</span><span class="s">Average</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">s, </span><span class="sh">"</span>
+          <span class="sa">f</span><span class="sh">"</span><span class="s">Max=</span><span class="si">{</span><span class="n">datapoint</span><span class="p">[</span><span class="sh">'</span><span class="s">Maximum</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">s</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="step-7-cost-optimization">Step 7: Cost Optimization</h3>
+
+<h4 id="s3-storage-class-transition"><strong>S3 Storage Class Transition</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Transition old partitions to Intelligent-Tiering
+</span><span class="kn">import</span> <span class="n">boto3</span>
+
+<span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="p">.</span><span class="nf">client</span><span class="p">(</span><span class="sh">'</span><span class="s">s3</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">transition_old_partitions</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">days_old</span><span class="o">=</span><span class="mi">90</span><span class="p">):</span>
+    <span class="n">cutoff_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">-</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days_old</span><span class="p">)</span>
+    
+    <span class="c1"># Create lifecycle policy
+</span>    <span class="n">lifecycle_config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="sh">'</span><span class="s">Rules</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="sh">'</span><span class="s">Id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">TransitionOldData</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">Status</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Enabled</span><span class="sh">'</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">Prefix</span><span class="sh">'</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span>
+                <span class="sh">'</span><span class="s">Transitions</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="sh">'</span><span class="s">Days</span><span class="sh">'</span><span class="p">:</span> <span class="n">days_old</span><span class="p">,</span>
+                        <span class="sh">'</span><span class="s">StorageClass</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">INTELLIGENT_TIERING</span><span class="sh">'</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+    
+    <span class="n">s3</span><span class="p">.</span><span class="nf">put_bucket_lifecycle_configuration</span><span class="p">(</span>
+        <span class="n">Bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span>
+        <span class="n">LifecycleConfiguration</span><span class="o">=</span><span class="n">lifecycle_config</span>
+    <span class="p">)</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✓ Lifecycle policy applied: </span><span class="si">{</span><span class="n">days_old</span><span class="si">}</span><span class="s">+ days → INTELLIGENT_TIERING</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="nf">transition_old_partitions</span><span class="p">(</span><span class="sh">'</span><span class="s">my-bucket</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">data/events/</span><span class="sh">'</span><span class="p">,</span> <span class="mi">90</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="cost-savings-effect"><strong>Cost Savings Effect</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Item</strong></th>
+      <th><strong>Before Migration</strong></th>
+      <th><strong>After Migration</strong></th>
+      <th><strong>Savings</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>S3 Storage</strong></td>
+      <td>$23,040/month (1TB, Standard)</td>
+      <td>$20,736/month (Intelligent-Tiering)</td>
+      <td>10%</td>
+    </tr>
+    <tr>
+      <td><strong>S3 API Cost</strong></td>
+      <td>$1,200/month (LIST/GET)</td>
+      <td>$360/month</td>
+      <td>70%</td>
+    </tr>
+    <tr>
+      <td><strong>Athena Scan</strong></td>
+      <td>$512/month</td>
+      <td>$128/month</td>
+      <td>75%</td>
+    </tr>
+    <tr>
+      <td><strong>Spark Compute</strong></td>
+      <td>$4,800/month</td>
+      <td>$3,200/month</td>
+      <td>33%</td>
+    </tr>
+    <tr>
+      <td><strong>Total Cost</strong></td>
+      <td><strong>$29,552/month</strong></td>
+      <td><strong>$24,424/month</strong></td>
+      <td><strong>17%</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="learning-summary">📚 Learning Summary</h2>
+
+<h3 id="key-points">Key Points</h3>
+
+<ol>
+  <li><strong>Architecture Understanding is Key</strong>
+    <ul>
+      <li>HDFS: Hierarchical file system, NameNode metadata</li>
+      <li>S3: Flat namespace object storage, List operation cost</li>
+    </ul>
+  </li>
+  <li><strong>S3 Optimization Strategies</strong>
+    <ul>
+      <li><strong>Shallow Structure</strong>: yyyy-mm-dd single level</li>
+      <li><strong>Large Files</strong>: 64-256MB recommended</li>
+      <li><strong>Prefix Distribution</strong>: Avoid request rate limits</li>
+    </ul>
+  </li>
+  <li><strong>Performance Improvement Effects</strong>
+    <ul>
+      <li><strong>Single Date Query</strong>: 4.1x faster</li>
+      <li><strong>7-Day Range Query</strong>: 4.7x faster (with shard)</li>
+      <li><strong>Cost Savings</strong>: 17% reduction</li>
+    </ul>
+  </li>
+  <li><strong>Migration Best Practices</strong>
+    <ul>
+      <li>Incremental migration</li>
+      <li>Thorough validation</li>
+      <li>Performance monitoring</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="production-checklist">Production Checklist</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Current partition structure analysis complete</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Small files problem identified</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Migration plan established</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Compaction script prepared</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Validation process defined</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Query/application modifications</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Performance monitoring dashboard built</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Cost optimization applied</li>
+</ul>
+
+<h3 id="additional-learning-resources">Additional Learning Resources</h3>
+
+<ul>
+  <li><strong>AWS Official Docs</strong>: S3 Performance Best Practices</li>
+  <li><strong>Spark Optimization</strong>: Adaptive Query Execution (AQE)</li>
+  <li><strong>Parquet Optimization</strong>: Row Group size, Compression</li>
+  <li><strong>Iceberg/Delta Lake</strong>: Partitioning abstraction with table formats</li>
+</ul>
+
+<hr />
+
+<blockquote>
+  <p><strong>“Proper partitioning strategy not only improves performance but also reduces costs and enhances operational efficiency.”</strong></p>
+</blockquote>
+
+<p>The transition from HDFS to S3 is not just a simple storage migration. When you understand the fundamental architectural differences and apply optimization strategies accordingly, you can realize the true value of a cloud-native data lake.</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+      
+      
+      
+      
+        
+        
+        <a href="/data-engineering/2025/10/12/s3-hdfs-partitioning-strategy.html" class="nav-link next">
+          다음: S3 vs HDFS 파티셔닝 전략 - 클라우드 시대의 데이터 레이크 최적화 →
+        </a>
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
