@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="데이터 레이크의 핵심 파일 포맷인 Parquet, ORC, Avro를 내부 구조부터 성능, 압축률, 호환성까지 실제 벤치마크로 완전 비교합니다.">
+
+
+
+<title>Parquet vs ORC vs Avro 실전 비교 - 데이터 레이크 파일 포맷 완전 정복 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Parquet vs ORC vs Avro 실전 비교 - 데이터 레이크 파일 포맷 완전 정복">
+<meta property="og:description" content="데이터 레이크의 핵심 파일 포맷인 Parquet, ORC, Avro를 내부 구조부터 성능, 압축률, 호환성까지 실제 벤치마크로 완전 비교합니다.">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2025/10/17/data-lake-file-format-comparison.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Parquet vs ORC vs Avro 실전 비교 - 데이터 레이크 파일 포맷 완전 정복">
+<meta name="twitter:description" content="데이터 레이크의 핵심 파일 포맷인 Parquet, ORC, Avro를 내부 구조부터 성능, 압축률, 호환성까지 실제 벤치마크로 완전 비교합니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2025/10/17/data-lake-file-format-comparison.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2025-10-17-data-lake-file-format-comparison.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 10월 17일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Parquet vs ORC vs Avro 실전 비교 - 데이터 레이크 파일 포맷 완전 정복</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Parquet</span>
+      
+        <span class="tag">ORC</span>
+      
+        <span class="tag">Avro</span>
+      
+        <span class="tag">DataLake</span>
+      
+        <span class="tag">FileFormat</span>
+      
+        <span class="tag">Performance</span>
+      
+        <span class="tag">Compression</span>
+      
+        <span class="tag">Spark</span>
+      
+        <span class="tag">Hive</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Cloud data architecture 시리즈</span>
+      <span class="series-order">Part 3</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 55분</span>
+      
+      
+        <span class="difficulty">📊 중급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="️-parquet-vs-orc-vs-avro-실전-비교---데이터-레이크-파일-포맷-완전-정복">🗄️ Parquet vs ORC vs Avro 실전 비교 - 데이터 레이크 파일 포맷 완전 정복</h1>
+
+<blockquote>
+  <p><strong>“올바른 파일 포맷 선택은 성능과 비용의 차이를 10배 이상 만들 수 있다”</strong> - 데이터 레이크 구축에서 가장 중요한 결정 중 하나</p>
+</blockquote>
+
+<p>데이터 레이크를 구축할 때 가장 먼저 마주하는 질문은 “어떤 파일 포맷을 사용할 것인가?”입니다. Parquet, ORC, Avro는 각각 고유한 특성과 장단점을 가지고 있으며, 잘못된 선택은 심각한 성능 저하와 비용 증가로 이어집니다. 이 포스트에서는 세 가지 포맷의 내부 구조, 실제 벤치마크 결과, 그리고 상황별 최적 선택 가이드를 제공합니다.</p>
+
+<hr />
+
+<h2 id="-목차">📚 목차</h2>
+
+<ul>
+  <li><a href="#파일-포맷-개요">파일 포맷 개요</a></li>
+  <li><a href="#parquet-내부-구조">Parquet 내부 구조</a></li>
+  <li><a href="#orc-내부-구조">ORC 내부 구조</a></li>
+  <li><a href="#avro-내부-구조">Avro 내부 구조</a></li>
+  <li><a href="#실제-벤치마크-비교">실제 벤치마크 비교</a></li>
+  <li><a href="#상황별-최적-포맷-선택">상황별 최적 포맷 선택</a></li>
+  <li><a href="#포맷-전환-가이드">포맷 전환 가이드</a></li>
+  <li><a href="#학습-요약">학습 요약</a></li>
+</ul>
+
+<hr />
+
+<h2 id="파일-포맷-개요">📋 파일 포맷 개요</h2>
+
+<h3 id="주요-파일-포맷-비교">주요 파일 포맷 비교</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>특성</strong></th>
+      <th><strong>Parquet</strong></th>
+      <th><strong>ORC</strong></th>
+      <th><strong>Avro</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>저장 방식</strong></td>
+      <td>열 기반 (Columnar)</td>
+      <td>열 기반 (Columnar)</td>
+      <td>행 기반 (Row-based)</td>
+    </tr>
+    <tr>
+      <td><strong>압축률</strong></td>
+      <td>높음 (4-10x)</td>
+      <td>매우 높음 (5-12x)</td>
+      <td>중간 (2-4x)</td>
+    </tr>
+    <tr>
+      <td><strong>읽기 성능</strong></td>
+      <td>매우 빠름</td>
+      <td>매우 빠름</td>
+      <td>느림</td>
+    </tr>
+    <tr>
+      <td><strong>쓰기 성능</strong></td>
+      <td>중간</td>
+      <td>중간</td>
+      <td>빠름</td>
+    </tr>
+    <tr>
+      <td><strong>스키마 진화</strong></td>
+      <td>제한적</td>
+      <td>제한적</td>
+      <td>우수</td>
+    </tr>
+    <tr>
+      <td><strong>생태계</strong></td>
+      <td>Spark, Presto, Athena</td>
+      <td>Hive, Presto</td>
+      <td>Kafka, Streaming</td>
+    </tr>
+    <tr>
+      <td><strong>파일 크기</strong></td>
+      <td>작음</td>
+      <td>더 작음</td>
+      <td>큼</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="언제-어떤-포맷을-사용할까">언제 어떤 포맷을 사용할까?</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>사용 케이스</strong></th>
+      <th><strong>추천 포맷</strong></th>
+      <th><strong>이유</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>분석용 데이터 레이크</strong></td>
+      <td>Parquet</td>
+      <td>범용성, Spark/Athena 최적화</td>
+    </tr>
+    <tr>
+      <td><strong>Hive 중심 환경</strong></td>
+      <td>ORC</td>
+      <td>Hive와 완벽한 통합</td>
+    </tr>
+    <tr>
+      <td><strong>실시간 스트리밍</strong></td>
+      <td>Avro</td>
+      <td>빠른 쓰기, 스키마 진화</td>
+    </tr>
+    <tr>
+      <td><strong>로그 수집</strong></td>
+      <td>Parquet</td>
+      <td>압축률, 분석 성능</td>
+    </tr>
+    <tr>
+      <td><strong>CDC 파이프라인</strong></td>
+      <td>Avro → Parquet</td>
+      <td>스트리밍 + 배치 변환</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="parquet-내부-구조">🔷 Parquet 내부 구조</h2>
+
+<h3 id="설계-철학">설계 철학</h3>
+
+<p>Parquet는 <strong>중첩된 데이터 구조를 효율적으로 저장</strong>하기 위해 Google Dremel 논문을 기반으로 설계되었습니다.</p>
+
+<h4 id="핵심-특징"><strong>핵심 특징</strong></h4>
+<ul>
+  <li><strong>Columnar Storage</strong>: 컬럼별로 데이터 저장</li>
+  <li><strong>Nested Data Support</strong>: 복잡한 중첩 구조 지원</li>
+  <li><strong>Efficient Compression</strong>: 컬럼 타입에 따른 최적 압축</li>
+  <li><strong>Predicate Pushdown</strong>: 파일 수준 통계로 불필요한 읽기 스킵</li>
+</ul>
+
+<h3 id="파일-구조">파일 구조</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Parquet File Structure:
+┌─────────────────────────────────┐
+│ Header (Magic: PAR1)            │
+├─────────────────────────────────┤
+│ Row Group 1                     │
+│  ├── Column Chunk A             │
+│  │   ├── Page 1 (compressed)    │
+│  │   ├── Page 2 (compressed)    │
+│  │   └── Page 3 (compressed)    │
+│  ├── Column Chunk B             │
+│  └── Column Chunk C             │
+├─────────────────────────────────┤
+│ Row Group 2                     │
+│  ├── Column Chunk A             │
+│  ├── Column Chunk B             │
+│  └── Column Chunk C             │
+├─────────────────────────────────┤
+│ Footer Metadata                 │
+│  ├── Schema                     │
+│  ├── Row Group Metadata         │
+│  ├── Column Statistics          │
+│  └── Compression Codec          │
+└─────────────────────────────────┘
+│ Footer Size (4 bytes)           │
+│ Magic: PAR1 (4 bytes)           │
+└─────────────────────────────────┘
+</code></pre></div></div>
+
+<h3 id="row-group과-page">Row Group과 Page</h3>
+
+<h4 id="row-group"><strong>Row Group</strong></h4>
+<ul>
+  <li><strong>정의</strong>: 행의 논리적 그룹 (기본 128MB)</li>
+  <li><strong>목적</strong>: 병렬 처리 단위</li>
+  <li><strong>통계</strong>: Min/Max/Null count per column</li>
+</ul>
+
+<h4 id="page"><strong>Page</strong></h4>
+<ul>
+  <li><strong>정의</strong>: 압축 및 인코딩 단위 (기본 1MB)</li>
+  <li><strong>인코딩</strong>: Dictionary, RLE, Delta encoding</li>
+  <li><strong>압축</strong>: Snappy, GZIP, LZO, ZSTD</li>
+</ul>
+
+<h3 id="parquet-생성-예제">Parquet 생성 예제</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.types</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">Parquet Example</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># 데이터 생성
+</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">,</span> <span class="mf">100.5</span><span class="p">,</span> <span class="sh">"</span><span class="s">2024-01-15</span><span class="sh">"</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="sh">"</span><span class="s">Bob</span><span class="sh">"</span><span class="p">,</span> <span class="mf">200.3</span><span class="p">,</span> <span class="sh">"</span><span class="s">2024-01-15</span><span class="sh">"</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="sh">"</span><span class="s">Charlie</span><span class="sh">"</span><span class="p">,</span> <span class="mf">150.7</span><span class="p">,</span> <span class="sh">"</span><span class="s">2024-01-15</span><span class="sh">"</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="n">schema</span> <span class="o">=</span> <span class="nc">StructType</span><span class="p">([</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="nc">IntegerType</span><span class="p">(),</span> <span class="bp">False</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="nc">StringType</span><span class="p">(),</span> <span class="bp">False</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">,</span> <span class="nc">DoubleType</span><span class="p">(),</span> <span class="bp">False</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">,</span> <span class="nc">StringType</span><span class="p">(),</span> <span class="bp">False</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="nf">createDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+
+<span class="c1"># Parquet 설정 최적화
+</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.compression.codec</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">snappy</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.block.size</span><span class="sh">"</span><span class="p">,</span> <span class="mi">134217728</span><span class="p">)</span>  <span class="c1"># 128MB
+</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.page.size</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1048576</span><span class="p">)</span>     <span class="c1"># 1MB
+</span>
+<span class="c1"># 저장
+</span><span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data/events.parquet</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="parquet-메타데이터-분석">Parquet 메타데이터 분석</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Parquet 파일 메타데이터 읽기
+</span><span class="kn">import</span> <span class="n">pyarrow.parquet</span> <span class="k">as</span> <span class="n">pq</span>
+
+<span class="n">parquet_file</span> <span class="o">=</span> <span class="n">pq</span><span class="p">.</span><span class="nc">ParquetFile</span><span class="p">(</span><span class="sh">'</span><span class="s">events.parquet</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># 스키마 확인
+</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Schema:</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">parquet_file</span><span class="p">.</span><span class="n">schema</span><span class="p">)</span>
+
+<span class="c1"># Row Group 정보
+</span><span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">Row Groups: </span><span class="si">{</span><span class="n">parquet_file</span><span class="p">.</span><span class="n">num_row_groups</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Row Group별 통계
+</span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">parquet_file</span><span class="p">.</span><span class="n">num_row_groups</span><span class="p">):</span>
+    <span class="n">rg</span> <span class="o">=</span> <span class="n">parquet_file</span><span class="p">.</span><span class="n">metadata</span><span class="p">.</span><span class="nf">row_group</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">Row Group </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s">:</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">  Rows: </span><span class="si">{</span><span class="n">rg</span><span class="p">.</span><span class="n">num_rows</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">  Total Size: </span><span class="si">{</span><span class="n">rg</span><span class="p">.</span><span class="n">total_byte_size</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s"> MB</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 컬럼별 통계
+</span>    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">rg</span><span class="p">.</span><span class="n">num_columns</span><span class="p">):</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="n">rg</span><span class="p">.</span><span class="nf">column</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">  Column </span><span class="si">{</span><span class="n">col</span><span class="p">.</span><span class="n">path_in_schema</span><span class="si">}</span><span class="s">:</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">    Compressed: </span><span class="si">{</span><span class="n">col</span><span class="p">.</span><span class="n">total_compressed_size</span> <span class="o">/</span> <span class="mi">1024</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s"> KB</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">    Uncompressed: </span><span class="si">{</span><span class="n">col</span><span class="p">.</span><span class="n">total_uncompressed_size</span> <span class="o">/</span> <span class="mi">1024</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s"> KB</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">    Compression Ratio: </span><span class="si">{</span><span class="n">col</span><span class="p">.</span><span class="n">total_uncompressed_size</span> <span class="o">/</span> <span class="n">col</span><span class="p">.</span><span class="n">total_compressed_size</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">x</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="orc-내부-구조">🔶 ORC 내부 구조</h2>
+
+<h3 id="설계-철학-1">설계 철학</h3>
+
+<p>ORC는 <strong>Hive 워크로드에 최적화</strong>된 포맷으로, Parquet보다 더 공격적인 압축을 제공합니다.</p>
+
+<h4 id="핵심-특징-1"><strong>핵심 특징</strong></h4>
+<ul>
+  <li><strong>High Compression</strong>: ZLIB 기본, 매우 높은 압축률</li>
+  <li><strong>Built-in Indexes</strong>: Row group, bloom filter, column statistics</li>
+  <li><strong>ACID Support</strong>: Hive ACID 트랜잭션 지원</li>
+  <li><strong>Predicate Pushdown</strong>: 다층 인덱스로 강력한 필터링</li>
+</ul>
+
+<h3 id="파일-구조-1">파일 구조</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ORC File Structure:
+┌─────────────────────────────────┐
+│ Postscript                      │
+│  ├── Compression                │
+│  ├── Footer Length              │
+│  └── Version                    │
+├─────────────────────────────────┤
+│ File Footer                     │
+│  ├── Schema                     │
+│  ├── Statistics                 │
+│  ├── Stripe Information         │
+│  └── User Metadata              │
+├─────────────────────────────────┤
+│ Stripe 1                        │
+│  ├── Index Data                 │
+│  │   ├── Row Index              │
+│  │   ├── Bloom Filter           │
+│  │   └── Column Statistics      │
+│  ├── Data (Compressed)          │
+│  │   ├── Column A Stream        │
+│  │   ├── Column B Stream        │
+│  │   └── Column C Stream        │
+│  └── Stripe Footer              │
+├─────────────────────────────────┤
+│ Stripe 2                        │
+│  └── ...                        │
+└─────────────────────────────────┘
+</code></pre></div></div>
+
+<h3 id="stripe와-index">Stripe와 Index</h3>
+
+<h4 id="stripe"><strong>Stripe</strong></h4>
+<ul>
+  <li><strong>정의</strong>: ORC의 기본 처리 단위 (기본 64MB)</li>
+  <li><strong>구성</strong>: Index Data + Actual Data + Footer</li>
+  <li><strong>병렬 처리</strong>: Stripe 단위로 분산 처리</li>
+</ul>
+
+<h4 id="index-types"><strong>Index Types</strong></h4>
+<ul>
+  <li><strong>Row Index</strong>: 10,000행마다 min/max/sum/count</li>
+  <li><strong>Bloom Filter</strong>: 특정 값 존재 여부 빠른 체크</li>
+  <li><strong>Column Statistics</strong>: Stripe 수준 통계</li>
+</ul>
+
+<h3 id="orc-생성-예제">ORC 생성 예제</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark에서 ORC 생성
+</span><span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">orc</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">compression</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">zlib</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">orc.stripe.size</span><span class="sh">"</span><span class="p">,</span> <span class="mi">67108864</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">orc.compress.size</span><span class="sh">"</span><span class="p">,</span> <span class="mi">262144</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">orc.bloom.filter.columns</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user_id,product_id</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data/events.orc</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="orc-메타데이터-분석">ORC 메타데이터 분석</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># ORC 파일 분석 (PyArrow 사용)
+</span><span class="kn">import</span> <span class="n">pyarrow.orc</span> <span class="k">as</span> <span class="n">orc</span>
+
+<span class="n">orc_file</span> <span class="o">=</span> <span class="n">orc</span><span class="p">.</span><span class="nc">ORCFile</span><span class="p">(</span><span class="sh">'</span><span class="s">events.orc</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># 스키마
+</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Schema:</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">orc_file</span><span class="p">.</span><span class="n">schema</span><span class="p">)</span>
+
+<span class="c1"># Stripe 정보
+</span><span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">Stripes: </span><span class="si">{</span><span class="n">orc_file</span><span class="p">.</span><span class="n">nstripes</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Rows: </span><span class="si">{</span><span class="n">orc_file</span><span class="p">.</span><span class="n">nrows</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 메타데이터
+</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">orc_file</span><span class="p">.</span><span class="n">metadata</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Compression: </span><span class="si">{</span><span class="n">metadata</span><span class="p">.</span><span class="n">compression</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Writer Version: </span><span class="si">{</span><span class="n">metadata</span><span class="p">.</span><span class="n">writer_version</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="avro-내부-구조">🔹 Avro 내부 구조</h2>
+
+<h3 id="설계-철학-2">설계 철학</h3>
+
+<p>Avro는 <strong>스키마 진화와 빠른 직렬화</strong>에 최적화된 행 기반 포맷입니다.</p>
+
+<h4 id="핵심-특징-2"><strong>핵심 특징</strong></h4>
+<ul>
+  <li><strong>Row-based</strong>: 전체 레코드를 순차적으로 저장</li>
+  <li><strong>Self-describing</strong>: 파일 내 스키마 포함</li>
+  <li><strong>Schema Evolution</strong>: 스키마 변경 완벽 지원</li>
+  <li><strong>Compact Binary</strong>: 효율적인 바이너리 인코딩</li>
+</ul>
+
+<h3 id="파일-구조-2">파일 구조</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Avro File Structure:
+┌─────────────────────────────────┐
+│ Header                          │
+│  ├── Magic: Obj\x01             │
+│  ├── File Metadata              │
+│  │   ├── Schema (JSON)          │
+│  │   └── Codec (snappy/deflate) │
+│  └── Sync Marker (16 bytes)     │
+├─────────────────────────────────┤
+│ Data Block 1                    │
+│  ├── Record Count               │
+│  ├── Block Size (compressed)    │
+│  ├── Records (compressed)       │
+│  │   ├── Record 1 (all fields)  │
+│  │   ├── Record 2 (all fields)  │
+│  │   └── Record N (all fields)  │
+│  └── Sync Marker                │
+├─────────────────────────────────┤
+│ Data Block 2                    │
+│  └── ...                        │
+└─────────────────────────────────┘
+</code></pre></div></div>
+
+<h3 id="스키마-정의">스키마 정의</h3>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"record"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Event"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"namespace"</span><span class="p">:</span><span class="w"> </span><span class="s2">"com.example"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"fields"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"id"</span><span class="p">,</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int"</span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name"</span><span class="p">,</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"amount"</span><span class="p">,</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"double"</span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"date"</span><span class="p">,</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"metadata"</span><span class="p">,</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"null"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"map"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"values"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="w">
+    </span><span class="p">}],</span><span class="w"> </span><span class="nl">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="avro-생성-예제">Avro 생성 예제</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark에서 Avro 생성
+</span><span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">avro</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">compression</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">snappy</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data/events.avro</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Kafka에서 Avro 사용
+</span><span class="kn">from</span> <span class="n">confluent_kafka</span> <span class="kn">import</span> <span class="n">avro</span>
+<span class="kn">from</span> <span class="n">confluent_kafka.avro</span> <span class="kn">import</span> <span class="n">AvroProducer</span>
+
+<span class="n">value_schema_str</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+{
+   </span><span class="sh">"</span><span class="s">namespace</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">com.example</span><span class="sh">"</span><span class="s">,
+   </span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">record</span><span class="sh">"</span><span class="s">,
+   </span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">Event</span><span class="sh">"</span><span class="s">,
+   </span><span class="sh">"</span><span class="s">fields</span><span class="sh">"</span><span class="s"> : [
+     {</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="s">, </span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">int</span><span class="sh">"</span><span class="s">},
+     {</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="s">, </span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="s">}
+   ]
+}
+</span><span class="sh">"""</span>
+
+<span class="n">value_schema</span> <span class="o">=</span> <span class="n">avro</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">value_schema_str</span><span class="p">)</span>
+
+<span class="n">avroProducer</span> <span class="o">=</span> <span class="nc">AvroProducer</span><span class="p">({</span>
+    <span class="sh">'</span><span class="s">bootstrap.servers</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">localhost:9092</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">schema.registry.url</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">http://localhost:8081</span><span class="sh">'</span>
+<span class="p">},</span> <span class="n">default_value_schema</span><span class="o">=</span><span class="n">value_schema</span><span class="p">)</span>
+
+<span class="c1"># 메시지 전송
+</span><span class="n">avroProducer</span><span class="p">.</span><span class="nf">produce</span><span class="p">(</span><span class="n">topic</span><span class="o">=</span><span class="sh">'</span><span class="s">events</span><span class="sh">'</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">})</span>
+<span class="n">avroProducer</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="실제-벤치마크-비교">📊 실제 벤치마크 비교</h2>
+
+<h3 id="테스트-환경">테스트 환경</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>항목</strong></th>
+      <th><strong>설정</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>데이터셋</strong></td>
+      <td>NYC Taxi (1억 레코드, 100GB CSV)</td>
+    </tr>
+    <tr>
+      <td><strong>Spark 버전</strong></td>
+      <td>3.4.0</td>
+    </tr>
+    <tr>
+      <td><strong>인스턴스</strong></td>
+      <td>r5.4xlarge × 10</td>
+    </tr>
+    <tr>
+      <td><strong>압축 코덱</strong></td>
+      <td>Snappy (Parquet/Avro), ZLIB (ORC)</td>
+    </tr>
+    <tr>
+      <td><strong>Row Group/Stripe</strong></td>
+      <td>128MB</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="테스트-1-파일-크기-및-압축률">테스트 1: 파일 크기 및 압축률</h3>
+
+<h4 id="원본-데이터-100gb-csv"><strong>원본 데이터: 100GB CSV</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>포맷</strong></th>
+      <th><strong>압축 코덱</strong></th>
+      <th><strong>파일 크기</strong></th>
+      <th><strong>압축률</strong></th>
+      <th><strong>파일 수</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>CSV</strong></td>
+      <td>None</td>
+      <td>100 GB</td>
+      <td>1.0x</td>
+      <td>1,000</td>
+    </tr>
+    <tr>
+      <td><strong>Parquet</strong></td>
+      <td>Snappy</td>
+      <td>12.3 GB</td>
+      <td><strong>8.1x</strong></td>
+      <td>97</td>
+    </tr>
+    <tr>
+      <td><strong>Parquet</strong></td>
+      <td>GZIP</td>
+      <td>8.9 GB</td>
+      <td><strong>11.2x</strong></td>
+      <td>70</td>
+    </tr>
+    <tr>
+      <td><strong>ORC</strong></td>
+      <td>ZLIB</td>
+      <td>9.1 GB</td>
+      <td><strong>11.0x</strong></td>
+      <td>72</td>
+    </tr>
+    <tr>
+      <td><strong>ORC</strong></td>
+      <td>Snappy</td>
+      <td>11.8 GB</td>
+      <td><strong>8.5x</strong></td>
+      <td>93</td>
+    </tr>
+    <tr>
+      <td><strong>Avro</strong></td>
+      <td>Snappy</td>
+      <td>28.4 GB</td>
+      <td><strong>3.5x</strong></td>
+      <td>224</td>
+    </tr>
+    <tr>
+      <td><strong>Avro</strong></td>
+      <td>Deflate</td>
+      <td>24.1 GB</td>
+      <td><strong>4.1x</strong></td>
+      <td>190</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="압축-시간-비교"><strong>압축 시간 비교</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">time</span>
+
+<span class="c1"># Parquet 쓰기
+</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">).</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">output.parquet</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">parquet_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="c1"># ORC 쓰기
+</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">orc</span><span class="sh">"</span><span class="p">).</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">).</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">output.orc</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">orc_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="c1"># Avro 쓰기
+</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">avro</span><span class="sh">"</span><span class="p">).</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">).</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">output.avro</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">avro_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Parquet: </span><span class="si">{</span><span class="n">parquet_time</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">s</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 결과: 142.3s
+</span><span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">ORC: </span><span class="si">{</span><span class="n">orc_time</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">s</span><span class="sh">"</span><span class="p">)</span>          <span class="c1"># 결과: 156.8s
+</span><span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Avro: </span><span class="si">{</span><span class="n">avro_time</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">s</span><span class="sh">"</span><span class="p">)</span>        <span class="c1"># 결과: 98.4s
+</span></code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>포맷</strong></th>
+      <th><strong>쓰기 시간</strong></th>
+      <th><strong>처리 속도</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Parquet (Snappy)</strong></td>
+      <td>142.3초</td>
+      <td>703 MB/s</td>
+    </tr>
+    <tr>
+      <td><strong>ORC (ZLIB)</strong></td>
+      <td>156.8초</td>
+      <td>638 MB/s</td>
+    </tr>
+    <tr>
+      <td><strong>Avro (Snappy)</strong></td>
+      <td>98.4초</td>
+      <td>1,016 MB/s</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="테스트-2-읽기-성능-전체-스캔">테스트 2: 읽기 성능 (전체 스캔)</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- 쿼리: 전체 데이터 집계</span>
+<span class="k">SELECT</span> 
+    <span class="n">pickup_date</span><span class="p">,</span>
+    <span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">as</span> <span class="n">trip_count</span><span class="p">,</span>
+    <span class="k">AVG</span><span class="p">(</span><span class="n">fare_amount</span><span class="p">)</span> <span class="k">as</span> <span class="n">avg_fare</span><span class="p">,</span>
+    <span class="k">SUM</span><span class="p">(</span><span class="n">tip_amount</span><span class="p">)</span> <span class="k">as</span> <span class="n">total_tips</span>
+<span class="k">FROM</span> <span class="n">trips</span>
+<span class="k">GROUP</span> <span class="k">BY</span> <span class="n">pickup_date</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="읽기-성능-비교"><strong>읽기 성능 비교</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>포맷</strong></th>
+      <th><strong>압축</strong></th>
+      <th><strong>스캔 시간</strong></th>
+      <th><strong>처리 속도</strong></th>
+      <th><strong>메모리 사용</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Parquet</strong></td>
+      <td>Snappy</td>
+      <td>23.4초</td>
+      <td>4.3 GB/s</td>
+      <td>18.2 GB</td>
+    </tr>
+    <tr>
+      <td><strong>Parquet</strong></td>
+      <td>GZIP</td>
+      <td>31.2초</td>
+      <td>3.2 GB/s</td>
+      <td>16.8 GB</td>
+    </tr>
+    <tr>
+      <td><strong>ORC</strong></td>
+      <td>ZLIB</td>
+      <td>28.7초</td>
+      <td>3.5 GB/s</td>
+      <td>17.1 GB</td>
+    </tr>
+    <tr>
+      <td><strong>ORC</strong></td>
+      <td>Snappy</td>
+      <td>24.1초</td>
+      <td>4.1 GB/s</td>
+      <td>18.5 GB</td>
+    </tr>
+    <tr>
+      <td><strong>Avro</strong></td>
+      <td>Snappy</td>
+      <td>87.3초</td>
+      <td>1.1 GB/s</td>
+      <td>32.4 GB</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="테스트-3-컬럼-선택-쿼리-projection-pushdown">테스트 3: 컬럼 선택 쿼리 (Projection Pushdown)</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- 쿼리: 특정 컬럼만 선택</span>
+<span class="k">SELECT</span> <span class="n">pickup_date</span><span class="p">,</span> <span class="n">fare_amount</span>
+<span class="k">FROM</span> <span class="n">trips</span>
+<span class="k">WHERE</span> <span class="n">pickup_date</span> <span class="o">=</span> <span class="s1">'2024-01-15'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="컬럼-선택-성능"><strong>컬럼 선택 성능</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>포맷</strong></th>
+      <th><strong>전체 컬럼</strong></th>
+      <th><strong>2개 컬럼</strong></th>
+      <th><strong>개선율</strong></th>
+      <th><strong>스캔 데이터</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Parquet</strong></td>
+      <td>23.4초</td>
+      <td>2.8초</td>
+      <td><strong>8.4x</strong></td>
+      <td>1.2 GB</td>
+    </tr>
+    <tr>
+      <td><strong>ORC</strong></td>
+      <td>28.7초</td>
+      <td>3.1초</td>
+      <td><strong>9.3x</strong></td>
+      <td>1.1 GB</td>
+    </tr>
+    <tr>
+      <td><strong>Avro</strong></td>
+      <td>87.3초</td>
+      <td>84.2초</td>
+      <td><strong>1.0x</strong></td>
+      <td>28.4 GB (전체)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>핵심</strong>: Columnar 포맷은 특정 컬럼만 읽어서 엄청난 성능 향상, Avro는 전체 레코드를 읽어야 함</p>
+
+<h3 id="테스트-4-predicate-pushdown">테스트 4: Predicate Pushdown</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- 쿼리: 필터링 조건</span>
+<span class="k">SELECT</span> <span class="o">*</span>
+<span class="k">FROM</span> <span class="n">trips</span>
+<span class="k">WHERE</span> <span class="n">fare_amount</span> <span class="o">&gt;</span> <span class="mi">50</span> <span class="k">AND</span> <span class="n">tip_amount</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="predicate-pushdown-효과"><strong>Predicate Pushdown 효과</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>포맷</strong></th>
+      <th><strong>스캔 데이터</strong></th>
+      <th><strong>실제 읽은 데이터</strong></th>
+      <th><strong>건너뛴 비율</strong></th>
+      <th><strong>쿼리 시간</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Parquet</strong></td>
+      <td>12.3 GB</td>
+      <td>3.2 GB</td>
+      <td><strong>74%</strong></td>
+      <td>8.4초</td>
+    </tr>
+    <tr>
+      <td><strong>ORC</strong></td>
+      <td>9.1 GB</td>
+      <td>2.1 GB</td>
+      <td><strong>77%</strong></td>
+      <td>7.2초</td>
+    </tr>
+    <tr>
+      <td><strong>Avro</strong></td>
+      <td>28.4 GB</td>
+      <td>28.4 GB</td>
+      <td><strong>0%</strong></td>
+      <td>72.1초</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>핵심</strong>: ORC의 Row Index와 Bloom Filter가 가장 효과적</p>
+
+<h3 id="테스트-5-스키마-진화">테스트 5: 스키마 진화</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 스키마 변경 테스트
+# 1. 기존 스키마로 데이터 저장
+</span><span class="n">schema_v1</span> <span class="o">=</span> <span class="nc">StructType</span><span class="p">([</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="nc">IntegerType</span><span class="p">()),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="nc">StringType</span><span class="p">()),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">,</span> <span class="nc">DoubleType</span><span class="p">())</span>
+<span class="p">])</span>
+
+<span class="n">df_v1</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">format_type</span><span class="p">).</span><span class="nf">save</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">data_</span><span class="si">{</span><span class="n">format_type</span><span class="si">}</span><span class="s">_v1</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 2. 새 컬럼 추가된 스키마
+</span><span class="n">schema_v2</span> <span class="o">=</span> <span class="nc">StructType</span><span class="p">([</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="nc">IntegerType</span><span class="p">()),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="nc">StringType</span><span class="p">()),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">,</span> <span class="nc">DoubleType</span><span class="p">()),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">,</span> <span class="nc">StringType</span><span class="p">())</span>  <span class="c1"># 새 컬럼
+</span><span class="p">])</span>
+
+<span class="n">df_v2</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">format_type</span><span class="p">).</span><span class="nf">save</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">data_</span><span class="si">{</span><span class="n">format_type</span><span class="si">}</span><span class="s">_v2</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 3. 두 버전 동시 읽기
+</span><span class="n">df_merged</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">format_type</span><span class="p">).</span><span class="nf">load</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">data_</span><span class="si">{</span><span class="n">format_type</span><span class="si">}</span><span class="s">_*</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="스키마-진화-지원"><strong>스키마 진화 지원</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>포맷</strong></th>
+      <th><strong>컬럼 추가</strong></th>
+      <th><strong>컬럼 삭제</strong></th>
+      <th><strong>타입 변경</strong></th>
+      <th><strong>컬럼 이름 변경</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Parquet</strong></td>
+      <td>✅ 가능</td>
+      <td>⚠️ 주의 필요</td>
+      <td>❌ 불가능</td>
+      <td>❌ 불가능</td>
+    </tr>
+    <tr>
+      <td><strong>ORC</strong></td>
+      <td>✅ 가능</td>
+      <td>⚠️ 주의 필요</td>
+      <td>❌ 불가능</td>
+      <td>❌ 불가능</td>
+    </tr>
+    <tr>
+      <td><strong>Avro</strong></td>
+      <td>✅ 완벽 지원</td>
+      <td>✅ 완벽 지원</td>
+      <td>✅ 일부 가능</td>
+      <td>✅ Alias 지원</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="상황별-최적-포맷-선택">🎯 상황별 최적 포맷 선택</h2>
+
+<h3 id="use-case-1-대규모-분석용-데이터-레이크">Use Case 1: 대규모 분석용 데이터 레이크</h3>
+
+<h4 id="시나리오"><strong>시나리오</strong></h4>
+<ul>
+  <li>1일 10TB 데이터 수집</li>
+  <li>Athena, Spark로 애드혹 쿼리</li>
+  <li>주로 집계 쿼리 실행</li>
+</ul>
+
+<h4 id="추천-parquet-snappy"><strong>추천: Parquet (Snappy)</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 최적 설정
+</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.compression.codec</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">snappy</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.block.size</span><span class="sh">"</span><span class="p">,</span> <span class="mi">134217728</span><span class="p">)</span>
+<span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.page.size</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1048576</span><span class="p">)</span>
+<span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.enableVectorizedReader</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">partitionBy</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/analytics/</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>이유</strong>:</p>
+<ul>
+  <li>✅ Athena 완벽 지원</li>
+  <li>✅ 빠른 읽기 성능</li>
+  <li>✅ 좋은 압축률</li>
+  <li>✅ 범용성</li>
+</ul>
+
+<h3 id="use-case-2-hive-중심-데이터-웨어하우스">Use Case 2: Hive 중심 데이터 웨어하우스</h3>
+
+<h4 id="시나리오-1"><strong>시나리오</strong></h4>
+<ul>
+  <li>Hive 메타스토어 사용</li>
+  <li>ACID 트랜잭션 필요</li>
+  <li>UPDATE/DELETE 작업 빈번</li>
+</ul>
+
+<h4 id="추천-orc-zlib"><strong>추천: ORC (ZLIB)</strong></h4>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Hive에서 ORC 테이블 생성</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">events</span> <span class="p">(</span>
+    <span class="n">id</span> <span class="nb">INT</span><span class="p">,</span>
+    <span class="n">name</span> <span class="n">STRING</span><span class="p">,</span>
+    <span class="n">amount</span> <span class="nb">DOUBLE</span><span class="p">,</span>
+    <span class="n">event_date</span> <span class="n">STRING</span>
+<span class="p">)</span>
+<span class="n">PARTITIONED</span> <span class="k">BY</span> <span class="p">(</span><span class="nb">date</span> <span class="n">STRING</span><span class="p">)</span>
+<span class="n">STORED</span> <span class="k">AS</span> <span class="n">ORC</span>
+<span class="n">TBLPROPERTIES</span> <span class="p">(</span>
+    <span class="nv">"orc.compress"</span><span class="o">=</span><span class="nv">"ZLIB"</span><span class="p">,</span>
+    <span class="nv">"orc.create.index"</span><span class="o">=</span><span class="nv">"true"</span><span class="p">,</span>
+    <span class="nv">"orc.bloom.filter.columns"</span><span class="o">=</span><span class="nv">"id,name"</span>
+<span class="p">);</span>
+
+<span class="c1">-- ACID 트랜잭션</span>
+<span class="k">UPDATE</span> <span class="n">events</span> <span class="k">SET</span> <span class="n">amount</span> <span class="o">=</span> <span class="n">amount</span> <span class="o">*</span> <span class="mi">1</span><span class="p">.</span><span class="mi">1</span> <span class="k">WHERE</span> <span class="nb">date</span> <span class="o">=</span> <span class="s1">'2024-01-15'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p><strong>이유</strong>:</p>
+<ul>
+  <li>✅ Hive 최적화</li>
+  <li>✅ ACID 지원</li>
+  <li>✅ 최고 압축률</li>
+  <li>✅ 강력한 인덱스</li>
+</ul>
+
+<h3 id="use-case-3-실시간-스트리밍-파이프라인">Use Case 3: 실시간 스트리밍 파이프라인</h3>
+
+<h4 id="시나리오-2"><strong>시나리오</strong></h4>
+<ul>
+  <li>Kafka로 실시간 데이터 수집</li>
+  <li>Schema Registry 사용</li>
+  <li>스키마 변경 빈번</li>
+</ul>
+
+<h4 id="추천-avro--parquet-하이브리드"><strong>추천: Avro → Parquet 하이브리드</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 실시간: Kafka + Avro
+</span><span class="kn">from</span> <span class="n">confluent_kafka</span> <span class="kn">import</span> <span class="n">avro</span>
+
+<span class="c1"># Avro로 Kafka에 저장
+</span><span class="n">avro_producer</span><span class="p">.</span><span class="nf">produce</span><span class="p">(</span><span class="n">topic</span><span class="o">=</span><span class="sh">'</span><span class="s">events</span><span class="sh">'</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">event_data</span><span class="p">)</span>
+
+<span class="c1"># 배치: Avro → Parquet 변환
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">avro</span><span class="sh">"</span><span class="p">).</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/streaming/avro/</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">partitionBy</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/analytics/parquet/</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>이유</strong>:</p>
+<ul>
+  <li>✅ Avro: 빠른 쓰기, 스키마 진화</li>
+  <li>✅ Parquet: 분석 최적화</li>
+  <li>✅ 두 가지 장점 활용</li>
+</ul>
+
+<h3 id="use-case-4-로그-데이터-장기-보관">Use Case 4: 로그 데이터 장기 보관</h3>
+
+<h4 id="시나리오-3"><strong>시나리오</strong></h4>
+<ul>
+  <li>1일 50TB 로그 데이터</li>
+  <li>대부분 cold storage</li>
+  <li>가끔 특정 기간 분석</li>
+</ul>
+
+<h4 id="추천-parquet-gzip-또는-zstd"><strong>추천: Parquet (GZIP 또는 ZSTD)</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 최대 압축률 설정
+</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.compression.codec</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">gzip</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 또는 zstd
+</span>
+<span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">partitionBy</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/logs/</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Lifecycle policy로 자동 전환
+</span><span class="kn">import</span> <span class="n">boto3</span>
+
+<span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="p">.</span><span class="nf">client</span><span class="p">(</span><span class="sh">'</span><span class="s">s3</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">s3</span><span class="p">.</span><span class="nf">put_bucket_lifecycle_configuration</span><span class="p">(</span>
+    <span class="n">Bucket</span><span class="o">=</span><span class="sh">'</span><span class="s">bucket</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">LifecycleConfiguration</span><span class="o">=</span><span class="p">{</span>
+        <span class="sh">'</span><span class="s">Rules</span><span class="sh">'</span><span class="p">:</span> <span class="p">[{</span>
+            <span class="sh">'</span><span class="s">Id</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">TransitionLogs</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">Status</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">Enabled</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">Prefix</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">logs/</span><span class="sh">'</span><span class="p">,</span>
+            <span class="sh">'</span><span class="s">Transitions</span><span class="sh">'</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="sh">'</span><span class="s">Days</span><span class="sh">'</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="sh">'</span><span class="s">StorageClass</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">STANDARD_IA</span><span class="sh">'</span><span class="p">},</span>
+                <span class="p">{</span><span class="sh">'</span><span class="s">Days</span><span class="sh">'</span><span class="p">:</span> <span class="mi">90</span><span class="p">,</span> <span class="sh">'</span><span class="s">StorageClass</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">GLACIER</span><span class="sh">'</span><span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}]</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>이유</strong>:</p>
+<ul>
+  <li>✅ 높은 압축률 (스토리지 비용 절감)</li>
+  <li>✅ S3 Glacier 호환</li>
+  <li>✅ 필요시 빠른 분석 가능</li>
+</ul>
+
+<h3 id="use-case-5-복잡한-중첩-데이터">Use Case 5: 복잡한 중첩 데이터</h3>
+
+<h4 id="시나리오-4"><strong>시나리오</strong></h4>
+<ul>
+  <li>JSON 이벤트 데이터</li>
+  <li>깊은 중첩 구조</li>
+  <li>특정 필드만 자주 조회</li>
+</ul>
+
+<h4 id="추천-parquet"><strong>추천: Parquet</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 중첩 JSON 데이터
+</span><span class="n">json_data</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+{
+  </span><span class="sh">"</span><span class="s">user</span><span class="sh">"</span><span class="s">: {
+    </span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="s">: 123,
+    </span><span class="sh">"</span><span class="s">profile</span><span class="sh">"</span><span class="s">: {
+      </span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="s">,
+      </span><span class="sh">"</span><span class="s">email</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">alice@example.com</span><span class="sh">"</span><span class="s">
+    }
+  },
+  </span><span class="sh">"</span><span class="s">event</span><span class="sh">"</span><span class="s">: {
+    </span><span class="sh">"</span><span class="s">type</span><span class="sh">"</span><span class="s">: </span><span class="sh">"</span><span class="s">purchase</span><span class="sh">"</span><span class="s">,
+    </span><span class="sh">"</span><span class="s">items</span><span class="sh">"</span><span class="s">: [
+      {</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="s">: 1, </span><span class="sh">"</span><span class="s">price</span><span class="sh">"</span><span class="s">: 100.5},
+      {</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="s">: 2, </span><span class="sh">"</span><span class="s">price</span><span class="sh">"</span><span class="s">: 50.3}
+    ]
+  }
+}
+</span><span class="sh">"""</span>
+
+<span class="c1"># Spark에서 중첩 구조 처리
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">json</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/raw/events.json</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Parquet로 저장 (중첩 구조 유지)
+</span><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/processed/events.parquet</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 특정 필드만 효율적으로 읽기
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/processed/events.parquet</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">df</span><span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="sh">"</span><span class="s">user.profile.name</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">event.type</span><span class="sh">"</span><span class="p">).</span><span class="nf">show</span><span class="p">()</span>
+<span class="c1"># Parquet는 필요한 컬럼만 읽음 (nested column pruning)
+</span></code></pre></div></div>
+
+<p><strong>이유</strong>:</p>
+<ul>
+  <li>✅ 중첩 구조 완벽 지원</li>
+  <li>✅ Nested column pruning</li>
+  <li>✅ 메모리 효율적</li>
+</ul>
+
+<hr />
+
+<h2 id="포맷-전환-가이드">🔄 포맷 전환 가이드</h2>
+
+<h3 id="csv--parquet-마이그레이션">CSV → Parquet 마이그레이션</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">CSV to Parquet</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.adaptive.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># CSV 읽기 (스키마 추론)
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">header</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">inferSchema</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">csv</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/raw/csv/*.csv</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 데이터 타입 최적화
+</span><span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">col</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span> \
+    <span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">,</span> <span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">).</span><span class="nf">cast</span><span class="p">(</span><span class="sh">"</span><span class="s">decimal(10,2)</span><span class="sh">"</span><span class="p">))</span> \
+    <span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">,</span> <span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">).</span><span class="nf">cast</span><span class="p">(</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">))</span>
+
+<span class="c1"># Parquet로 변환
+</span><span class="n">df</span><span class="p">.</span><span class="nf">repartition</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> \
+    <span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">compression</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">snappy</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">partitionBy</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/processed/parquet/</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Original CSV: </span><span class="si">{</span><span class="n">df</span><span class="p">.</span><span class="nf">inputFiles</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Rows: </span><span class="si">{</span><span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="마이그레이션-결과"><strong>마이그레이션 결과</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>항목</strong></th>
+      <th><strong>CSV</strong></th>
+      <th><strong>Parquet</strong></th>
+      <th><strong>개선</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>파일 크기</strong></td>
+      <td>100 GB</td>
+      <td>12.3 GB</td>
+      <td><strong>87% 감소</strong></td>
+    </tr>
+    <tr>
+      <td><strong>쿼리 시간</strong></td>
+      <td>245초</td>
+      <td>23.4초</td>
+      <td><strong>10.5x 빠름</strong></td>
+    </tr>
+    <tr>
+      <td><strong>S3 비용</strong></td>
+      <td>$2,300/월</td>
+      <td>$283/월</td>
+      <td><strong>87% 절감</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Athena 스캔</strong></td>
+      <td>$512/쿼리</td>
+      <td>$62/쿼리</td>
+      <td><strong>88% 절감</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="avro--parquet-배치-변환">Avro → Parquet 배치 변환</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 스트리밍에서 수집된 Avro를 분석용 Parquet로 변환
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">Avro to Parquet Batch</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># 어제 날짜 데이터 처리
+</span><span class="n">yesterday</span> <span class="o">=</span> <span class="p">(</span><span class="n">datetime</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">-</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)).</span><span class="nf">strftime</span><span class="p">(</span><span class="sh">"</span><span class="s">%Y-%m-%d</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Avro 읽기
+</span><span class="n">avro_path</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">s3://bucket/streaming/avro/date=</span><span class="si">{</span><span class="n">yesterday</span><span class="si">}</span><span class="s">/</span><span class="sh">"</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">avro</span><span class="sh">"</span><span class="p">).</span><span class="nf">load</span><span class="p">(</span><span class="n">avro_path</span><span class="p">)</span>
+
+<span class="c1"># 데이터 품질 체크
+</span><span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Records: </span><span class="si">{</span><span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Duplicates: </span><span class="si">{</span><span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span> <span class="o">-</span> <span class="n">df</span><span class="p">.</span><span class="nf">dropDuplicates</span><span class="p">().</span><span class="nf">count</span><span class="p">()</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 중복 제거 및 정렬
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">dropDuplicates</span><span class="p">([</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">])</span> \
+    <span class="p">.</span><span class="nf">orderBy</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Parquet로 저장
+</span><span class="n">parquet_path</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">s3://bucket/analytics/parquet/date=</span><span class="si">{</span><span class="n">yesterday</span><span class="si">}</span><span class="s">/</span><span class="sh">"</span>
+<span class="n">df</span><span class="p">.</span><span class="nf">repartition</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> \
+    <span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="n">parquet_path</span><span class="p">)</span>
+
+<span class="c1"># 검증
+</span><span class="n">parquet_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="n">parquet_path</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span> <span class="o">==</span> <span class="n">parquet_df</span><span class="p">.</span><span class="nf">count</span><span class="p">(),</span> <span class="sh">"</span><span class="s">Record count mismatch!</span><span class="sh">"</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✓ Migration completed: </span><span class="si">{</span><span class="n">yesterday</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="orc--parquet-상호-변환">ORC ↔ Parquet 상호 변환</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># ORC → Parquet
+</span><span class="n">orc_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">orc</span><span class="sh">"</span><span class="p">).</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data.orc</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">orc_df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data.parquet</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Parquet → ORC
+</span><span class="n">parquet_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data.parquet</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">parquet_df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">orc</span><span class="sh">"</span><span class="p">).</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data.orc</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 성능 비교
+</span><span class="kn">import</span> <span class="n">time</span>
+
+<span class="c1"># ORC 읽기
+</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+<span class="n">orc_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">orc</span><span class="sh">"</span><span class="p">).</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/large_data.orc</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">orc_count</span> <span class="o">=</span> <span class="n">orc_df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+<span class="n">orc_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="c1"># Parquet 읽기
+</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+<span class="n">parquet_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/large_data.parquet</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">parquet_count</span> <span class="o">=</span> <span class="n">parquet_df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+<span class="n">parquet_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">ORC: </span><span class="si">{</span><span class="n">orc_time</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">s, </span><span class="si">{</span><span class="n">orc_count</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="s"> rows</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Parquet: </span><span class="si">{</span><span class="n">parquet_time</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">s, </span><span class="si">{</span><span class="n">parquet_count</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="s"> rows</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="실무-최적화-팁">🛠️ 실무 최적화 팁</h2>
+
+<h3 id="parquet-최적화">Parquet 최적화</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 1. 압축 코덱 선택
+# - Snappy: 빠른 압축/해제 (실시간 분석)
+# - GZIP: 높은 압축률 (장기 보관)
+# - ZSTD: 균형잡힌 성능 (권장)
+</span>
+<span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.compression.codec</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">zstd</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 2. Row Group 크기 조정
+</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.block.size</span><span class="sh">"</span><span class="p">,</span> <span class="mi">268435456</span><span class="p">)</span>  <span class="c1"># 256MB
+</span>
+<span class="c1"># 3. Dictionary encoding 활용
+# 카디널리티 낮은 컬럼에 자동 적용
+# 수동으로 비활성화하려면:
+</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.enableDictionaryEncoding</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 4. Vectorized reader 활성화
+</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.enableVectorizedReader</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 5. Binary as string 최적화
+</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.parquet.binaryAsString</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="orc-최적화">ORC 최적화</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 1. Stripe 크기 조정
+</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.orc.stripe.size</span><span class="sh">"</span><span class="p">,</span> <span class="mi">67108864</span><span class="p">)</span>  <span class="c1"># 64MB
+</span>
+<span class="c1"># 2. Bloom filter 설정
+</span><span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">orc</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">orc.bloom.filter.columns</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user_id,product_id</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">orc.bloom.filter.fpp</span><span class="sh">"</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data.orc</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 3. 압축 선택
+# - ZLIB: 최고 압축률 (기본값)
+# - SNAPPY: 빠른 성능
+# - LZO: 균형
+</span>
+<span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.orc.compression.codec</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">zlib</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 4. Index stride (row index 간격)
+</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">orc.row.index.stride</span><span class="sh">"</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="avro-최적화">Avro 최적화</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 1. 압축 설정
+</span><span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">avro</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">compression</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">snappy</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data.avro</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 2. 스키마 레지스트리 연동
+</span><span class="kn">from</span> <span class="n">confluent_kafka</span> <span class="kn">import</span> <span class="n">avro</span>
+<span class="kn">from</span> <span class="n">confluent_kafka.avro</span> <span class="kn">import</span> <span class="n">AvroProducer</span>
+
+<span class="n">producer_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">'</span><span class="s">bootstrap.servers</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">localhost:9092</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">schema.registry.url</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">http://localhost:8081</span><span class="sh">'</span>
+<span class="p">}</span>
+
+<span class="n">producer</span> <span class="o">=</span> <span class="nc">AvroProducer</span><span class="p">(</span><span class="n">producer_config</span><span class="p">,</span> <span class="n">default_value_schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="포맷-선택-의사결정-트리">포맷 선택 의사결정 트리</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">choose_format</span><span class="p">(</span><span class="n">use_case</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">포맷 선택 도우미 함수</span><span class="sh">"""</span>
+    
+    <span class="c1"># 실시간 스트리밍?
+</span>    <span class="k">if</span> <span class="n">use_case</span><span class="p">[</span><span class="sh">"</span><span class="s">streaming</span><span class="sh">"</span><span class="p">]</span> <span class="ow">and</span> <span class="n">use_case</span><span class="p">[</span><span class="sh">"</span><span class="s">schema_changes</span><span class="sh">"</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sh">"</span><span class="s">Avro</span><span class="sh">"</span>
+    
+    <span class="c1"># Hive 중심 환경?
+</span>    <span class="k">if</span> <span class="n">use_case</span><span class="p">[</span><span class="sh">"</span><span class="s">hive</span><span class="sh">"</span><span class="p">]</span> <span class="ow">and</span> <span class="n">use_case</span><span class="p">[</span><span class="sh">"</span><span class="s">acid</span><span class="sh">"</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sh">"</span><span class="s">ORC</span><span class="sh">"</span>
+    
+    <span class="c1"># 최대 압축률 필요?
+</span>    <span class="k">if</span> <span class="n">use_case</span><span class="p">[</span><span class="sh">"</span><span class="s">storage_critical</span><span class="sh">"</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sh">"</span><span class="s">ORC with ZLIB</span><span class="sh">"</span>
+    
+    <span class="c1"># 범용 분석?
+</span>    <span class="k">if</span> <span class="n">use_case</span><span class="p">[</span><span class="sh">"</span><span class="s">analytics</span><span class="sh">"</span><span class="p">]</span> <span class="ow">and</span> <span class="n">use_case</span><span class="p">[</span><span class="sh">"</span><span class="s">athena</span><span class="sh">"</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sh">"</span><span class="s">Parquet with Snappy</span><span class="sh">"</span>
+    
+    <span class="c1"># 빠른 쓰기 필요?
+</span>    <span class="k">if</span> <span class="n">use_case</span><span class="p">[</span><span class="sh">"</span><span class="s">write_heavy</span><span class="sh">"</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sh">"</span><span class="s">Avro</span><span class="sh">"</span>
+    
+    <span class="c1"># 기본값
+</span>    <span class="k">return</span> <span class="sh">"</span><span class="s">Parquet</span><span class="sh">"</span>
+
+<span class="c1"># 사용 예시
+</span><span class="n">use_case</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">"</span><span class="s">streaming</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">schema_changes</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">hive</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">acid</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">storage_critical</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">analytics</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">athena</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">write_heavy</span><span class="sh">"</span><span class="p">:</span> <span class="bp">False</span>
+<span class="p">}</span>
+
+<span class="n">recommended</span> <span class="o">=</span> <span class="nf">choose_format</span><span class="p">(</span><span class="n">use_case</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Recommended format: </span><span class="si">{</span><span class="n">recommended</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="c1"># 출력: Recommended format: Parquet with Snappy
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="학습-요약">📚 학습 요약</h2>
+
+<h3 id="핵심-포인트">핵심 포인트</h3>
+
+<ol>
+  <li><strong>포맷별 특성 이해</strong>
+    <ul>
+      <li><strong>Parquet</strong>: 범용 분석, Athena/Spark 최적화</li>
+      <li><strong>ORC</strong>: Hive 최적화, 최고 압축률, ACID 지원</li>
+      <li><strong>Avro</strong>: 스트리밍, 스키마 진화, 빠른 쓰기</li>
+    </ul>
+  </li>
+  <li><strong>성능 비교 요약</strong>
+    <ul>
+      <li><strong>압축률</strong>: ORC &gt; Parquet &gt; Avro</li>
+      <li><strong>읽기 성능</strong>: Parquet ≈ ORC » Avro</li>
+      <li><strong>쓰기 성능</strong>: Avro &gt; Parquet ≈ ORC</li>
+      <li><strong>컬럼 선택</strong>: Parquet/ORC 8-9x 빠름</li>
+    </ul>
+  </li>
+  <li><strong>실무 선택 가이드</strong>
+    <ul>
+      <li><strong>분석 중심</strong>: Parquet (Snappy)</li>
+      <li><strong>Hive 환경</strong>: ORC (ZLIB)</li>
+      <li><strong>스트리밍</strong>: Avro → Parquet 하이브리드</li>
+      <li><strong>장기 보관</strong>: Parquet (GZIP/ZSTD)</li>
+    </ul>
+  </li>
+  <li><strong>최적화 전략</strong>
+    <ul>
+      <li>파일 크기: 64-256MB 유지</li>
+      <li>압축 코덱: 용도에 맞게 선택</li>
+      <li>파티셔닝: 단순하고 얕게</li>
+      <li>스키마 설계: 데이터 타입 최적화</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="실무-체크리스트">실무 체크리스트</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />사용 케이스 분석 완료</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />현재 포맷 성능 측정</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />벤치마크 테스트 수행</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />포맷 선택 및 설정 최적화</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />마이그레이션 계획 수립</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />검증 프로세스 정의</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />비용 영향도 분석</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />모니터링 대시보드 구축</li>
+</ul>
+
+<h3 id="다음-단계">다음 단계</h3>
+
+<ul>
+  <li><strong>Apache Iceberg/Delta Lake</strong>: 테이블 포맷으로 파일 포맷 추상화</li>
+  <li><strong>Parquet 고급 최적화</strong>: Bloom filter, Column index</li>
+  <li><strong>압축 알고리즘 비교</strong>: ZSTD vs LZ4 vs Brotli</li>
+  <li><strong>스키마 진화 전략</strong>: 호환성 관리</li>
+</ul>
+
+<hr />
+
+<blockquote>
+  <p><strong>“파일 포맷 선택은 단순한 기술 결정이 아닌, 비즈니스 성과에 직접적인 영향을 미치는 전략적 선택입니다.”</strong></p>
+</blockquote>
+
+<p>데이터 레이크의 파일 포맷은 한 번 결정하면 바꾸기 어렵습니다. 각 포맷의 특성을 정확히 이해하고, 자신의 사용 케이스에 맞는 최적의 포맷을 선택하는 것이 성공적인 데이터 레이크 구축의 핵심입니다. 이 가이드를 통해 올바른 선택을 하시길 바랍니다!</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+          
+          
+      
+      
+        
+        
+        <a href="/data-engineering/2025/10/12/s3-hdfs-partitioning-strategy.html" class="nav-link prev">
+          ← 이전: S3 vs HDFS 파티셔닝 전략 - 클라우드 시대의 데이터 레이크 최적화
+        </a>
+      
+      
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
