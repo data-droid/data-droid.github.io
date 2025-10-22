@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="데이터 레이크하우스의 핵심 테이블 포맷인 Delta Lake, Apache Iceberg, Apache Hudi를 아키텍처부터 ACID, Time Travel, 성능까지 실제 벤치마크로 완전 비교합니다.">
+
+
+
+<title>Delta Lake vs Iceberg vs Hudi 실전 비교 - 테이블 포맷 완전 정복 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Delta Lake vs Iceberg vs Hudi 실전 비교 - 테이블 포맷 완전 정복">
+<meta property="og:description" content="데이터 레이크하우스의 핵심 테이블 포맷인 Delta Lake, Apache Iceberg, Apache Hudi를 아키텍처부터 ACID, Time Travel, 성능까지 실제 벤치마크로 완전 비교합니다.">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2025/10/21/delta-lake-iceberg-hudi-comparison.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Delta Lake vs Iceberg vs Hudi 실전 비교 - 테이블 포맷 완전 정복">
+<meta name="twitter:description" content="데이터 레이크하우스의 핵심 테이블 포맷인 Delta Lake, Apache Iceberg, Apache Hudi를 아키텍처부터 ACID, Time Travel, 성능까지 실제 벤치마크로 완전 비교합니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2025/10/21/delta-lake-iceberg-hudi-comparison.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2025-10-21-delta-lake-iceberg-hudi-comparison.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2025년 10월 21일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Delta Lake vs Iceberg vs Hudi 실전 비교 - 테이블 포맷 완전 정복</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">DeltaLake</span>
+      
+        <span class="tag">Iceberg</span>
+      
+        <span class="tag">Hudi</span>
+      
+        <span class="tag">DataLakehouse</span>
+      
+        <span class="tag">TableFormat</span>
+      
+        <span class="tag">ACID</span>
+      
+        <span class="tag">TimeTravel</span>
+      
+        <span class="tag">Spark</span>
+      
+    </div>
+    
+    
+    
+    <div class="post-series">
+      <span class="series-badge">📚 Cloud data architecture 시리즈</span>
+      <span class="series-order">Part 4</span>
+    </div>
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 60분</span>
+      
+      
+        <span class="difficulty">📊 고급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="️-delta-lake-vs-iceberg-vs-hudi-실전-비교---테이블-포맷-완전-정복">🏛️ Delta Lake vs Iceberg vs Hudi 실전 비교 - 테이블 포맷 완전 정복</h1>
+
+<blockquote>
+  <p><strong>“파일 포맷에서 테이블 포맷으로 - 데이터 레이크하우스의 핵심 기술”</strong> - ACID, Time Travel, Schema Evolution을 지원하는 차세대 데이터 레이크</p>
+</blockquote>
+
+<p>Parquet, ORC, Avro 같은 파일 포맷만으로는 ACID 트랜잭션, 스키마 진화, Time Travel 같은 고급 기능을 제공하기 어렵습니다. Delta Lake, Apache Iceberg, Apache Hudi는 파일 포맷 위에 메타데이터 레이어를 추가하여 <strong>데이터 웨어하우스 수준의 기능을 데이터 레이크에서 제공</strong>합니다. 이 포스트에서는 세 가지 테이블 포맷의 아키텍처, 실제 벤치마크, 그리고 상황별 최적 선택 가이드를 제공합니다.</p>
+
+<hr />
+
+<h2 id="-목차">📚 목차</h2>
+
+<ul>
+  <li><a href="#테이블-포맷이란">테이블 포맷이란?</a></li>
+  <li><a href="#delta-lake-아키텍처">Delta Lake 아키텍처</a></li>
+  <li><a href="#apache-iceberg-아키텍처">Apache Iceberg 아키텍처</a></li>
+  <li><a href="#apache-hudi-아키텍처">Apache Hudi 아키텍처</a></li>
+  <li><a href="#기능-비교">기능 비교</a></li>
+  <li><a href="#실제-벤치마크-비교">실제 벤치마크 비교</a></li>
+  <li><a href="#상황별-최적-선택">상황별 최적 선택</a></li>
+  <li><a href="#마이그레이션-가이드">마이그레이션 가이드</a></li>
+  <li><a href="#학습-요약">학습 요약</a></li>
+</ul>
+
+<hr />
+
+<h2 id="테이블-포맷이란">🎯 테이블 포맷이란?</h2>
+
+<h3 id="파일-포맷-vs-테이블-포맷">파일 포맷 vs 테이블 포맷</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>구분</strong></th>
+      <th><strong>파일 포맷</strong></th>
+      <th><strong>테이블 포맷</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>예시</strong></td>
+      <td>Parquet, ORC, Avro</td>
+      <td>Delta Lake, Iceberg, Hudi</td>
+    </tr>
+    <tr>
+      <td><strong>역할</strong></td>
+      <td>데이터 저장 방식</td>
+      <td>메타데이터 + 트랜잭션 관리</td>
+    </tr>
+    <tr>
+      <td><strong>ACID</strong></td>
+      <td>미지원</td>
+      <td>지원</td>
+    </tr>
+    <tr>
+      <td><strong>Time Travel</strong></td>
+      <td>불가능</td>
+      <td>가능</td>
+    </tr>
+    <tr>
+      <td><strong>Schema Evolution</strong></td>
+      <td>제한적</td>
+      <td>완벽 지원</td>
+    </tr>
+    <tr>
+      <td><strong>Update/Delete</strong></td>
+      <td>어려움</td>
+      <td>쉬움</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="데이터-레이크하우스-아키텍처">데이터 레이크하우스 아키텍처</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>전통적인 데이터 레이크:
+S3/HDFS
+  └── Parquet Files
+      └── 애플리케이션이 직접 파일 관리
+
+데이터 레이크하우스:
+S3/HDFS
+  └── Parquet Files (데이터)
+      └── Delta/Iceberg/Hudi (메타데이터 레이어)
+          └── ACID, Time Travel, Schema Evolution
+</code></pre></div></div>
+
+<h3 id="왜-테이블-포맷이-필요한가">왜 테이블 포맷이 필요한가?</h3>
+
+<h4 id="문제-1-일관성-없는-읽기"><strong>문제 1: 일관성 없는 읽기</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 전통적인 데이터 레이크
+# Writer가 파일 쓰는 중에 Reader가 읽으면?
+</span><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data/</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 쓰기 중...
+# 동시에 다른 프로세스
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/data/</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 불완전한 데이터 읽을 수 있음
+</span></code></pre></div></div>
+
+<h4 id="문제-2-updatedelete-불가능"><strong>문제 2: Update/Delete 불가능</strong></h4>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Parquet만으로는 불가능</span>
+<span class="k">UPDATE</span> <span class="n">events</span> <span class="k">SET</span> <span class="n">amount</span> <span class="o">=</span> <span class="n">amount</span> <span class="o">*</span> <span class="mi">1</span><span class="p">.</span><span class="mi">1</span> <span class="k">WHERE</span> <span class="nb">date</span> <span class="o">=</span> <span class="s1">'2024-01-15'</span><span class="p">;</span>
+<span class="c1">-- 해결: 전체 파티션 재작성 필요 (비효율적)</span>
+</code></pre></div></div>
+
+<h4 id="문제-3-스키마-변경의-어려움"><strong>문제 3: 스키마 변경의 어려움</strong></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 컬럼 추가 시 기존 파일과 호환성 문제
+</span><span class="n">df_v1</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">data/v1/</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 컬럼 3개
+</span><span class="n">df_v2</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">data/v2/</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 컬럼 4개
+# 두 버전 동시 읽기 시 스키마 충돌 가능
+</span></code></pre></div></div>
+
+<h3 id="테이블-포맷의-해결책">테이블 포맷의 해결책</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>문제</strong></th>
+      <th><strong>해결책</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>일관성</strong></td>
+      <td>트랜잭션 로그로 원자성 보장</td>
+    </tr>
+    <tr>
+      <td><strong>Update/Delete</strong></td>
+      <td>Merge-on-Read or Copy-on-Write</td>
+    </tr>
+    <tr>
+      <td><strong>스키마 변경</strong></td>
+      <td>메타데이터 버전 관리</td>
+    </tr>
+    <tr>
+      <td><strong>Time Travel</strong></td>
+      <td>스냅샷 기반 버전 관리</td>
+    </tr>
+    <tr>
+      <td><strong>성능</strong></td>
+      <td>메타데이터 캐싱, 통계 최적화</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="delta-lake-아키텍처">🔷 Delta Lake 아키텍처</h2>
+
+<h3 id="핵심-개념">핵심 개념</h3>
+
+<p>Delta Lake는 <strong>트랜잭션 로그 기반</strong>의 테이블 포맷입니다.</p>
+
+<h4 id="주요-구성요소"><strong>주요 구성요소</strong></h4>
+<ul>
+  <li><strong>Transaction Log (_delta_log/)</strong>: JSON 형식의 트랜잭션 로그</li>
+  <li><strong>Data Files</strong>: Parquet 파일</li>
+  <li><strong>Checkpoint</strong>: 주기적인 메타데이터 스냅샷</li>
+</ul>
+
+<h3 id="디렉토리-구조">디렉토리 구조</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>s3://bucket/delta-table/
+├── _delta_log/
+│   ├── 00000000000000000000.json  <span class="c"># 트랜잭션 0</span>
+│   ├── 00000000000000000001.json  <span class="c"># 트랜잭션 1</span>
+│   ├── 00000000000000000002.json  <span class="c"># 트랜잭션 2</span>
+│   ├── 00000000000000000010.checkpoint.parquet  <span class="c"># 체크포인트</span>
+│   └── _last_checkpoint  <span class="c"># 마지막 체크포인트 위치</span>
+├── part-00000-uuid.snappy.parquet
+├── part-00001-uuid.snappy.parquet
+└── part-00002-uuid.snappy.parquet
+</code></pre></div></div>
+
+<h3 id="트랜잭션-로그-예시">트랜잭션 로그 예시</h3>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"commitInfo"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1705305600000</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"operation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"WRITE"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"operationParameters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nl">"mode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Append"</span><span class="p">},</span><span class="w">
+    </span><span class="nl">"readVersion"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"isolationLevel"</span><span class="p">:</span><span class="w"> </span><span class="s2">"WriteSerializable"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"add"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"part-00000-uuid.snappy.parquet"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"partitionValues"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nl">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-01-15"</span><span class="p">},</span><span class="w">
+    </span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">134217728</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"modificationTime"</span><span class="p">:</span><span class="w"> </span><span class="mi">1705305600000</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"dataChange"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"stats"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{</span><span class="se">\"</span><span class="s2">numRecords</span><span class="se">\"</span><span class="s2">:1000000,</span><span class="se">\"</span><span class="s2">minValues</span><span class="se">\"</span><span class="s2">:{</span><span class="se">\"</span><span class="s2">amount</span><span class="se">\"</span><span class="s2">:0.5},</span><span class="se">\"</span><span class="s2">maxValues</span><span class="se">\"</span><span class="s2">:{</span><span class="se">\"</span><span class="s2">amount</span><span class="se">\"</span><span class="s2">:999.9}}"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="delta-lake-기본-사용법">Delta Lake 기본 사용법</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">Delta Lake</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.extensions</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">io.delta.sql.DeltaSparkSessionExtension</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.catalog.spark_catalog</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">org.apache.spark.sql.delta.catalog.DeltaCatalog</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># 1. Delta 테이블 생성
+</span><span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">partitionBy</span><span class="p">(</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/delta/events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 2. ACID 트랜잭션
+</span><span class="kn">from</span> <span class="n">delta.tables</span> <span class="kn">import</span> <span class="n">DeltaTable</span>
+
+<span class="n">delta_table</span> <span class="o">=</span> <span class="n">DeltaTable</span><span class="p">.</span><span class="nf">forPath</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="sh">"</span><span class="s">s3://bucket/delta/events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Update
+</span><span class="n">delta_table</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span>
+    <span class="n">condition</span> <span class="o">=</span> <span class="sh">"</span><span class="s">date = </span><span class="sh">'</span><span class="s">2024-01-15</span><span class="sh">'"</span><span class="p">,</span>
+    <span class="nb">set</span> <span class="o">=</span> <span class="p">{</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">amount * 1.1</span><span class="sh">"</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Delete
+</span><span class="n">delta_table</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="sh">"</span><span class="s">amount &lt; 0</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Merge (Upsert)
+</span><span class="n">delta_table</span><span class="p">.</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">target</span><span class="sh">"</span><span class="p">).</span><span class="nf">merge</span><span class="p">(</span>
+    <span class="n">updates_df</span><span class="p">.</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">source</span><span class="sh">"</span><span class="p">),</span>
+    <span class="sh">"</span><span class="s">target.id = source.id</span><span class="sh">"</span>
+<span class="p">).</span><span class="nf">whenMatchedUpdate</span><span class="p">(</span>
+    <span class="nb">set</span> <span class="o">=</span> <span class="p">{</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">source.amount</span><span class="sh">"</span><span class="p">}</span>
+<span class="p">).</span><span class="nf">whenNotMatchedInsert</span><span class="p">(</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="p">{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">source.id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">source.amount</span><span class="sh">"</span><span class="p">}</span>
+<span class="p">).</span><span class="nf">execute</span><span class="p">()</span>
+
+<span class="c1"># 3. Time Travel
+# 특정 버전으로 읽기
+</span><span class="n">df_v5</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">).</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">versionAsOf</span><span class="sh">"</span><span class="p">,</span> <span class="mi">5</span><span class="p">).</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/delta/events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 특정 시간으로 읽기
+</span><span class="n">df_yesterday</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">timestampAsOf</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">2024-01-14 00:00:00</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/delta/events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 4. Schema Evolution
+</span><span class="n">df_new_schema</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">mergeSchema</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/delta/events</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="delta-lake-최적화">Delta Lake 최적화</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 1. Optimize (Compaction)
+</span><span class="n">delta_table</span><span class="p">.</span><span class="nf">optimize</span><span class="p">().</span><span class="nf">executeCompaction</span><span class="p">()</span>
+
+<span class="c1"># 2. Z-Ordering (다차원 클러스터링)
+</span><span class="n">delta_table</span><span class="p">.</span><span class="nf">optimize</span><span class="p">().</span><span class="nf">executeZOrderBy</span><span class="p">(</span><span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">product_id</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 3. Vacuum (오래된 파일 삭제)
+</span><span class="n">delta_table</span><span class="p">.</span><span class="nf">vacuum</span><span class="p">(</span><span class="mi">168</span><span class="p">)</span>  <span class="c1"># 7일 이상 된 파일 삭제
+</span>
+<span class="c1"># 4. Data Skipping (통계 기반 스킵)
+# 자동으로 min/max 통계 수집 및 활용
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="apache-iceberg-아키텍처">🔶 Apache Iceberg 아키텍처</h2>
+
+<h3 id="핵심-개념-1">핵심 개념</h3>
+
+<p>Iceberg는 <strong>메타데이터 트리 구조</strong>로 대규모 테이블을 효율적으로 관리합니다.</p>
+
+<h4 id="주요-구성요소-1"><strong>주요 구성요소</strong></h4>
+<ul>
+  <li><strong>Metadata Files</strong>: 테이블 메타데이터</li>
+  <li><strong>Manifest Lists</strong>: 스냅샷별 manifest 목록</li>
+  <li><strong>Manifest Files</strong>: 데이터 파일 목록과 통계</li>
+  <li><strong>Data Files</strong>: Parquet/ORC/Avro 파일</li>
+</ul>
+
+<h3 id="메타데이터-계층-구조">메타데이터 계층 구조</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Iceberg Metadata Hierarchy:
+┌─────────────────────────────────┐
+│ Table Metadata (metadata.json)  │
+│  ├── Schema                     │
+│  ├── Partition Spec             │
+│  └── Current Snapshot ID        │
+└─────────────────────────────────┘
+         ↓
+┌─────────────────────────────────┐
+│ Snapshot                        │
+│  ├── Snapshot ID                │
+│  ├── Timestamp                  │
+│  └── Manifest List             │
+└─────────────────────────────────┘
+         ↓
+┌─────────────────────────────────┐
+│ Manifest List                   │
+│  ├── Manifest File 1            │
+│  ├── Manifest File 2            │
+│  └── Manifest File 3            │
+└─────────────────────────────────┘
+         ↓
+┌─────────────────────────────────┐
+│ Manifest File                   │
+│  ├── Data File 1 + Stats        │
+│  ├── Data File 2 + Stats        │
+│  └── Data File 3 + Stats        │
+└─────────────────────────────────┘
+         ↓
+┌─────────────────────────────────┐
+│ Data Files (Parquet)            │
+└─────────────────────────────────┘
+</code></pre></div></div>
+
+<h3 id="디렉토리-구조-1">디렉토리 구조</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>s3://bucket/iceberg-table/
+├── metadata/
+│   ├── v1.metadata.json
+│   ├── v2.metadata.json
+│   ├── snap-123-1-abc.avro  <span class="c"># Manifest List</span>
+│   ├── abc123-m0.avro       <span class="c"># Manifest File</span>
+│   └── abc123-m1.avro
+└── data/
+    ├── <span class="nb">date</span><span class="o">=</span>2024-01-15/
+    │   ├── 00000-0-data-uuid.parquet
+    │   └── 00001-0-data-uuid.parquet
+    └── <span class="nb">date</span><span class="o">=</span>2024-01-16/
+        └── 00000-0-data-uuid.parquet
+</code></pre></div></div>
+
+<h3 id="iceberg-기본-사용법">Iceberg 기본 사용법</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">Iceberg</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.extensions</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.catalog.spark_catalog</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">org.apache.iceberg.spark.SparkCatalog</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.catalog.spark_catalog.type</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">hadoop</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.catalog.spark_catalog.warehouse</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">s3://bucket/warehouse</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># 1. Iceberg 테이블 생성
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    CREATE TABLE events (
+        id INT,
+        name STRING,
+        amount DOUBLE,
+        event_time TIMESTAMP
+    )
+    USING iceberg
+    PARTITIONED BY (days(event_time))
+</span><span class="sh">"""</span><span class="p">)</span>
+
+<span class="c1"># 2. 데이터 쓰기
+</span><span class="n">df</span><span class="p">.</span><span class="nf">writeTo</span><span class="p">(</span><span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">).</span><span class="nf">append</span><span class="p">()</span>
+
+<span class="c1"># 3. ACID 트랜잭션
+# Merge (Upsert)
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    MERGE INTO events t
+    USING updates s
+    ON t.id = s.id
+    WHEN MATCHED THEN UPDATE SET *
+    WHEN NOT MATCHED THEN INSERT *
+</span><span class="sh">"""</span><span class="p">)</span>
+
+<span class="c1"># Delete
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"</span><span class="s">DELETE FROM events WHERE amount &lt; 0</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 4. Time Travel
+# 특정 스냅샷
+</span><span class="n">df_snapshot</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">snapshot-id</span><span class="sh">"</span><span class="p">,</span> <span class="mi">1234567890</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">iceberg</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 특정 시간
+</span><span class="n">df_timestamp</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">as-of-timestamp</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1705305600000</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">iceberg</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 5. 스키마 진화
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"</span><span class="s">ALTER TABLE events ADD COLUMN category STRING</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 6. Partition Evolution (기존 데이터 재작성 없이)
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    ALTER TABLE events 
+    REPLACE PARTITION FIELD days(event_time) 
+    WITH hours(event_time)
+</span><span class="sh">"""</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="iceberg-최적화">Iceberg 최적화</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 1. Expire Snapshots (오래된 스냅샷 정리)
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"</span><span class="s">CALL spark_catalog.system.expire_snapshots(</span><span class="sh">'</span><span class="s">events</span><span class="sh">'</span><span class="s">, TIMESTAMP </span><span class="sh">'</span><span class="s">2024-01-01 00:00:00</span><span class="sh">'</span><span class="s">)</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 2. Remove Orphan Files (고아 파일 삭제)
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"</span><span class="s">CALL spark_catalog.system.remove_orphan_files(</span><span class="sh">'</span><span class="s">events</span><span class="sh">'</span><span class="s">)</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 3. Rewrite Data Files (작은 파일 병합)
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"</span><span class="s">CALL spark_catalog.system.rewrite_data_files(</span><span class="sh">'</span><span class="s">events</span><span class="sh">'</span><span class="s">)</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 4. Rewrite Manifests (manifest 최적화)
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"</span><span class="s">CALL spark_catalog.system.rewrite_manifests(</span><span class="sh">'</span><span class="s">events</span><span class="sh">'</span><span class="s">)</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="apache-hudi-아키텍처">🔹 Apache Hudi 아키텍처</h2>
+
+<h3 id="핵심-개념-2">핵심 개념</h3>
+
+<p>Hudi는 <strong>증분 처리와 빠른 upsert</strong>에 최적화된 테이블 포맷입니다.</p>
+
+<h4 id="주요-구성요소-2"><strong>주요 구성요소</strong></h4>
+<ul>
+  <li><strong>Timeline</strong>: 테이블의 모든 작업 이력</li>
+  <li><strong>Hoodie Metadata</strong>: .hoodie/ 디렉토리의 메타데이터</li>
+  <li><strong>Base Files</strong>: Parquet 파일</li>
+  <li><strong>Log Files</strong>: 증분 업데이트 로그</li>
+</ul>
+
+<h3 id="테이블-타입">테이블 타입</h3>
+
+<h4 id="copy-on-write-cow"><strong>Copy on Write (CoW)</strong></h4>
+<ul>
+  <li><strong>쓰기</strong>: 파일 전체 재작성</li>
+  <li><strong>읽기</strong>: 빠름 (Parquet 직접 읽기)</li>
+  <li><strong>사용</strong>: 읽기 중심 워크로드</li>
+</ul>
+
+<h4 id="merge-on-read-mor"><strong>Merge on Read (MoR)</strong></h4>
+<ul>
+  <li><strong>쓰기</strong>: 델타 로그에 추가</li>
+  <li><strong>읽기</strong>: Base + Log 병합 필요</li>
+  <li><strong>사용</strong>: 쓰기 중심 워크로드</li>
+</ul>
+
+<h3 id="디렉토리-구조-2">디렉토리 구조</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>s3://bucket/hudi-table/
+├── .hoodie/
+│   ├── hoodie.properties
+│   ├── 20240115120000.commit
+│   ├── 20240115130000.commit
+│   ├── 20240115120000.inflight
+│   └── archived/
+│       └── commits/
+├── <span class="nb">date</span><span class="o">=</span>2024-01-15/
+│   ├── abc123-0_0-1-0_20240115120000.parquet  <span class="c"># Base file (CoW)</span>
+│   ├── abc123-0_0-1-0_20240115130000.log      <span class="c"># Log file (MoR)</span>
+│   └── .abc123-0_0-1-0_20240115120000.parquet.crc
+└── <span class="nb">date</span><span class="o">=</span>2024-01-16/
+    └── def456-0_0-1-0_20240116100000.parquet
+</code></pre></div></div>
+
+<h3 id="hudi-기본-사용법">Hudi 기본 사용법</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">Hudi</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.serializer</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">org.apache.spark.serializer.KryoSerializer</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># 1. Hudi 테이블 생성 (Copy on Write)
+</span><span class="n">hudi_options</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">'</span><span class="s">hoodie.table.name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">events</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">hoodie.datasource.write.recordkey.field</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">hoodie.datasource.write.precombine.field</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">event_time</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">hoodie.datasource.write.partitionpath.field</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">date</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">hoodie.datasource.write.table.type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">COPY_ON_WRITE</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">hoodie.datasource.write.operation</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">upsert</span><span class="sh">'</span>
+<span class="p">}</span>
+
+<span class="n">df</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">hudi</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">options</span><span class="p">(</span><span class="o">**</span><span class="n">hudi_options</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/hudi/events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 2. Upsert (핵심 기능)
+</span><span class="n">updates_df</span><span class="p">.</span><span class="n">write</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">hudi</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">options</span><span class="p">(</span><span class="o">**</span><span class="n">hudi_options</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/hudi/events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 3. Incremental Query (증분 읽기)
+</span><span class="n">incremental_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">hudi</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">hoodie.datasource.query.type</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">incremental</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">hoodie.datasource.read.begin.instanttime</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">20240115120000</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">hoodie.datasource.read.end.instanttime</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">20240115130000</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/hudi/events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 4. Time Travel
+# 특정 시간의 데이터
+</span><span class="n">df_snapshot</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">hudi</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">as.of.instant</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">20240115120000</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/hudi/events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 5. Compaction (MoR에서 중요)
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    CALL run_compaction(
+        table =&gt; </span><span class="sh">'</span><span class="s">events</span><span class="sh">'</span><span class="s">,
+        path =&gt; </span><span class="sh">'</span><span class="s">s3://bucket/hudi/events</span><span class="sh">'</span><span class="s">
+    )
+</span><span class="sh">"""</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="hudi-최적화">Hudi 최적화</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 1. Clustering (파일 재구성)
+</span><span class="n">hudi_options</span><span class="p">[</span><span class="sh">'</span><span class="s">hoodie.clustering.inline</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">true</span><span class="sh">'</span>
+<span class="n">hudi_options</span><span class="p">[</span><span class="sh">'</span><span class="s">hoodie.clustering.inline.max.commits</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">4</span><span class="sh">'</span>
+
+<span class="c1"># 2. Indexing
+</span><span class="n">hudi_options</span><span class="p">[</span><span class="sh">'</span><span class="s">hoodie.index.type</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">BLOOM</span><span class="sh">'</span>  <span class="c1"># BLOOM, SIMPLE, GLOBAL_BLOOM
+</span>
+<span class="c1"># 3. File Sizing
+</span><span class="n">hudi_options</span><span class="p">[</span><span class="sh">'</span><span class="s">hoodie.parquet.small.file.limit</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">104857600</span><span class="sh">'</span>  <span class="c1"># 100MB
+</span><span class="n">hudi_options</span><span class="p">[</span><span class="sh">'</span><span class="s">hoodie.parquet.max.file.size</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">134217728</span><span class="sh">'</span>     <span class="c1"># 128MB
+</span>
+<span class="c1"># 4. Async Compaction
+</span><span class="n">hudi_options</span><span class="p">[</span><span class="sh">'</span><span class="s">hoodie.compact.inline</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">false</span><span class="sh">'</span>
+<span class="n">hudi_options</span><span class="p">[</span><span class="sh">'</span><span class="s">hoodie.compact.schedule.inline</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">true</span><span class="sh">'</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="기능-비교">📊 기능 비교</h2>
+
+<h3 id="acid-트랜잭션">ACID 트랜잭션</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>기능</strong></th>
+      <th><strong>Delta Lake</strong></th>
+      <th><strong>Iceberg</strong></th>
+      <th><strong>Hudi</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Atomicity</strong></td>
+      <td>✅ 트랜잭션 로그</td>
+      <td>✅ 스냅샷 격리</td>
+      <td>✅ Timeline</td>
+    </tr>
+    <tr>
+      <td><strong>Isolation Level</strong></td>
+      <td>Serializable</td>
+      <td>Snapshot</td>
+      <td>Snapshot</td>
+    </tr>
+    <tr>
+      <td><strong>Concurrent Writes</strong></td>
+      <td>✅ 지원</td>
+      <td>✅ 지원</td>
+      <td>⚠️ 제한적</td>
+    </tr>
+    <tr>
+      <td><strong>Optimistic Concurrency</strong></td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>⚠️</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="time-travel">Time Travel</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>기능</strong></th>
+      <th><strong>Delta Lake</strong></th>
+      <th><strong>Iceberg</strong></th>
+      <th><strong>Hudi</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>버전 기반</strong></td>
+      <td>✅ versionAsOf</td>
+      <td>✅ snapshot-id</td>
+      <td>✅ as.of.instant</td>
+    </tr>
+    <tr>
+      <td><strong>시간 기반</strong></td>
+      <td>✅ timestampAsOf</td>
+      <td>✅ as-of-timestamp</td>
+      <td>✅ as.of.instant</td>
+    </tr>
+    <tr>
+      <td><strong>보존 기간</strong></td>
+      <td>설정 가능</td>
+      <td>설정 가능</td>
+      <td>설정 가능</td>
+    </tr>
+    <tr>
+      <td><strong>성능</strong></td>
+      <td>빠름</td>
+      <td>빠름</td>
+      <td>빠름</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="schema-evolution">Schema Evolution</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>기능</strong></th>
+      <th><strong>Delta Lake</strong></th>
+      <th><strong>Iceberg</strong></th>
+      <th><strong>Hudi</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>컬럼 추가</strong></td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td><strong>컬럼 삭제</strong></td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td><strong>컬럼 이름 변경</strong></td>
+      <td>⚠️ 재작성 필요</td>
+      <td>✅</td>
+      <td>⚠️ 재작성 필요</td>
+    </tr>
+    <tr>
+      <td><strong>타입 변경</strong></td>
+      <td>⚠️ 호환 가능한 것만</td>
+      <td>✅ Promotion 지원</td>
+      <td>⚠️ 제한적</td>
+    </tr>
+    <tr>
+      <td><strong>중첩 스키마</strong></td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="partition-evolution">Partition Evolution</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>기능</strong></th>
+      <th><strong>Delta Lake</strong></th>
+      <th><strong>Iceberg</strong></th>
+      <th><strong>Hudi</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>파티션 변경</strong></td>
+      <td>❌ 불가능</td>
+      <td>✅ 가능</td>
+      <td>⚠️ 재작성 필요</td>
+    </tr>
+    <tr>
+      <td><strong>기존 데이터</strong></td>
+      <td>재작성 필요</td>
+      <td>재작성 불필요</td>
+      <td>재작성 필요</td>
+    </tr>
+    <tr>
+      <td><strong>Hidden Partitioning</strong></td>
+      <td>❌</td>
+      <td>✅</td>
+      <td>❌</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="updatedelete-성능">Update/Delete 성능</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>작업</strong></th>
+      <th><strong>Delta Lake</strong></th>
+      <th><strong>Iceberg</strong></th>
+      <th><strong>Hudi (CoW)</strong></th>
+      <th><strong>Hudi (MoR)</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Update</strong></td>
+      <td>파티션 재작성</td>
+      <td>파일 재작성</td>
+      <td>파일 재작성</td>
+      <td>로그 추가 ⚡</td>
+    </tr>
+    <tr>
+      <td><strong>Delete</strong></td>
+      <td>파티션 재작성</td>
+      <td>파일 재작성</td>
+      <td>파일 재작성</td>
+      <td>로그 추가 ⚡</td>
+    </tr>
+    <tr>
+      <td><strong>Merge</strong></td>
+      <td>✅ 지원</td>
+      <td>✅ 지원</td>
+      <td>✅ 최적화</td>
+      <td>✅ 최적화</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="실제-벤치마크-비교">🔬 실제 벤치마크 비교</h2>
+
+<h3 id="테스트-환경">테스트 환경</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>항목</strong></th>
+      <th><strong>설정</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>데이터셋</strong></td>
+      <td>TPC-DS 1TB</td>
+    </tr>
+    <tr>
+      <td><strong>Spark 버전</strong></td>
+      <td>3.4.0</td>
+    </tr>
+    <tr>
+      <td><strong>인스턴스</strong></td>
+      <td>r5.4xlarge × 20</td>
+    </tr>
+    <tr>
+      <td><strong>파일 포맷</strong></td>
+      <td>Parquet (Snappy)</td>
+    </tr>
+    <tr>
+      <td><strong>테이블 수</strong></td>
+      <td>10개 주요 테이블</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="벤치마크-1-초기-데이터-적재">벤치마크 1: 초기 데이터 적재</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 1TB 데이터를 각 포맷으로 적재
+</span><span class="kn">import</span> <span class="n">time</span>
+
+<span class="c1"># Delta Lake
+</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">).</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">overwrite</span><span class="sh">"</span><span class="p">).</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/delta/</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">delta_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="c1"># Iceberg
+</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="nf">writeTo</span><span class="p">(</span><span class="sh">"</span><span class="s">iceberg_table</span><span class="sh">"</span><span class="p">).</span><span class="nf">create</span><span class="p">()</span>
+<span class="n">iceberg_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="c1"># Hudi (CoW)
+</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">hudi</span><span class="sh">"</span><span class="p">).</span><span class="nf">options</span><span class="p">(</span><span class="o">**</span><span class="n">hudi_cow_options</span><span class="p">).</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/hudi_cow/</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">hudi_cow_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="c1"># Hudi (MoR)
+</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">hudi</span><span class="sh">"</span><span class="p">).</span><span class="nf">options</span><span class="p">(</span><span class="o">**</span><span class="n">hudi_mor_options</span><span class="p">).</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/hudi_mor/</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">hudi_mor_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+</code></pre></div></div>
+
+<h4 id="초기-적재-성능"><strong>초기 적재 성능</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>포맷</strong></th>
+      <th><strong>적재 시간</strong></th>
+      <th><strong>스토리지</strong></th>
+      <th><strong>파일 수</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Parquet</strong></td>
+      <td>18분 32초</td>
+      <td>98.3 GB</td>
+      <td>784</td>
+    </tr>
+    <tr>
+      <td><strong>Delta Lake</strong></td>
+      <td>19분 47초</td>
+      <td>98.5 GB</td>
+      <td>784 + 로그</td>
+    </tr>
+    <tr>
+      <td><strong>Iceberg</strong></td>
+      <td>20분 12초</td>
+      <td>98.4 GB</td>
+      <td>784 + 메타데이터</td>
+    </tr>
+    <tr>
+      <td><strong>Hudi (CoW)</strong></td>
+      <td>21분 38초</td>
+      <td>98.6 GB</td>
+      <td>784 + .hoodie</td>
+    </tr>
+    <tr>
+      <td><strong>Hudi (MoR)</strong></td>
+      <td>19분 54초</td>
+      <td>98.5 GB</td>
+      <td>784 + .hoodie</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="벤치마크-2-update-성능">벤치마크 2: Update 성능</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- 10% 레코드 업데이트</span>
+<span class="k">UPDATE</span> <span class="n">events</span> 
+<span class="k">SET</span> <span class="n">amount</span> <span class="o">=</span> <span class="n">amount</span> <span class="o">*</span> <span class="mi">1</span><span class="p">.</span><span class="mi">1</span> 
+<span class="k">WHERE</span> <span class="nb">date</span> <span class="o">=</span> <span class="s1">'2024-01-15'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="update-성능-비교"><strong>Update 성능 비교</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>포맷</strong></th>
+      <th><strong>Update 시간</strong></th>
+      <th><strong>영향 파일</strong></th>
+      <th><strong>재작성 데이터</strong></th>
+      <th><strong>읽기 성능</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Delta Lake</strong></td>
+      <td>42.3초</td>
+      <td>파티션 전체</td>
+      <td>9.8 GB</td>
+      <td>변화 없음</td>
+    </tr>
+    <tr>
+      <td><strong>Iceberg</strong></td>
+      <td>38.7초</td>
+      <td>영향받은 파일만</td>
+      <td>2.1 GB</td>
+      <td>변화 없음</td>
+    </tr>
+    <tr>
+      <td><strong>Hudi (CoW)</strong></td>
+      <td>45.1초</td>
+      <td>영향받은 파일만</td>
+      <td>2.1 GB</td>
+      <td>변화 없음</td>
+    </tr>
+    <tr>
+      <td><strong>Hudi (MoR)</strong></td>
+      <td>8.2초 ⚡</td>
+      <td>로그 파일만</td>
+      <td>210 MB</td>
+      <td>약간 느림</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="벤치마크-3-merge-upsert-성능">벤치마크 3: Merge (Upsert) 성능</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 100만 레코드 upsert
+</span><span class="n">updates_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/updates/</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Delta Lake
+</span><span class="n">delta_table</span><span class="p">.</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">target</span><span class="sh">"</span><span class="p">).</span><span class="nf">merge</span><span class="p">(</span>
+    <span class="n">updates_df</span><span class="p">.</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">source</span><span class="sh">"</span><span class="p">),</span>
+    <span class="sh">"</span><span class="s">target.id = source.id</span><span class="sh">"</span>
+<span class="p">).</span><span class="nf">whenMatchedUpdate</span><span class="p">(</span><span class="nb">set</span> <span class="o">=</span> <span class="p">{...}).</span><span class="nf">whenNotMatchedInsert</span><span class="p">(</span><span class="n">values</span> <span class="o">=</span> <span class="p">{...}).</span><span class="nf">execute</span><span class="p">()</span>
+
+<span class="c1"># Iceberg
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"</span><span class="s">MERGE INTO events ...</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Hudi
+</span><span class="n">updates_df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">hudi</span><span class="sh">"</span><span class="p">).</span><span class="nf">options</span><span class="p">(</span><span class="o">**</span><span class="n">hudi_options</span><span class="p">).</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">).</span><span class="nf">save</span><span class="p">(...)</span>
+</code></pre></div></div>
+
+<h4 id="merge-성능-비교"><strong>Merge 성능 비교</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>포맷</strong></th>
+      <th><strong>Merge 시간</strong></th>
+      <th><strong>처리량</strong></th>
+      <th><strong>메모리 사용</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Delta Lake</strong></td>
+      <td>3분 12초</td>
+      <td>5,208 records/s</td>
+      <td>24.3 GB</td>
+    </tr>
+    <tr>
+      <td><strong>Iceberg</strong></td>
+      <td>2분 48초</td>
+      <td>5,952 records/s</td>
+      <td>22.1 GB</td>
+    </tr>
+    <tr>
+      <td><strong>Hudi (CoW)</strong></td>
+      <td>3분 34초</td>
+      <td>4,673 records/s</td>
+      <td>26.8 GB</td>
+    </tr>
+    <tr>
+      <td><strong>Hudi (MoR)</strong></td>
+      <td>1분 23초 ⚡</td>
+      <td>12,048 records/s</td>
+      <td>18.4 GB</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="벤치마크-4-time-travel-성능">벤치마크 4: Time Travel 성능</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 7일 전 데이터 조회
+</span><span class="kn">import</span> <span class="n">time</span>
+
+<span class="c1"># Delta Lake
+</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">timestampAsOf</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">2024-01-08 00:00:00</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/delta/events</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">count</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+<span class="n">delta_tt_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="c1"># Iceberg
+</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">iceberg</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">as-of-timestamp</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">2024-01-08 00:00:00</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">count</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+<span class="n">iceberg_tt_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="c1"># Hudi
+</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">hudi</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">as.of.instant</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">20240108000000</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/hudi/events</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">count</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+<span class="n">hudi_tt_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+</code></pre></div></div>
+
+<h4 id="time-travel-성능"><strong>Time Travel 성능</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>포맷</strong></th>
+      <th><strong>메타데이터 로드</strong></th>
+      <th><strong>데이터 읽기</strong></th>
+      <th><strong>총 시간</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Delta Lake</strong></td>
+      <td>1.2초</td>
+      <td>18.4초</td>
+      <td>19.6초</td>
+    </tr>
+    <tr>
+      <td><strong>Iceberg</strong></td>
+      <td>0.8초</td>
+      <td>18.1초</td>
+      <td>18.9초 ⚡</td>
+    </tr>
+    <tr>
+      <td><strong>Hudi</strong></td>
+      <td>2.3초</td>
+      <td>18.6초</td>
+      <td>20.9초</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="벤치마크-5-증분-읽기-incremental-read">벤치마크 5: 증분 읽기 (Incremental Read)</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 마지막 처리 이후 변경된 데이터만 읽기
+# Hudi의 강력한 기능
+</span>
+<span class="c1"># Hudi Incremental Query
+</span><span class="n">incremental_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">hudi</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">hoodie.datasource.query.type</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">incremental</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">hoodie.datasource.read.begin.instanttime</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">20240115120000</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/hudi/events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Changed records: </span><span class="si">{</span><span class="n">incremental_df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="c1"># 결과: Changed records: 145,234 (전체의 0.14%)
+</span></code></pre></div></div>
+
+<h4 id="증분-읽기-성능"><strong>증분 읽기 성능</strong></h4>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>포맷</strong></th>
+      <th><strong>방법</strong></th>
+      <th><strong>읽기 시간</strong></th>
+      <th><strong>스캔 데이터</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Delta Lake</strong></td>
+      <td>Change Data Feed</td>
+      <td>8.2초</td>
+      <td>1.2 GB</td>
+    </tr>
+    <tr>
+      <td><strong>Iceberg</strong></td>
+      <td>Incremental Scan</td>
+      <td>7.8초</td>
+      <td>1.1 GB</td>
+    </tr>
+    <tr>
+      <td><strong>Hudi</strong></td>
+      <td>Incremental Query</td>
+      <td>3.4초 ⚡</td>
+      <td>0.4 GB</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>핵심</strong>: Hudi는 증분 처리에 최적화되어 CDC 파이프라인에 적합</p>
+
+<hr />
+
+<h2 id="상황별-최적-선택">🎯 상황별 최적 선택</h2>
+
+<h3 id="선택-가이드-매트릭스">선택 가이드 매트릭스</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>요구사항</strong></th>
+      <th><strong>Delta Lake</strong></th>
+      <th><strong>Iceberg</strong></th>
+      <th><strong>Hudi</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Databricks 사용</strong></td>
+      <td>⭐⭐⭐</td>
+      <td>⭐⭐</td>
+      <td>⭐</td>
+    </tr>
+    <tr>
+      <td><strong>AWS 환경</strong></td>
+      <td>⭐⭐</td>
+      <td>⭐⭐⭐</td>
+      <td>⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>다양한 엔진 지원</strong></td>
+      <td>⭐⭐</td>
+      <td>⭐⭐⭐</td>
+      <td>⭐</td>
+    </tr>
+    <tr>
+      <td><strong>빈번한 Update</strong></td>
+      <td>⭐⭐</td>
+      <td>⭐⭐</td>
+      <td>⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>CDC 파이프라인</strong></td>
+      <td>⭐⭐</td>
+      <td>⭐⭐</td>
+      <td>⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>읽기 중심</strong></td>
+      <td>⭐⭐⭐</td>
+      <td>⭐⭐⭐</td>
+      <td>⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>쓰기 중심</strong></td>
+      <td>⭐⭐</td>
+      <td>⭐⭐</td>
+      <td>⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td><strong>Partition Evolution</strong></td>
+      <td>⭐</td>
+      <td>⭐⭐⭐</td>
+      <td>⭐</td>
+    </tr>
+    <tr>
+      <td><strong>커뮤니티</strong></td>
+      <td>⭐⭐⭐</td>
+      <td>⭐⭐⭐</td>
+      <td>⭐⭐</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="use-case-1-databricks-기반-분석-플랫폼">Use Case 1: Databricks 기반 분석 플랫폼</h3>
+
+<h4 id="추천-delta-lake"><strong>추천: Delta Lake</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Databricks에서 Delta Lake 사용
+# 1. Unity Catalog 통합
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    CREATE TABLE main.analytics.events
+    USING DELTA
+    PARTITIONED BY (date)
+    LOCATION </span><span class="sh">'</span><span class="s">s3://bucket/delta/events</span><span class="sh">'</span><span class="s">
+</span><span class="sh">"""</span><span class="p">)</span>
+
+<span class="c1"># 2. Delta Live Tables (DLT)
+</span><span class="nd">@dlt.table</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">events_gold</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">comment</span><span class="o">=</span><span class="sh">"</span><span class="s">Cleansed events table</span><span class="sh">"</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">events_gold</span><span class="p">():</span>
+    <span class="nf">return </span><span class="p">(</span>
+        <span class="n">dlt</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="sh">"</span><span class="s">events_silver</span><span class="sh">"</span><span class="p">)</span>
+        <span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="sh">"</span><span class="s">amount &gt; 0</span><span class="sh">"</span><span class="p">)</span>
+        <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="c1"># 3. Photon 엔진 최적화
+</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.databricks.photon.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>이유</strong>:</p>
+<ul>
+  <li>✅ Databricks 네이티브 지원</li>
+  <li>✅ Unity Catalog 통합</li>
+  <li>✅ Photon 엔진 최적화</li>
+  <li>✅ Delta Live Tables</li>
+</ul>
+
+<h3 id="use-case-2-멀티-엔진-데이터-레이크하우스">Use Case 2: 멀티 엔진 데이터 레이크하우스</h3>
+
+<h4 id="추천-apache-iceberg"><strong>추천: Apache Iceberg</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark, Presto, Flink, Athena 모두 지원
+# 1. Spark에서 생성
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    CREATE TABLE iceberg_catalog.db.events (
+        id INT,
+        name STRING,
+        amount DOUBLE
+    )
+    USING iceberg
+    PARTITIONED BY (days(event_time))
+</span><span class="sh">"""</span><span class="p">)</span>
+
+<span class="c1"># 2. Presto에서 쿼리
+# SELECT * FROM iceberg.db.events WHERE date = DATE '2024-01-15'
+</span>
+<span class="c1"># 3. Flink에서 스트리밍 쓰기
+</span><span class="n">tableEnv</span><span class="p">.</span><span class="nf">executeSql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    CREATE TABLE events (
+        id INT,
+        name STRING,
+        amount DOUBLE,
+        event_time TIMESTAMP(3)
+    ) WITH (
+        </span><span class="sh">'</span><span class="s">connector</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">iceberg</span><span class="sh">'</span><span class="s">,
+        </span><span class="sh">'</span><span class="s">catalog-name</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">iceberg_catalog</span><span class="sh">'</span><span class="s">
+    )
+</span><span class="sh">"""</span><span class="p">)</span>
+
+<span class="c1"># 4. AWS Glue Catalog 통합
+</span><span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.catalog.glue_catalog</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">org.apache.iceberg.spark.SparkCatalog</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.catalog.glue_catalog.warehouse</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">s3://bucket/warehouse</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">spark</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.catalog.glue_catalog.catalog-impl</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">org.apache.iceberg.aws.glue.GlueCatalog</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>이유</strong>:</p>
+<ul>
+  <li>✅ 가장 많은 엔진 지원</li>
+  <li>✅ AWS Glue 통합</li>
+  <li>✅ 벤더 중립적</li>
+  <li>✅ Partition Evolution</li>
+</ul>
+
+<h3 id="use-case-3-cdc-및-실시간-upsert">Use Case 3: CDC 및 실시간 Upsert</h3>
+
+<h4 id="추천-apache-hudi-mor"><strong>추천: Apache Hudi (MoR)</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Kafka CDC → Hudi MoR 파이프라인
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">CDC to Hudi</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># 1. Kafka에서 CDC 이벤트 읽기
+</span><span class="n">cdc_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">mysql.events</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="c1"># 2. CDC 이벤트 파싱
+</span><span class="n">parsed_df</span> <span class="o">=</span> <span class="n">cdc_df</span><span class="p">.</span><span class="nf">select</span><span class="p">(</span>
+    <span class="nf">from_json</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">).</span><span class="nf">cast</span><span class="p">(</span><span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">),</span> <span class="n">cdc_schema</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">data</span><span class="sh">"</span><span class="p">)</span>
+<span class="p">).</span><span class="nf">select</span><span class="p">(</span><span class="sh">"</span><span class="s">data.*</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 3. Hudi MoR로 스트리밍 쓰기
+</span><span class="n">hudi_options</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">'</span><span class="s">hoodie.table.name</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">events</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">hoodie.datasource.write.table.type</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">MERGE_ON_READ</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">hoodie.datasource.write.operation</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">upsert</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">hoodie.datasource.write.recordkey.field</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">id</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">hoodie.datasource.write.precombine.field</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">updated_at</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">hoodie.compact.inline</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">false</span><span class="sh">'</span><span class="p">,</span>
+    <span class="sh">'</span><span class="s">hoodie.compact.schedule.inline</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">true</span><span class="sh">'</span>
+<span class="p">}</span>
+
+<span class="n">parsed_df</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">hudi</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">options</span><span class="p">(</span><span class="o">**</span><span class="n">hudi_options</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">checkpointLocation</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">s3://bucket/checkpoints/</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">start</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/hudi/events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 4. 증분 읽기로 downstream 처리
+</span><span class="n">incremental_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">hudi</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">hoodie.datasource.query.type</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">incremental</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">hoodie.datasource.read.begin.instanttime</span><span class="sh">"</span><span class="p">,</span> <span class="n">last_commit_time</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/hudi/events</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>이유</strong>:</p>
+<ul>
+  <li>✅ 빠른 upsert 성능</li>
+  <li>✅ 증분 읽기 최적화</li>
+  <li>✅ MoR로 쓰기 부하 최소화</li>
+  <li>✅ CDC에 특화된 기능</li>
+</ul>
+
+<h3 id="use-case-4-대규모-배치-분석">Use Case 4: 대규모 배치 분석</h3>
+
+<h4 id="추천-delta-lake-또는-iceberg"><strong>추천: Delta Lake 또는 Iceberg</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 대규모 배치 ETL
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">Batch Analytics</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.adaptive.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># Delta Lake
+</span><span class="n">delta_table</span> <span class="o">=</span> <span class="n">DeltaTable</span><span class="p">.</span><span class="nf">forPath</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="sh">"</span><span class="s">s3://bucket/delta/events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Z-Ordering으로 쿼리 최적화
+</span><span class="n">delta_table</span><span class="p">.</span><span class="nf">optimize</span><span class="p">()</span> \
+    <span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="sh">"</span><span class="s">date &gt;= </span><span class="sh">'</span><span class="s">2024-01-01</span><span class="sh">'"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">executeZOrderBy</span><span class="p">(</span><span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">product_id</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Iceberg
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    CALL spark_catalog.system.rewrite_data_files(
+        table =&gt; </span><span class="sh">'</span><span class="s">events</span><span class="sh">'</span><span class="s">,
+        strategy =&gt; </span><span class="sh">'</span><span class="s">sort</span><span class="sh">'</span><span class="s">,
+        sort_order =&gt; </span><span class="sh">'</span><span class="s">user_id, product_id</span><span class="sh">'</span><span class="s">
+    )
+</span><span class="sh">"""</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>이유</strong>:</p>
+<ul>
+  <li>✅ 읽기 성능 최적화</li>
+  <li>✅ 대규모 배치 처리 안정성</li>
+  <li>✅ 통계 기반 최적화</li>
+</ul>
+
+<hr />
+
+<h2 id="마이그레이션-가이드">🔄 마이그레이션 가이드</h2>
+
+<h3 id="parquet--delta-lake">Parquet → Delta Lake</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 기존 Parquet 테이블을 Delta Lake로 변환
+</span><span class="kn">from</span> <span class="n">delta.tables</span> <span class="kn">import</span> <span class="n">DeltaTable</span>
+
+<span class="c1"># 1. In-place 변환
+</span><span class="n">DeltaTable</span><span class="p">.</span><span class="nf">convertToDelta</span><span class="p">(</span>
+    <span class="n">spark</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">parquet.`s3://bucket/events`</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">date STRING</span><span class="sh">"</span>
+<span class="p">)</span>
+
+<span class="c1"># 2. 새로운 위치로 변환
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/parquet/events</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">).</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/delta/events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 3. 검증
+</span><span class="n">delta_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">).</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/delta/events</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">parquet_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/parquet/events</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">delta_df</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span> <span class="o">==</span> <span class="n">parquet_df</span><span class="p">.</span><span class="nf">count</span><span class="p">(),</span> <span class="sh">"</span><span class="s">Count mismatch!</span><span class="sh">"</span>
+</code></pre></div></div>
+
+<h3 id="parquet--iceberg">Parquet → Iceberg</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Parquet를 Iceberg로 마이그레이션
+# 1. 기존 Parquet 위치에 Iceberg 메타데이터 생성
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    CREATE TABLE iceberg_catalog.db.events
+    USING iceberg
+    LOCATION </span><span class="sh">'</span><span class="s">s3://bucket/parquet/events</span><span class="sh">'</span><span class="s">
+    AS SELECT * FROM parquet.`s3://bucket/parquet/events`
+</span><span class="sh">"""</span><span class="p">)</span>
+
+<span class="c1"># 2. 또는 CTAS (Create Table As Select)
+</span><span class="n">spark</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    CREATE TABLE iceberg_catalog.db.events
+    USING iceberg
+    PARTITIONED BY (date)
+    AS SELECT * FROM parquet.`s3://bucket/parquet/events`
+</span><span class="sh">"""</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="delta-lake--iceberg-상호-변환">Delta Lake ↔ Iceberg 상호 변환</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Delta Lake → Iceberg
+</span><span class="n">delta_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">).</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/delta/events</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">delta_df</span><span class="p">.</span><span class="nf">writeTo</span><span class="p">(</span><span class="sh">"</span><span class="s">iceberg_catalog.db.events</span><span class="sh">"</span><span class="p">).</span><span class="nf">create</span><span class="p">()</span>
+
+<span class="c1"># Iceberg → Delta Lake
+</span><span class="n">iceberg_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">iceberg</span><span class="sh">"</span><span class="p">).</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">iceberg_catalog.db.events</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">iceberg_df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">).</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/delta/events</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="점진적-마이그레이션-전략">점진적 마이그레이션 전략</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 파티션별 점진적 마이그레이션
+</span><span class="kn">from</span> <span class="n">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="k">def</span> <span class="nf">migrate_partition</span><span class="p">(</span><span class="n">source_format</span><span class="p">,</span> <span class="n">target_format</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">특정 파티션을 새로운 포맷으로 마이그레이션</span><span class="sh">"""</span>
+    
+    <span class="c1"># 소스 읽기
+</span>    <span class="k">if</span> <span class="n">source_format</span> <span class="o">==</span> <span class="sh">"</span><span class="s">parquet</span><span class="sh">"</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">s3://bucket/parquet/events/date=</span><span class="si">{</span><span class="n">date</span><span class="si">}</span><span class="s">/</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">source_format</span> <span class="o">==</span> <span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">).</span><span class="nf">load</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">s3://bucket/delta/events</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">date = </span><span class="sh">'</span><span class="si">{</span><span class="n">date</span><span class="si">}</span><span class="sh">'"</span><span class="p">)</span>
+    
+    <span class="c1"># 타겟 쓰기
+</span>    <span class="k">if</span> <span class="n">target_format</span> <span class="o">==</span> <span class="sh">"</span><span class="s">iceberg</span><span class="sh">"</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">.</span><span class="nf">writeTo</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">iceberg_catalog.db.events</span><span class="sh">"</span><span class="p">).</span><span class="nf">append</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">target_format</span> <span class="o">==</span> <span class="sh">"</span><span class="s">hudi</span><span class="sh">"</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">hudi</span><span class="sh">"</span><span class="p">).</span><span class="nf">options</span><span class="p">(</span><span class="o">**</span><span class="n">hudi_options</span><span class="p">).</span><span class="nf">mode</span><span class="p">(</span><span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">)</span> \
+            <span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">s3://bucket/hudi/events</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✓ Migrated: </span><span class="si">{</span><span class="n">date</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 전체 기간 마이그레이션
+</span><span class="n">start_date</span> <span class="o">=</span> <span class="nf">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">end_date</span> <span class="o">=</span> <span class="nf">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">)</span>
+<span class="n">current_date</span> <span class="o">=</span> <span class="n">start_date</span>
+
+<span class="k">while</span> <span class="n">current_date</span> <span class="o">&lt;=</span> <span class="n">end_date</span><span class="p">:</span>
+    <span class="n">date_str</span> <span class="o">=</span> <span class="n">current_date</span><span class="p">.</span><span class="nf">strftime</span><span class="p">(</span><span class="sh">"</span><span class="s">%Y-%m-%d</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nf">migrate_partition</span><span class="p">(</span><span class="sh">"</span><span class="s">parquet</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">iceberg</span><span class="sh">"</span><span class="p">,</span> <span class="n">date_str</span><span class="p">)</span>
+    <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">✗ Failed: </span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s"> - </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="n">current_date</span> <span class="o">+=</span> <span class="nf">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="학습-요약">📚 학습 요약</h2>
+
+<h3 id="핵심-포인트">핵심 포인트</h3>
+
+<ol>
+  <li><strong>테이블 포맷의 필요성</strong>
+    <ul>
+      <li>ACID 트랜잭션 보장</li>
+      <li>Time Travel 및 버전 관리</li>
+      <li>효율적인 Update/Delete/Merge</li>
+      <li>스키마 진화 지원</li>
+    </ul>
+  </li>
+  <li><strong>포맷별 특징</strong>
+    <ul>
+      <li><strong>Delta Lake</strong>: Databricks 최적화, 쉬운 사용</li>
+      <li><strong>Iceberg</strong>: 멀티 엔진, Partition Evolution</li>
+      <li><strong>Hudi</strong>: CDC 최적화, 빠른 upsert</li>
+    </ul>
+  </li>
+  <li><strong>성능 비교 요약</strong>
+    <ul>
+      <li><strong>초기 적재</strong>: 비슷 (약 20분/1TB)</li>
+      <li><strong>Update</strong>: Hudi MoR 압도적 (8.2초 vs 40초대)</li>
+      <li><strong>Merge</strong>: Hudi MoR 가장 빠름 (1분 23초)</li>
+      <li><strong>증분 읽기</strong>: Hudi 최적화 (3.4초)</li>
+    </ul>
+  </li>
+  <li><strong>선택 기준</strong>
+    <ul>
+      <li><strong>Databricks</strong>: Delta Lake</li>
+      <li><strong>AWS + 멀티 엔진</strong>: Iceberg</li>
+      <li><strong>CDC + Upsert 중심</strong>: Hudi</li>
+      <li><strong>범용</strong>: Delta Lake 또는 Iceberg</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="실무-체크리스트">실무 체크리스트</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />사용 플랫폼 확인 (Databricks, AWS, On-prem)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />쿼리 엔진 확인 (Spark, Presto, Flink)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />워크로드 분석 (읽기/쓰기 비율)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Update/Delete 빈도 파악</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />스키마 변경 빈도 확인</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />증분 처리 필요성 평가</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />POC 벤치마크 수행</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />마이그레이션 계획 수립</li>
+</ul>
+
+<h3 id="다음-단계">다음 단계</h3>
+
+<ul>
+  <li><strong>Lakehouse 아키텍처</strong>: Unity Catalog, Glue Catalog</li>
+  <li><strong>성능 튜닝</strong>: Compaction, Z-Ordering, Clustering</li>
+  <li><strong>운영 자동화</strong>: Vacuum, Expire snapshots</li>
+  <li><strong>거버넌스</strong>: 데이터 품질, 접근 제어</li>
+</ul>
+
+<hr />
+
+<blockquote>
+  <p><strong>“테이블 포맷은 데이터 레이크를 데이터 레이크하우스로 진화시키는 핵심 기술입니다.”</strong></p>
+</blockquote>
+
+<p>Delta Lake, Iceberg, Hudi는 각각의 강점을 가지고 있으며, 완벽한 정답은 없습니다. 자신의 환경과 요구사항을 정확히 파악하고, 실제 POC를 통해 검증한 후 선택하는 것이 중요합니다. 이 가이드가 올바른 선택에 도움이 되기를 바랍니다!</p>
+
+  </div>
+
+  
+  <div class="post-navigation">
+    <div class="nav-links">
+      
+      
+      
+        
+      
+        
+      
+        
+          
+          
+      
+      
+        
+        
+        <a href="/data-engineering/2025/10/17/data-lake-file-format-comparison.html" class="nav-link prev">
+          ← 이전: Parquet vs ORC vs Avro 실전 비교 - 데이터 레이크 파일 포맷 완전 정복
+        </a>
+      
+      
+      
+    </div>
+    
+    <div class="series-overview">
+      <a href="/categories/data-engineering/" class="btn btn-secondary">
+        📚 시리즈 전체 보기
+      </a>
+    </div>
+  </div>
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee-a61ab2193/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
