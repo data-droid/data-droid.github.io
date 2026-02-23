@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Complete guide to LSM Tree and Bloom Filter principles and practical applications widely used in modern databases.">
+
+
+
+<title>LSM Tree and Bloom Filter - Core Data Structures of Modern Databases - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="LSM Tree and Bloom Filter - Core Data Structures of Modern Databases">
+<meta property="og:description" content="Complete guide to LSM Tree and Bloom Filter principles and practical applications widely used in modern databases.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2026-02-22-lsm-tree-bloom-filter-database-fundamentals.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LSM Tree and Bloom Filter - Core Data Structures of Modern Databases">
+<meta name="twitter:description" content="Complete guide to LSM Tree and Bloom Filter principles and practical applications widely used in modern databases.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2026/02/22/lsm-tree-bloom-filter-database-fundamentals.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2026-02-22-lsm-tree-bloom-filter-database-fundamentals.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2026년 02월 22일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">LSM Tree and Bloom Filter - Core Data Structures of Modern Databases</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">LSM-Tree</span>
+      
+        <span class="tag">Bloom-Filter</span>
+      
+        <span class="tag">Database</span>
+      
+        <span class="tag">DataStructure</span>
+      
+        <span class="tag">NoSQL</span>
+      
+        <span class="tag">RocksDB</span>
+      
+        <span class="tag">LevelDB</span>
+      
+        <span class="tag">PerformanceOptimization</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 45 min</span>
+      
+      
+        <span class="difficulty">📊 Intermediate</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="-lsm-tree-and-bloom-filter---core-data-structures-of-modern-databases">🌳 LSM Tree and Bloom Filter - Core Data Structures of Modern Databases</h1>
+
+<blockquote>
+  <p><strong>“Fast writes and efficient reads simultaneously - Modern databases powered by LSM Tree and Bloom Filter”</strong> - Core technologies of RocksDB, Cassandra, and HBase</p>
+</blockquote>
+
+<p>Traditional B-Tree-based databases have limitations in random write performance. LSM Tree (Log-Structured Merge Tree) leverages sequential writes to <strong>improve write performance by orders of magnitude</strong>, while Bloom Filter <strong>dramatically reduces unnecessary disk I/O</strong> to optimize read performance. This post provides a complete guide to both technologies, from principles to actual database implementations.</p>
+
+<hr />
+
+<h2 id="-table-of-contents">📚 Table of Contents</h2>
+
+<ul>
+  <li><a href="#what-is-lsm-tree">What is LSM Tree?</a></li>
+  <li><a href="#lsm-tree-operation-principles">LSM Tree Operation Principles</a></li>
+  <li><a href="#bloom-filter-fundamentals">Bloom Filter Fundamentals</a></li>
+  <li><a href="#bloom-filter-operation-principles">Bloom Filter Operation Principles</a></li>
+  <li><a href="#combining-lsm-tree-and-bloom-filter">Combining LSM Tree and Bloom Filter</a></li>
+  <li><a href="#real-database-implementations">Real Database Implementations</a></li>
+  <li><a href="#performance-optimization-strategies">Performance Optimization Strategies</a></li>
+  <li><a href="#learning-summary">Learning Summary</a></li>
+</ul>
+
+<hr />
+
+<h2 id="what-is-lsm-tree">🎯 What is LSM Tree?</h2>
+
+<h3 id="limitations-of-traditional-b-tree">Limitations of Traditional B-Tree</h3>
+
+<p>Traditional B-Tree-based databases (MySQL, PostgreSQL, etc.) have the following problems:</p>
+
+<h4 id="problem-1-random-write-performance-degradation"><strong>Problem 1: Random Write Performance Degradation</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Random writes in B-Tree
+# Each write must modify multiple disk locations
+</span><span class="n">INSERT</span> <span class="n">INTO</span> <span class="nf">users </span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="nc">VALUES </span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="sh">'</span><span class="s">Alice</span><span class="sh">'</span><span class="p">);</span>   <span class="c1"># Modify disk location A
+</span><span class="n">INSERT</span> <span class="n">INTO</span> <span class="nf">users </span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="nc">VALUES </span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="sh">'</span><span class="s">Bob</span><span class="sh">'</span><span class="p">);</span>      <span class="c1"># Modify disk location B
+</span><span class="n">INSERT</span> <span class="n">INTO</span> <span class="nf">users </span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="nc">VALUES </span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="sh">'</span><span class="s">Charlie</span><span class="sh">'</span><span class="p">);</span> <span class="c1"># Modify disk location C
+# → Frequent disk head movement causes performance degradation
+</span></code></pre></div></div>
+
+<h4 id="problem-2-write-amplification"><strong>Problem 2: Write Amplification</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>B-Tree write process:
+1. Read data page (disk I/O)
+2. Modify page
+3. Write page (disk I/O)
+4. Update index page (additional disk I/O)
+5. Write WAL (Write-Ahead Log) (additional disk I/O)
+
+→ One write causes multiple disk I/Os
+</code></pre></div></div>
+
+<h3 id="lsm-trees-solution">LSM Tree’s Solution</h3>
+
+<p>LSM Tree solves performance issues by leveraging <strong>sequential writes</strong>.</p>
+
+<h4 id="core-idea"><strong>Core Idea</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Traditional B-Tree:
+Random writes → Disk head movement → Slow performance
+
+LSM Tree:
+1. Write sequentially to memory buffer (very fast)
+2. When buffer is full, write sequentially to disk (fast)
+3. Perform merge (Compaction) in background
+</code></pre></div></div>
+
+<h3 id="advantages-of-lsm-tree">Advantages of LSM Tree</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Feature</strong></th>
+      <th><strong>B-Tree</strong></th>
+      <th><strong>LSM Tree</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Write Performance</strong></td>
+      <td>Random writes (slow)</td>
+      <td>Sequential writes (fast)</td>
+    </tr>
+    <tr>
+      <td><strong>Write Amplification</strong></td>
+      <td>High (multiple page modifications)</td>
+      <td>Low (sequential writes)</td>
+    </tr>
+    <tr>
+      <td><strong>Read Performance</strong></td>
+      <td>Fast (direct index access)</td>
+      <td>Relatively slow (multi-level search)</td>
+    </tr>
+    <tr>
+      <td><strong>Space Efficiency</strong></td>
+      <td>High</td>
+      <td>Medium (duplicate data exists)</td>
+    </tr>
+    <tr>
+      <td><strong>Compression</strong></td>
+      <td>Limited</td>
+      <td>Efficient (compression during merge)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="lsm-tree-operation-principles">🔄 LSM Tree Operation Principles</h2>
+
+<h3 id="basic-structure">Basic Structure</h3>
+
+<p>LSM Tree consists of multiple levels:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>LSM Tree Structure:
+┌─────────────────────┐
+│   MemTable (L0)     │  ← Memory (most recent data)
+│   (In-Memory)       │
+└─────────────────────┘
+         ↓ (flush)
+┌─────────────────────┐
+│   SSTable (L1)       │  ← Disk (small files)
+│   (Sorted String)   │
+└─────────────────────┘
+         ↓ (merge)
+┌─────────────────────┐
+│   SSTable (L2)       │  ← Disk (larger files)
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   SSTable (L3)       │  ← Disk (largest files)
+└─────────────────────┘
+</code></pre></div></div>
+
+<h3 id="1-write-path">1. Write Path</h3>
+
+<h4 id="step-1-write-to-memtable"><strong>Step 1: Write to MemTable</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Simulating LSM Tree write process with Python
+</span><span class="k">class</span> <span class="nc">MemTable</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Sorted dictionary in memory
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">max_size</span> <span class="o">=</span> <span class="n">max_size</span>
+    
+    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Write data to memory (very fast)</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        
+        <span class="c1"># Flush when MemTable is full
+</span>        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">self</span><span class="p">.</span><span class="n">max_size</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Flush MemTable to disk (SSTable)</span><span class="sh">"""</span>
+        <span class="c1"># Convert sorted data to SSTable
+</span>        <span class="n">sorted_data</span> <span class="o">=</span> <span class="nf">sorted</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">items</span><span class="p">())</span>
+        <span class="n">sstable</span> <span class="o">=</span> <span class="nc">SSTable</span><span class="p">(</span><span class="n">sorted_data</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">clear</span><span class="p">()</span>  <span class="c1"># Reset MemTable
+</span>        <span class="k">return</span> <span class="n">sstable</span>
+
+<span class="c1"># Usage example
+</span><span class="n">memtable</span> <span class="o">=</span> <span class="nc">MemTable</span><span class="p">(</span><span class="n">max_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># Write sequentially (very fast)
+</span><span class="n">memtable</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">memtable</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:2</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Bob</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">memtable</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:3</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Charlie</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">memtable</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:4</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">David</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">memtable</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:5</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Eve</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># → MemTable full → flush occurs
+</span></code></pre></div></div>
+
+<h4 id="step-2-write-to-wal-write-ahead-log"><strong>Step 2: Write to WAL (Write-Ahead Log)</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">WAL</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Write-Ahead Log - log for disaster recovery</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_file</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">log_file</span> <span class="o">=</span> <span class="n">log_file</span>
+    
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Write sequentially to WAL (very fast)</span><span class="sh">"""</span>
+        <span class="n">log_entry</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s">:</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\n</span><span class="sh">"</span>
+        <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">log_file</span><span class="p">,</span> <span class="sh">'</span><span class="s">a</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">log_entry</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">replay</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Replay WAL during disaster recovery</span><span class="sh">"""</span>
+        <span class="n">operations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">log_file</span><span class="p">,</span> <span class="sh">'</span><span class="s">r</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="p">.</span><span class="nf">strip</span><span class="p">().</span><span class="nf">split</span><span class="p">(</span><span class="sh">'</span><span class="s">:</span><span class="sh">'</span><span class="p">)</span>
+                <span class="n">operations</span><span class="p">.</span><span class="nf">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">operations</span>
+
+<span class="c1"># Write process
+</span><span class="n">wal</span> <span class="o">=</span> <span class="nc">WAL</span><span class="p">(</span><span class="sh">"</span><span class="s">wal.log</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">wal</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># Write to WAL first
+</span><span class="n">memtable</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># Then write to MemTable
+</span></code></pre></div></div>
+
+<h4 id="step-3-create-sstable"><strong>Step 3: Create SSTable</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SSTable</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Sorted String Table - sorted data stored on disk</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">sorted_data</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="nf">dict</span><span class="p">(</span><span class="n">sorted_data</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">min_key</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">max_key</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">size</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Query key from SSTable</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">range_query</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">start_key</span><span class="p">,</span> <span class="n">end_key</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Range query</span><span class="sh">"""</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">start_key</span> <span class="o">&lt;=</span> <span class="n">key</span> <span class="o">&lt;=</span> <span class="n">end_key</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+<span class="c1"># MemTable flush → Create SSTable
+</span><span class="n">sstable</span> <span class="o">=</span> <span class="n">memtable</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">SSTable created: </span><span class="si">{</span><span class="n">sstable</span><span class="p">.</span><span class="n">min_key</span><span class="si">}</span><span class="s"> to </span><span class="si">{</span><span class="n">sstable</span><span class="p">.</span><span class="n">max_key</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-read-path">2. Read Path</h3>
+
+<p>LSM Tree reads must search multiple levels:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">LSMTree</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">memtable</span> <span class="o">=</span> <span class="nc">MemTable</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">sstables</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># List of SSTables by level
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">wal</span> <span class="o">=</span> <span class="nc">WAL</span><span class="p">(</span><span class="sh">"</span><span class="s">wal.log</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Query key - search from most recent data</span><span class="sh">"""</span>
+        
+        <span class="c1"># 1. Search MemTable first (most recent)
+</span>        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">memtable</span><span class="p">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">memtable</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        
+        <span class="c1"># 2. Search SSTables in reverse order (newest first)
+</span>        <span class="k">for</span> <span class="n">sstable</span> <span class="ow">in</span> <span class="nf">reversed</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sstables</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">sstable</span><span class="p">.</span><span class="n">min_key</span> <span class="o">&lt;=</span> <span class="n">key</span> <span class="o">&lt;=</span> <span class="n">sstable</span><span class="p">.</span><span class="n">max_key</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">sstable</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">value</span>
+        
+        <span class="c1"># 3. Not found
+</span>        <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c1"># Read example
+</span><span class="n">lsm</span> <span class="o">=</span> <span class="nc">LSMTree</span><span class="p">()</span>
+<span class="n">lsm</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">lsm</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:2</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Bob</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Found immediately in MemTable (fast)
+</span><span class="nf">print</span><span class="p">(</span><span class="n">lsm</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">))</span>  <span class="c1"># "Alice"
+</span>
+<span class="c1"># After MemTable flush
+</span><span class="n">lsm</span><span class="p">.</span><span class="n">memtable</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+
+<span class="c1"># Found in SSTable (relatively slow)
+</span><span class="nf">print</span><span class="p">(</span><span class="n">lsm</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">))</span>  <span class="c1"># "Alice"
+</span></code></pre></div></div>
+
+<h3 id="3-compaction-process">3. Compaction Process</h3>
+
+<p>Compaction merges multiple SSTables to improve read performance:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Compactor</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Responsible for SSTable merging</span><span class="sh">"""</span>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">compact</span><span class="p">(</span><span class="n">sstables</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Merge multiple SSTables into one</span><span class="sh">"""</span>
+        <span class="n">merged_data</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c1"># Merge data from all SSTables (newest value takes priority)
+</span>        <span class="k">for</span> <span class="n">sstable</span> <span class="ow">in</span> <span class="nf">reversed</span><span class="p">(</span><span class="n">sstables</span><span class="p">):</span>  <span class="c1"># From newest
+</span>            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">sstable</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">merged_data</span><span class="p">:</span>  <span class="c1"># Keep only newest value
+</span>                    <span class="n">merged_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        
+        <span class="c1"># Create new sorted SSTable
+</span>        <span class="n">sorted_data</span> <span class="o">=</span> <span class="nf">sorted</span><span class="p">(</span><span class="n">merged_data</span><span class="p">.</span><span class="nf">items</span><span class="p">())</span>
+        <span class="k">return</span> <span class="nc">SSTable</span><span class="p">(</span><span class="n">sorted_data</span><span class="p">)</span>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">level_compact</span><span class="p">(</span><span class="n">level_sstables</span><span class="p">,</span> <span class="n">next_level_sstables</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Merge between levels (Leveled Compaction)</span><span class="sh">"""</span>
+        <span class="c1"># Merge L1 SSTables with L2
+</span>        <span class="n">all_sstables</span> <span class="o">=</span> <span class="n">level_sstables</span> <span class="o">+</span> <span class="n">next_level_sstables</span>
+        <span class="k">return</span> <span class="n">Compactor</span><span class="p">.</span><span class="nf">compact</span><span class="p">(</span><span class="n">all_sstables</span><span class="p">)</span>
+
+<span class="c1"># Compaction example
+</span><span class="n">sstable1</span> <span class="o">=</span> <span class="nc">SSTable</span><span class="p">([(</span><span class="sh">"</span><span class="s">a</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1</span><span class="sh">"</span><span class="p">),</span> <span class="p">(</span><span class="sh">"</span><span class="s">b</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">2</span><span class="sh">"</span><span class="p">)])</span>
+<span class="n">sstable2</span> <span class="o">=</span> <span class="nc">SSTable</span><span class="p">([(</span><span class="sh">"</span><span class="s">b</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">3</span><span class="sh">"</span><span class="p">),</span> <span class="p">(</span><span class="sh">"</span><span class="s">c</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">4</span><span class="sh">"</span><span class="p">)])</span>  <span class="c1"># b is updated
+</span>
+<span class="c1"># Merge (newest value takes priority)
+</span><span class="n">merged</span> <span class="o">=</span> <span class="n">Compactor</span><span class="p">.</span><span class="nf">compact</span><span class="p">([</span><span class="n">sstable1</span><span class="p">,</span> <span class="n">sstable2</span><span class="p">])</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">merged</span><span class="p">.</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># {'a': '1', 'b': '3', 'c': '4'}
+</span></code></pre></div></div>
+
+<h3 id="compaction-strategies">Compaction Strategies</h3>
+
+<h4 id="size-tiered-compaction"><strong>Size-Tiered Compaction</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Merge SSTables of similar sizes by level
+L1: [10MB, 10MB, 10MB] → merge → L2: [30MB]
+L2: [30MB, 30MB, 30MB] → merge → L3: [90MB]
+</code></pre></div></div>
+
+<h4 id="leveled-compaction"><strong>Leveled Compaction</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Each level has maximum size limit
+L1: Max 10 files, each 10MB
+L2: Max 10 files, each 100MB
+L3: Max 10 files, each 1GB
+→ File size increases as level increases
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="bloom-filter-fundamentals">🔍 Bloom Filter Fundamentals</h2>
+
+<h3 id="what-is-bloom-filter">What is Bloom Filter?</h3>
+
+<p>Bloom Filter is a <strong>probabilistic data structure</strong> that can <strong>quickly check element existence</strong>, but <strong>False Positives are possible while False Negatives are impossible</strong>.</p>
+
+<h3 id="why-is-bloom-filter-needed">Why is Bloom Filter Needed?</h3>
+
+<p>When searching for a key in LSM Tree:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Key search without Bloom Filter
+</span><span class="k">def</span> <span class="nf">get_without_bloom_filter</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+    <span class="c1"># Must search all SSTables
+</span>    <span class="k">for</span> <span class="n">sstable</span> <span class="ow">in</span> <span class="n">sstables</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sstable</span><span class="p">:</span>  <span class="c1"># Disk I/O occurs!
+</span>            <span class="k">return</span> <span class="n">sstable</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c1"># Problem: Non-existent keys also require searching all SSTables
+# → Unnecessary disk I/O occurs
+</span></code></pre></div></div>
+
+<p>With Bloom Filter:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Key search with Bloom Filter
+</span><span class="k">def</span> <span class="nf">get_with_bloom_filter</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">sstable</span> <span class="ow">in</span> <span class="n">sstables</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sstable</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="nf">might_contain</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>  <span class="c1"># Quick check in memory
+</span>            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sstable</span><span class="p">:</span>  <span class="c1"># Disk I/O only when actually exists
+</span>                <span class="k">return</span> <span class="n">sstable</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c1"># Advantage: Non-existent keys are quickly rejected without disk I/O
+</span></code></pre></div></div>
+
+<h3 id="characteristics-of-bloom-filter">Characteristics of Bloom Filter</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Feature</strong></th>
+      <th><strong>Description</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Space Efficiency</strong></td>
+      <td>Very small memory usage (bit array)</td>
+    </tr>
+    <tr>
+      <td><strong>Speed</strong></td>
+      <td>O(k) - k is number of hash functions</td>
+    </tr>
+    <tr>
+      <td><strong>False Positive</strong></td>
+      <td>Possible (reports existence when not present)</td>
+    </tr>
+    <tr>
+      <td><strong>False Negative</strong></td>
+      <td>Impossible (never reports absence when present)</td>
+    </tr>
+    <tr>
+      <td><strong>Deletion</strong></td>
+      <td>Not possible by default (possible with Counting Bloom Filter)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="bloom-filter-operation-principles">🧮 Bloom Filter Operation Principles</h2>
+
+<h3 id="basic-structure-1">Basic Structure</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">mmh3</span>  <span class="c1"># MurmurHash3
+</span><span class="kn">import</span> <span class="n">math</span>
+
+<span class="k">class</span> <span class="nc">BloomFilter</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Bloom Filter implementation</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">capacity</span><span class="p">,</span> <span class="n">error_rate</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">
+        capacity: Expected number of elements
+        error_rate: Acceptable False Positive rate
+        </span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">capacity</span> <span class="o">=</span> <span class="n">capacity</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">error_rate</span> <span class="o">=</span> <span class="n">error_rate</span>
+        
+        <span class="c1"># Calculate bit array size
+</span>        <span class="c1"># m = -n * ln(p) / (ln(2)^2)
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">bit_array_size</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="o">-</span><span class="n">capacity</span> <span class="o">*</span> <span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="n">error_rate</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+        
+        <span class="c1"># Calculate number of hash functions
+</span>        <span class="c1"># k = (m/n) * ln(2)
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">hash_count</span> <span class="o">=</span> <span class="nf">int</span><span class="p">((</span><span class="n">self</span><span class="p">.</span><span class="n">bit_array_size</span> <span class="o">/</span> <span class="n">capacity</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        
+        <span class="c1"># Initialize bit array
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">bit_array</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">self</span><span class="p">.</span><span class="n">bit_array_size</span>
+    
+    <span class="k">def</span> <span class="nf">_hash</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">seed</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Hash function (using MurmurHash3)</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="n">mmh3</span><span class="p">.</span><span class="nf">hash</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span> <span class="o">%</span> <span class="n">self</span><span class="p">.</span><span class="n">bit_array_size</span>
+    
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Add element</span><span class="sh">"""</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">hash_count</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_hash</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">bit_array</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    
+    <span class="k">def</span> <span class="nf">might_contain</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Check element existence possibility</span><span class="sh">"""</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">hash_count</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_hash</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">bit_array</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>  <span class="c1"># Definitely does not exist
+</span>        <span class="k">return</span> <span class="bp">True</span>  <span class="c1"># May exist (False Positive possible)
+</span>
+<span class="c1"># Usage example
+</span><span class="n">bloom</span> <span class="o">=</span> <span class="nc">BloomFilter</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">error_rate</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+
+<span class="c1"># Add elements
+</span><span class="n">bloom</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">bloom</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="sh">"</span><span class="s">user:2</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">bloom</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="sh">"</span><span class="s">user:3</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Check existence
+</span><span class="nf">print</span><span class="p">(</span><span class="n">bloom</span><span class="p">.</span><span class="nf">might_contain</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">))</span>  <span class="c1"># True
+</span><span class="nf">print</span><span class="p">(</span><span class="n">bloom</span><span class="p">.</span><span class="nf">might_contain</span><span class="p">(</span><span class="sh">"</span><span class="s">user:999</span><span class="sh">"</span><span class="p">))</span>  <span class="c1"># False (definitely not present)
+</span><span class="nf">print</span><span class="p">(</span><span class="n">bloom</span><span class="p">.</span><span class="nf">might_contain</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1001</span><span class="sh">"</span><span class="p">))</span>  <span class="c1"># True or False (False Positive possible)
+</span></code></pre></div></div>
+
+<h3 id="hash-functions-and-bit-array">Hash Functions and Bit Array</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Bloom Filter operation process:
+
+1. Add element:
+   "user:1" → Hash1 → Index 5 → Bit[5] = 1
+            → Hash2 → Index 12 → Bit[12] = 1
+            → Hash3 → Index 23 → Bit[23] = 1
+
+2. Check element:
+   "user:1" → Hash1 → Index 5 → Bit[5] == 1? ✓
+            → Hash2 → Index 12 → Bit[12] == 1? ✓
+            → Hash3 → Index 23 → Bit[23] == 1? ✓
+            → "May exist" (True)
+
+   "user:999" → Hash1 → Index 7 → Bit[7] == 1? ✗
+              → "Definitely does not exist" (False)
+</code></pre></div></div>
+
+<h3 id="false-positive-rate-calculation">False Positive Rate Calculation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">calculate_false_positive_rate</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    n: Actual number of elements
+    m: Bit array size
+    k: Number of hash functions
+    </span><span class="sh">"""</span>
+    <span class="c1"># False Positive probability = (1 - e^(-kn/m))^k
+</span>    <span class="kn">import</span> <span class="n">math</span>
+    <span class="nf">return </span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">math</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="o">-</span><span class="n">k</span> <span class="o">*</span> <span class="n">n</span> <span class="o">/</span> <span class="n">m</span><span class="p">))</span> <span class="o">**</span> <span class="n">k</span>
+
+<span class="c1"># Example
+</span><span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span>  <span class="c1"># 1000 elements
+</span><span class="n">m</span> <span class="o">=</span> <span class="mi">9585</span>  <span class="c1"># Bit array size (when error_rate=0.01)
+</span><span class="n">k</span> <span class="o">=</span> <span class="mi">7</span>     <span class="c1"># Number of hash functions
+</span>
+<span class="n">fp_rate</span> <span class="o">=</span> <span class="nf">calculate_false_positive_rate</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">False Positive Rate: </span><span class="si">{</span><span class="n">fp_rate</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># Approximately 0.01 (1%)
+</span></code></pre></div></div>
+
+<h3 id="optimal-parameter-selection">Optimal Parameter Selection</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">optimal_bloom_filter_params</span><span class="p">(</span><span class="n">capacity</span><span class="p">,</span> <span class="n">error_rate</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Calculate optimal Bloom Filter parameters</span><span class="sh">"""</span>
+    <span class="kn">import</span> <span class="n">math</span>
+    
+    <span class="c1"># Bit array size
+</span>    <span class="n">m</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="o">-</span><span class="n">capacity</span> <span class="o">*</span> <span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="n">error_rate</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+    
+    <span class="c1"># Number of hash functions
+</span>    <span class="n">k</span> <span class="o">=</span> <span class="nf">int</span><span class="p">((</span><span class="n">m</span> <span class="o">/</span> <span class="n">capacity</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="sh">'</span><span class="s">bit_array_size</span><span class="sh">'</span><span class="p">:</span> <span class="n">m</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">hash_count</span><span class="sh">'</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">memory_bytes</span><span class="sh">'</span><span class="p">:</span> <span class="n">m</span> <span class="o">/</span> <span class="mi">8</span><span class="p">,</span>  <span class="c1"># Convert bits to bytes
+</span>        <span class="sh">'</span><span class="s">bits_per_element</span><span class="sh">'</span><span class="p">:</span> <span class="n">m</span> <span class="o">/</span> <span class="n">capacity</span>
+    <span class="p">}</span>
+
+<span class="c1"># Example: 1 million elements, 1% error rate
+</span><span class="n">params</span> <span class="o">=</span> <span class="nf">optimal_bloom_filter_params</span><span class="p">(</span><span class="mi">1_000_000</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Bit array size: </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="sh">'</span><span class="s">bit_array_size</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="s"> bits</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Number of hash functions: </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="sh">'</span><span class="s">hash_count</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Memory usage: </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="sh">'</span><span class="s">memory_bytes</span><span class="sh">'</span><span class="p">]</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s"> MB</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Bits per element: </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="sh">'</span><span class="s">bits_per_element</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Output:
+# Bit array size: 9,585,058 bits
+# Number of hash functions: 7
+# Memory usage: 1.14 MB
+# Bits per element: 9.59
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="combining-lsm-tree-and-bloom-filter">🔗 Combining LSM Tree and Bloom Filter</h2>
+
+<h3 id="integrated-architecture">Integrated Architecture</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SSTableWithBloomFilter</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">SSTable with Bloom Filter</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">sorted_data</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="nf">dict</span><span class="p">(</span><span class="n">sorted_data</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">min_key</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">max_key</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span>
+        
+        <span class="c1"># Create Bloom Filter
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span> <span class="o">=</span> <span class="nc">BloomFilter</span><span class="p">(</span>
+            <span class="n">capacity</span><span class="o">=</span><span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">error_rate</span><span class="o">=</span><span class="mf">0.01</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Add all keys to Bloom Filter
+</span>        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">keys</span><span class="p">():</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Query after filtering with Bloom Filter</span><span class="sh">"""</span>
+        <span class="c1"># 1. Quick filtering with Bloom Filter
+</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="nf">might_contain</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">None</span>  <span class="c1"># Definitely not present → No disk I/O
+</span>        
+        <span class="c1"># 2. Actual data query (disk I/O occurs)
+</span>        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">OptimizedLSMTree</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">LSM Tree integrated with Bloom Filter</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">memtable</span> <span class="o">=</span> <span class="nc">MemTable</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">sstables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">wal</span> <span class="o">=</span> <span class="nc">WAL</span><span class="p">(</span><span class="sh">"</span><span class="s">wal.log</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Optimized read - leveraging Bloom Filter</span><span class="sh">"""</span>
+        
+        <span class="c1"># 1. Search MemTable (memory, fastest)
+</span>        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">memtable</span><span class="p">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">memtable</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        
+        <span class="c1"># 2. Search SSTables (filtered with Bloom Filter)
+</span>        <span class="k">for</span> <span class="n">sstable</span> <span class="ow">in</span> <span class="nf">reversed</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sstables</span><span class="p">):</span>
+            <span class="c1"># Check with Bloom Filter first (memory, fast)
+</span>            <span class="k">if</span> <span class="n">sstable</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="nf">might_contain</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="c1"># May actually exist → Query from disk
+</span>                <span class="n">value</span> <span class="o">=</span> <span class="n">sstable</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">value</span>
+        
+        <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c1"># Performance comparison
+</span><span class="k">def</span> <span class="nf">benchmark_read_performance</span><span class="p">():</span>
+    <span class="sh">"""</span><span class="s">Read performance benchmark</span><span class="sh">"""</span>
+    <span class="kn">import</span> <span class="n">time</span>
+    
+    <span class="n">lsm_without_bf</span> <span class="o">=</span> <span class="nc">LSMTree</span><span class="p">()</span>  <span class="c1"># Without Bloom Filter
+</span>    <span class="n">lsm_with_bf</span> <span class="o">=</span> <span class="nc">OptimizedLSMTree</span><span class="p">()</span>  <span class="c1"># With Bloom Filter
+</span>    
+    <span class="c1"># Prepare test data
+</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">):</span>
+        <span class="n">lsm_without_bf</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">key:</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> <span class="sa">f</span><span class="sh">"</span><span class="s">value:</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="n">lsm_with_bf</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">key:</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> <span class="sa">f</span><span class="sh">"</span><span class="s">value:</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># Search for non-existent keys (biggest difference)
+</span>    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="mi">20000</span><span class="p">):</span>
+        <span class="n">lsm_without_bf</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">key:</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># Search all SSTables
+</span>    <span class="n">time_without_bf</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+    
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="mi">20000</span><span class="p">):</span>
+        <span class="n">lsm_with_bf</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">key:</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># Quick filtering with Bloom Filter
+</span>    <span class="n">time_with_bf</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Without Bloom Filter: </span><span class="si">{</span><span class="n">time_without_bf</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="s"> seconds</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">With Bloom Filter: </span><span class="si">{</span><span class="n">time_with_bf</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="s"> seconds</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Performance improvement: </span><span class="si">{</span><span class="n">time_without_bf</span> <span class="o">/</span> <span class="n">time_with_bf</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">x</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># benchmark_read_performance()
+# Example output:
+# Without Bloom Filter: 2.3456 seconds
+# With Bloom Filter: 0.1234 seconds
+# Performance improvement: 19.01x
+</span></code></pre></div></div>
+
+<h3 id="performance-improvement-effects">Performance Improvement Effects</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Scenario</strong></th>
+      <th><strong>Without Bloom Filter</strong></th>
+      <th><strong>With Bloom Filter</strong></th>
+      <th><strong>Improvement</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Existing Key</strong></td>
+      <td>Search all levels</td>
+      <td>Search all levels</td>
+      <td>Similar</td>
+    </tr>
+    <tr>
+      <td><strong>Non-existent Key</strong></td>
+      <td>Search all levels</td>
+      <td>Immediately rejected in memory</td>
+      <td><strong>10-100x</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Partially Existing Key</strong></td>
+      <td>Search some levels</td>
+      <td>Search some levels</td>
+      <td><strong>2-5x</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="real-database-implementations">🗄️ Real Database Implementations</h2>
+
+<h3 id="rocksdb">RocksDB</h3>
+
+<p>RocksDB is an LSM Tree-based storage engine developed by Facebook.</p>
+
+<h4 id="rocksdb-architecture"><strong>RocksDB Architecture</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>RocksDB Structure:
+┌─────────────────────┐
+│   MemTable          │  ← SkipList (memory)
+│   (SkipList)        │
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   Immutable MemTable│  ← Waiting for flush
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   L0 SSTable        │  ← Level 0 (multiple files)
+│   (Bloom Filter)    │
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   L1 SSTable        │  ← Level 1
+│   (Bloom Filter)    │
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   L2+ SSTable       │  ← Level 2 and above
+│   (Bloom Filter)    │
+└─────────────────────┘
+</code></pre></div></div>
+
+<h4 id="rocksdb-usage-example"><strong>RocksDB Usage Example</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">rocksdb</span>
+
+<span class="c1"># Open RocksDB
+</span><span class="n">db</span> <span class="o">=</span> <span class="n">rocksdb</span><span class="p">.</span><span class="nc">DB</span><span class="p">(</span><span class="sh">"</span><span class="s">test.db</span><span class="sh">"</span><span class="p">,</span> <span class="n">rocksdb</span><span class="p">.</span><span class="nc">Options</span><span class="p">(</span><span class="n">create_if_missing</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+
+<span class="c1"># Write (very fast - sequential write)
+</span><span class="n">db</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sa">b</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">,</span> <span class="sa">b</span><span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">db</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sa">b</span><span class="sh">"</span><span class="s">user:2</span><span class="sh">"</span><span class="p">,</span> <span class="sa">b</span><span class="sh">"</span><span class="s">Bob</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">db</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sa">b</span><span class="sh">"</span><span class="s">user:3</span><span class="sh">"</span><span class="p">,</span> <span class="sa">b</span><span class="sh">"</span><span class="s">Charlie</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Read (optimized with Bloom Filter)
+</span><span class="n">value</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sa">b</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># b"Alice"
+</span>
+<span class="c1"># Batch write (even faster)
+</span><span class="n">batch</span> <span class="o">=</span> <span class="n">rocksdb</span><span class="p">.</span><span class="nc">WriteBatch</span><span class="p">()</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sa">b</span><span class="sh">"</span><span class="s">user:4</span><span class="sh">"</span><span class="p">,</span> <span class="sa">b</span><span class="sh">"</span><span class="s">David</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sa">b</span><span class="sh">"</span><span class="s">user:5</span><span class="sh">"</span><span class="p">,</span> <span class="sa">b</span><span class="sh">"</span><span class="s">Eve</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">db</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+
+<span class="c1"># Range scan
+</span><span class="n">it</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="nf">iteritems</span><span class="p">()</span>
+<span class="n">it</span><span class="p">.</span><span class="nf">seek</span><span class="p">(</span><span class="sa">b</span><span class="sh">"</span><span class="s">user:</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">it</span><span class="p">:</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="apache-cassandra">Apache Cassandra</h3>
+
+<p>Cassandra is a distributed NoSQL database that uses LSM Tree.</p>
+
+<h4 id="cassandras-lsm-tree-implementation"><strong>Cassandra’s LSM Tree Implementation</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Cassandra Structure:
+┌─────────────────────┐
+│   Memtable          │  ← Memory of each node
+│   (ConcurrentSkipList)│
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   Commit Log        │  ← WAL (disaster recovery)
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   SSTable (L0)      │  ← Multiple SSTables
+│   (Bloom Filter)    │
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   Compaction        │  ← Size-Tiered Compaction
+└─────────────────────┘
+</code></pre></div></div>
+
+<h3 id="hbase">HBase</h3>
+
+<p>HBase is a Hadoop-based distributed database.</p>
+
+<h4 id="hbases-lsm-tree-implementation"><strong>HBase’s LSM Tree Implementation</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HBase Structure:
+┌─────────────────────┐
+│   MemStore          │  ← RegionServer memory
+│   (ConcurrentSkipList)│
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   WAL (HLog)        │  ← Stored in HDFS
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   HFile (SSTable)   │  ← Stored in HDFS
+│   (Bloom Filter)    │
+└─────────────────────┘
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="performance-optimization-strategies">⚡ Performance Optimization Strategies</h2>
+
+<h3 id="1-bloom-filter-optimization">1. Bloom Filter Optimization</h3>
+
+<h4 id="adaptive-bloom-filter-size"><strong>Adaptive Bloom Filter Size</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">AdaptiveBloomFilter</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Bloom Filter that automatically adjusts based on data size</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">initial_capacity</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">capacity</span> <span class="o">=</span> <span class="n">initial_capacity</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span> <span class="o">=</span> <span class="nc">BloomFilter</span><span class="p">(</span><span class="n">initial_capacity</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">actual_count</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Auto-expand capacity when adding elements</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">actual_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="c1"># Expand when actual count exceeds 80% of expected capacity
+</span>        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">actual_count</span> <span class="o">&gt;=</span> <span class="n">self</span><span class="p">.</span><span class="n">capacity</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_expand</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">_expand</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Expand Bloom Filter</span><span class="sh">"""</span>
+        <span class="n">old_filter</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">capacity</span> <span class="o">*=</span> <span class="mi">2</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span> <span class="o">=</span> <span class="nc">BloomFilter</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">capacity</span><span class="p">)</span>
+        
+        <span class="c1"># Reconstruct existing data (actually done during SSTable regeneration)
+</span>        <span class="c1"># Simulation here
+</span>        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Bloom Filter expanded to </span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">capacity</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="block-level-bloom-filter"><strong>Block-Level Bloom Filter</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">BlockBloomFilter</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Separate Bloom Filter for each block of SSTable</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">4096</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">block_size</span> <span class="o">=</span> <span class="n">block_size</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">block_filters</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Bloom Filter per block
+</span>    
+    <span class="k">def</span> <span class="nf">add_to_block</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">block_id</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Add to specific block</span><span class="sh">'</span><span class="s">s Bloom Filter</span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="n">block_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">block_filters</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">block_filters</span><span class="p">[</span><span class="n">block_id</span><span class="p">]</span> <span class="o">=</span> <span class="nc">BloomFilter</span><span class="p">(</span>
+                <span class="n">capacity</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">block_size</span>
+            <span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">block_filters</span><span class="p">[</span><span class="n">block_id</span><span class="p">].</span><span class="nf">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">might_contain_in_block</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">block_id</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Check if key exists in specific block</span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="n">block_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">block_filters</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">block_filters</span><span class="p">[</span><span class="n">block_id</span><span class="p">].</span><span class="nf">might_contain</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-compaction-optimization">2. Compaction Optimization</h3>
+
+<h4 id="compaction-strategy-selection"><strong>Compaction Strategy Selection</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CompactionStrategy</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Compaction strategy selection</span><span class="sh">"""</span>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">size_tiered_compact</span><span class="p">(</span><span class="n">sstables</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Size-Tiered: Merge files of similar sizes</span><span class="sh">"""</span>
+        <span class="c1"># Group SSTables by similar size range
+</span>        <span class="n">size_groups</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">sstable</span> <span class="ow">in</span> <span class="n">sstables</span><span class="p">:</span>
+            <span class="n">size_range</span> <span class="o">=</span> <span class="n">sstable</span><span class="p">.</span><span class="n">size</span> <span class="o">//</span> <span class="mi">1000</span>  <span class="c1"># Group by 1KB units
+</span>            <span class="k">if</span> <span class="n">size_range</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">size_groups</span><span class="p">:</span>
+                <span class="n">size_groups</span><span class="p">[</span><span class="n">size_range</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">size_groups</span><span class="p">[</span><span class="n">size_range</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="n">sstable</span><span class="p">)</span>
+        
+        <span class="c1"># Merge if 4 or more in each group
+</span>        <span class="n">merged</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">size_range</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">size_groups</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">merged</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">Compactor</span><span class="p">.</span><span class="nf">compact</span><span class="p">(</span><span class="n">group</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">merged</span><span class="p">.</span><span class="nf">extend</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">merged</span>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">leveled_compact</span><span class="p">(</span><span class="n">levels</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Leveled: Size limit per level</span><span class="sh">"""</span>
+        <span class="k">for</span> <span class="n">level</span><span class="p">,</span> <span class="n">sstables</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">levels</span><span class="p">):</span>
+            <span class="n">max_files</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># More files allowed at higher levels
+</span>            <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">sstables</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_files</span><span class="p">:</span>
+                <span class="c1"># Merge excess files with next level
+</span>                <span class="k">return</span> <span class="n">Compactor</span><span class="p">.</span><span class="nf">level_compact</span><span class="p">(</span>
+                    <span class="n">sstables</span><span class="p">[:</span><span class="n">max_files</span><span class="p">],</span>
+                    <span class="n">levels</span><span class="p">[</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">level</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nf">len</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span> <span class="k">else</span> <span class="p">[]</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">levels</span>
+</code></pre></div></div>
+
+<h3 id="3-memory-management">3. Memory Management</h3>
+
+<h4 id="memtable-size-limit"><strong>MemTable Size Limit</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MemoryAwareMemTable</span><span class="p">(</span><span class="n">MemTable</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">MemTable that monitors memory usage</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">max_memory_mb</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="n">max_size</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">max_memory_mb</span> <span class="o">=</span> <span class="n">max_memory_mb</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">current_memory_mb</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Check memory usage</span><span class="sh">"""</span>
+        <span class="n">key_size</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="nf">str</span><span class="p">(</span><span class="n">key</span><span class="p">).</span><span class="nf">encode</span><span class="p">())</span>
+        <span class="n">value_size</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="nf">str</span><span class="p">(</span><span class="n">value</span><span class="p">).</span><span class="nf">encode</span><span class="p">())</span>
+        <span class="n">entry_size_mb</span> <span class="o">=</span> <span class="p">(</span><span class="n">key_size</span> <span class="o">+</span> <span class="n">value_size</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">current_memory_mb</span> <span class="o">+</span> <span class="n">entry_size_mb</span> <span class="o">&gt;</span> <span class="n">self</span><span class="p">.</span><span class="n">max_memory_mb</span><span class="p">:</span>
+            <span class="c1"># Memory exceeded → Flush immediately
+</span>            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">current_memory_mb</span> <span class="o">+=</span> <span class="n">entry_size_mb</span>
+        <span class="k">return</span> <span class="nf">super</span><span class="p">().</span><span class="nf">put</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Reset memory after flush</span><span class="sh">"""</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nf">super</span><span class="p">().</span><span class="nf">flush</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">current_memory_mb</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">result</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="learning-summary">📚 Learning Summary</h2>
+
+<h3 id="key-points">Key Points</h3>
+
+<ol>
+  <li><strong>Advantages of LSM Tree</strong>
+    <ul>
+      <li>Excellent write performance with sequential writes</li>
+      <li>Reduced Write Amplification</li>
+      <li>Improved compression efficiency</li>
+      <li>Suitable for large-scale data processing</li>
+    </ul>
+  </li>
+  <li><strong>Role of Bloom Filter</strong>
+    <ul>
+      <li>Quickly filter non-existent keys</li>
+      <li>Eliminate unnecessary disk I/O</li>
+      <li>Significant performance improvement with small memory</li>
+    </ul>
+  </li>
+  <li><strong>Real Applications</strong>
+    <ul>
+      <li>RocksDB: Embedded database</li>
+      <li>Cassandra: Distributed NoSQL</li>
+      <li>HBase: Big data storage</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="performance-comparison-summary">Performance Comparison Summary</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Operation</strong></th>
+      <th><strong>B-Tree</strong></th>
+      <th><strong>LSM Tree (No Bloom Filter)</strong></th>
+      <th><strong>LSM Tree (With Bloom Filter)</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Write</strong></td>
+      <td>Slow (random)</td>
+      <td>Very fast (sequential)</td>
+      <td>Very fast (sequential)</td>
+    </tr>
+    <tr>
+      <td><strong>Read (exists)</strong></td>
+      <td>Fast</td>
+      <td>Medium</td>
+      <td>Medium</td>
+    </tr>
+    <tr>
+      <td><strong>Read (not exists)</strong></td>
+      <td>Fast</td>
+      <td>Slow</td>
+      <td>Very fast</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="practical-checklist">Practical Checklist</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Is it a write-heavy workload? → Consider LSM Tree</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Is read performance important? → Bloom Filter essential</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Are there memory constraints? → Adjust Bloom Filter size</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Choose Compaction strategy (Size-Tiered vs Leveled)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Configure WAL and disaster recovery strategy</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Set up monitoring and tuning metrics</li>
+</ul>
+
+<h3 id="next-steps">Next Steps</h3>
+
+<ul>
+  <li><strong>Distributed LSM Tree</strong>: Distributed architecture of Cassandra, HBase</li>
+  <li><strong>Advanced Compaction</strong>: Tiered Compaction, Universal Compaction</li>
+  <li><strong>Performance Tuning</strong>: Memory allocation, Compaction thread count</li>
+  <li><strong>Monitoring</strong>: Write latency, read latency, Compaction latency</li>
+</ul>
+
+<hr />
+
+<blockquote>
+  <p><strong>“LSM Tree and Bloom Filter are core technologies that determine the performance of modern databases.”</strong></p>
+</blockquote>
+
+<p>LSM Tree is essential for workloads where write performance is important, and Bloom Filter significantly improves read performance. Many modern databases like RocksDB, Cassandra, and HBase achieve excellent performance by combining these two technologies. I hope this guide helps you understand and optimize database internal structures!</p>
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2026 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

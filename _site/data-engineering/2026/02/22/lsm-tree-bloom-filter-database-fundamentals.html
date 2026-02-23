@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="최신 데이터베이스에서 널리 사용되는 LSM Tree와 Bloom Filter의 원리부터 실무 적용까지 완전 정복합니다.">
+
+
+
+<title>LSM Tree와 Bloom Filter - 현대 데이터베이스의 핵심 자료구조 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="LSM Tree와 Bloom Filter - 현대 데이터베이스의 핵심 자료구조">
+<meta property="og:description" content="최신 데이터베이스에서 널리 사용되는 LSM Tree와 Bloom Filter의 원리부터 실무 적용까지 완전 정복합니다.">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2026/02/22/lsm-tree-bloom-filter-database-fundamentals.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LSM Tree와 Bloom Filter - 현대 데이터베이스의 핵심 자료구조">
+<meta name="twitter:description" content="최신 데이터베이스에서 널리 사용되는 LSM Tree와 Bloom Filter의 원리부터 실무 적용까지 완전 정복합니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2026/02/22/lsm-tree-bloom-filter-database-fundamentals.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2026-02-22-lsm-tree-bloom-filter-database-fundamentals.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2026년 02월 22일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">LSM Tree와 Bloom Filter - 현대 데이터베이스의 핵심 자료구조</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">LSM-Tree</span>
+      
+        <span class="tag">Bloom-Filter</span>
+      
+        <span class="tag">데이터베이스</span>
+      
+        <span class="tag">자료구조</span>
+      
+        <span class="tag">NoSQL</span>
+      
+        <span class="tag">RocksDB</span>
+      
+        <span class="tag">LevelDB</span>
+      
+        <span class="tag">성능최적화</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 45분</span>
+      
+      
+        <span class="difficulty">📊 중급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="-lsm-tree와-bloom-filter---현대-데이터베이스의-핵심-자료구조">🌳 LSM Tree와 Bloom Filter - 현대 데이터베이스의 핵심 자료구조</h1>
+
+<blockquote>
+  <p><strong>“빠른 쓰기와 효율적인 읽기를 동시에 - LSM Tree와 Bloom Filter가 만드는 현대적 데이터베이스”</strong> - RocksDB, Cassandra, HBase의 핵심 기술</p>
+</blockquote>
+
+<p>전통적인 B-Tree 기반 데이터베이스는 랜덤 쓰기 성능에 한계가 있습니다. LSM Tree(Log-Structured Merge Tree)는 순차 쓰기를 활용하여 <strong>쓰기 성능을 수십 배 향상</strong>시키고, Bloom Filter는 <strong>불필요한 디스크 I/O를 대폭 줄여</strong> 읽기 성능을 최적화합니다. 이 포스트에서는 두 기술의 원리부터 실제 데이터베이스 구현까지 완전히 정복합니다.</p>
+
+<hr />
+
+<h2 id="-목차">📚 목차</h2>
+
+<ul>
+  <li><a href="#lsm-tree란">LSM Tree란?</a></li>
+  <li><a href="#lsm-tree-동작-원리">LSM Tree 동작 원리</a></li>
+  <li><a href="#bloom-filter-기초">Bloom Filter 기초</a></li>
+  <li><a href="#bloom-filter-동작-원리">Bloom Filter 동작 원리</a></li>
+  <li><a href="#lsm-tree와-bloom-filter의-조합">LSM Tree와 Bloom Filter의 조합</a></li>
+  <li><a href="#실제-데이터베이스-구현">실제 데이터베이스 구현</a></li>
+  <li><a href="#성능-최적화-전략">성능 최적화 전략</a></li>
+  <li><a href="#학습-요약">학습 요약</a></li>
+</ul>
+
+<hr />
+
+<h2 id="lsm-tree란">🎯 LSM Tree란?</h2>
+
+<h3 id="전통적인-b-tree의-한계">전통적인 B-Tree의 한계</h3>
+
+<p>전통적인 B-Tree 기반 데이터베이스(MySQL, PostgreSQL 등)는 다음과 같은 문제가 있습니다:</p>
+
+<h4 id="문제-1-랜덤-쓰기-성능-저하"><strong>문제 1: 랜덤 쓰기 성능 저하</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># B-Tree의 랜덤 쓰기
+# 각 쓰기마다 디스크의 여러 위치를 수정해야 함
+</span><span class="n">INSERT</span> <span class="n">INTO</span> <span class="nf">users </span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="nc">VALUES </span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="sh">'</span><span class="s">Alice</span><span class="sh">'</span><span class="p">);</span>   <span class="c1"># 디스크 위치 A 수정
+</span><span class="n">INSERT</span> <span class="n">INTO</span> <span class="nf">users </span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="nc">VALUES </span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="sh">'</span><span class="s">Bob</span><span class="sh">'</span><span class="p">);</span>      <span class="c1"># 디스크 위치 B 수정
+</span><span class="n">INSERT</span> <span class="n">INTO</span> <span class="nf">users </span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="nc">VALUES </span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="sh">'</span><span class="s">Charlie</span><span class="sh">'</span><span class="p">);</span> <span class="c1"># 디스크 위치 C 수정
+# → 디스크 헤드 이동이 많아 성능 저하
+</span></code></pre></div></div>
+
+<h4 id="문제-2-write-amplification"><strong>문제 2: Write Amplification</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>B-Tree 쓰기 과정:
+1. 데이터 페이지 읽기 (디스크 I/O)
+2. 페이지 수정
+3. 페이지 쓰기 (디스크 I/O)
+4. 인덱스 페이지 업데이트 (추가 디스크 I/O)
+5. WAL(Write-Ahead Log) 쓰기 (추가 디스크 I/O)
+
+→ 하나의 쓰기가 여러 번의 디스크 I/O를 유발
+</code></pre></div></div>
+
+<h3 id="lsm-tree의-해결책">LSM Tree의 해결책</h3>
+
+<p>LSM Tree는 <strong>순차 쓰기(Sequential Write)</strong>를 활용하여 성능 문제를 해결합니다.</p>
+
+<h4 id="핵심-아이디어"><strong>핵심 아이디어</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>전통적인 B-Tree:
+랜덤 쓰기 → 디스크 헤드 이동 → 느린 성능
+
+LSM Tree:
+1. 메모리 버퍼에 순차적으로 쓰기 (매우 빠름)
+2. 버퍼가 가득 차면 디스크에 순차 쓰기 (빠름)
+3. 백그라운드에서 병합(Compaction) 수행
+</code></pre></div></div>
+
+<h3 id="lsm-tree의-장점">LSM Tree의 장점</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>특징</strong></th>
+      <th><strong>B-Tree</strong></th>
+      <th><strong>LSM Tree</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>쓰기 성능</strong></td>
+      <td>랜덤 쓰기 (느림)</td>
+      <td>순차 쓰기 (빠름)</td>
+    </tr>
+    <tr>
+      <td><strong>쓰기 증폭</strong></td>
+      <td>높음 (여러 페이지 수정)</td>
+      <td>낮음 (순차 쓰기)</td>
+    </tr>
+    <tr>
+      <td><strong>읽기 성능</strong></td>
+      <td>빠름 (인덱스 직접)</td>
+      <td>상대적으로 느림 (여러 레벨 검색)</td>
+    </tr>
+    <tr>
+      <td><strong>공간 효율</strong></td>
+      <td>높음</td>
+      <td>중간 (중복 데이터 존재)</td>
+    </tr>
+    <tr>
+      <td><strong>압축</strong></td>
+      <td>제한적</td>
+      <td>효율적 (병합 시 압축)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="lsm-tree-동작-원리">🔄 LSM Tree 동작 원리</h2>
+
+<h3 id="기본-구조">기본 구조</h3>
+
+<p>LSM Tree는 여러 레벨(Level)로 구성됩니다:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>LSM Tree 구조:
+┌─────────────────────┐
+│   MemTable (L0)     │  ← 메모리 (가장 최신 데이터)
+│   (In-Memory)       │
+└─────────────────────┘
+         ↓ (플러시)
+┌─────────────────────┐
+│   SSTable (L1)       │  ← 디스크 (작은 파일들)
+│   (Sorted String)   │
+└─────────────────────┘
+         ↓ (병합)
+┌─────────────────────┐
+│   SSTable (L2)       │  ← 디스크 (더 큰 파일들)
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   SSTable (L3)       │  ← 디스크 (가장 큰 파일들)
+└─────────────────────┘
+</code></pre></div></div>
+
+<h3 id="1-쓰기-과정-write-path">1. 쓰기 과정 (Write Path)</h3>
+
+<h4 id="step-1-memtable에-쓰기"><strong>Step 1: MemTable에 쓰기</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Python으로 LSM Tree 쓰기 과정 시뮬레이션
+</span><span class="k">class</span> <span class="nc">MemTable</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># 메모리 내 정렬된 딕셔너리
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">max_size</span> <span class="o">=</span> <span class="n">max_size</span>
+    
+    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메모리에 데이터 쓰기 (매우 빠름)</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        
+        <span class="c1"># MemTable이 가득 차면 플러시
+</span>        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">self</span><span class="p">.</span><span class="n">max_size</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">MemTable을 디스크(SSTable)로 플러시</span><span class="sh">"""</span>
+        <span class="c1"># 정렬된 데이터를 SSTable로 변환
+</span>        <span class="n">sorted_data</span> <span class="o">=</span> <span class="nf">sorted</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">items</span><span class="p">())</span>
+        <span class="n">sstable</span> <span class="o">=</span> <span class="nc">SSTable</span><span class="p">(</span><span class="n">sorted_data</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">clear</span><span class="p">()</span>  <span class="c1"># MemTable 초기화
+</span>        <span class="k">return</span> <span class="n">sstable</span>
+
+<span class="c1"># 사용 예시
+</span><span class="n">memtable</span> <span class="o">=</span> <span class="nc">MemTable</span><span class="p">(</span><span class="n">max_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># 순차적으로 쓰기 (매우 빠름)
+</span><span class="n">memtable</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">memtable</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:2</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Bob</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">memtable</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:3</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Charlie</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">memtable</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:4</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">David</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">memtable</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:5</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Eve</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># → MemTable 가득 참 → 플러시 발생
+</span></code></pre></div></div>
+
+<h4 id="step-2-walwrite-ahead-log-쓰기"><strong>Step 2: WAL(Write-Ahead Log) 쓰기</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">WAL</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">쓰기 전 로그 - 장애 복구를 위한 로그</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">log_file</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">log_file</span> <span class="o">=</span> <span class="n">log_file</span>
+    
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">WAL에 순차적으로 쓰기 (매우 빠름)</span><span class="sh">"""</span>
+        <span class="n">log_entry</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s">:</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\n</span><span class="sh">"</span>
+        <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">log_file</span><span class="p">,</span> <span class="sh">'</span><span class="s">a</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">log_entry</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">replay</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">장애 복구 시 WAL 재생</span><span class="sh">"""</span>
+        <span class="n">operations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">log_file</span><span class="p">,</span> <span class="sh">'</span><span class="s">r</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="p">.</span><span class="nf">strip</span><span class="p">().</span><span class="nf">split</span><span class="p">(</span><span class="sh">'</span><span class="s">:</span><span class="sh">'</span><span class="p">)</span>
+                <span class="n">operations</span><span class="p">.</span><span class="nf">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">operations</span>
+
+<span class="c1"># 쓰기 과정
+</span><span class="n">wal</span> <span class="o">=</span> <span class="nc">WAL</span><span class="p">(</span><span class="sh">"</span><span class="s">wal.log</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">wal</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># WAL에 먼저 쓰기
+</span><span class="n">memtable</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 그 다음 MemTable에 쓰기
+</span></code></pre></div></div>
+
+<h4 id="step-3-sstable-생성"><strong>Step 3: SSTable 생성</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SSTable</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Sorted String Table - 디스크에 저장되는 정렬된 데이터</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">sorted_data</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="nf">dict</span><span class="p">(</span><span class="n">sorted_data</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">min_key</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">max_key</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">size</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">SSTable에서 키 조회</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">range_query</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">start_key</span><span class="p">,</span> <span class="n">end_key</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">범위 쿼리</span><span class="sh">"""</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">start_key</span> <span class="o">&lt;=</span> <span class="n">key</span> <span class="o">&lt;=</span> <span class="n">end_key</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+<span class="c1"># MemTable 플러시 → SSTable 생성
+</span><span class="n">sstable</span> <span class="o">=</span> <span class="n">memtable</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">SSTable created: </span><span class="si">{</span><span class="n">sstable</span><span class="p">.</span><span class="n">min_key</span><span class="si">}</span><span class="s"> to </span><span class="si">{</span><span class="n">sstable</span><span class="p">.</span><span class="n">max_key</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-읽기-과정-read-path">2. 읽기 과정 (Read Path)</h3>
+
+<p>LSM Tree의 읽기는 여러 레벨을 검색해야 합니다:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">LSMTree</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">memtable</span> <span class="o">=</span> <span class="nc">MemTable</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">sstables</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 레벨별 SSTable 리스트
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">wal</span> <span class="o">=</span> <span class="nc">WAL</span><span class="p">(</span><span class="sh">"</span><span class="s">wal.log</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">키 조회 - 최신 데이터부터 검색</span><span class="sh">"""</span>
+        
+        <span class="c1"># 1. MemTable에서 먼저 검색 (가장 최신)
+</span>        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">memtable</span><span class="p">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">memtable</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        
+        <span class="c1"># 2. SSTable들을 최신 순서로 검색
+</span>        <span class="k">for</span> <span class="n">sstable</span> <span class="ow">in</span> <span class="nf">reversed</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sstables</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">sstable</span><span class="p">.</span><span class="n">min_key</span> <span class="o">&lt;=</span> <span class="n">key</span> <span class="o">&lt;=</span> <span class="n">sstable</span><span class="p">.</span><span class="n">max_key</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">sstable</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">value</span>
+        
+        <span class="c1"># 3. 찾지 못함
+</span>        <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c1"># 읽기 예시
+</span><span class="n">lsm</span> <span class="o">=</span> <span class="nc">LSMTree</span><span class="p">()</span>
+<span class="n">lsm</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">lsm</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sh">"</span><span class="s">user:2</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Bob</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># MemTable에서 바로 찾음 (빠름)
+</span><span class="nf">print</span><span class="p">(</span><span class="n">lsm</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">))</span>  <span class="c1"># "Alice"
+</span>
+<span class="c1"># MemTable 플러시 후
+</span><span class="n">lsm</span><span class="p">.</span><span class="n">memtable</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+
+<span class="c1"># SSTable에서 찾음 (상대적으로 느림)
+</span><span class="nf">print</span><span class="p">(</span><span class="n">lsm</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">))</span>  <span class="c1"># "Alice"
+</span></code></pre></div></div>
+
+<h3 id="3-compaction-병합-과정">3. Compaction (병합) 과정</h3>
+
+<p>Compaction은 여러 SSTable을 병합하여 읽기 성능을 향상시킵니다:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Compactor</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">SSTable 병합 담당</span><span class="sh">"""</span>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">compact</span><span class="p">(</span><span class="n">sstables</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">여러 SSTable을 하나로 병합</span><span class="sh">"""</span>
+        <span class="n">merged_data</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c1"># 모든 SSTable의 데이터를 병합 (최신 값 우선)
+</span>        <span class="k">for</span> <span class="n">sstable</span> <span class="ow">in</span> <span class="nf">reversed</span><span class="p">(</span><span class="n">sstables</span><span class="p">):</span>  <span class="c1"># 최신부터
+</span>            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">sstable</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">merged_data</span><span class="p">:</span>  <span class="c1"># 최신 값만 유지
+</span>                    <span class="n">merged_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        
+        <span class="c1"># 정렬된 새 SSTable 생성
+</span>        <span class="n">sorted_data</span> <span class="o">=</span> <span class="nf">sorted</span><span class="p">(</span><span class="n">merged_data</span><span class="p">.</span><span class="nf">items</span><span class="p">())</span>
+        <span class="k">return</span> <span class="nc">SSTable</span><span class="p">(</span><span class="n">sorted_data</span><span class="p">)</span>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">level_compact</span><span class="p">(</span><span class="n">level_sstables</span><span class="p">,</span> <span class="n">next_level_sstables</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">레벨 간 병합 (Leveled Compaction)</span><span class="sh">"""</span>
+        <span class="c1"># L1의 SSTable들을 L2와 병합
+</span>        <span class="n">all_sstables</span> <span class="o">=</span> <span class="n">level_sstables</span> <span class="o">+</span> <span class="n">next_level_sstables</span>
+        <span class="k">return</span> <span class="n">Compactor</span><span class="p">.</span><span class="nf">compact</span><span class="p">(</span><span class="n">all_sstables</span><span class="p">)</span>
+
+<span class="c1"># Compaction 예시
+</span><span class="n">sstable1</span> <span class="o">=</span> <span class="nc">SSTable</span><span class="p">([(</span><span class="sh">"</span><span class="s">a</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1</span><span class="sh">"</span><span class="p">),</span> <span class="p">(</span><span class="sh">"</span><span class="s">b</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">2</span><span class="sh">"</span><span class="p">)])</span>
+<span class="n">sstable2</span> <span class="o">=</span> <span class="nc">SSTable</span><span class="p">([(</span><span class="sh">"</span><span class="s">b</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">3</span><span class="sh">"</span><span class="p">),</span> <span class="p">(</span><span class="sh">"</span><span class="s">c</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">4</span><span class="sh">"</span><span class="p">)])</span>  <span class="c1"># b가 업데이트됨
+</span>
+<span class="c1"># 병합 (최신 값 우선)
+</span><span class="n">merged</span> <span class="o">=</span> <span class="n">Compactor</span><span class="p">.</span><span class="nf">compact</span><span class="p">([</span><span class="n">sstable1</span><span class="p">,</span> <span class="n">sstable2</span><span class="p">])</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">merged</span><span class="p">.</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># {'a': '1', 'b': '3', 'c': '4'}
+</span></code></pre></div></div>
+
+<h3 id="compaction-전략">Compaction 전략</h3>
+
+<h4 id="size-tiered-compaction"><strong>Size-Tiered Compaction</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>레벨별로 비슷한 크기의 SSTable들을 병합
+L1: [10MB, 10MB, 10MB] → 병합 → L2: [30MB]
+L2: [30MB, 30MB, 30MB] → 병합 → L3: [90MB]
+</code></pre></div></div>
+
+<h4 id="leveled-compaction"><strong>Leveled Compaction</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>각 레벨은 최대 크기 제한
+L1: 최대 10개 파일, 각 10MB
+L2: 최대 10개 파일, 각 100MB
+L3: 최대 10개 파일, 각 1GB
+→ 레벨이 올라갈수록 파일 크기 증가
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="bloom-filter-기초">🔍 Bloom Filter 기초</h2>
+
+<h3 id="bloom-filter란">Bloom Filter란?</h3>
+
+<p>Bloom Filter는 <strong>확률적 자료구조(Probabilistic Data Structure)</strong>로, <strong>원소의 존재 여부를 빠르게 확인</strong>할 수 있지만, <strong>False Positive(거짓 양성)는 가능하지만 False Negative(거짓 음성)는 불가능</strong>합니다.</p>
+
+<h3 id="왜-bloom-filter가-필요한가">왜 Bloom Filter가 필요한가?</h3>
+
+<p>LSM Tree에서 키를 찾을 때:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Bloom Filter 없이 키 검색
+</span><span class="k">def</span> <span class="nf">get_without_bloom_filter</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+    <span class="c1"># 모든 SSTable을 검색해야 함
+</span>    <span class="k">for</span> <span class="n">sstable</span> <span class="ow">in</span> <span class="n">sstables</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sstable</span><span class="p">:</span>  <span class="c1"># 디스크 I/O 발생!
+</span>            <span class="k">return</span> <span class="n">sstable</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c1"># 문제: 존재하지 않는 키도 모든 SSTable을 검색해야 함
+# → 불필요한 디스크 I/O 발생
+</span></code></pre></div></div>
+
+<p>Bloom Filter를 사용하면:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Bloom Filter로 키 검색
+</span><span class="k">def</span> <span class="nf">get_with_bloom_filter</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">sstable</span> <span class="ow">in</span> <span class="n">sstables</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sstable</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="nf">might_contain</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>  <span class="c1"># 메모리에서 빠르게 확인
+</span>            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sstable</span><span class="p">:</span>  <span class="c1"># 실제로 존재할 때만 디스크 I/O
+</span>                <span class="k">return</span> <span class="n">sstable</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c1"># 장점: 존재하지 않는 키는 디스크 I/O 없이 빠르게 거부
+</span></code></pre></div></div>
+
+<h3 id="bloom-filter의-특징">Bloom Filter의 특징</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>특징</strong></th>
+      <th><strong>설명</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>공간 효율</strong></td>
+      <td>매우 작은 메모리 사용 (비트 배열)</td>
+    </tr>
+    <tr>
+      <td><strong>속도</strong></td>
+      <td>O(k) - k는 해시 함수 개수</td>
+    </tr>
+    <tr>
+      <td><strong>False Positive</strong></td>
+      <td>가능 (존재하지 않는데 존재한다고 판단)</td>
+    </tr>
+    <tr>
+      <td><strong>False Negative</strong></td>
+      <td>불가능 (존재하는데 없다고 판단하지 않음)</td>
+    </tr>
+    <tr>
+      <td><strong>삭제</strong></td>
+      <td>기본적으로 불가능 (Counting Bloom Filter로 가능)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="bloom-filter-동작-원리">🧮 Bloom Filter 동작 원리</h2>
+
+<h3 id="기본-구조-1">기본 구조</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">mmh3</span>  <span class="c1"># MurmurHash3
+</span><span class="kn">import</span> <span class="n">math</span>
+
+<span class="k">class</span> <span class="nc">BloomFilter</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Bloom Filter 구현</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">capacity</span><span class="p">,</span> <span class="n">error_rate</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">
+        capacity: 예상 원소 개수
+        error_rate: 허용 가능한 False Positive 비율
+        </span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">capacity</span> <span class="o">=</span> <span class="n">capacity</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">error_rate</span> <span class="o">=</span> <span class="n">error_rate</span>
+        
+        <span class="c1"># 비트 배열 크기 계산
+</span>        <span class="c1"># m = -n * ln(p) / (ln(2)^2)
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">bit_array_size</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="o">-</span><span class="n">capacity</span> <span class="o">*</span> <span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="n">error_rate</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+        
+        <span class="c1"># 해시 함수 개수 계산
+</span>        <span class="c1"># k = (m/n) * ln(2)
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">hash_count</span> <span class="o">=</span> <span class="nf">int</span><span class="p">((</span><span class="n">self</span><span class="p">.</span><span class="n">bit_array_size</span> <span class="o">/</span> <span class="n">capacity</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        
+        <span class="c1"># 비트 배열 초기화
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">bit_array</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">self</span><span class="p">.</span><span class="n">bit_array_size</span>
+    
+    <span class="k">def</span> <span class="nf">_hash</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">seed</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">해시 함수 (MurmurHash3 사용)</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="n">mmh3</span><span class="p">.</span><span class="nf">hash</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span> <span class="o">%</span> <span class="n">self</span><span class="p">.</span><span class="n">bit_array_size</span>
+    
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">원소 추가</span><span class="sh">"""</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">hash_count</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_hash</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">bit_array</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    
+    <span class="k">def</span> <span class="nf">might_contain</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">원소 존재 가능성 확인</span><span class="sh">"""</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">hash_count</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_hash</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">bit_array</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>  <span class="c1"># 확실히 존재하지 않음
+</span>        <span class="k">return</span> <span class="bp">True</span>  <span class="c1"># 존재할 가능성이 있음 (False Positive 가능)
+</span>
+<span class="c1"># 사용 예시
+</span><span class="n">bloom</span> <span class="o">=</span> <span class="nc">BloomFilter</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">error_rate</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+
+<span class="c1"># 원소 추가
+</span><span class="n">bloom</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">bloom</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="sh">"</span><span class="s">user:2</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">bloom</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="sh">"</span><span class="s">user:3</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 존재 확인
+</span><span class="nf">print</span><span class="p">(</span><span class="n">bloom</span><span class="p">.</span><span class="nf">might_contain</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">))</span>  <span class="c1"># True
+</span><span class="nf">print</span><span class="p">(</span><span class="n">bloom</span><span class="p">.</span><span class="nf">might_contain</span><span class="p">(</span><span class="sh">"</span><span class="s">user:999</span><span class="sh">"</span><span class="p">))</span>  <span class="c1"># False (확실히 없음)
+</span><span class="nf">print</span><span class="p">(</span><span class="n">bloom</span><span class="p">.</span><span class="nf">might_contain</span><span class="p">(</span><span class="sh">"</span><span class="s">user:1001</span><span class="sh">"</span><span class="p">))</span>  <span class="c1"># True or False (False Positive 가능)
+</span></code></pre></div></div>
+
+<h3 id="해시-함수와-비트-배열">해시 함수와 비트 배열</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Bloom Filter 동작 과정:
+
+1. 원소 추가:
+   "user:1" → Hash1 → Index 5 → Bit[5] = 1
+            → Hash2 → Index 12 → Bit[12] = 1
+            → Hash3 → Index 23 → Bit[23] = 1
+
+2. 원소 확인:
+   "user:1" → Hash1 → Index 5 → Bit[5] == 1? ✓
+            → Hash2 → Index 12 → Bit[12] == 1? ✓
+            → Hash3 → Index 23 → Bit[23] == 1? ✓
+            → "존재할 가능성 있음" (True)
+
+   "user:999" → Hash1 → Index 7 → Bit[7] == 1? ✗
+              → "확실히 존재하지 않음" (False)
+</code></pre></div></div>
+
+<h3 id="false-positive-확률-계산">False Positive 확률 계산</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">calculate_false_positive_rate</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    n: 실제 원소 개수
+    m: 비트 배열 크기
+    k: 해시 함수 개수
+    </span><span class="sh">"""</span>
+    <span class="c1"># False Positive 확률 = (1 - e^(-kn/m))^k
+</span>    <span class="kn">import</span> <span class="n">math</span>
+    <span class="nf">return </span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">math</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="o">-</span><span class="n">k</span> <span class="o">*</span> <span class="n">n</span> <span class="o">/</span> <span class="n">m</span><span class="p">))</span> <span class="o">**</span> <span class="n">k</span>
+
+<span class="c1"># 예시
+</span><span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span>  <span class="c1"># 1000개 원소
+</span><span class="n">m</span> <span class="o">=</span> <span class="mi">9585</span>  <span class="c1"># 비트 배열 크기 (error_rate=0.01일 때)
+</span><span class="n">k</span> <span class="o">=</span> <span class="mi">7</span>     <span class="c1"># 해시 함수 개수
+</span>
+<span class="n">fp_rate</span> <span class="o">=</span> <span class="nf">calculate_false_positive_rate</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">False Positive Rate: </span><span class="si">{</span><span class="n">fp_rate</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 약 0.01 (1%)
+</span></code></pre></div></div>
+
+<h3 id="최적-파라미터-선택">최적 파라미터 선택</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">optimal_bloom_filter_params</span><span class="p">(</span><span class="n">capacity</span><span class="p">,</span> <span class="n">error_rate</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">최적의 Bloom Filter 파라미터 계산</span><span class="sh">"""</span>
+    <span class="kn">import</span> <span class="n">math</span>
+    
+    <span class="c1"># 비트 배열 크기
+</span>    <span class="n">m</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="o">-</span><span class="n">capacity</span> <span class="o">*</span> <span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="n">error_rate</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+    
+    <span class="c1"># 해시 함수 개수
+</span>    <span class="n">k</span> <span class="o">=</span> <span class="nf">int</span><span class="p">((</span><span class="n">m</span> <span class="o">/</span> <span class="n">capacity</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="sh">'</span><span class="s">bit_array_size</span><span class="sh">'</span><span class="p">:</span> <span class="n">m</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">hash_count</span><span class="sh">'</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">memory_bytes</span><span class="sh">'</span><span class="p">:</span> <span class="n">m</span> <span class="o">/</span> <span class="mi">8</span><span class="p">,</span>  <span class="c1"># 비트를 바이트로 변환
+</span>        <span class="sh">'</span><span class="s">bits_per_element</span><span class="sh">'</span><span class="p">:</span> <span class="n">m</span> <span class="o">/</span> <span class="n">capacity</span>
+    <span class="p">}</span>
+
+<span class="c1"># 예시: 100만 개 원소, 1% 오류율
+</span><span class="n">params</span> <span class="o">=</span> <span class="nf">optimal_bloom_filter_params</span><span class="p">(</span><span class="mi">1_000_000</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">비트 배열 크기: </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="sh">'</span><span class="s">bit_array_size</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">,</span><span class="si">}</span><span class="s"> bits</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">해시 함수 개수: </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="sh">'</span><span class="s">hash_count</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">메모리 사용량: </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="sh">'</span><span class="s">memory_bytes</span><span class="sh">'</span><span class="p">]</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s"> MB</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">원소당 비트 수: </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="sh">'</span><span class="s">bits_per_element</span><span class="sh">'</span><span class="p">]</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 출력:
+# 비트 배열 크기: 9,585,058 bits
+# 해시 함수 개수: 7
+# 메모리 사용량: 1.14 MB
+# 원소당 비트 수: 9.59
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="lsm-tree와-bloom-filter의-조합">🔗 LSM Tree와 Bloom Filter의 조합</h2>
+
+<h3 id="통합-아키텍처">통합 아키텍처</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SSTableWithBloomFilter</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Bloom Filter가 포함된 SSTable</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">sorted_data</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="nf">dict</span><span class="p">(</span><span class="n">sorted_data</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">min_key</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">max_key</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span>
+        
+        <span class="c1"># Bloom Filter 생성
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span> <span class="o">=</span> <span class="nc">BloomFilter</span><span class="p">(</span>
+            <span class="n">capacity</span><span class="o">=</span><span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">error_rate</span><span class="o">=</span><span class="mf">0.01</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># 모든 키를 Bloom Filter에 추가
+</span>        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">keys</span><span class="p">():</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Bloom Filter로 필터링 후 조회</span><span class="sh">"""</span>
+        <span class="c1"># 1. Bloom Filter로 빠른 필터링
+</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="nf">might_contain</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">None</span>  <span class="c1"># 확실히 없음 → 디스크 I/O 없음
+</span>        
+        <span class="c1"># 2. 실제 데이터 조회 (디스크 I/O 발생)
+</span>        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">OptimizedLSMTree</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Bloom Filter가 통합된 LSM Tree</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">memtable</span> <span class="o">=</span> <span class="nc">MemTable</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">sstables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">wal</span> <span class="o">=</span> <span class="nc">WAL</span><span class="p">(</span><span class="sh">"</span><span class="s">wal.log</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">최적화된 읽기 - Bloom Filter 활용</span><span class="sh">"""</span>
+        
+        <span class="c1"># 1. MemTable 검색 (메모리, 가장 빠름)
+</span>        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">memtable</span><span class="p">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">memtable</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        
+        <span class="c1"># 2. SSTable 검색 (Bloom Filter로 필터링)
+</span>        <span class="k">for</span> <span class="n">sstable</span> <span class="ow">in</span> <span class="nf">reversed</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sstables</span><span class="p">):</span>
+            <span class="c1"># Bloom Filter로 먼저 확인 (메모리, 빠름)
+</span>            <span class="k">if</span> <span class="n">sstable</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="nf">might_contain</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="c1"># 실제로 존재할 가능성이 있음 → 디스크에서 조회
+</span>                <span class="n">value</span> <span class="o">=</span> <span class="n">sstable</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">value</span>
+        
+        <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c1"># 성능 비교
+</span><span class="k">def</span> <span class="nf">benchmark_read_performance</span><span class="p">():</span>
+    <span class="sh">"""</span><span class="s">읽기 성능 벤치마크</span><span class="sh">"""</span>
+    <span class="kn">import</span> <span class="n">time</span>
+    
+    <span class="n">lsm_without_bf</span> <span class="o">=</span> <span class="nc">LSMTree</span><span class="p">()</span>  <span class="c1"># Bloom Filter 없음
+</span>    <span class="n">lsm_with_bf</span> <span class="o">=</span> <span class="nc">OptimizedLSMTree</span><span class="p">()</span>  <span class="c1"># Bloom Filter 있음
+</span>    
+    <span class="c1"># 테스트 데이터 준비
+</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">):</span>
+        <span class="n">lsm_without_bf</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">key:</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> <span class="sa">f</span><span class="sh">"</span><span class="s">value:</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="n">lsm_with_bf</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">key:</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> <span class="sa">f</span><span class="sh">"</span><span class="s">value:</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="c1"># 존재하지 않는 키 검색 (가장 큰 차이)
+</span>    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="mi">20000</span><span class="p">):</span>
+        <span class="n">lsm_without_bf</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">key:</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 모든 SSTable 검색
+</span>    <span class="n">time_without_bf</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+    
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="mi">20000</span><span class="p">):</span>
+        <span class="n">lsm_with_bf</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">key:</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># Bloom Filter로 빠르게 필터링
+</span>    <span class="n">time_with_bf</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+    
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Bloom Filter 없음: </span><span class="si">{</span><span class="n">time_without_bf</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="s">초</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Bloom Filter 있음: </span><span class="si">{</span><span class="n">time_with_bf</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="s">초</span><span class="sh">"</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">성능 향상: </span><span class="si">{</span><span class="n">time_without_bf</span> <span class="o">/</span> <span class="n">time_with_bf</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">배</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># benchmark_read_performance()
+# 출력 예시:
+# Bloom Filter 없음: 2.3456초
+# Bloom Filter 있음: 0.1234초
+# 성능 향상: 19.01배
+</span></code></pre></div></div>
+
+<h3 id="성능-향상-효과">성능 향상 효과</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>시나리오</strong></th>
+      <th><strong>Bloom Filter 없음</strong></th>
+      <th><strong>Bloom Filter 있음</strong></th>
+      <th><strong>향상</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>존재하는 키</strong></td>
+      <td>모든 레벨 검색</td>
+      <td>모든 레벨 검색</td>
+      <td>비슷</td>
+    </tr>
+    <tr>
+      <td><strong>존재하지 않는 키</strong></td>
+      <td>모든 레벨 검색</td>
+      <td>메모리에서 즉시 거부</td>
+      <td><strong>10-100배</strong></td>
+    </tr>
+    <tr>
+      <td><strong>부분 존재 키</strong></td>
+      <td>일부 레벨만 검색</td>
+      <td>일부 레벨만 검색</td>
+      <td><strong>2-5배</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="실제-데이터베이스-구현">🗄️ 실제 데이터베이스 구현</h2>
+
+<h3 id="rocksdb">RocksDB</h3>
+
+<p>RocksDB는 Facebook에서 개발한 LSM Tree 기반 스토리지 엔진입니다.</p>
+
+<h4 id="rocksdb-아키텍처"><strong>RocksDB 아키텍처</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>RocksDB 구조:
+┌─────────────────────┐
+│   MemTable          │  ← SkipList (메모리)
+│   (SkipList)        │
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   Immutable MemTable│  ← 플러시 대기 중
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   L0 SSTable        │  ← Level 0 (여러 파일)
+│   (Bloom Filter)    │
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   L1 SSTable        │  ← Level 1
+│   (Bloom Filter)    │
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   L2+ SSTable       │  ← Level 2 이상
+│   (Bloom Filter)    │
+└─────────────────────┘
+</code></pre></div></div>
+
+<h4 id="rocksdb-사용-예시"><strong>RocksDB 사용 예시</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">rocksdb</span>
+
+<span class="c1"># RocksDB 열기
+</span><span class="n">db</span> <span class="o">=</span> <span class="n">rocksdb</span><span class="p">.</span><span class="nc">DB</span><span class="p">(</span><span class="sh">"</span><span class="s">test.db</span><span class="sh">"</span><span class="p">,</span> <span class="n">rocksdb</span><span class="p">.</span><span class="nc">Options</span><span class="p">(</span><span class="n">create_if_missing</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+
+<span class="c1"># 쓰기 (매우 빠름 - 순차 쓰기)
+</span><span class="n">db</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sa">b</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">,</span> <span class="sa">b</span><span class="sh">"</span><span class="s">Alice</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">db</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sa">b</span><span class="sh">"</span><span class="s">user:2</span><span class="sh">"</span><span class="p">,</span> <span class="sa">b</span><span class="sh">"</span><span class="s">Bob</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">db</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sa">b</span><span class="sh">"</span><span class="s">user:3</span><span class="sh">"</span><span class="p">,</span> <span class="sa">b</span><span class="sh">"</span><span class="s">Charlie</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 읽기 (Bloom Filter로 최적화)
+</span><span class="n">value</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sa">b</span><span class="sh">"</span><span class="s">user:1</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># b"Alice"
+</span>
+<span class="c1"># 배치 쓰기 (더 빠름)
+</span><span class="n">batch</span> <span class="o">=</span> <span class="n">rocksdb</span><span class="p">.</span><span class="nc">WriteBatch</span><span class="p">()</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sa">b</span><span class="sh">"</span><span class="s">user:4</span><span class="sh">"</span><span class="p">,</span> <span class="sa">b</span><span class="sh">"</span><span class="s">David</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span><span class="sa">b</span><span class="sh">"</span><span class="s">user:5</span><span class="sh">"</span><span class="p">,</span> <span class="sa">b</span><span class="sh">"</span><span class="s">Eve</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">db</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+
+<span class="c1"># 범위 스캔
+</span><span class="n">it</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="nf">iteritems</span><span class="p">()</span>
+<span class="n">it</span><span class="p">.</span><span class="nf">seek</span><span class="p">(</span><span class="sa">b</span><span class="sh">"</span><span class="s">user:</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">it</span><span class="p">:</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="apache-cassandra">Apache Cassandra</h3>
+
+<p>Cassandra는 분산 NoSQL 데이터베이스로 LSM Tree를 사용합니다.</p>
+
+<h4 id="cassandra의-lsm-tree-구현"><strong>Cassandra의 LSM Tree 구현</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Cassandra 구조:
+┌─────────────────────┐
+│   Memtable          │  ← 각 노드의 메모리
+│   (ConcurrentSkipList)│
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   Commit Log        │  ← WAL (장애 복구)
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   SSTable (L0)      │  ← 여러 SSTable
+│   (Bloom Filter)    │
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   Compaction        │  ← Size-Tiered Compaction
+└─────────────────────┘
+</code></pre></div></div>
+
+<h3 id="hbase">HBase</h3>
+
+<p>HBase는 Hadoop 기반 분산 데이터베이스입니다.</p>
+
+<h4 id="hbase의-lsm-tree-구현"><strong>HBase의 LSM Tree 구현</strong></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HBase 구조:
+┌─────────────────────┐
+│   MemStore          │  ← RegionServer 메모리
+│   (ConcurrentSkipList)│
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   WAL (HLog)        │  ← HDFS에 저장
+└─────────────────────┘
+         ↓
+┌─────────────────────┐
+│   HFile (SSTable)   │  ← HDFS에 저장
+│   (Bloom Filter)    │
+└─────────────────────┘
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="성능-최적화-전략">⚡ 성능 최적화 전략</h2>
+
+<h3 id="1-bloom-filter-최적화">1. Bloom Filter 최적화</h3>
+
+<h4 id="적응형-bloom-filter-크기"><strong>적응형 Bloom Filter 크기</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">AdaptiveBloomFilter</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">데이터 크기에 따라 자동 조정되는 Bloom Filter</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">initial_capacity</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">capacity</span> <span class="o">=</span> <span class="n">initial_capacity</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span> <span class="o">=</span> <span class="nc">BloomFilter</span><span class="p">(</span><span class="n">initial_capacity</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">actual_count</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">원소 추가 시 용량 자동 확장</span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">actual_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="c1"># 실제 개수가 예상 용량의 80%를 넘으면 확장
+</span>        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">actual_count</span> <span class="o">&gt;=</span> <span class="n">self</span><span class="p">.</span><span class="n">capacity</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_expand</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">_expand</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Bloom Filter 확장</span><span class="sh">"""</span>
+        <span class="n">old_filter</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">capacity</span> <span class="o">*=</span> <span class="mi">2</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">bloom_filter</span> <span class="o">=</span> <span class="nc">BloomFilter</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">capacity</span><span class="p">)</span>
+        
+        <span class="c1"># 기존 데이터 재구성 (실제로는 SSTable 재생성 시 수행)
+</span>        <span class="c1"># 여기서는 시뮬레이션
+</span>        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Bloom Filter expanded to </span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">capacity</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="블록-레벨-bloom-filter"><strong>블록 레벨 Bloom Filter</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">BlockBloomFilter</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">SSTable의 각 블록마다 별도의 Bloom Filter</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">4096</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">block_size</span> <span class="o">=</span> <span class="n">block_size</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">block_filters</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># 블록별 Bloom Filter
+</span>    
+    <span class="k">def</span> <span class="nf">add_to_block</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">block_id</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">특정 블록의 Bloom Filter에 추가</span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="n">block_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">block_filters</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">block_filters</span><span class="p">[</span><span class="n">block_id</span><span class="p">]</span> <span class="o">=</span> <span class="nc">BloomFilter</span><span class="p">(</span>
+                <span class="n">capacity</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">block_size</span>
+            <span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">block_filters</span><span class="p">[</span><span class="n">block_id</span><span class="p">].</span><span class="nf">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">might_contain_in_block</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">block_id</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">특정 블록에 키가 존재하는지 확인</span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="n">block_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">block_filters</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">block_filters</span><span class="p">[</span><span class="n">block_id</span><span class="p">].</span><span class="nf">might_contain</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-compaction-최적화">2. Compaction 최적화</h3>
+
+<h4 id="compaction-전략-선택"><strong>Compaction 전략 선택</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CompactionStrategy</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Compaction 전략 선택</span><span class="sh">"""</span>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">size_tiered_compact</span><span class="p">(</span><span class="n">sstables</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Size-Tiered: 비슷한 크기 파일들 병합</span><span class="sh">"""</span>
+        <span class="c1"># 같은 크기 범위의 SSTable들을 그룹화
+</span>        <span class="n">size_groups</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">sstable</span> <span class="ow">in</span> <span class="n">sstables</span><span class="p">:</span>
+            <span class="n">size_range</span> <span class="o">=</span> <span class="n">sstable</span><span class="p">.</span><span class="n">size</span> <span class="o">//</span> <span class="mi">1000</span>  <span class="c1"># 1KB 단위로 그룹화
+</span>            <span class="k">if</span> <span class="n">size_range</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">size_groups</span><span class="p">:</span>
+                <span class="n">size_groups</span><span class="p">[</span><span class="n">size_range</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">size_groups</span><span class="p">[</span><span class="n">size_range</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="n">sstable</span><span class="p">)</span>
+        
+        <span class="c1"># 각 그룹에서 4개 이상이면 병합
+</span>        <span class="n">merged</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">size_range</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">size_groups</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">merged</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">Compactor</span><span class="p">.</span><span class="nf">compact</span><span class="p">(</span><span class="n">group</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">merged</span><span class="p">.</span><span class="nf">extend</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">merged</span>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">leveled_compact</span><span class="p">(</span><span class="n">levels</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Leveled: 레벨별 크기 제한</span><span class="sh">"""</span>
+        <span class="k">for</span> <span class="n">level</span><span class="p">,</span> <span class="n">sstables</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">levels</span><span class="p">):</span>
+            <span class="n">max_files</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># 레벨이 높을수록 더 많은 파일 허용
+</span>            <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">sstables</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_files</span><span class="p">:</span>
+                <span class="c1"># 초과 파일들을 다음 레벨과 병합
+</span>                <span class="k">return</span> <span class="n">Compactor</span><span class="p">.</span><span class="nf">level_compact</span><span class="p">(</span>
+                    <span class="n">sstables</span><span class="p">[:</span><span class="n">max_files</span><span class="p">],</span>
+                    <span class="n">levels</span><span class="p">[</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">level</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nf">len</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span> <span class="k">else</span> <span class="p">[]</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">levels</span>
+</code></pre></div></div>
+
+<h3 id="3-메모리-관리">3. 메모리 관리</h3>
+
+<h4 id="memtable-크기-제한"><strong>MemTable 크기 제한</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MemoryAwareMemTable</span><span class="p">(</span><span class="n">MemTable</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">메모리 사용량을 모니터링하는 MemTable</span><span class="sh">"""</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">max_memory_mb</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="n">max_size</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">max_memory_mb</span> <span class="o">=</span> <span class="n">max_memory_mb</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">current_memory_mb</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">메모리 사용량 체크</span><span class="sh">"""</span>
+        <span class="n">key_size</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="nf">str</span><span class="p">(</span><span class="n">key</span><span class="p">).</span><span class="nf">encode</span><span class="p">())</span>
+        <span class="n">value_size</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="nf">str</span><span class="p">(</span><span class="n">value</span><span class="p">).</span><span class="nf">encode</span><span class="p">())</span>
+        <span class="n">entry_size_mb</span> <span class="o">=</span> <span class="p">(</span><span class="n">key_size</span> <span class="o">+</span> <span class="n">value_size</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">current_memory_mb</span> <span class="o">+</span> <span class="n">entry_size_mb</span> <span class="o">&gt;</span> <span class="n">self</span><span class="p">.</span><span class="n">max_memory_mb</span><span class="p">:</span>
+            <span class="c1"># 메모리 초과 → 즉시 플러시
+</span>            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">current_memory_mb</span> <span class="o">+=</span> <span class="n">entry_size_mb</span>
+        <span class="k">return</span> <span class="nf">super</span><span class="p">().</span><span class="nf">put</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">플러시 후 메모리 초기화</span><span class="sh">"""</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nf">super</span><span class="p">().</span><span class="nf">flush</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">current_memory_mb</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">result</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="학습-요약">📚 학습 요약</h2>
+
+<h3 id="핵심-포인트">핵심 포인트</h3>
+
+<ol>
+  <li><strong>LSM Tree의 장점</strong>
+    <ul>
+      <li>순차 쓰기로 뛰어난 쓰기 성능</li>
+      <li>Write Amplification 감소</li>
+      <li>압축 효율 향상</li>
+      <li>대용량 데이터 처리에 적합</li>
+    </ul>
+  </li>
+  <li><strong>Bloom Filter의 역할</strong>
+    <ul>
+      <li>존재하지 않는 키를 빠르게 필터링</li>
+      <li>불필요한 디스크 I/O 제거</li>
+      <li>작은 메모리로 큰 성능 향상</li>
+    </ul>
+  </li>
+  <li><strong>실제 적용</strong>
+    <ul>
+      <li>RocksDB: 임베디드 데이터베이스</li>
+      <li>Cassandra: 분산 NoSQL</li>
+      <li>HBase: 빅데이터 스토리지</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="성능-비교-요약">성능 비교 요약</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>작업</strong></th>
+      <th><strong>B-Tree</strong></th>
+      <th><strong>LSM Tree (Bloom Filter 없음)</strong></th>
+      <th><strong>LSM Tree (Bloom Filter 있음)</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>쓰기</strong></td>
+      <td>느림 (랜덤)</td>
+      <td>매우 빠름 (순차)</td>
+      <td>매우 빠름 (순차)</td>
+    </tr>
+    <tr>
+      <td><strong>읽기 (존재)</strong></td>
+      <td>빠름</td>
+      <td>중간</td>
+      <td>중간</td>
+    </tr>
+    <tr>
+      <td><strong>읽기 (부재)</strong></td>
+      <td>빠름</td>
+      <td>느림</td>
+      <td>매우 빠름</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="실무-체크리스트">실무 체크리스트</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />쓰기 중심 워크로드인가? → LSM Tree 고려</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />읽기 성능이 중요한가? → Bloom Filter 필수</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />메모리 제약이 있는가? → Bloom Filter 크기 조정</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Compaction 전략 선택 (Size-Tiered vs Leveled)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />WAL 설정 및 장애 복구 전략</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />모니터링 및 튜닝 지표 설정</li>
+</ul>
+
+<h3 id="다음-단계">다음 단계</h3>
+
+<ul>
+  <li><strong>분산 LSM Tree</strong>: Cassandra, HBase의 분산 아키텍처</li>
+  <li><strong>고급 Compaction</strong>: Tiered Compaction, Universal Compaction</li>
+  <li><strong>성능 튜닝</strong>: 메모리 할당, Compaction 스레드 수</li>
+  <li><strong>모니터링</strong>: 쓰기 지연, 읽기 지연, Compaction 지연</li>
+</ul>
+
+<hr />
+
+<blockquote>
+  <p><strong>“LSM Tree와 Bloom Filter는 현대 데이터베이스의 성능을 결정하는 핵심 기술입니다.”</strong></p>
+</blockquote>
+
+<p>쓰기 성능이 중요한 워크로드에서는 LSM Tree가 필수적이며, Bloom Filter는 읽기 성능을 크게 향상시킵니다. RocksDB, Cassandra, HBase 등 많은 현대적 데이터베이스가 이 두 기술을 조합하여 뛰어난 성능을 달성하고 있습니다. 이 가이드가 데이터베이스 내부 구조를 이해하고 최적화하는 데 도움이 되기를 바랍니다!</p>
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2026 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
