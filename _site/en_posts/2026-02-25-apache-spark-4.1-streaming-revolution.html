@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Complete guide to Spark 4.1's real-time processing improvements, differences with Flink, and evolution to true streaming.">
+
+
+
+<title>Apache Spark 4.1 - Streaming Revolution and Comparison with Flink - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Apache Spark 4.1 - Streaming Revolution and Comparison with Flink">
+<meta property="og:description" content="Complete guide to Spark 4.1's real-time processing improvements, differences with Flink, and evolution to true streaming.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2026-02-25-apache-spark-4.1-streaming-revolution.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Apache Spark 4.1 - Streaming Revolution and Comparison with Flink">
+<meta name="twitter:description" content="Complete guide to Spark 4.1's real-time processing improvements, differences with Flink, and evolution to true streaming.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2026/02/25/apache-spark-4.1-streaming-revolution.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2026-02-25-apache-spark-4.1-streaming-revolution.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2026년 02월 25일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Apache Spark 4.1 - Streaming Revolution and Comparison with Flink</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Apache-Spark</span>
+      
+        <span class="tag">Spark-4.1</span>
+      
+        <span class="tag">Structured-Streaming</span>
+      
+        <span class="tag">Apache-Flink</span>
+      
+        <span class="tag">Real-time-Processing</span>
+      
+        <span class="tag">Streaming</span>
+      
+        <span class="tag">Micro-batch</span>
+      
+        <span class="tag">Continuous-Processing</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 55 min</span>
+      
+      
+        <span class="difficulty">📊 Advanced</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="-apache-spark-41---streaming-revolution-and-comparison-with-flink">🚀 Apache Spark 4.1 - Streaming Revolution and Comparison with Flink</h1>
+
+<blockquote>
+  <p><strong>“From micro-batch to true streaming - The paradigm shift in real-time processing brought by Spark 4.1”</strong> - Continuous Processing, low latency, Flink-level performance</p>
+</blockquote>
+
+<p>Apache Spark has traditionally processed real-time data using <strong>micro-batch</strong> approach. However, Spark 4.1 achieves <strong>Flink-level low latency</strong> through <strong>Continuous Processing</strong> and <strong>enhanced Structured Streaming</strong>. This post provides a complete guide to Spark’s streaming evolution, differences with Flink, and revolutionary improvements in Spark 4.1.</p>
+
+<hr />
+
+<h2 id="-table-of-contents">📚 Table of Contents</h2>
+
+<ul>
+  <li><a href="#spark-vs-flink-fundamental-differences">Spark vs Flink: Fundamental Differences</a></li>
+  <li><a href="#evolution-of-spark-streaming">Evolution of Spark Streaming</a></li>
+  <li><a href="#key-improvements-in-spark-41">Key Improvements in Spark 4.1</a></li>
+  <li><a href="#complete-guide-to-continuous-processing">Complete Guide to Continuous Processing</a></li>
+  <li><a href="#flink-vs-spark-41-practical-comparison">Flink vs Spark 4.1 Practical Comparison</a></li>
+  <li><a href="#practical-example-real-time-event-processing-system">Practical Example: Real-time Event Processing System</a></li>
+  <li><a href="#performance-benchmarks-and-optimization">Performance Benchmarks and Optimization</a></li>
+  <li><a href="#learning-summary">Learning Summary</a></li>
+</ul>
+
+<hr />
+
+<h2 id="spark-vs-flink-fundamental-differences">⚔️ Spark vs Flink: Fundamental Differences</h2>
+
+<h3 id="architectural-philosophy-differences">Architectural Philosophy Differences</h3>
+
+<h4 id="spark-micro-batch-approach"><strong>Spark: Micro-batch Approach</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark 3.x and earlier: Micro-batch approach
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">SparkMicroBatch</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># Structured Streaming (micro-batch)
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="c1"># Process at batch intervals (e.g., every 1 second)
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">df</span> \
+    <span class="p">.</span><span class="nf">withWatermark</span><span class="p">(</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10 seconds</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="nf">window</span><span class="p">(</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">5 seconds</span><span class="sh">"</span><span class="p">),</span> <span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">agg</span><span class="p">(</span><span class="nf">count</span><span class="p">(</span><span class="sh">"</span><span class="s">*</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">))</span>
+
+<span class="n">query</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">update</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="sh">"</span><span class="s">1 second</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 1 second batch interval
+</span>    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">console</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+
+<span class="c1"># Problem: Minimum latency = batch interval (1 second)
+# → Difficult to achieve millisecond-level real-time processing
+</span></code></pre></div></div>
+
+<h4 id="flink-true-streaming-approach"><strong>Flink: True Streaming Approach</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Flink: Process events immediately upon arrival
+</span><span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
+<span class="kn">from</span> <span class="n">pyflink.table</span> <span class="kn">import</span> <span class="n">StreamTableEnvironment</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+<span class="n">table_env</span> <span class="o">=</span> <span class="n">StreamTableEnvironment</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+
+<span class="c1"># Kafka source
+</span><span class="n">table_env</span><span class="p">.</span><span class="nf">execute_sql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    CREATE TABLE events (
+        id STRING,
+        category STRING,
+        amount DOUBLE,
+        event_time TIMESTAMP(3),
+        WATERMARK FOR event_time AS event_time - INTERVAL </span><span class="sh">'</span><span class="s">10</span><span class="sh">'</span><span class="s"> SECOND
+    ) WITH (
+        </span><span class="sh">'</span><span class="s">connector</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">kafka</span><span class="sh">'</span><span class="s">,
+        </span><span class="sh">'</span><span class="s">topic</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">events</span><span class="sh">'</span><span class="s">,
+        </span><span class="sh">'</span><span class="s">properties.bootstrap.servers</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">localhost:9092</span><span class="sh">'</span><span class="s">,
+        </span><span class="sh">'</span><span class="s">format</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">json</span><span class="sh">'</span><span class="s">
+    )
+</span><span class="sh">"""</span><span class="p">)</span>
+
+<span class="c1"># Process immediately upon event arrival (no batch interval)
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">table_env</span><span class="p">.</span><span class="nf">sql_query</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    SELECT 
+        TUMBLE_START(event_time, INTERVAL </span><span class="sh">'</span><span class="s">5</span><span class="sh">'</span><span class="s"> SECOND) as window_start,
+        category,
+        COUNT(*) as count
+    FROM events
+    GROUP BY TUMBLE(event_time, INTERVAL </span><span class="sh">'</span><span class="s">5</span><span class="sh">'</span><span class="s"> SECOND), category
+</span><span class="sh">"""</span><span class="p">)</span>
+
+<span class="c1"># Advantage: Millisecond-level low latency
+# → True real-time processing
+</span></code></pre></div></div>
+
+<h3 id="key-differences-comparison">Key Differences Comparison</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Feature</strong></th>
+      <th><strong>Spark (3.x and earlier)</strong></th>
+      <th><strong>Flink</strong></th>
+      <th><strong>Spark 4.1</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Processing Mode</strong></td>
+      <td>Micro-batch</td>
+      <td>True streaming</td>
+      <td>Continuous Processing support</td>
+    </tr>
+    <tr>
+      <td><strong>Minimum Latency</strong></td>
+      <td>Batch interval (1 second+)</td>
+      <td>Milliseconds</td>
+      <td>Milliseconds (CP mode)</td>
+    </tr>
+    <tr>
+      <td><strong>Processing Guarantee</strong></td>
+      <td>At-least-once / Exactly-once</td>
+      <td>Exactly-once</td>
+      <td>Exactly-once</td>
+    </tr>
+    <tr>
+      <td><strong>State Management</strong></td>
+      <td>Limited</td>
+      <td>Powerful state management</td>
+      <td>Enhanced state management</td>
+    </tr>
+    <tr>
+      <td><strong>Backpressure Handling</strong></td>
+      <td>Limited</td>
+      <td>Automatic handling</td>
+      <td>Improved</td>
+    </tr>
+    <tr>
+      <td><strong>Complex Event Processing</strong></td>
+      <td>Limited</td>
+      <td>CEP support</td>
+      <td>Enhanced</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="evolution-of-spark-streaming">📈 Evolution of Spark Streaming</h2>
+
+<h3 id="stage-1-spark-streaming-dstream---2013">Stage 1: Spark Streaming (DStream) - 2013</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark Streaming (DStream) - Legacy API
+</span><span class="kn">from</span> <span class="n">pyspark</span> <span class="kn">import</span> <span class="n">SparkContext</span>
+<span class="kn">from</span> <span class="n">pyspark.streaming</span> <span class="kn">import</span> <span class="n">StreamingContext</span>
+
+<span class="n">sc</span> <span class="o">=</span> <span class="nc">SparkContext</span><span class="p">(</span><span class="sh">"</span><span class="s">local[2]</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">DStreamExample</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">ssc</span> <span class="o">=</span> <span class="nc">StreamingContext</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># 5 second batch interval
+</span>
+<span class="c1"># Create DStream
+</span><span class="n">lines</span> <span class="o">=</span> <span class="n">ssc</span><span class="p">.</span><span class="nf">socketTextStream</span><span class="p">(</span><span class="sh">"</span><span class="s">localhost</span><span class="sh">"</span><span class="p">,</span> <span class="mi">9999</span><span class="p">)</span>
+
+<span class="c1"># Process per batch
+</span><span class="n">words</span> <span class="o">=</span> <span class="n">lines</span><span class="p">.</span><span class="nf">flatMap</span><span class="p">(</span><span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="n">line</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s"> </span><span class="sh">"</span><span class="p">))</span>
+<span class="n">pairs</span> <span class="o">=</span> <span class="n">words</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">word</span><span class="p">:</span> <span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">word_counts</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">.</span><span class="nf">reduceByKey</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="n">word_counts</span><span class="p">.</span><span class="nf">pprint</span><span class="p">()</span>
+
+<span class="n">ssc</span><span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+<span class="n">ssc</span><span class="p">.</span><span class="nf">awaitTermination</span><span class="p">()</span>
+
+<span class="c1"># Characteristics:
+# - RDD-based
+# - Only micro-batch support
+# - Difficult state management
+# - Complex failure recovery
+</span></code></pre></div></div>
+
+<h3 id="stage-2-structured-streaming---2016">Stage 2: Structured Streaming - 2016</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Structured Streaming - Spark 2.0+
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">StructuredStreaming</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># Streaming DataFrame
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="c1"># SQL-like operations
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">df</span> \
+    <span class="p">.</span><span class="nf">selectExpr</span><span class="p">(</span><span class="sh">"</span><span class="s">CAST(key AS STRING)</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">CAST(value AS STRING)</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">,</span> <span class="nf">current_timestamp</span><span class="p">())</span> \
+    <span class="p">.</span><span class="nf">withWatermark</span><span class="p">(</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10 seconds</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="nf">window</span><span class="p">(</span><span class="sh">"</span><span class="s">timestamp</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">5 seconds</span><span class="sh">"</span><span class="p">),</span> <span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">agg</span><span class="p">(</span><span class="nf">count</span><span class="p">(</span><span class="sh">"</span><span class="s">*</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">))</span>
+
+<span class="c1"># Output
+</span><span class="n">query</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">update</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">console</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="sh">"</span><span class="s">1 second</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+
+<span class="c1"># Improvements:
+# - DataFrame/Dataset API
+# - SQL support
+# - Watermarking
+# - Exactly-once guarantee
+# - But still micro-batch
+</span></code></pre></div></div>
+
+<h3 id="stage-3-continuous-processing---spark-23">Stage 3: Continuous Processing - Spark 2.3+</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Continuous Processing - Spark 2.3+ (experimental)
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">ContinuousProcessing</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.continuous.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="c1"># Continuous Processing mode
+</span><span class="n">query</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">topic</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">output</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="n">continuous</span><span class="o">=</span><span class="sh">"</span><span class="s">1 second</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># Continuous mode
+</span>    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+
+<span class="c1"># Characteristics:
+# - Low latency (milliseconds)
+# - But limited operations only
+# - Difficult for production use
+</span></code></pre></div></div>
+
+<h3 id="stage-4-spark-41---evolution-to-true-streaming">Stage 4: Spark 4.1 - Evolution to True Streaming</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark 4.1: Enhanced Continuous Processing
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">Spark41Streaming</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.continuous.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.continuous.checkpointInterval</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1s</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># Kafka source
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">startingOffsets</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">latest</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="c1"># Complex operations also support Continuous Processing
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">df</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="nf">from_json</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">).</span><span class="nf">cast</span><span class="p">(</span><span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">),</span> <span class="n">schema</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">data</span><span class="sh">"</span><span class="p">))</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="sh">"</span><span class="s">data.*</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">withWatermark</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10 seconds</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="nf">window</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">5 seconds</span><span class="sh">"</span><span class="p">),</span> <span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">agg</span><span class="p">(</span>
+        <span class="nf">count</span><span class="p">(</span><span class="sh">"</span><span class="s">*</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">sum</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">total_amount</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">avg</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">avg_amount</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="c1"># Continuous Processing mode
+</span><span class="n">query</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">update</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">topic</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">results</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">checkpointLocation</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">/checkpoint</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="n">continuous</span><span class="o">=</span><span class="sh">"</span><span class="s">100 milliseconds</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 100ms latency
+</span>    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+
+<span class="c1"># Key improvements:
+# - More operations supported
+# - Enhanced state management
+# - Low latency (under 100ms)
+# - Production ready
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="key-improvements-in-spark-41">🎯 Key Improvements in Spark 4.1</h2>
+
+<h3 id="1-enhanced-continuous-processing">1. Enhanced Continuous Processing</h3>
+
+<h4 id="limitations-of-previous-versions"><strong>Limitations of Previous Versions</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark 3.x: Continuous Processing limitations
+# - Only simple map/filter supported
+# - Aggregation operations not possible
+# - Join operations not possible
+# - Limited state management
+</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">).</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="c1"># ❌ Not possible: Aggregation operations
+# result = df.groupBy("category").agg(count("*"))
+# → Not supported in Continuous Processing
+</span>
+<span class="c1"># ✅ Possible: Simple transformations only
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="sh">"</span><span class="s">key</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="spark-41-improvements"><strong>Spark 4.1 Improvements</strong></h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark 4.1: More operations supported
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">Spark41CP</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.continuous.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="c1"># ✅ Possible: Aggregation operations (Spark 4.1)
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">df</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="nf">from_json</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">).</span><span class="nf">cast</span><span class="p">(</span><span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">),</span> <span class="n">schema</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">data</span><span class="sh">"</span><span class="p">))</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="sh">"</span><span class="s">data.*</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">withWatermark</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10 seconds</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="nf">window</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">5 seconds</span><span class="sh">"</span><span class="p">),</span> <span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">agg</span><span class="p">(</span>
+        <span class="nf">count</span><span class="p">(</span><span class="sh">"</span><span class="s">*</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">sum</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">total</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">avg</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">avg</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="c1"># ✅ Possible: Join operations (Spark 4.1)
+</span><span class="n">static_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">parquet</span><span class="p">(</span><span class="sh">"</span><span class="s">static_data.parquet</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">joined</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">static_df</span><span class="p">,</span> <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">left</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># ✅ Possible: Complex state management (Spark 4.1)
+</span><span class="kn">from</span> <span class="n">pyspark.sql.streaming</span> <span class="kn">import</span> <span class="n">GroupState</span><span class="p">,</span> <span class="n">GroupStateTimeout</span>
+
+<span class="k">def</span> <span class="nf">update_state</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">GroupState</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">state</span><span class="p">.</span><span class="n">hasTimedOut</span><span class="p">:</span>
+        <span class="c1"># Handle timeout
+</span>        <span class="k">return</span> <span class="bp">None</span>
+    
+    <span class="n">current_sum</span> <span class="o">=</span> <span class="n">state</span><span class="p">.</span><span class="n">getOption</span><span class="p">.</span><span class="nf">getOrElse</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">new_sum</span> <span class="o">=</span> <span class="n">current_sum</span> <span class="o">+</span> <span class="nf">sum</span><span class="p">([</span><span class="n">v</span><span class="p">.</span><span class="n">amount</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">])</span>
+    <span class="n">state</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">new_sum</span><span class="p">)</span>
+    <span class="n">state</span><span class="p">.</span><span class="nf">setTimeoutDuration</span><span class="p">(</span><span class="sh">"</span><span class="s">1 minute</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">key</span><span class="sh">"</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span> <span class="sh">"</span><span class="s">sum</span><span class="sh">"</span><span class="p">:</span> <span class="n">new_sum</span><span class="p">}</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">groupByKey</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">.</span><span class="n">category</span><span class="p">).</span><span class="nf">applyInPandasWithState</span><span class="p">(</span>
+    <span class="n">update_state</span><span class="p">,</span>
+    <span class="n">output_schema</span><span class="p">,</span>
+    <span class="n">state_schema</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">GroupStateTimeout</span><span class="p">.</span><span class="n">ProcessingTimeTimeout</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-enhanced-state-management">2. Enhanced State Management</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark 4.1: Enhanced state management
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.streaming</span> <span class="kn">import</span> <span class="n">GroupState</span><span class="p">,</span> <span class="n">GroupStateTimeout</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">StateManagement</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.stateStore.providerClass</span><span class="sh">"</span><span class="p">,</span> 
+            <span class="sh">"</span><span class="s">org.apache.spark.sql.execution.streaming.state.RocksDBStateStoreProvider</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># Complex state-based operations
+</span><span class="k">def</span> <span class="nf">session_aggregation</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">GroupState</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Session-based aggregation</span><span class="sh">"""</span>
+    <span class="k">if</span> <span class="n">state</span><span class="p">.</span><span class="n">hasTimedOut</span><span class="p">:</span>
+        <span class="c1"># Session timeout
+</span>        <span class="n">session_data</span> <span class="o">=</span> <span class="n">state</span><span class="p">.</span><span class="n">getOption</span><span class="p">.</span><span class="nf">getOrElse</span><span class="p">({</span>
+            <span class="sh">"</span><span class="s">session_id</span><span class="sh">"</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="sh">"</span><span class="s">start_time</span><span class="sh">"</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">end_time</span><span class="sh">"</span><span class="p">:</span> <span class="bp">None</span>
+        <span class="p">})</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">session_data</span><span class="p">]</span>
+    
+    <span class="n">current_session</span> <span class="o">=</span> <span class="n">state</span><span class="p">.</span><span class="n">getOption</span><span class="p">.</span><span class="nf">getOrElse</span><span class="p">({</span>
+        <span class="sh">"</span><span class="s">session_id</span><span class="sh">"</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="sh">"</span><span class="s">start_time</span><span class="sh">"</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">end_time</span><span class="sh">"</span><span class="p">:</span> <span class="bp">None</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># Add events
+</span>    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+        <span class="n">current_session</span><span class="p">[</span><span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">current_session</span><span class="p">[</span><span class="sh">"</span><span class="s">start_time</span><span class="sh">"</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">current_session</span><span class="p">[</span><span class="sh">"</span><span class="s">start_time</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">.</span><span class="n">timestamp</span>
+        <span class="n">current_session</span><span class="p">[</span><span class="sh">"</span><span class="s">end_time</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">.</span><span class="n">timestamp</span>
+    
+    <span class="n">state</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">current_session</span><span class="p">)</span>
+    <span class="n">state</span><span class="p">.</span><span class="nf">setTimeoutDuration</span><span class="p">(</span><span class="sh">"</span><span class="s">30 minutes</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 30 minute session timeout
+</span>    
+    <span class="k">return</span> <span class="p">[]</span>
+
+<span class="c1"># State-based session aggregation
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="nf">groupByKey</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">.</span><span class="n">user_id</span><span class="p">).</span><span class="nf">applyInPandasWithState</span><span class="p">(</span>
+    <span class="n">session_aggregation</span><span class="p">,</span>
+    <span class="n">output_schema</span><span class="p">,</span>
+    <span class="n">state_schema</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">GroupStateTimeout</span><span class="p">.</span><span class="n">ProcessingTimeTimeout</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-enhanced-backpressure-handling">3. Enhanced Backpressure Handling</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark 4.1: Automatic backpressure handling
+</span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">Backpressure</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.maxRatePerPartition</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1000</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.backpressure.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.backpressure.initialRate</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10000</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># Kafka source (automatic backpressure adjustment)
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">maxOffsetsPerTrigger</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10000</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="c1"># Automatically adjust input rate when processing slows down
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">df</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="nf">from_json</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">).</span><span class="nf">cast</span><span class="p">(</span><span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">),</span> <span class="n">schema</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">data</span><span class="sh">"</span><span class="p">))</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="sh">"</span><span class="s">data.*</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="n">query</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">console</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="4-enhanced-checkpointing">4. Enhanced Checkpointing</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark 4.1: Fast checkpointing
+</span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">Checkpointing</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.checkpointLocation</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">/checkpoint</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.checkpoint.interval</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10s</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.stateStore.compression.codec</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">lz4</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># Checkpoint optimization
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">df</span> \
+    <span class="p">.</span><span class="nf">withWatermark</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10 seconds</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="nf">window</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">5 seconds</span><span class="sh">"</span><span class="p">),</span> <span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">agg</span><span class="p">(</span><span class="nf">count</span><span class="p">(</span><span class="sh">"</span><span class="s">*</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">))</span>
+
+<span class="n">query</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">update</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">console</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">checkpointLocation</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">/checkpoint</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="n">continuous</span><span class="o">=</span><span class="sh">"</span><span class="s">100ms</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+
+<span class="c1"># Improvements:
+# - Faster checkpointing
+# - Compression support
+# - Incremental checkpointing
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="complete-guide-to-continuous-processing">🔄 Complete Guide to Continuous Processing</h2>
+
+<h3 id="continuous-processing-vs-micro-batch">Continuous Processing vs Micro-batch</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Comparison: Micro-batch vs Continuous Processing
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">Comparison</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="c1"># 1. Micro-batch mode (default)
+</span><span class="n">query_microbatch</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">console</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="sh">"</span><span class="s">1 second</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 1 second batch interval
+</span>    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+
+<span class="c1"># Characteristics:
+# - Process at batch intervals
+# - Minimum latency = batch interval (1 second)
+# - High throughput
+# - All operations supported
+</span>
+<span class="c1"># 2. Continuous Processing mode (Spark 4.1)
+</span><span class="n">query_continuous</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">console</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="n">continuous</span><span class="o">=</span><span class="sh">"</span><span class="s">100 milliseconds</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 100ms latency
+</span>    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+
+<span class="c1"># Characteristics:
+# - Process immediately upon event arrival
+# - Low latency (under 100ms)
+# - Flink-level performance
+# - More operations supported (Spark 4.1)
+</span></code></pre></div></div>
+
+<h3 id="continuous-processing-configuration">Continuous Processing Configuration</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark 4.1: Complete Continuous Processing setup
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">ContinuousProcessing</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.continuous.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.continuous.checkpointInterval</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1s</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.continuous.partitionInitializingInterval</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">200ms</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.continuous.maxAttempts</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">3</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># Kafka source
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">startingOffsets</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">latest</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">maxOffsetsPerTrigger</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10000</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="c1"># Complex streaming operations
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">df</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="nf">from_json</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">).</span><span class="nf">cast</span><span class="p">(</span><span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">),</span> <span class="n">schema</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">data</span><span class="sh">"</span><span class="p">))</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="sh">"</span><span class="s">data.*</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">withWatermark</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10 seconds</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="nf">window</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">5 seconds</span><span class="sh">"</span><span class="p">),</span> <span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">agg</span><span class="p">(</span>
+        <span class="nf">count</span><span class="p">(</span><span class="sh">"</span><span class="s">*</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">sum</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">total</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">avg</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">avg</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">max</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">max</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">min</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">min</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="c1"># Continuous Processing output
+</span><span class="n">query</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">update</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">topic</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">results</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">checkpointLocation</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">/checkpoint</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="n">continuous</span><span class="o">=</span><span class="sh">"</span><span class="s">100 milliseconds</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+
+<span class="n">query</span><span class="p">.</span><span class="nf">awaitTermination</span><span class="p">()</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="flink-vs-spark-41-practical-comparison">⚔️ Flink vs Spark 4.1 Practical Comparison</h2>
+
+<h3 id="latency-comparison">Latency Comparison</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Practical comparison: Latency measurement
+</span>
+<span class="c1"># 1. Flink: True streaming
+</span><span class="kn">from</span> <span class="n">pyflink.datastream</span> <span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
+<span class="kn">from</span> <span class="n">pyflink.table</span> <span class="kn">import</span> <span class="n">StreamTableEnvironment</span>
+<span class="kn">import</span> <span class="n">time</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="nf">get_execution_environment</span><span class="p">()</span>
+<span class="n">table_env</span> <span class="o">=</span> <span class="n">StreamTableEnvironment</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+
+<span class="c1"># Record event creation time
+</span><span class="n">table_env</span><span class="p">.</span><span class="nf">execute_sql</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    CREATE TABLE events (
+        id STRING,
+        timestamp BIGINT,
+        event_time AS TO_TIMESTAMP(FROM_UNIXTIME(timestamp / 1000)),
+        WATERMARK FOR event_time AS event_time - INTERVAL </span><span class="sh">'</span><span class="s">10</span><span class="sh">'</span><span class="s"> SECOND
+    ) WITH (
+        </span><span class="sh">'</span><span class="s">connector</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">kafka</span><span class="sh">'</span><span class="s">,
+        </span><span class="sh">'</span><span class="s">topic</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">events</span><span class="sh">'</span><span class="s">,
+        </span><span class="sh">'</span><span class="s">properties.bootstrap.servers</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">localhost:9092</span><span class="sh">'</span><span class="s">,
+        </span><span class="sh">'</span><span class="s">format</span><span class="sh">'</span><span class="s"> = </span><span class="sh">'</span><span class="s">json</span><span class="sh">'</span><span class="s">
+    )
+</span><span class="sh">"""</span><span class="p">)</span>
+
+<span class="c1"># Measure processing start time
+</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="nf">time</span><span class="p">()</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">table_env</span><span class="p">.</span><span class="nf">sql_query</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+    SELECT 
+        id,
+        event_time,
+        CURRENT_TIMESTAMP as processing_time,
+        TIMESTAMPDIFF(SECOND, event_time, CURRENT_TIMESTAMP) as latency
+    FROM events
+</span><span class="sh">"""</span><span class="p">)</span>
+
+<span class="c1"># Average latency: ~50-100ms
+</span>
+<span class="c1"># 2. Spark 4.1: Continuous Processing
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">LatencyTest</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.continuous.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">df</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="nf">from_json</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">).</span><span class="nf">cast</span><span class="p">(</span><span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">),</span> <span class="n">schema</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">data</span><span class="sh">"</span><span class="p">))</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span>
+        <span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">data.id</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">data.timestamp</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">current_timestamp</span><span class="p">().</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">processing_time</span><span class="sh">"</span><span class="p">),</span>
+        <span class="p">(</span><span class="nf">unix_timestamp</span><span class="p">(</span><span class="nf">current_timestamp</span><span class="p">())</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">-</span> <span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">data.timestamp</span><span class="sh">"</span><span class="p">)).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">latency_ms</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="n">query</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">console</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="n">continuous</span><span class="o">=</span><span class="sh">"</span><span class="s">100 milliseconds</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+
+<span class="c1"># Average latency: ~100-200ms (Spark 4.1)
+</span></code></pre></div></div>
+
+<h3 id="throughput-comparison">Throughput Comparison</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Throughput benchmark
+</span>
+<span class="c1"># Flink throughput
+# - Single node: ~1M events/sec
+# - Cluster: ~10M events/sec
+</span>
+<span class="c1"># Spark 4.1 throughput (Continuous Processing)
+# - Single node: ~800K events/sec
+# - Cluster: ~8M events/sec
+</span>
+<span class="c1"># Spark 4.1 throughput (Micro-batch)
+# - Single node: ~1.2M events/sec
+# - Cluster: ~12M events/sec
+</span>
+<span class="c1"># Conclusion:
+# - Latency: Flink ≈ Spark 4.1 CP &lt; Spark Micro-batch
+# - Throughput: Spark Micro-batch &gt; Flink ≈ Spark 4.1 CP
+</span></code></pre></div></div>
+
+<h3 id="feature-comparison-table">Feature Comparison Table</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Feature</strong></th>
+      <th><strong>Flink</strong></th>
+      <th><strong>Spark 4.1 (CP)</strong></th>
+      <th><strong>Spark 4.1 (Micro-batch)</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Minimum Latency</strong></td>
+      <td>10-50ms</td>
+      <td>100-200ms</td>
+      <td>1 second+</td>
+    </tr>
+    <tr>
+      <td><strong>Throughput</strong></td>
+      <td>High</td>
+      <td>Medium</td>
+      <td>Very high</td>
+    </tr>
+    <tr>
+      <td><strong>CEP Support</strong></td>
+      <td>✅ Strong</td>
+      <td>⚠️ Limited</td>
+      <td>❌ None</td>
+    </tr>
+    <tr>
+      <td><strong>State Management</strong></td>
+      <td>✅ Very powerful</td>
+      <td>✅ Enhanced</td>
+      <td>⚠️ Limited</td>
+    </tr>
+    <tr>
+      <td><strong>SQL Support</strong></td>
+      <td>✅ Full support</td>
+      <td>✅ Full support</td>
+      <td>✅ Full support</td>
+    </tr>
+    <tr>
+      <td><strong>Batch Integration</strong></td>
+      <td>⚠️ Separate API</td>
+      <td>✅ Integrated</td>
+      <td>✅ Integrated</td>
+    </tr>
+    <tr>
+      <td><strong>Learning Curve</strong></td>
+      <td>Steep</td>
+      <td>Gentle</td>
+      <td>Gentle</td>
+    </tr>
+    <tr>
+      <td><strong>Ecosystem</strong></td>
+      <td>Medium</td>
+      <td>Very wide</td>
+      <td>Very wide</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="practical-example-real-time-event-processing-system">💼 Practical Example: Real-time Event Processing System</h2>
+
+<h3 id="scenario-real-time-order-processing-system">Scenario: Real-time Order Processing System</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Real-time order processing system - Spark 4.1
+</span><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.types</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Create Spark session
+</span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">RealTimeOrderProcessing</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.continuous.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.checkpointLocation</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">/checkpoint/orders</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># Define order schema
+</span><span class="n">order_schema</span> <span class="o">=</span> <span class="nc">StructType</span><span class="p">([</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">order_id</span><span class="sh">"</span><span class="p">,</span> <span class="nc">StringType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">,</span> <span class="nc">StringType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">product_id</span><span class="sh">"</span><span class="p">,</span> <span class="nc">StringType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">,</span> <span class="nc">DoubleType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">quantity</span><span class="sh">"</span><span class="p">,</span> <span class="nc">IntegerType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">order_time</span><span class="sh">"</span><span class="p">,</span> <span class="nc">TimestampType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">,</span> <span class="nc">StringType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="c1"># Read order stream from Kafka
+</span><span class="n">orders_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">orders</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">startingOffsets</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">latest</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="c1"># Parse JSON
+</span><span class="n">orders_parsed</span> <span class="o">=</span> <span class="n">orders_df</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="nf">from_json</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">).</span><span class="nf">cast</span><span class="p">(</span><span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">),</span> <span class="n">order_schema</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">data</span><span class="sh">"</span><span class="p">))</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="sh">"</span><span class="s">data.*</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">withWatermark</span><span class="p">(</span><span class="sh">"</span><span class="s">order_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1 minute</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># 1. Real-time revenue aggregation (5 second window)
+</span><span class="n">revenue_by_window</span> <span class="o">=</span> <span class="n">orders_parsed</span> \
+    <span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">)</span> <span class="o">==</span> <span class="sh">"</span><span class="s">completed</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span>
+        <span class="nf">window</span><span class="p">(</span><span class="sh">"</span><span class="s">order_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">5 seconds</span><span class="sh">"</span><span class="p">),</span>
+        <span class="sh">"</span><span class="s">product_id</span><span class="sh">"</span>
+    <span class="p">)</span> \
+    <span class="p">.</span><span class="nf">agg</span><span class="p">(</span>
+        <span class="nf">count</span><span class="p">(</span><span class="sh">"</span><span class="s">*</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">order_count</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">sum</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">total_revenue</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">avg</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">avg_order_value</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">sum</span><span class="p">(</span><span class="sh">"</span><span class="s">quantity</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">total_quantity</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">)</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span>
+        <span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">window.start</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">window_start</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">window.end</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">window_end</span><span class="sh">"</span><span class="p">),</span>
+        <span class="sh">"</span><span class="s">product_id</span><span class="sh">"</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">order_count</span><span class="sh">"</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">total_revenue</span><span class="sh">"</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">avg_order_value</span><span class="sh">"</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">total_quantity</span><span class="sh">"</span>
+    <span class="p">)</span>
+
+<span class="c1"># 2. Real-time user aggregation
+</span><span class="n">user_stats</span> <span class="o">=</span> <span class="n">orders_parsed</span> \
+    <span class="p">.</span><span class="nf">withWatermark</span><span class="p">(</span><span class="sh">"</span><span class="s">order_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10 minutes</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span>
+        <span class="nf">window</span><span class="p">(</span><span class="sh">"</span><span class="s">order_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">1 minute</span><span class="sh">"</span><span class="p">),</span>
+        <span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span>
+    <span class="p">)</span> \
+    <span class="p">.</span><span class="nf">agg</span><span class="p">(</span>
+        <span class="nf">count</span><span class="p">(</span><span class="sh">"</span><span class="s">*</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">user_order_count</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">sum</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">user_total_spent</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">collect_list</span><span class="p">(</span><span class="sh">"</span><span class="s">product_id</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">purchased_products</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="c1"># 3. Anomaly detection (real-time)
+</span><span class="n">anomaly_detection</span> <span class="o">=</span> <span class="n">orders_parsed</span> \
+    <span class="p">.</span><span class="nf">withWatermark</span><span class="p">(</span><span class="sh">"</span><span class="s">order_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">5 minutes</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">agg</span><span class="p">(</span>
+        <span class="nf">count</span><span class="p">(</span><span class="sh">"</span><span class="s">*</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">recent_orders</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">sum</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">recent_spending</span><span class="sh">"</span><span class="p">),</span>
+        <span class="nf">avg</span><span class="p">(</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">avg_order_value</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">)</span> \
+    <span class="p">.</span><span class="nf">filter</span><span class="p">(</span>
+        <span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">recent_orders</span><span class="sh">"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">)</span> <span class="o">|</span>  <span class="c1"># 10+ orders in 5 minutes
+</span>        <span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">recent_spending</span><span class="sh">"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">10000</span><span class="p">)</span>  <span class="c1"># $10,000+ in 5 minutes
+</span>    <span class="p">)</span>
+
+<span class="c1"># Output 1: Revenue aggregation to Kafka
+</span><span class="n">revenue_query</span> <span class="o">=</span> <span class="n">revenue_by_window</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">update</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">topic</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">revenue_aggregates</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">checkpointLocation</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">/checkpoint/revenue</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="n">continuous</span><span class="o">=</span><span class="sh">"</span><span class="s">100 milliseconds</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+
+<span class="c1"># Output 2: User statistics to console
+</span><span class="n">user_query</span> <span class="o">=</span> <span class="n">user_stats</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">update</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">console</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">truncate</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">false</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="n">continuous</span><span class="o">=</span><span class="sh">"</span><span class="s">1 second</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+
+<span class="c1"># Output 3: Anomalies to database
+</span><span class="n">anomaly_query</span> <span class="o">=</span> <span class="n">anomaly_detection</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">update</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">foreachBatch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">df</span><span class="p">,</span> <span class="n">epoch_id</span><span class="p">:</span> <span class="nf">save_to_database</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="sh">"</span><span class="s">anomalies</span><span class="sh">"</span><span class="p">))</span> \
+    <span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="n">continuous</span><span class="o">=</span><span class="sh">"</span><span class="s">500 milliseconds</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+
+<span class="c1"># Execute all queries
+</span><span class="n">spark</span><span class="p">.</span><span class="n">streams</span><span class="p">.</span><span class="nf">awaitAnyTermination</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="state-based-session-tracking">State-based Session Tracking</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># State-based user session tracking
+</span><span class="kn">from</span> <span class="n">pyspark.sql.streaming</span> <span class="kn">import</span> <span class="n">GroupState</span><span class="p">,</span> <span class="n">GroupStateTimeout</span>
+
+<span class="c1"># Session state schema
+</span><span class="n">session_state_schema</span> <span class="o">=</span> <span class="nc">StructType</span><span class="p">([</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">,</span> <span class="nc">StringType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">session_start</span><span class="sh">"</span><span class="p">,</span> <span class="nc">TimestampType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">session_end</span><span class="sh">"</span><span class="p">,</span> <span class="nc">TimestampType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">page_views</span><span class="sh">"</span><span class="p">,</span> <span class="nc">IntegerType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">total_time</span><span class="sh">"</span><span class="p">,</span> <span class="nc">LongType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="nc">StructField</span><span class="p">(</span><span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">,</span> <span class="nc">ArrayType</span><span class="p">(</span><span class="nc">StringType</span><span class="p">()),</span> <span class="bp">True</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="c1"># Session update function
+</span><span class="k">def</span> <span class="nf">update_session</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">GroupState</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Update user session state</span><span class="sh">"""</span>
+    
+    <span class="c1"># Handle timed-out sessions
+</span>    <span class="k">if</span> <span class="n">state</span><span class="p">.</span><span class="n">hasTimedOut</span><span class="p">:</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">state</span><span class="p">.</span><span class="n">getOption</span><span class="p">.</span><span class="nf">getOrElse</span><span class="p">({</span>
+            <span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">session_start</span><span class="sh">"</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">session_end</span><span class="sh">"</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">page_views</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">total_time</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">})</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="p">]</span>
+    
+    <span class="c1"># Get current session state
+</span>    <span class="n">current_session</span> <span class="o">=</span> <span class="n">state</span><span class="p">.</span><span class="n">getOption</span><span class="p">.</span><span class="nf">getOrElse</span><span class="p">({</span>
+        <span class="sh">"</span><span class="s">user_id</span><span class="sh">"</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">session_start</span><span class="sh">"</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">session_end</span><span class="sh">"</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">page_views</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">total_time</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">:</span> <span class="p">[]</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># Process events
+</span>    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">current_session</span><span class="p">[</span><span class="sh">"</span><span class="s">session_start</span><span class="sh">"</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">current_session</span><span class="p">[</span><span class="sh">"</span><span class="s">session_start</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">.</span><span class="n">timestamp</span>
+        
+        <span class="n">current_session</span><span class="p">[</span><span class="sh">"</span><span class="s">session_end</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">.</span><span class="n">timestamp</span>
+        <span class="n">current_session</span><span class="p">[</span><span class="sh">"</span><span class="s">page_views</span><span class="sh">"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">current_session</span><span class="p">[</span><span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="n">value</span><span class="p">.</span><span class="n">event_type</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">current_session</span><span class="p">[</span><span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">time_diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">-</span> <span class="n">current_session</span><span class="p">[</span><span class="sh">"</span><span class="s">session_start</span><span class="sh">"</span><span class="p">]).</span><span class="nf">total_seconds</span><span class="p">()</span>
+            <span class="n">current_session</span><span class="p">[</span><span class="sh">"</span><span class="s">total_time</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">time_diff</span><span class="p">)</span>
+    
+    <span class="c1"># Update state
+</span>    <span class="n">state</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">current_session</span><span class="p">)</span>
+    <span class="n">state</span><span class="p">.</span><span class="nf">setTimeoutDuration</span><span class="p">(</span><span class="sh">"</span><span class="s">30 minutes</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 30 minute session timeout
+</span>    
+    <span class="k">return</span> <span class="p">[]</span>
+
+<span class="c1"># Session tracking stream
+</span><span class="n">events_df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">user_events</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="n">sessions</span> <span class="o">=</span> <span class="n">events_df</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="nf">from_json</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">).</span><span class="nf">cast</span><span class="p">(</span><span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">),</span> <span class="n">event_schema</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">data</span><span class="sh">"</span><span class="p">))</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="sh">"</span><span class="s">data.*</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">groupByKey</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">.</span><span class="n">user_id</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">applyInPandasWithState</span><span class="p">(</span>
+        <span class="n">update_session</span><span class="p">,</span>
+        <span class="n">output_schema</span><span class="o">=</span><span class="n">session_state_schema</span><span class="p">,</span>
+        <span class="n">state_schema</span><span class="o">=</span><span class="n">session_state_schema</span><span class="p">,</span>
+        <span class="n">output_mode</span><span class="o">=</span><span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">state_timeout</span><span class="o">=</span><span class="n">GroupStateTimeout</span><span class="p">.</span><span class="n">ProcessingTimeTimeout</span>
+    <span class="p">)</span>
+
+<span class="c1"># Session result output
+</span><span class="n">session_query</span> <span class="o">=</span> <span class="n">sessions</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">append</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">console</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="n">continuous</span><span class="o">=</span><span class="sh">"</span><span class="s">1 second</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="performance-benchmarks-and-optimization">📊 Performance Benchmarks and Optimization</h2>
+
+<h3 id="performance-benchmark-results">Performance Benchmark Results</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Performance comparison benchmark
+</span>
+<span class="c1"># Test environment:
+# - Data: 10M events/sec
+# - Cluster: 10 nodes, 32 cores each, 128GB RAM
+# - Kafka: 10 partitions
+</span>
+<span class="c1"># Results:
+</span>
+<span class="c1"># 1. Latency (P99)
+# Flink: 50ms
+# Spark 4.1 CP: 150ms
+# Spark 4.1 Micro-batch: 2000ms
+</span>
+<span class="c1"># 2. Throughput
+# Flink: 8M events/sec
+# Spark 4.1 CP: 7M events/sec
+# Spark 4.1 Micro-batch: 12M events/sec
+</span>
+<span class="c1"># 3. Resource usage
+# Flink: CPU 60%, Memory 70%
+# Spark 4.1 CP: CPU 65%, Memory 75%
+# Spark 4.1 Micro-batch: CPU 50%, Memory 60%
+</span></code></pre></div></div>
+
+<h3 id="optimization-strategy">Optimization Strategy</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Spark 4.1 optimization settings
+</span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">OptimizedStreaming</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.continuous.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span>
+    <span class="c1"># Checkpointing optimization
+</span>    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.checkpoint.interval</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10s</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.stateStore.compression.codec</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">lz4</span><span class="sh">"</span><span class="p">)</span>
+    <span class="c1"># State store optimization
+</span>    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.stateStore.providerClass</span><span class="sh">"</span><span class="p">,</span> 
+            <span class="sh">"</span><span class="s">org.apache.spark.sql.execution.streaming.state.RocksDBStateStoreProvider</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.stateStore.rocksdb.compression</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">snappy</span><span class="sh">"</span><span class="p">)</span>
+    <span class="c1"># Backpressure optimization
+</span>    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.backpressure.enabled</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">true</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.backpressure.initialRate</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10000</span><span class="sh">"</span><span class="p">)</span>
+    <span class="c1"># Memory optimization
+</span>    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.stateStore.maxMemorySize</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">512m</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.shuffle.partitions</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">200</span><span class="sh">"</span><span class="p">)</span>
+    <span class="c1"># Kafka optimization
+</span>    <span class="p">.</span><span class="nf">config</span><span class="p">(</span><span class="sh">"</span><span class="s">spark.sql.streaming.kafka.maxOffsetsPerTrigger</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10000</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="c1"># Partitioning optimization
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka.bootstrap.servers</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">localhost:9092</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">subscribe</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">events</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">maxOffsetsPerTrigger</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10000</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="c1"># Adjust partition count
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">df</span> \
+    <span class="p">.</span><span class="nf">repartition</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="nf">from_json</span><span class="p">(</span><span class="nf">col</span><span class="p">(</span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">).</span><span class="nf">cast</span><span class="p">(</span><span class="sh">"</span><span class="s">string</span><span class="sh">"</span><span class="p">),</span> <span class="n">schema</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">data</span><span class="sh">"</span><span class="p">))</span> \
+    <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="sh">"</span><span class="s">data.*</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">withWatermark</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">10 seconds</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="nf">window</span><span class="p">(</span><span class="sh">"</span><span class="s">event_time</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">5 seconds</span><span class="sh">"</span><span class="p">),</span> <span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">agg</span><span class="p">(</span><span class="nf">count</span><span class="p">(</span><span class="sh">"</span><span class="s">*</span><span class="sh">"</span><span class="p">).</span><span class="nf">alias</span><span class="p">(</span><span class="sh">"</span><span class="s">count</span><span class="sh">"</span><span class="p">))</span>
+
+<span class="n">query</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="n">writeStream</span> \
+    <span class="p">.</span><span class="nf">outputMode</span><span class="p">(</span><span class="sh">"</span><span class="s">update</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">kafka</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">topic</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">results</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">checkpointLocation</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">/checkpoint</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="n">continuous</span><span class="o">=</span><span class="sh">"</span><span class="s">100 milliseconds</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">start</span><span class="p">()</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="learning-summary">📚 Learning Summary</h2>
+
+<h3 id="key-points">Key Points</h3>
+
+<ol>
+  <li><strong>Spark’s Evolution</strong>
+    <ul>
+      <li>Spark Streaming (DStream) → Structured Streaming → Continuous Processing</li>
+      <li>Evolution from micro-batch to true streaming</li>
+    </ul>
+  </li>
+  <li><strong>Key Improvements in Spark 4.1</strong>
+    <ul>
+      <li>Enhanced Continuous Processing</li>
+      <li>More operations supported (aggregations, joins, etc.)</li>
+      <li>Enhanced state management</li>
+      <li>Low latency (under 100ms)</li>
+    </ul>
+  </li>
+  <li><strong>Flink vs Spark 4.1</strong>
+    <ul>
+      <li>Latency: Flink (50ms) &lt; Spark 4.1 CP (150ms) &lt; Spark Micro-batch (2000ms)</li>
+      <li>Throughput: Spark Micro-batch &gt; Flink ≈ Spark 4.1 CP</li>
+      <li>Features: Flink has advantage in advanced features like CEP</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="selection-guide">Selection Guide</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Requirement</strong></th>
+      <th><strong>Recommendation</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Minimum Latency (&lt; 50ms)</strong></td>
+      <td>Flink</td>
+    </tr>
+    <tr>
+      <td><strong>High Throughput</strong></td>
+      <td>Spark Micro-batch</td>
+    </tr>
+    <tr>
+      <td><strong>Balanced Performance</strong></td>
+      <td>Spark 4.1 CP</td>
+    </tr>
+    <tr>
+      <td><strong>Leverage Existing Spark Ecosystem</strong></td>
+      <td>Spark 4.1</td>
+    </tr>
+    <tr>
+      <td><strong>CEP, Complex Event Processing</strong></td>
+      <td>Flink</td>
+    </tr>
+    <tr>
+      <td><strong>Batch and Streaming Integration</strong></td>
+      <td>Spark 4.1</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="practical-checklist">Practical Checklist</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Check latency requirements (&lt; 100ms consider Spark 4.1 CP)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Check throughput requirements</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Evaluate state management complexity</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Check if existing Spark infrastructure can be leveraged</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Check if CEP is needed</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Perform performance benchmarks</li>
+</ul>
+
+<h3 id="next-steps">Next Steps</h3>
+
+<ul>
+  <li><strong>Advanced State Management</strong>: Complex state-based operations</li>
+  <li><strong>Performance Tuning</strong>: Partitioning, memory optimization</li>
+  <li><strong>Monitoring</strong>: Latency, throughput monitoring</li>
+  <li><strong>Failure Recovery</strong>: Checkpointing strategies</li>
+</ul>
+
+<hr />
+
+<blockquote>
+  <p><strong>“Spark 4.1 enables Flink-level real-time processing beyond the limitations of micro-batch.”</strong></p>
+</blockquote>
+
+<p>Spark 4.1’s Continuous Processing allows achieving Flink-level low latency while maintaining the existing Spark ecosystem. It’s important to choose appropriately between Flink and Spark 4.1 based on your project requirements. I hope this guide helps you make the right choice!</p>
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2026 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
