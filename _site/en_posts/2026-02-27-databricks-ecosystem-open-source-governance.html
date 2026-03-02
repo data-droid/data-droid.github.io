@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="A deep dive into how Databricks unifies data ingestion, storage, analytics, ML, and governance on top of open source projects like Apache Spark, Delta Lake, MLflow, and Unity Catalog, plus how it works with dbt.">
+
+
+
+<title>Databricks Ecosystem Deep Dive - Open Source Foundations and Governance - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Databricks Ecosystem Deep Dive - Open Source Foundations and Governance">
+<meta property="og:description" content="A deep dive into how Databricks unifies data ingestion, storage, analytics, ML, and governance on top of open source projects like Apache Spark, Delta Lake, MLflow, and Unity Catalog, plus how it works with dbt.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2026-02-27-databricks-ecosystem-open-source-governance.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Databricks Ecosystem Deep Dive - Open Source Foundations and Governance">
+<meta name="twitter:description" content="A deep dive into how Databricks unifies data ingestion, storage, analytics, ML, and governance on top of open source projects like Apache Spark, Delta Lake, MLflow, and Unity Catalog, plus how it works with dbt.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2026/03/02/databricks-ecosystem-open-source-governance.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2026-02-27-databricks-ecosystem-open-source-governance.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2026년 03월 02일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Databricks Ecosystem Deep Dive - Open Source Foundations and Governance</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Databricks</span>
+      
+        <span class="tag">Lakehouse</span>
+      
+        <span class="tag">Delta-Lake</span>
+      
+        <span class="tag">Apache-Spark</span>
+      
+        <span class="tag">MLflow</span>
+      
+        <span class="tag">Unity-Catalog</span>
+      
+        <span class="tag">dbt</span>
+      
+        <span class="tag">Data-Governance</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 45 min</span>
+      
+      
+        <span class="difficulty">📊 Intermediate</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="databricks-ecosystem-deep-dive---open-source-foundations-and-governance">Databricks Ecosystem Deep Dive - Open Source Foundations and Governance</h1>
+
+<blockquote>
+  <p><strong>“Databricks looks like an all-in-one platform for data ingestion, storage, analytics, ML, and governance – but under the hood it’s powered by well-known open source projects.”</strong></p>
+</blockquote>
+
+<p>This post looks at Databricks not just as a “managed Spark service”, but as a <strong>unified data &amp; AI platform built on top of open source</strong>.<br />
+We’ll also cover <strong>data governance (especially Unity Catalog)</strong> and how Databricks <strong>works together with dbt</strong> rather than replacing it.</p>
+
+<hr />
+
+<h2 id="-big-picture-layered-view-of-the-databricks-platform">📚 Big Picture: Layered View of the Databricks Platform</h2>
+
+<p>It’s easiest to understand Databricks by looking at it layer by layer.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>User Layer (User &amp; Tools)
+ ├─ Notebooks, Dashboards, SQL Editor
+ ├─ Databricks SQL / Databricks Workflows
+ ├─ Partner tools: dbt, Power BI, Tableau, Looker, Fivetran, Airflow, etc.
+ └─ REST / SDK / JDBC / ODBC
+
+Engine &amp; Runtime Layer
+ ├─ Apache Spark (optimized in Databricks Runtime)
+ ├─ Photon (C++ vectorized query engine, commercial)
+ ├─ ML Runtime (Spark + curated ML libraries)
+ └─ Databricks Model Serving / Vector Search
+
+Storage &amp; Metadata Layer
+ ├─ Delta Lake (open source table format)
+ ├─ Unity Catalog (catalog, permissions, lineage – now open source)
+ └─ Cloud storage (S3, ADLS, GCS, etc.)
+
+Orchestration &amp; Quality Layer
+ ├─ Databricks Workflows (job / pipeline scheduling)
+ ├─ Delta Live Tables / Lakeflow (declarative pipelines, data quality)
+ └─ Integration with dbt, Airflow, Dagster and others
+
+ML &amp; MLOps Layer
+ ├─ MLflow (experiments, models, registry – open source)
+ ├─ Feature Store, AutoML
+ └─ Model Serving, Monitoring
+</code></pre></div></div>
+
+<p>Now let’s see <strong>which open source projects power each layer</strong>, and <strong>what Databricks adds on top</strong>.</p>
+
+<hr />
+
+<h2 id="-the-big-three-open-source-pillars-spark-delta-lake-mlflow">🔧 The Big Three Open Source Pillars: Spark, Delta Lake, MLflow</h2>
+
+<h3 id="1-apache-spark--the-distributed-compute-engine">1. Apache Spark – The Distributed Compute Engine</h3>
+
+<ul>
+  <li>The original core of Databricks and still the main engine</li>
+  <li>Handles batch, streaming, SQL, ML, and graph workloads in a single engine</li>
+  <li>Databricks optimizes Spark in <strong>Databricks Runtime (DBR)</strong> with performance patches, stability fixes, and connectors</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">DatabricksExample</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">).</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">/mnt/datalake/sales</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">agg</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">df</span><span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="sh">"</span><span class="s">country</span><span class="sh">"</span><span class="p">)</span>
+      <span class="p">.</span><span class="nf">agg</span><span class="p">({</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">sum</span><span class="sh">"</span><span class="p">})</span>
+      <span class="p">.</span><span class="nf">withColumnRenamed</span><span class="p">(</span><span class="sh">"</span><span class="s">sum(amount)</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">total_sales</span><span class="sh">"</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Open Source Spark vs Databricks Runtime</strong></p>
+
+<ul>
+  <li><strong>Open source Spark</strong>: You run the vanilla engine, manage clusters, configs, tuning, and connectors yourself.</li>
+  <li><strong>Databricks Runtime</strong> adds:
+    <ul>
+      <li>Auto scaling clusters, auto optimizer tuning</li>
+      <li>Photon-powered high‑performance SQL</li>
+      <li>Native integration with Unity Catalog for permissions</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="2-delta-lake--lakehouse-table-format">2. Delta Lake – Lakehouse Table Format</h3>
+
+<ul>
+  <li>Open source table format <strong>originated by Databricks</strong></li>
+  <li>Adds a <strong>transaction log and metadata layer</strong> on top of Parquet files</li>
+  <li>Provides ACID, Time Travel, Schema Evolution, CDC, and Change Data Feed</li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Databricks SQL example</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">sales_delta</span>
+<span class="k">USING</span> <span class="n">DELTA</span>
+<span class="k">LOCATION</span> <span class="s1">'/mnt/datalake/sales_delta'</span> <span class="k">AS</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">raw_sales</span><span class="p">;</span>
+
+<span class="c1">-- Time Travel</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">sales_delta</span> <span class="k">VERSION</span> <span class="k">AS</span> <span class="k">OF</span> <span class="mi">5</span><span class="p">;</span>
+
+<span class="c1">-- CDC / Change Data Feed</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">table_changes</span><span class="p">(</span><span class="s1">'sales_delta'</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p><strong>Open Source Delta Lake vs Databricks</strong></p>
+
+<ul>
+  <li><strong>Open source Delta Lake</strong>
+    <ul>
+      <li>Core ACID, Time Travel, Schema Evolution</li>
+      <li>Readable from many engines (Spark, Flink, Trino, Snowflake, etc.)</li>
+    </ul>
+  </li>
+  <li><strong>On Databricks</strong>
+    <ul>
+      <li>Photon + Delta for very fast SQL</li>
+      <li>Deep integration with Delta Live Tables / Lakeflow for data quality rules</li>
+      <li>Centralized governance, lineage, and tagging via Unity Catalog</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="3-mlflow--ml-lifecycle-management">3. MLflow – ML Lifecycle Management</h3>
+
+<ul>
+  <li>Covers the full ML lifecycle: experiments, metrics, artifacts, models, registry</li>
+  <li>A fully open source project; Databricks runs it as a <strong>managed control plane</strong></li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">mlflow</span>
+<span class="kn">import</span> <span class="n">mlflow.sklearn</span>
+
+<span class="k">with</span> <span class="n">mlflow</span><span class="p">.</span><span class="nf">start_run</span><span class="p">()</span> <span class="k">as</span> <span class="n">run</span><span class="p">:</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="nf">train_model</span><span class="p">(</span><span class="n">train_df</span><span class="p">)</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="nf">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">test_df</span><span class="p">)</span>
+
+    <span class="n">mlflow</span><span class="p">.</span><span class="nf">log_params</span><span class="p">({</span><span class="sh">"</span><span class="s">max_depth</span><span class="sh">"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="sh">"</span><span class="s">n_estimators</span><span class="sh">"</span><span class="p">:</span> <span class="mi">100</span><span class="p">})</span>
+    <span class="n">mlflow</span><span class="p">.</span><span class="nf">log_metrics</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+
+    <span class="n">mlflow</span><span class="p">.</span><span class="n">sklearn</span><span class="p">.</span><span class="nf">log_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sh">"</span><span class="s">model</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Open Source MLflow vs Databricks</strong></p>
+
+<ul>
+  <li><strong>Open source</strong>: You host the tracking server, back-end DB, and artifact storage yourself.</li>
+  <li><strong>On Databricks</strong>:
+    <ul>
+      <li>Experiments, runs, and models are integrated into the workspace</li>
+      <li>Model registry is tied into Unity Catalog (permissions, lineage, audit)</li>
+      <li>First‑class integrations with Feature Store and Model Serving</li>
+    </ul>
+  </li>
+</ul>
+
+<hr />
+
+<h2 id="-unity-catalog-and-data-governance">🧭 Unity Catalog and Data Governance</h2>
+
+<h3 id="what-is-unity-catalog">What is Unity Catalog?</h3>
+
+<ul>
+  <li>Databricks’ <strong>unified governance layer</strong> for data and AI</li>
+  <li>Attaches <strong>permissions, lineage, and tags</strong> to catalogs, schemas, tables, views, models, and features</li>
+  <li>Recently <strong>open sourced</strong>, evolving into a multi‑engine, multi‑format catalog</li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Unity Catalog namespace example</span>
+<span class="c1">-- catalog.schema.table</span>
+
+<span class="k">CREATE</span> <span class="k">CATALOG</span> <span class="n">prod</span><span class="p">;</span>
+<span class="k">CREATE</span> <span class="k">SCHEMA</span> <span class="n">prod</span><span class="p">.</span><span class="n">sales</span><span class="p">;</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">prod</span><span class="p">.</span><span class="n">sales</span><span class="p">.</span><span class="n">orders</span>
+<span class="k">USING</span> <span class="n">DELTA</span>
+<span class="k">LOCATION</span> <span class="s1">'s3://lakehouse/prod/sales/orders'</span><span class="p">;</span>
+
+<span class="k">GRANT</span> <span class="k">SELECT</span> <span class="k">ON</span> <span class="k">TABLE</span> <span class="n">prod</span><span class="p">.</span><span class="n">sales</span><span class="p">.</span><span class="n">orders</span> <span class="k">TO</span> <span class="nv">`analyst_role`</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="core-capabilities-of-unity-catalog">Core Capabilities of Unity Catalog</h3>
+
+<ul>
+  <li><strong>Centralized access control</strong>
+    <ul>
+      <li>Permissions at catalog / schema / table / column level</li>
+      <li>One security model across SQL, Python, R, and Scala</li>
+    </ul>
+  </li>
+  <li><strong>Data lineage</strong>
+    <ul>
+      <li>Automatic tracking of how tables are produced from sources</li>
+      <li>Lineage can extend all the way to BI dashboards and ML models</li>
+    </ul>
+  </li>
+  <li><strong>Data quality and policy integration</strong>
+    <ul>
+      <li>Quality expectations from Delta Live Tables / Lakeflow stored as UC metadata</li>
+      <li>Policy changes and audit logs exposed via system tables</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Example: Query audit logs from Unity Catalog system tables</span>
+<span class="k">SELECT</span> <span class="o">*</span>
+<span class="k">FROM</span> <span class="k">system</span><span class="p">.</span><span class="k">access</span><span class="p">.</span><span class="n">audit</span>
+<span class="k">WHERE</span> <span class="n">principal</span> <span class="o">=</span> <span class="s1">'analyst_role'</span>
+  <span class="k">AND</span> <span class="n">object_name</span> <span class="o">=</span> <span class="s1">'prod.sales.orders'</span>
+  <span class="k">AND</span> <span class="n">action_name</span> <span class="o">=</span> <span class="s1">'SELECT'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="-databricks-and-dbt-clear-separation-of-responsibilities">🧱 Databricks and dbt: Clear Separation of Responsibilities</h2>
+
+<h3 id="what-databricks-is-good-at">What Databricks Is Good At</h3>
+
+<ul>
+  <li><strong>Platform layer</strong>
+    <ul>
+      <li>Cluster and workspace management, storage integration, governance (UC)</li>
+    </ul>
+  </li>
+  <li><strong>Engine layer</strong>
+    <ul>
+      <li>Spark Runtime, Photon, Delta Lake</li>
+    </ul>
+  </li>
+  <li><strong>Workflow layer</strong>
+    <ul>
+      <li>Databricks Workflows, Delta Live Tables / Lakeflow</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="what-dbt-is-good-at">What dbt Is Good At</h3>
+
+<ul>
+  <li><strong>Modeling and transformation logic (the T in ELT)</strong>
+    <ul>
+      <li>SQL-based model definitions</li>
+      <li>Reusable patterns via Jinja and macros</li>
+    </ul>
+  </li>
+  <li><strong>Testing and documentation</strong>
+    <ul>
+      <li>Tests and descriptions via <code class="language-plaintext highlighter-rouge">schema.yml</code></li>
+      <li>Auto-generated docs site</li>
+    </ul>
+  </li>
+  <li><strong>Environment management</strong>
+    <ul>
+      <li>Clean separation of dev / staging / prod</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- dbt model example: models/sales/orders_daily.sql</span>
+
+
+
+<span class="k">WITH</span> <span class="n">base</span> <span class="k">AS</span> <span class="p">(</span>
+    <span class="k">SELECT</span>
+        <span class="n">order_id</span><span class="p">,</span>
+        <span class="n">user_id</span><span class="p">,</span>
+        <span class="n">total_amount</span><span class="p">,</span>
+        <span class="n">order_date</span>
+    <span class="k">FROM</span> 
+    <span class="k">WHERE</span> <span class="n">status</span> <span class="o">=</span> <span class="s1">'COMPLETED'</span>
+<span class="p">),</span>
+<span class="n">daily</span> <span class="k">AS</span> <span class="p">(</span>
+    <span class="k">SELECT</span>
+        <span class="n">order_date</span><span class="p">,</span>
+        <span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>         <span class="k">AS</span> <span class="n">order_count</span><span class="p">,</span>
+        <span class="k">SUM</span><span class="p">(</span><span class="n">total_amount</span><span class="p">)</span> <span class="k">AS</span> <span class="n">total_revenue</span>
+    <span class="k">FROM</span> <span class="n">base</span>
+    <span class="k">GROUP</span> <span class="k">BY</span> <span class="n">order_date</span>
+<span class="p">)</span>
+
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">daily</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># tests &amp; docs: models/sales/schema.yml</span>
+
+<span class="na">version</span><span class="pi">:</span> <span class="m">2</span>
+
+<span class="na">models</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">orders_daily</span>
+    <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Daily</span><span class="nv"> </span><span class="s">order</span><span class="nv"> </span><span class="s">counts</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">revenue"</span>
+    <span class="na">columns</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">order_date</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">order_count</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+          <span class="pi">-</span> <span class="na">greater_than</span><span class="pi">:</span> <span class="m">0</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">total_revenue</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+</code></pre></div></div>
+
+<h3 id="databricks--dbt-integration-pattern">Databricks + dbt Integration Pattern</h3>
+
+<ul>
+  <li><strong>Data layer</strong>
+    <ul>
+      <li>S3/ADLS/GCS + Delta Lake + Unity Catalog</li>
+    </ul>
+  </li>
+  <li><strong>Transform layer</strong>
+    <ul>
+      <li>Databricks SQL Warehouse or all‑purpose clusters as dbt targets</li>
+    </ul>
+  </li>
+  <li><strong>Governance</strong>
+    <ul>
+      <li>dbt‑created tables/views are registered in Unity Catalog</li>
+      <li>Permissions, lineage, and tags are managed in Unity Catalog</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># dbt profiles.yml example (Databricks)</span>
+
+<span class="na">databricks_lakehouse</span><span class="pi">:</span>
+  <span class="na">target</span><span class="pi">:</span> <span class="s">prod</span>
+  <span class="na">outputs</span><span class="pi">:</span>
+    <span class="na">prod</span><span class="pi">:</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">databricks</span>
+      <span class="na">catalog</span><span class="pi">:</span> <span class="s">prod</span>            <span class="c1"># Unity Catalog</span>
+      <span class="na">schema</span><span class="pi">:</span> <span class="s">analytics</span>
+      <span class="na">host</span><span class="pi">:</span> <span class="s">adb-123.45.azuredatabricks.net</span>
+      <span class="na">http_path</span><span class="pi">:</span> <span class="s">/sql/1.0/warehouses/xxxx</span>
+      <span class="na">token</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+      <span class="na">threads</span><span class="pi">:</span> <span class="m">8</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="-pipelines--quality-delta-live-tables--lakeflow">🧪 Pipelines &amp; Quality: Delta Live Tables / Lakeflow</h2>
+
+<p>Databricks is moving toward <strong>declarative pipelines</strong> via <strong>Lakeflow / Delta Live Tables (DLT)</strong>, where <strong>data quality expectations</strong> become first‑class metadata on tables.</p>
+
+<h3 id="declarative-pipelines">Declarative Pipelines</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">dlt</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="nd">@dlt.table</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">raw_orders</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">comment</span><span class="o">=</span><span class="sh">"</span><span class="s">Raw order data</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">raw_orders</span><span class="p">():</span>
+    <span class="nf">return </span><span class="p">(</span>
+        <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span>
+             <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">cloudFiles</span><span class="sh">"</span><span class="p">)</span>
+             <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">cloudFiles.format</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">json</span><span class="sh">"</span><span class="p">)</span>
+             <span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">/mnt/raw/orders</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="nd">@dlt.table</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">clean_orders</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">comment</span><span class="o">=</span><span class="sh">"</span><span class="s">Validated and cleaned order data</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@dlt.expect</span><span class="p">(</span><span class="sh">"</span><span class="s">valid_amount</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">amount &gt;= 0</span><span class="sh">"</span><span class="p">)</span>
+<span class="nd">@dlt.expect_or_drop</span><span class="p">(</span><span class="sh">"</span><span class="s">valid_status</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">status IN (</span><span class="sh">'</span><span class="s">CREATED</span><span class="sh">'</span><span class="s">,</span><span class="sh">'</span><span class="s">COMPLETED</span><span class="sh">'</span><span class="s">,</span><span class="sh">'</span><span class="s">CANCELLED</span><span class="sh">'</span><span class="s">)</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">clean_orders</span><span class="p">():</span>
+    <span class="nf">return </span><span class="p">(</span>
+        <span class="n">dlt</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="sh">"</span><span class="s">raw_orders</span><span class="sh">"</span><span class="p">)</span>
+           <span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">order_ts</span><span class="sh">"</span><span class="p">,</span> <span class="nf">to_timestamp</span><span class="p">(</span><span class="sh">"</span><span class="s">order_time</span><span class="sh">"</span><span class="p">))</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="integrating-expectations-with-unity-catalog">Integrating Expectations with Unity Catalog</h3>
+
+<ul>
+  <li>DLT/Lakeflow <strong>expectations</strong> are stored as Unity Catalog table metadata</li>
+  <li>Quality rules become <strong>versioned, auditable, and discoverable</strong></li>
+  <li>Governance teams can manage quality as <strong>policy</strong>, not hidden code</li>
+</ul>
+
+<hr />
+
+<h2 id="-databricks-through-a-governance-lens">🛡 Databricks Through a Governance Lens</h2>
+
+<p>Databricks governance is designed as <strong>end‑to‑end governance</strong>, not just basic table permissions.</p>
+
+<h3 id="1-data-governance">1. Data Governance</h3>
+
+<ul>
+  <li>Unity Catalog: fine‑grained permissions (catalog / schema / table / column)</li>
+  <li>Lineage: from raw sources through pipelines to reports and ML models</li>
+  <li>Policy‑based access control (tag/label‑based masking, etc.)</li>
+</ul>
+
+<h3 id="2-ml-governance">2. ML Governance</h3>
+
+<ul>
+  <li>MLflow integrated with Unity Catalog</li>
+  <li>Model registry with versions and stages (prod / staging / dev)</li>
+  <li>Feature Store for reusable, governed features</li>
+</ul>
+
+<h3 id="3-audit--compliance">3. Audit &amp; Compliance</h3>
+
+<ul>
+  <li>System tables expose <strong>access logs, policy changes, and pipeline definition changes</strong></li>
+  <li>Designed to support regulated industries (financial services, healthcare, etc.)</li>
+</ul>
+
+<hr />
+
+<h2 id="-how-to-think-about-databricks">📌 How to Think About Databricks</h2>
+
+<h3 id="databricks-is">Databricks is…</h3>
+
+<ol>
+  <li><strong>A commercial lakehouse platform built on open source</strong>
+    <ul>
+      <li>Apache Spark, Delta Lake, MLflow, and open‑sourced Unity Catalog</li>
+    </ul>
+  </li>
+  <li><strong>An enterprise‑grade data &amp; AI operations platform</strong>
+    <ul>
+      <li>Central place for permissions, lineage, quality, and audit</li>
+    </ul>
+  </li>
+  <li><strong>A hub in a larger ecosystem with dbt, Airflow, Fivetran, etc.</strong>
+    <ul>
+      <li>Databricks is the “platform”; dbt is the “modeling &amp; transformation DSL”</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="closing-thoughts">Closing Thoughts</h3>
+
+<ul>
+  <li>If you see Databricks only as a “Spark notebook service”, you’re missing half the story.</li>
+  <li>The real question is <strong>which open source components are combined in which way to solve which problems</strong> – especially governance, operations, and productivity.</li>
+  <li>In real projects, <strong>combinations</strong> matter:
+    <ul>
+      <li>Databricks + dbt + Fivetran + Power BI</li>
+      <li>Databricks + Airflow/Dagster + MLflow + Feature Store</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Going forward, the open sourcing of Unity Catalog and interoperability across table formats like Iceberg/Delta/Hudi will matter even more.<br />
+Hopefully this guide helps you see the Databricks ecosystem as a whole, rather than just one tool in isolation.</p>
+
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2026 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

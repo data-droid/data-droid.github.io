@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Databricks가 데이터 수집·저장·분석·머신러닝·거버넌스를 어떻게 통합하고 있는지, 어떤 오픈소스를 기반으로 하는지, 그리고 dbt·Unity Catalog와의 연계를 중심으로 정리합니다.">
+
+
+
+<title>Databricks 생태계 완전 정리 - 오픈소스 기반과 거버넌스까지 - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Databricks 생태계 완전 정리 - 오픈소스 기반과 거버넌스까지">
+<meta property="og:description" content="Databricks가 데이터 수집·저장·분석·머신러닝·거버넌스를 어떻게 통합하고 있는지, 어떤 오픈소스를 기반으로 하는지, 그리고 dbt·Unity Catalog와의 연계를 중심으로 정리합니다.">
+<meta property="og:url" content="http://localhost:4000/data-engineering/2026/03/02/databricks-ecosystem-open-source-governance.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Databricks 생태계 완전 정리 - 오픈소스 기반과 거버넌스까지">
+<meta name="twitter:description" content="Databricks가 데이터 수집·저장·분석·머신러닝·거버넌스를 어떻게 통합하고 있는지, 어떤 오픈소스를 기반으로 하는지, 그리고 dbt·Unity Catalog와의 연계를 중심으로 정리합니다.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">홈</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">카테고리</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+              <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+              <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+              <li><a href="/categories/data-quality/">데이터 품질</a></li>
+              <li><a href="/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/blog/">블로그</a></li>
+        <li><a href="/about/">소개</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          <a href="/data-engineering/2026/03/02/databricks-ecosystem-open-source-governance.html" class="lang-btn active">한국어</a>
+          
+          <a href="/en_posts/2026-03-02-databricks-ecosystem-open-source-governance.html" class="lang-btn">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2026년 03월 02일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Databricks 생태계 완전 정리 - 오픈소스 기반과 거버넌스까지</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Databricks</span>
+      
+        <span class="tag">Lakehouse</span>
+      
+        <span class="tag">Delta-Lake</span>
+      
+        <span class="tag">Apache-Spark</span>
+      
+        <span class="tag">MLflow</span>
+      
+        <span class="tag">Unity-Catalog</span>
+      
+        <span class="tag">dbt</span>
+      
+        <span class="tag">데이터거버넌스</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 45분</span>
+      
+      
+        <span class="difficulty">📊 중급</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="databricks-생태계-완전-정리---오픈소스-기반과-거버넌스까지">Databricks 생태계 완전 정리 - 오픈소스 기반과 거버넌스까지</h1>
+
+<blockquote>
+  <p><strong>“Databricks는 레이크하우스를 중심으로 데이터 수집부터 분석·ML·거버넌스까지 올인원 플랫폼을 제공하지만, 그 밑바닥에는 잘 알려진 오픈소스들이 있다.”</strong></p>
+</blockquote>
+
+<p>이 글에서는 Databricks를 단순히 “관리형 Spark”가 아니라, <strong>어떤 오픈소스를 기반으로 한 통합 데이터·AI 플랫폼인지</strong> 관점에서 정리합니다.<br />
+또한 <strong>데이터 거버넌스(특히 Unity Catalog)</strong>와 <strong>dbt와의 역할 분담</strong>까지 함께 살펴봅니다.</p>
+
+<hr />
+
+<h2 id="-큰-그림-databricks-레이어-구조">📚 큰 그림: Databricks 레이어 구조</h2>
+
+<p>먼저 Databricks를 <strong>레이어별로</strong> 나누어 보면 이해가 쉽습니다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>사용자 레벨 (User &amp; Tools)
+ ├─ Notebooks, Dashboards, SQL Editor
+ ├─ Databricks SQL / Databricks Workflows
+ ├─ 파트너 도구: dbt, Power BI, Tableau, Looker, Fivetran, Airflow 등
+ └─ REST / SDK / JDBC/ODBC
+
+엔진 &amp; 런타임 레벨 (Runtime &amp; Engines)
+ ├─ Apache Spark (Databricks Runtime에 최적화)
+ ├─ Photon (C++ 기반 벡터화 쿼리 엔진, 상용)
+ ├─ ML Runtime (Spark + ML 라이브러리 번들)
+ └─ Databricks Model Serving / Vector Search
+
+스토리지 &amp; 메타데이터 레벨 (Storage &amp; Metadata)
+ ├─ Delta Lake (오픈소스 테이블 포맷)
+ ├─ Unity Catalog (카탈로그 &amp; 권한 &amp; 계보, 최근 오픈소스화)
+ └─ 클라우드 스토리지 (S3, ADLS, GCS 등)
+
+워크플로우 &amp; 품질 레벨 (Orchestration &amp; Quality)
+ ├─ Databricks Workflows (잡/파이프라인 스케줄링)
+ ├─ Delta Live Tables / Lakeflow (선언적 파이프라인, 데이터 품질)
+ └─ dbt, Airflow, Dagster 등 외부 오케스트레이터와 통합
+
+ML &amp; MLOps 레벨 (ML &amp; MLOps)
+ ├─ MLflow (실험, 모델, 레지스트리 - 오픈소스)
+ ├─ Feature Store, AutoML
+ └─ Model Serving, Monitoring
+</code></pre></div></div>
+
+<p>이제 각 레이어별로 <strong>어떤 오픈소스를 기반</strong>으로 하는지, Databricks가 그 위에 <strong>어떤 기능을 추가</strong>했는지 살펴보겠습니다.</p>
+
+<hr />
+
+<h2 id="-핵심-오픈소스-3대장-spark-delta-lake-mlflow">🔧 핵심 오픈소스 3대장: Spark, Delta Lake, MLflow</h2>
+
+<h3 id="1-apache-spark---분산-처리-엔진">1. Apache Spark - 분산 처리 엔진</h3>
+
+<ul>
+  <li>Databricks의 출발점이자 핵심 엔진</li>
+  <li>배치, 스트리밍, SQL, ML, 그래프를 하나의 엔진으로 처리</li>
+  <li>Databricks는 <strong>Databricks Runtime(DXR)</strong> 에서 Spark를 최적화(성능 패치, 안정성, 커넥터 등)</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="p">.</span><span class="n">builder</span> \
+    <span class="p">.</span><span class="nf">appName</span><span class="p">(</span><span class="sh">"</span><span class="s">DatabricksExample</span><span class="sh">"</span><span class="p">)</span> \
+    <span class="p">.</span><span class="nf">getOrCreate</span><span class="p">()</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">delta</span><span class="sh">"</span><span class="p">).</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">/mnt/datalake/sales</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">agg</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">df</span><span class="p">.</span><span class="nf">groupBy</span><span class="p">(</span><span class="sh">"</span><span class="s">country</span><span class="sh">"</span><span class="p">)</span>
+      <span class="p">.</span><span class="nf">agg</span><span class="p">({</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">sum</span><span class="sh">"</span><span class="p">})</span>
+      <span class="p">.</span><span class="nf">withColumnRenamed</span><span class="p">(</span><span class="sh">"</span><span class="s">sum(amount)</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">total_sales</span><span class="sh">"</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Spark 오픈소스 vs Databricks 차이</strong></p>
+
+<ul>
+  <li><strong>오픈소스 Spark</strong>: 순정 엔진, 클러스터·옵션·튜닝을 직접 해야 함</li>
+  <li><strong>Databricks Runtime</strong>:
+    <ul>
+      <li>자동 클러스터 스케일링, 자동 옵티마이저 튜닝</li>
+      <li>Photon과 결합된 고성능 SQL</li>
+      <li>Unity Catalog와 통합된 권한 관리</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="2-delta-lake---레이크하우스-테이블-포맷">2. Delta Lake - 레이크하우스 테이블 포맷</h3>
+
+<ul>
+  <li>Databricks가 주도한 <strong>오픈소스 테이블 포맷</strong></li>
+  <li>파일 포맷(Parquet) 위에 <strong>트랜잭션 로그 + 메타데이터 레이어</strong>를 올린 구조</li>
+  <li>ACID, Time Travel, Schema Evolution, CDC, Change Data Feed 등을 제공</li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Databricks SQL 예시</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">sales_delta</span>
+<span class="k">USING</span> <span class="n">DELTA</span>
+<span class="k">LOCATION</span> <span class="s1">'/mnt/datalake/sales_delta'</span> <span class="k">AS</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">raw_sales</span><span class="p">;</span>
+
+<span class="c1">-- Time Travel</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">sales_delta</span> <span class="k">VERSION</span> <span class="k">AS</span> <span class="k">OF</span> <span class="mi">5</span><span class="p">;</span>
+
+<span class="c1">-- CDC / Change Data Feed</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">table_changes</span><span class="p">(</span><span class="s1">'sales_delta'</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p><strong>Delta Lake 오픈소스 vs Databricks 기능</strong></p>
+
+<ul>
+  <li><strong>오픈소스 Delta Lake</strong>
+    <ul>
+      <li>기본 ACID, Time Travel, Schema Evolution</li>
+      <li>다양한 엔진(Spark, Flink, Trino, Snowflake 등)에서 읽기 가능</li>
+    </ul>
+  </li>
+  <li><strong>Databricks</strong>
+    <ul>
+      <li>Photon + Delta 조합으로 고성능 쿼리</li>
+      <li>Delta Live Tables / Lakeflow에서 품질 규칙과 함께 사용</li>
+      <li>Unity Catalog 기반 중앙 거버넌스, 계보, 태깅</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="3-mlflow---ml-라이프사이클-관리">3. MLflow - ML 라이프사이클 관리</h3>
+
+<ul>
+  <li>실험 관리, 모델 등록, 아티팩트 관리, 서빙까지 전체 ML 라이프사이클 담당</li>
+  <li>완전한 오픈소스 프로젝트이며, Databricks는 이를 <strong>매니지드 서비스로 제공</strong></li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">mlflow</span>
+<span class="kn">import</span> <span class="n">mlflow.sklearn</span>
+
+<span class="k">with</span> <span class="n">mlflow</span><span class="p">.</span><span class="nf">start_run</span><span class="p">()</span> <span class="k">as</span> <span class="n">run</span><span class="p">:</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="nf">train_model</span><span class="p">(</span><span class="n">train_df</span><span class="p">)</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="nf">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">test_df</span><span class="p">)</span>
+
+    <span class="n">mlflow</span><span class="p">.</span><span class="nf">log_params</span><span class="p">({</span><span class="sh">"</span><span class="s">max_depth</span><span class="sh">"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="sh">"</span><span class="s">n_estimators</span><span class="sh">"</span><span class="p">:</span> <span class="mi">100</span><span class="p">})</span>
+    <span class="n">mlflow</span><span class="p">.</span><span class="nf">log_metrics</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+
+    <span class="n">mlflow</span><span class="p">.</span><span class="n">sklearn</span><span class="p">.</span><span class="nf">log_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sh">"</span><span class="s">model</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>MLflow 오픈소스 vs Databricks</strong></p>
+
+<ul>
+  <li><strong>오픈소스</strong>: 직접 서버 띄우고 백엔드 스토리지/아티팩트 스토리지 구성 필요</li>
+  <li><strong>Databricks</strong>:
+    <ul>
+      <li>워크스페이스와 통합된 실험/모델/등록</li>
+      <li>Unity Catalog와 통합된 모델 레지스트리(권한·계보·감사)</li>
+      <li>Model Serving, Feature Store와 연결</li>
+    </ul>
+  </li>
+</ul>
+
+<hr />
+
+<h2 id="-unity-catalog와-데이터-거버넌스">🧭 Unity Catalog와 데이터 거버넌스</h2>
+
+<h3 id="unity-catalog란">Unity Catalog란?</h3>
+
+<ul>
+  <li>Databricks의 <strong>통합 데이터 &amp; AI 거버넌스 계층</strong></li>
+  <li>카탈로그, 스키마, 테이블, 뷰, 모델, 피처 등 <strong>모든 오브젝트에 권한·계보·태그</strong>를 부여</li>
+  <li>최근에는 <strong>오픈소스로 공개</strong>되어, 멀티 엔진/멀티 포맷 카탈로그로 발전 중</li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Unity Catalog 네임스페이스 예시</span>
+<span class="c1">-- catalog.schema.table</span>
+
+<span class="k">CREATE</span> <span class="k">CATALOG</span> <span class="n">prod</span><span class="p">;</span>
+<span class="k">CREATE</span> <span class="k">SCHEMA</span> <span class="n">prod</span><span class="p">.</span><span class="n">sales</span><span class="p">;</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">prod</span><span class="p">.</span><span class="n">sales</span><span class="p">.</span><span class="n">orders</span>
+<span class="k">USING</span> <span class="n">DELTA</span>
+<span class="k">LOCATION</span> <span class="s1">'s3://lakehouse/prod/sales/orders'</span><span class="p">;</span>
+
+<span class="k">GRANT</span> <span class="k">SELECT</span> <span class="k">ON</span> <span class="k">TABLE</span> <span class="n">prod</span><span class="p">.</span><span class="n">sales</span><span class="p">.</span><span class="n">orders</span> <span class="k">TO</span> <span class="nv">`analyst_role`</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="unity-catalog의-핵심-기능">Unity Catalog의 핵심 기능</h3>
+
+<ul>
+  <li><strong>중앙 권한 관리</strong>
+    <ul>
+      <li>카탈로그/스키마/테이블/컬럼 레벨 권한</li>
+      <li>SQL, Python, R, Scala를 모두 같은 정책으로 관리</li>
+    </ul>
+  </li>
+  <li><strong>데이터 계보(Lineage)</strong>
+    <ul>
+      <li>어떤 테이블이 어떤 소스에서 어떻게 만들어졌는지 자동 추적</li>
+      <li>BI 리포트/ML 모델까지 계보를 연결</li>
+    </ul>
+  </li>
+  <li><strong>데이터 품질/정책 통합</strong>
+    <ul>
+      <li>Delta Live Tables / Lakeflow의 quality expectations를 UC 메타데이터로 관리</li>
+      <li>정책 변경 이력과 감사 로그를 시스템 테이블로 조회</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- 예: Unity Catalog 시스템 테이블에서 감사 로그 조회</span>
+<span class="k">SELECT</span> <span class="o">*</span>
+<span class="k">FROM</span> <span class="k">system</span><span class="p">.</span><span class="k">access</span><span class="p">.</span><span class="n">audit</span>
+<span class="k">WHERE</span> <span class="n">principal</span> <span class="o">=</span> <span class="s1">'analyst_role'</span>
+  <span class="k">AND</span> <span class="n">object_name</span> <span class="o">=</span> <span class="s1">'prod.sales.orders'</span>
+  <span class="k">AND</span> <span class="n">action_name</span> <span class="o">=</span> <span class="s1">'SELECT'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="-databricks와-dbt-역할-분담">🧱 Databricks와 dbt: 역할 분담</h2>
+
+<h3 id="databricks가-잘하는-일">Databricks가 잘하는 일</h3>
+
+<ul>
+  <li><strong>플랫폼 레벨</strong>
+    <ul>
+      <li>클러스터/워크스페이스 관리, 스토리지 통합, 거버넌스(UC)</li>
+    </ul>
+  </li>
+  <li><strong>엔진 레벨</strong>
+    <ul>
+      <li>Spark Runtime, Photon, Delta Lake</li>
+    </ul>
+  </li>
+  <li><strong>워크플로우</strong>
+    <ul>
+      <li>Databricks Workflows, Delta Live Tables / Lakeflow</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="dbt가-잘하는-일">dbt가 잘하는 일</h3>
+
+<ul>
+  <li><strong>모델링과 변환 로직(T in ELT)</strong>
+    <ul>
+      <li>SQL 기반 모델 정의</li>
+      <li>Jinja + macro를 활용한 재사용 가능한 모델 패턴</li>
+    </ul>
+  </li>
+  <li><strong>테스트 &amp; 문서화</strong>
+    <ul>
+      <li>schema.yml을 통한 test/description 관리</li>
+      <li>docs 사이트 자동 생성</li>
+    </ul>
+  </li>
+  <li><strong>환경 관리</strong>
+    <ul>
+      <li>dev/staging/prod 환경별 설정 분리</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># dbt 모델 예시: models/sales/orders_daily.sql</span>
+
+
+
+<span class="s">WITH base AS (</span>
+    <span class="s">SELECT</span>
+        <span class="s">order_id,</span>
+        <span class="s">user_id,</span>
+        <span class="s">total_amount,</span>
+        <span class="s">order_date</span>
+    <span class="s">FROM</span> 
+    <span class="s">WHERE status = 'COMPLETED'</span>
+<span class="s">),</span>
+<span class="s">daily AS (</span>
+    <span class="s">SELECT</span>
+        <span class="s">order_date,</span>
+        <span class="s">COUNT(*)       AS order_count,</span>
+        <span class="s">SUM(total_amount) AS total_revenue</span>
+    <span class="s">FROM base</span>
+    <span class="s">GROUP BY order_date</span>
+<span class="s">)</span>
+
+<span class="s">SELECT * FROM daily;</span>
+</code></pre></div></div>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># tests &amp; docs: models/sales/schema.yml</span>
+
+<span class="na">version</span><span class="pi">:</span> <span class="m">2</span>
+
+<span class="na">models</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">orders_daily</span>
+    <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">일자별</span><span class="nv"> </span><span class="s">주문</span><span class="nv"> </span><span class="s">수</span><span class="nv"> </span><span class="s">및</span><span class="nv"> </span><span class="s">매출</span><span class="nv"> </span><span class="s">집계</span><span class="nv"> </span><span class="s">테이블"</span>
+    <span class="na">columns</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">order_date</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">order_count</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+          <span class="pi">-</span> <span class="na">greater_than</span><span class="pi">:</span> <span class="m">0</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">total_revenue</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+</code></pre></div></div>
+
+<h3 id="databricks--dbt-통합-패턴">Databricks + dbt 통합 패턴</h3>
+
+<ul>
+  <li><strong>데이터 레이어</strong>
+    <ul>
+      <li>S3/ADLS/GCS + Delta Lake + Unity Catalog</li>
+    </ul>
+  </li>
+  <li><strong>변환 레이어</strong>
+    <ul>
+      <li>Databricks SQL Warehouse or All-Purpose Cluster를 dbt의 target으로 사용</li>
+    </ul>
+  </li>
+  <li><strong>거버넌스</strong>
+    <ul>
+      <li>dbt가 생성하는 테이블/뷰를 Unity Catalog에 등록</li>
+      <li>권한·계보·태그는 Unity Catalog에서 관리</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># dbt profiles.yml 예시 (Databricks)</span>
+
+<span class="na">databricks_lakehouse</span><span class="pi">:</span>
+  <span class="na">target</span><span class="pi">:</span> <span class="s">prod</span>
+  <span class="na">outputs</span><span class="pi">:</span>
+    <span class="na">prod</span><span class="pi">:</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">databricks</span>
+      <span class="na">catalog</span><span class="pi">:</span> <span class="s">prod</span>            <span class="c1"># Unity Catalog</span>
+      <span class="na">schema</span><span class="pi">:</span> <span class="s">analytics</span>
+      <span class="na">host</span><span class="pi">:</span> <span class="s">adb-123.45.azuredatabricks.net</span>
+      <span class="na">http_path</span><span class="pi">:</span> <span class="s">/sql/1.0/warehouses/xxxx</span>
+      <span class="na">token</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+      <span class="na">threads</span><span class="pi">:</span> <span class="m">8</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="-파이프라인--품질-delta-live-tables--lakeflow">🧪 파이프라인 &amp; 품질: Delta Live Tables / Lakeflow</h2>
+
+<p>Databricks는 최근 <strong>Lakeflow / Delta Live Tables(DLT)</strong>를 통해 파이프라인을 <strong>선언적으로 정의</strong>하고, <strong>데이터 품질 기대치(expectations)</strong>를 직접 테이블 메타데이터로 관리하는 방향으로 진화하고 있습니다.</p>
+
+<h3 id="선언적-파이프라인">선언적 파이프라인</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">dlt</span>
+<span class="kn">from</span> <span class="n">pyspark.sql.functions</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="nd">@dlt.table</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">raw_orders</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">comment</span><span class="o">=</span><span class="sh">"</span><span class="s">원시 주문 데이터</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">raw_orders</span><span class="p">():</span>
+    <span class="nf">return </span><span class="p">(</span>
+        <span class="n">spark</span><span class="p">.</span><span class="n">readStream</span>
+             <span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="sh">"</span><span class="s">cloudFiles</span><span class="sh">"</span><span class="p">)</span>
+             <span class="p">.</span><span class="nf">option</span><span class="p">(</span><span class="sh">"</span><span class="s">cloudFiles.format</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">json</span><span class="sh">"</span><span class="p">)</span>
+             <span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">/mnt/raw/orders</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="nd">@dlt.table</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">clean_orders</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">comment</span><span class="o">=</span><span class="sh">"</span><span class="s">검증 및 정제된 주문 데이터</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@dlt.expect</span><span class="p">(</span><span class="sh">"</span><span class="s">valid_amount</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">amount &gt;= 0</span><span class="sh">"</span><span class="p">)</span>
+<span class="nd">@dlt.expect_or_drop</span><span class="p">(</span><span class="sh">"</span><span class="s">valid_status</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">status IN (</span><span class="sh">'</span><span class="s">CREATED</span><span class="sh">'</span><span class="s">,</span><span class="sh">'</span><span class="s">COMPLETED</span><span class="sh">'</span><span class="s">,</span><span class="sh">'</span><span class="s">CANCELLED</span><span class="sh">'</span><span class="s">)</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">clean_orders</span><span class="p">():</span>
+    <span class="nf">return </span><span class="p">(</span>
+        <span class="n">dlt</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="sh">"</span><span class="s">raw_orders</span><span class="sh">"</span><span class="p">)</span>
+           <span class="p">.</span><span class="nf">withColumn</span><span class="p">(</span><span class="sh">"</span><span class="s">order_ts</span><span class="sh">"</span><span class="p">,</span> <span class="nf">to_timestamp</span><span class="p">(</span><span class="sh">"</span><span class="s">order_time</span><span class="sh">"</span><span class="p">))</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="unity-catalog와-품질-규칙의-통합">Unity Catalog와 품질 규칙의 통합</h3>
+
+<ul>
+  <li>DLT/Lakeflow의 <strong>expectations</strong>가 Unity Catalog의 테이블 메타데이터로 저장</li>
+  <li>품질 규칙이 <strong>버전 관리 가능</strong>하고 <strong>감사 및 추적 가능</strong></li>
+  <li>거버넌스 팀이 <strong>정책으로 품질 규칙을 관리</strong>할 수 있는 구조</li>
+</ul>
+
+<hr />
+
+<h2 id="-거버넌스-관점에서-본-databricks">🛡 거버넌스 관점에서 본 Databricks</h2>
+
+<p>Databricks의 거버넌스는 단순 권한 제어를 넘어서 <strong>엔드투엔드 거버넌스</strong>를 지향합니다.</p>
+
+<h3 id="1-데이터-거버넌스">1. 데이터 거버넌스</h3>
+
+<ul>
+  <li>Unity Catalog: 카탈로그·스키마·테이블·컬럼 단위 권한</li>
+  <li>데이터 계보: 파이프라인·리포트·모델까지 추적</li>
+  <li>정책 기반 접근 제어(태그/라벨 기반 마스킹 등)</li>
+</ul>
+
+<h3 id="2-ml-거버넌스">2. ML 거버넌스</h3>
+
+<ul>
+  <li>MLflow + Unity Catalog 통합</li>
+  <li>모델 레지스트리, 버전, 스테이지(prod/staging/dev)</li>
+  <li>Feature Store와 함께 재사용 가능한 피처 관리</li>
+</ul>
+
+<h3 id="3-감사--규제-준수">3. 감사 &amp; 규제 준수</h3>
+
+<ul>
+  <li>시스템 테이블에서 <strong>접근 로그/정책 변경/파이프라인 변경 이력 조회</strong></li>
+  <li>금융·헬스케어 등 규제 산업에서도 레이크하우스 사용 가능하도록 설계</li>
+</ul>
+
+<hr />
+
+<h2 id="-정리-databricks를-어떻게-바라볼-것인가">📌 정리: Databricks를 어떻게 바라볼 것인가?</h2>
+
+<h3 id="databricks는">Databricks는…</h3>
+
+<ol>
+  <li><strong>오픈소스 위에 구축된 상용 레이크하우스 플랫폼</strong>
+    <ul>
+      <li>Apache Spark, Delta Lake, MLflow, (오픈소스화된) Unity Catalog</li>
+    </ul>
+  </li>
+  <li><strong>엔터프라이즈급 거버넌스를 갖춘 데이터·AI 운영 플랫폼</strong>
+    <ul>
+      <li>권한, 계보, 품질, 감사까지 한 곳에서 관리</li>
+    </ul>
+  </li>
+  <li><strong>dbt·Airflow·Fivetran 등과 공존하는 생태계의 허브</strong>
+    <ul>
+      <li>Databricks는 “플랫폼”, dbt는 “모델링 &amp; 변환 DSL”에 집중</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="글을-마치며">글을 마치며</h3>
+
+<ul>
+  <li>Databricks를 그냥 “Spark Notebook 서비스”로 보면 절반만 보는 것입니다.</li>
+  <li><strong>어떤 오픈소스들을 어떻게 조합해서, 어떤 문제(거버넌스·운영·생산성)를 풀고 있는지</strong> 관점에서 보면 훨씬 이해가 잘 됩니다.</li>
+  <li>실제 프로젝트에서는 <strong>조합</strong>이 중요합니다.
+    <ul>
+      <li>Databricks + dbt + Fivetran + Power BI</li>
+      <li>Databricks + Airflow/Dagster + MLflow + Feature Store</li>
+    </ul>
+  </li>
+</ul>
+
+<p>향후에는 Unity Catalog의 오픈소스화와 Iceberg/Delta/Hudi 같은 테이블 포맷 간 상호운용성이 더 중요해질 것입니다.<br />
+이 글이 Databricks 생태계를 전체 그림에서 이해하는 데 도움이 되었다면 좋겠습니다.</p>
+
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>카테고리</h4>
+        <ul>
+          <li><a href="/categories/data-engineering/">데이터 엔지니어링</a></li>
+          <li><a href="/categories/bi-engineering/">BI 엔지니어링</a></li>
+          <li><a href="/categories/infrastructure-tools/">인프라 & 도구</a></li>
+          <li><a href="/categories/data-quality/">데이터 품질</a></li>
+          <li><a href="/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>링크</h4>
+        <ul>
+          <li><a href="/">홈</a></li>
+          <li><a href="/blog/">블로그</a></li>
+          <li><a href="/about/">소개</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>소셜</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2026 Data Droid Blog. 모든 권리 보유</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
