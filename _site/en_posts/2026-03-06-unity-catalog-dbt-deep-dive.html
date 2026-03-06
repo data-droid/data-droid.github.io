@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Deep dive into how to combine Unity Catalog and dbt for lakehouse governance: namespaces, permission models, environment strategy, tests vs policies, and lineage.">
+
+
+
+<title>Unity Catalog and dbt Deep Dive - Lakehouse Governance Best Practices - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Unity Catalog and dbt Deep Dive - Lakehouse Governance Best Practices">
+<meta property="og:description" content="Deep dive into how to combine Unity Catalog and dbt for lakehouse governance: namespaces, permission models, environment strategy, tests vs policies, and lineage.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2026-03-06-unity-catalog-dbt-deep-dive.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Unity Catalog and dbt Deep Dive - Lakehouse Governance Best Practices">
+<meta name="twitter:description" content="Deep dive into how to combine Unity Catalog and dbt for lakehouse governance: namespaces, permission models, environment strategy, tests vs policies, and lineage.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2026/03/06/unity-catalog-dbt-deep-dive.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2026-03-06-unity-catalog-dbt-deep-dive.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2026년 03월 06일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Unity Catalog and dbt Deep Dive - Lakehouse Governance Best Practices</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Unity-Catalog</span>
+      
+        <span class="tag">dbt</span>
+      
+        <span class="tag">Databricks</span>
+      
+        <span class="tag">Lakehouse</span>
+      
+        <span class="tag">Data-Governance</span>
+      
+        <span class="tag">Data-Lineage</span>
+      
+        <span class="tag">Data-Quality</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 50 min</span>
+      
+      
+        <span class="difficulty">📊 Advanced</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="unity-catalog-and-dbt-deep-dive---lakehouse-governance-best-practices">Unity Catalog and dbt Deep Dive - Lakehouse Governance Best Practices</h1>
+
+<blockquote>
+  <p><strong>“Between ‘we can do everything in Databricks’ and ‘we can do everything in dbt,’ there’s a practical balance worth finding.”</strong></p>
+</blockquote>
+
+<p>When using Databricks, you often run into questions like:</p>
+
+<ul>
+  <li><strong>We use dbt – why do we need Unity Catalog?</strong></li>
+  <li><strong>We manage permissions with Unity Catalog – how far should we go with dbt’s <code class="language-plaintext highlighter-rouge">schema.yml</code> tests and docs?</strong></li>
+  <li><strong>How should we name catalogs/schemas/tables so environment separation stays clean?</strong></li>
+</ul>
+
+<p>This post dives deep into <strong>architecture, governance, and patterns</strong> when using <strong>Unity Catalog (UC)</strong> and <strong>dbt</strong> together, from a practical standpoint.</p>
+
+<hr />
+
+<h2 id="-table-of-contents">📚 Table of Contents</h2>
+
+<ol>
+  <li><a href="#role-split-unity-catalog-vs-dbt">Role Split: Unity Catalog vs dbt</a></li>
+  <li><a href="#namespace-design-catalogschematable-strategy">Namespace Design: catalog.schema.table Strategy</a></li>
+  <li><a href="#permission-model-mapping-uc-permissions-to-dbt-roles">Permission Model: Mapping UC Permissions to dbt Roles</a></li>
+  <li><a href="#environment-separation-dev--staging--prod">Environment Separation: dev / staging / prod</a></li>
+  <li><a href="#where-dbt-tests-end-and-unity-catalog-policies-begin">Where dbt Tests End and Unity Catalog Policies Begin</a></li>
+  <li><a href="#lineage-and-the-catalog-connecting-dbt-uc-and-bi">Lineage and the Catalog: Connecting dbt, UC, and BI</a></li>
+  <li><a href="#practical-pattern-domain-centric-lakehouse--dbt-project">Practical Pattern: Domain-Centric Lakehouse + dbt Project</a></li>
+  <li><a href="#checklist-summary">Checklist Summary</a></li>
+</ol>
+
+<hr />
+
+<h2 id="role-split-unity-catalog-vs-dbt">🎭 Role Split: Unity Catalog vs dbt</h2>
+
+<p>It helps to <strong>clearly separate roles</strong> so the two tools don’t overlap in confusing ways.</p>
+
+<h3 id="unity-catalogs-domain">Unity Catalog’s Domain</h3>
+
+<ul>
+  <li><strong>Who can see what?</strong>
+    <ul>
+      <li>Catalog / schema / table / column permissions</li>
+      <li>Row- and column-level security, data masking</li>
+    </ul>
+  </li>
+  <li><strong>Where did the data come from and where does it go?</strong>
+    <ul>
+      <li>Lineage, system tables, audit logs</li>
+    </ul>
+  </li>
+  <li><strong>Organization-wide source of truth</strong>
+    <ul>
+      <li>e.g. “<code class="language-plaintext highlighter-rouge">prod.analytics.orders</code> is our official orders mart”</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="dbts-domain">dbt’s Domain</h3>
+
+<ul>
+  <li><strong>How should data be transformed?</strong>
+    <ul>
+      <li>SQL-based modeling, Jinja macros</li>
+    </ul>
+  </li>
+  <li><strong>How do we enforce model quality?</strong>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">schema.yml</code> tests, documentation, docs site</li>
+    </ul>
+  </li>
+  <li><strong>Data team productivity</strong>
+    <ul>
+      <li>Developer experience, review/deploy/rollback workflows</li>
+    </ul>
+  </li>
+</ul>
+
+<blockquote>
+  <p><strong>Summary</strong></p>
+
+  <ul>
+    <li><strong>Unity Catalog</strong>: Security, governance, lineage, and official object definitions</li>
+    <li><strong>dbt</strong>: Transformation logic, quality, and domain modeling</li>
+  </ul>
+</blockquote>
+
+<p>Treat them as <strong>complementary</strong>, not competing: each fills gaps the other doesn’t.</p>
+
+<hr />
+
+<h2 id="namespace-design-catalogschematable-strategy">🧭 Namespace Design: <code class="language-plaintext highlighter-rouge">catalog.schema.table</code> Strategy</h2>
+
+<p>Unity Catalog uses a three-level namespace.</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- catalog.schema.table</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">prod</span><span class="p">.</span><span class="n">analytics</span><span class="p">.</span><span class="n">orders</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="three-common-patterns">Three Common Patterns</h3>
+
+<ol>
+  <li><strong>Catalog = environment, schema = domain</strong>
+    <ul>
+      <li>e.g. <code class="language-plaintext highlighter-rouge">dev.analytics.orders</code>, <code class="language-plaintext highlighter-rouge">prod.analytics.orders</code></li>
+      <li>Pros: Strong isolation per environment, intuitive permission model</li>
+      <li>Cons: More catalogs as environments grow</li>
+    </ul>
+  </li>
+  <li><strong>Catalog = domain, schema = layer (raw/stg/mart)</strong> (recommended)
+    <ul>
+      <li>e.g. <code class="language-plaintext highlighter-rouge">analytics.raw.orders_raw</code>, <code class="language-plaintext highlighter-rouge">analytics.mart.orders</code></li>
+      <li>Environment separation handled via dbt profile / job config</li>
+      <li>Pros: Domain-centric design, easy for BI/ML to reference</li>
+    </ul>
+  </li>
+  <li><strong>Catalog = organization/platform, schema = domain + environment</strong>
+    <ul>
+      <li>e.g. <code class="language-plaintext highlighter-rouge">corp.analytics_prod.orders</code>, <code class="language-plaintext highlighter-rouge">corp.analytics_dev.orders</code></li>
+      <li>Similar to legacy data warehouse naming</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="what-fits-dbt-best">What Fits dbt Best</h3>
+
+<p>dbt naturally works with <strong>layer-based schemas</strong>:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># dbt project config example (dbt_project.yml)</span>
+
+<span class="na">models</span><span class="pi">:</span>
+  <span class="na">my_project</span><span class="pi">:</span>
+    <span class="na">raw</span><span class="pi">:</span>
+      <span class="na">+schema</span><span class="pi">:</span> <span class="s">raw</span>
+    <span class="na">staging</span><span class="pi">:</span>
+      <span class="na">+schema</span><span class="pi">:</span> <span class="s">stg</span>
+    <span class="na">marts</span><span class="pi">:</span>
+      <span class="na">+schema</span><span class="pi">:</span> <span class="s">mart</span>
+</code></pre></div></div>
+
+<p>The best fit is:</p>
+
+<ul>
+  <li><strong>Catalog = domain</strong> (e.g. analytics, marketing)</li>
+  <li><strong>Schema = layer</strong> (raw, stg, mart)</li>
+</ul>
+
+<p>Examples:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">analytics.raw.events_raw</code></li>
+  <li><code class="language-plaintext highlighter-rouge">analytics.stg.events_staging</code></li>
+  <li><code class="language-plaintext highlighter-rouge">analytics.mart.events_sessionized</code></li>
+</ul>
+
+<hr />
+
+<h2 id="permission-model-mapping-uc-permissions-to-dbt-roles">🔐 Permission Model: Mapping UC Permissions to dbt Roles</h2>
+
+<h3 id="basics-of-unity-catalog-permissions">Basics of Unity Catalog Permissions</h3>
+
+<ul>
+  <li><strong>Principal</strong>: User, group, or service principal</li>
+  <li><strong>Object</strong>: Catalog, schema, table, view, function, volume, etc.</li>
+  <li><strong>Privileges</strong>: <code class="language-plaintext highlighter-rouge">USAGE</code>, <code class="language-plaintext highlighter-rouge">SELECT</code>, <code class="language-plaintext highlighter-rouge">MODIFY</code>, <code class="language-plaintext highlighter-rouge">OWNERSHIP</code>, <code class="language-plaintext highlighter-rouge">APPLY TAG</code>, <code class="language-plaintext highlighter-rouge">EXECUTE</code>, etc.</li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Example: analytics catalog and mart schema</span>
+<span class="k">GRANT</span> <span class="k">USAGE</span> <span class="k">ON</span> <span class="k">CATALOG</span> <span class="n">analytics</span> <span class="k">TO</span> <span class="nv">`analytics_readonly`</span><span class="p">;</span>
+<span class="k">GRANT</span> <span class="k">USAGE</span> <span class="k">ON</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">mart</span> <span class="k">TO</span> <span class="nv">`analytics_readonly`</span><span class="p">;</span>
+<span class="k">GRANT</span> <span class="k">SELECT</span> <span class="k">ON</span> <span class="k">ALL</span> <span class="n">TABLES</span> <span class="k">IN</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">mart</span> <span class="k">TO</span> <span class="nv">`analytics_readonly`</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="aligning-with-dbt-roles">Aligning with dbt “Roles”</h3>
+
+<p>Typical dbt-side roles:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">analytics_dev</code>: developers</li>
+  <li><code class="language-plaintext highlighter-rouge">analytics_ci</code>: CI/CD pipeline</li>
+  <li><code class="language-plaintext highlighter-rouge">analytics_reader</code>: reporting / analytics (read-only)</li>
+</ul>
+
+<p>Map these to Unity Catalog groups or service principals:</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Developer permissions</span>
+<span class="k">GRANT</span> <span class="k">USAGE</span> <span class="k">ON</span> <span class="k">CATALOG</span> <span class="n">analytics</span> <span class="k">TO</span> <span class="nv">`grp_analytics_dev`</span><span class="p">;</span>
+<span class="k">GRANT</span> <span class="k">USAGE</span><span class="p">,</span> <span class="k">CREATE</span> <span class="k">ON</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">raw</span> <span class="k">TO</span> <span class="nv">`grp_analytics_dev`</span><span class="p">;</span>
+<span class="k">GRANT</span> <span class="k">USAGE</span><span class="p">,</span> <span class="k">CREATE</span><span class="p">,</span> <span class="k">MODIFY</span> <span class="k">ON</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">stg</span> <span class="k">TO</span> <span class="nv">`grp_analytics_dev`</span><span class="p">;</span>
+<span class="k">GRANT</span> <span class="k">USAGE</span><span class="p">,</span> <span class="k">SELECT</span> <span class="k">ON</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">mart</span> <span class="k">TO</span> <span class="nv">`grp_analytics_dev`</span><span class="p">;</span>
+
+<span class="c1">-- Read-only</span>
+<span class="k">GRANT</span> <span class="k">USAGE</span> <span class="k">ON</span> <span class="k">CATALOG</span> <span class="n">analytics</span> <span class="k">TO</span> <span class="nv">`grp_analytics_reader`</span><span class="p">;</span>
+<span class="k">GRANT</span> <span class="k">USAGE</span> <span class="k">ON</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">mart</span> <span class="k">TO</span> <span class="nv">`grp_analytics_reader`</span><span class="p">;</span>
+<span class="k">GRANT</span> <span class="k">SELECT</span> <span class="k">ON</span> <span class="k">ALL</span> <span class="n">TABLES</span> <span class="k">IN</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">mart</span> <span class="k">TO</span> <span class="nv">`grp_analytics_reader`</span><span class="p">;</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>Pattern</strong></p>
+
+  <ul>
+    <li><strong>dbt execution</strong> (CI/Job) usually uses a <strong>machine account</strong> like <code class="language-plaintext highlighter-rouge">grp_analytics_ci</code></li>
+    <li>People (analysts, engineers) get separate groups with least-privilege access</li>
+  </ul>
+</blockquote>
+
+<hr />
+
+<h2 id="environment-separation-dev--staging--prod">🌱 Environment Separation: dev / staging / prod</h2>
+
+<p>You can separate environments in two main ways:</p>
+
+<ol>
+  <li><strong>At the Unity Catalog level</strong>
+    <ul>
+      <li>e.g. <code class="language-plaintext highlighter-rouge">dev_analytics</code>, <code class="language-plaintext highlighter-rouge">stg_analytics</code>, <code class="language-plaintext highlighter-rouge">prod_analytics</code></li>
+    </ul>
+  </li>
+  <li><strong>At the dbt profile / job level</strong>
+    <ul>
+      <li>Same UC catalog, different schema / storage / cluster</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="1-catalog-based-environment-separation">1) Catalog-Based Environment Separation</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">CATALOG</span> <span class="n">dev_analytics</span><span class="p">;</span>
+<span class="k">CREATE</span> <span class="k">CATALOG</span> <span class="n">prod_analytics</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># profiles.yml (catalog-based)</span>
+
+<span class="na">databricks_uc</span><span class="pi">:</span>
+  <span class="na">target</span><span class="pi">:</span> <span class="s">dev</span>
+  <span class="na">outputs</span><span class="pi">:</span>
+    <span class="na">dev</span><span class="pi">:</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">databricks</span>
+      <span class="na">catalog</span><span class="pi">:</span> <span class="s">dev_analytics</span>
+      <span class="na">schema</span><span class="pi">:</span> <span class="s">mart</span>
+      <span class="s">...</span>
+    <span class="na">prod</span><span class="pi">:</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">databricks</span>
+      <span class="na">catalog</span><span class="pi">:</span> <span class="s">prod_analytics</span>
+      <span class="na">schema</span><span class="pi">:</span> <span class="s">mart</span>
+      <span class="s">...</span>
+</code></pre></div></div>
+
+<ul>
+  <li>Pros: Strong isolation, lower risk of touching prod by mistake</li>
+  <li>Cons: More catalogs, more permission/policy management</li>
+</ul>
+
+<h3 id="2-shared-catalog--schemastorage-separation-common-pattern">2) Shared Catalog + Schema/Storage Separation (common pattern)</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Single analytics catalog</span>
+<span class="k">CREATE</span> <span class="k">CATALOG</span> <span class="n">analytics</span><span class="p">;</span>
+
+<span class="c1">-- Per-environment schemas</span>
+<span class="k">CREATE</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">mart_dev</span><span class="p">;</span>
+<span class="k">CREATE</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">mart_prod</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># profiles.yml (schema-based)</span>
+
+<span class="na">databricks_uc</span><span class="pi">:</span>
+  <span class="na">target</span><span class="pi">:</span> <span class="s">dev</span>
+  <span class="na">outputs</span><span class="pi">:</span>
+    <span class="na">dev</span><span class="pi">:</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">databricks</span>
+      <span class="na">catalog</span><span class="pi">:</span> <span class="s">analytics</span>
+      <span class="na">schema</span><span class="pi">:</span> <span class="s">mart_dev</span>
+      <span class="s">...</span>
+    <span class="na">prod</span><span class="pi">:</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">databricks</span>
+      <span class="na">catalog</span><span class="pi">:</span> <span class="s">analytics</span>
+      <span class="na">schema</span><span class="pi">:</span> <span class="s">mart_prod</span>
+      <span class="s">...</span>
+</code></pre></div></div>
+
+<ul>
+  <li>Pros: Domain-centric catalog, easy for BI/ML to reference</li>
+  <li>Cons: More schemas/tables; naming rules must be followed</li>
+</ul>
+
+<blockquote>
+  <p><strong>Practical tip</strong></p>
+
+  <ul>
+    <li><strong>Small teams</strong>: Catalog = domain, schema = raw/stg/mart; separate environments via profile/workspace</li>
+    <li><strong>Larger enterprises</strong>: Often mix in <strong>catalog = environment</strong> for compliance</li>
+  </ul>
+</blockquote>
+
+<hr />
+
+<h2 id="where-dbt-tests-end-and-unity-catalog-policies-begin">✅ Where dbt Tests End and Unity Catalog Policies Begin</h2>
+
+<p>Both tools touch “quality” and “policy,” so it’s useful to draw a line: <strong>dbt for what, UC/platform for what.</strong></p>
+
+<h3 id="dbts-responsibility">dbt’s Responsibility</h3>
+
+<ul>
+  <li><strong>Logical model quality</strong>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">not_null</code>, <code class="language-plaintext highlighter-rouge">unique</code>, <code class="language-plaintext highlighter-rouge">accepted_values</code>, <code class="language-plaintext highlighter-rouge">relationships</code>, etc.</li>
+    </ul>
+  </li>
+  <li><strong>Domain rules</strong>
+    <ul>
+      <li>e.g. <code class="language-plaintext highlighter-rouge">status IN ('COMPLETED','CANCELLED')</code></li>
+      <li>e.g. <code class="language-plaintext highlighter-rouge">order_date &lt;= current_date</code></li>
+    </ul>
+  </li>
+  <li><strong>Documentation</strong>
+    <ul>
+      <li>Column descriptions, business definitions, examples</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version</span><span class="pi">:</span> <span class="m">2</span>
+
+<span class="na">models</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">orders</span>
+    <span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Fact</span><span class="nv"> </span><span class="s">table</span><span class="nv"> </span><span class="s">of</span><span class="nv"> </span><span class="s">orders</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">application"</span>
+    <span class="na">columns</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">order_id</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">not_null</span>
+          <span class="pi">-</span> <span class="s">unique</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">status</span>
+        <span class="na">tests</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="na">accepted_values</span><span class="pi">:</span>
+              <span class="na">values</span><span class="pi">:</span> <span class="pi">[</span><span class="s1">'</span><span class="s">CREATED'</span><span class="pi">,</span> <span class="s1">'</span><span class="s">COMPLETED'</span><span class="pi">,</span> <span class="s1">'</span><span class="s">CANCELLED'</span><span class="pi">]</span>
+</code></pre></div></div>
+
+<h3 id="unity-catalog--platforms-responsibility">Unity Catalog / Platform’s Responsibility</h3>
+
+<ul>
+  <li><strong>Access control, masking, filtering</strong>
+    <ul>
+      <li>PII, PHI, financial data, etc.</li>
+    </ul>
+  </li>
+  <li><strong>Audit and compliance</strong>
+    <ul>
+      <li>Who accessed what, when</li>
+    </ul>
+  </li>
+  <li><strong>Organization-wide policy</strong>
+    <ul>
+      <li>e.g. “SSN must always be masked for US residents”</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Conceptual example: tag-based masking in UC</span>
+
+<span class="k">ALTER</span> <span class="k">TABLE</span> <span class="n">prod</span><span class="p">.</span><span class="n">analytics</span><span class="p">.</span><span class="n">customers</span>
+  <span class="k">ALTER</span> <span class="k">COLUMN</span> <span class="n">ssn</span>
+  <span class="k">SET</span> <span class="n">TAGS</span> <span class="p">(</span><span class="s1">'classification'</span> <span class="o">=</span> <span class="s1">'pii'</span><span class="p">);</span>
+
+<span class="k">CREATE</span> <span class="n">MASKING</span> <span class="n">POLICY</span> <span class="n">mask_pii</span> <span class="k">AS</span>
+  <span class="p">(</span><span class="n">value</span> <span class="n">STRING</span><span class="p">)</span> <span class="k">RETURNS</span> <span class="n">STRING</span> <span class="o">-&gt;</span>
+    <span class="k">CASE</span>
+      <span class="k">WHEN</span> <span class="k">current_role</span><span class="p">()</span> <span class="k">IN</span> <span class="p">(</span><span class="s1">'pii_approved_role'</span><span class="p">)</span> <span class="k">THEN</span> <span class="n">value</span>
+      <span class="k">ELSE</span> <span class="s1">'***-**-****'</span>
+    <span class="k">END</span><span class="p">;</span>
+
+<span class="n">APPLY</span> <span class="n">MASKING</span> <span class="n">POLICY</span> <span class="n">mask_pii</span>
+<span class="k">ON</span> <span class="n">prod</span><span class="p">.</span><span class="n">analytics</span><span class="p">.</span><span class="n">customers</span><span class="p">.</span><span class="n">ssn</span><span class="p">;</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>Summary</strong></p>
+
+  <ul>
+    <li><strong>dbt</strong>: “Is the data correct?” (logical and domain quality)</li>
+    <li><strong>Unity Catalog</strong>: “Who can see what?” (security and compliance)</li>
+  </ul>
+</blockquote>
+
+<hr />
+
+<h2 id="lineage-and-the-catalog-connecting-dbt-uc-and-bi">🔗 Lineage and the Catalog: Connecting dbt, UC, and BI</h2>
+
+<h3 id="lineage-in-dbt">Lineage in dbt</h3>
+
+<ul>
+  <li><strong>Model dependency graph</strong> via <code class="language-plaintext highlighter-rouge">dbt docs</code> and <code class="language-plaintext highlighter-rouge">dbt meta</code></li>
+  <li>Developer view: “Which raw sources feed this mart table?”</li>
+</ul>
+
+<h3 id="lineage-in-unity-catalog">Lineage in Unity Catalog</h3>
+
+<ul>
+  <li>UC captures lineage at <strong>engine/query level</strong>
+    <ul>
+      <li>SQL Warehouse, Notebooks, Workflows, BI tools, etc.</li>
+    </ul>
+  </li>
+  <li>Organization view: “Which reports, models, or notebooks use this table/view?”</li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Conceptual example: UC lineage (actual view/API may vary by version)</span>
+<span class="k">SELECT</span> <span class="o">*</span>
+<span class="k">FROM</span> <span class="k">system</span><span class="p">.</span><span class="n">lineage</span><span class="p">.</span><span class="n">relations</span>
+<span class="k">WHERE</span> <span class="n">downstream_object</span> <span class="o">=</span> <span class="s1">'analytics.mart.orders'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="using-both-together">Using Both Together</h3>
+
+<ul>
+  <li><strong>dbt</strong>: “Code-level” lineage for developers</li>
+  <li><strong>Unity Catalog</strong>: “Platform-level” lineage for security, governance, and BI/ML owners</li>
+</ul>
+
+<p>Treat the two lineage views as <strong>complementary</strong>, serving different audiences, rather than redundant.</p>
+
+<hr />
+
+<h2 id="practical-pattern-domain-centric-lakehouse--dbt-project">🧩 Practical Pattern: Domain-Centric Lakehouse + dbt Project</h2>
+
+<h3 id="example-domain-analytics-lakehouse">Example Domain: <code class="language-plaintext highlighter-rouge">analytics</code> Lakehouse</h3>
+
+<p><strong>1. Unity Catalog setup</strong></p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">CATALOG</span> <span class="n">analytics</span><span class="p">;</span>
+
+<span class="k">CREATE</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">raw</span><span class="p">;</span>
+<span class="k">CREATE</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">stg</span><span class="p">;</span>
+<span class="k">CREATE</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">mart</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p><strong>2. dbt project structure</strong></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>models/
+  raw/
+    raw_events.sql
+  staging/
+    stg_events.sql
+  marts/
+    fct_sessions.sql
+    dim_users.sql
+</code></pre></div></div>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># dbt_project.yml (summary)</span>
+
+<span class="na">models</span><span class="pi">:</span>
+  <span class="na">analytics_dbt</span><span class="pi">:</span>
+    <span class="na">raw</span><span class="pi">:</span>
+      <span class="na">+schema</span><span class="pi">:</span> <span class="s">raw</span>
+    <span class="na">staging</span><span class="pi">:</span>
+      <span class="na">+schema</span><span class="pi">:</span> <span class="s">stg</span>
+    <span class="na">marts</span><span class="pi">:</span>
+      <span class="na">+schema</span><span class="pi">:</span> <span class="s">mart</span>
+</code></pre></div></div>
+
+<p><strong>3. Connect to UC via profiles.yml</strong></p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">analytics_dbt</span><span class="pi">:</span>
+  <span class="na">target</span><span class="pi">:</span> <span class="s">dev</span>
+  <span class="na">outputs</span><span class="pi">:</span>
+    <span class="na">dev</span><span class="pi">:</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">databricks</span>
+      <span class="na">catalog</span><span class="pi">:</span> <span class="s">analytics</span>
+      <span class="na">schema</span><span class="pi">:</span> <span class="s">mart_dev</span>
+      <span class="na">host</span><span class="pi">:</span> <span class="s">adb-123.45.azuredatabricks.net</span>
+      <span class="na">http_path</span><span class="pi">:</span> <span class="s">/sql/1.0/warehouses/abc</span>
+      <span class="na">token</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+      <span class="na">threads</span><span class="pi">:</span> <span class="m">8</span>
+    <span class="na">prod</span><span class="pi">:</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">databricks</span>
+      <span class="na">catalog</span><span class="pi">:</span> <span class="s">analytics</span>
+      <span class="na">schema</span><span class="pi">:</span> <span class="s">mart</span>
+      <span class="na">host</span><span class="pi">:</span> <span class="s">adb-123.45.azuredatabricks.net</span>
+      <span class="na">http_path</span><span class="pi">:</span> <span class="s">/sql/1.0/warehouses/xyz</span>
+      <span class="na">token</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+      <span class="na">threads</span><span class="pi">:</span> <span class="m">16</span>
+</code></pre></div></div>
+
+<p><strong>4. Permissions / governance</strong></p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Developer group</span>
+<span class="k">GRANT</span> <span class="k">USAGE</span> <span class="k">ON</span> <span class="k">CATALOG</span> <span class="n">analytics</span> <span class="k">TO</span> <span class="nv">`grp_analytics_dev`</span><span class="p">;</span>
+<span class="k">GRANT</span> <span class="k">USAGE</span><span class="p">,</span> <span class="k">CREATE</span><span class="p">,</span> <span class="k">MODIFY</span> <span class="k">ON</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">raw</span> <span class="k">TO</span> <span class="nv">`grp_analytics_dev`</span><span class="p">;</span>
+<span class="k">GRANT</span> <span class="k">USAGE</span><span class="p">,</span> <span class="k">CREATE</span><span class="p">,</span> <span class="k">MODIFY</span> <span class="k">ON</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">stg</span> <span class="k">TO</span> <span class="nv">`grp_analytics_dev`</span><span class="p">;</span>
+<span class="k">GRANT</span> <span class="k">USAGE</span><span class="p">,</span> <span class="k">SELECT</span> <span class="k">ON</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">mart</span> <span class="k">TO</span> <span class="nv">`grp_analytics_dev`</span><span class="p">;</span>
+
+<span class="c1">-- Reader group (read-only)</span>
+<span class="k">GRANT</span> <span class="k">USAGE</span> <span class="k">ON</span> <span class="k">CATALOG</span> <span class="n">analytics</span> <span class="k">TO</span> <span class="nv">`grp_analytics_reader`</span><span class="p">;</span>
+<span class="k">GRANT</span> <span class="k">USAGE</span> <span class="k">ON</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">mart</span> <span class="k">TO</span> <span class="nv">`grp_analytics_reader`</span><span class="p">;</span>
+<span class="k">GRANT</span> <span class="k">SELECT</span> <span class="k">ON</span> <span class="k">ALL</span> <span class="n">TABLES</span> <span class="k">IN</span> <span class="k">SCHEMA</span> <span class="n">analytics</span><span class="p">.</span><span class="n">mart</span> <span class="k">TO</span> <span class="nv">`grp_analytics_reader`</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p><strong>5. Quality and lineage</strong></p>
+
+<ul>
+  <li><strong>dbt</strong>: Column-level quality rules and descriptions in <code class="language-plaintext highlighter-rouge">schema.yml</code></li>
+  <li><strong>Unity Catalog</strong>: Tags/labels for sensitivity, ownership, data domain; system tables and Lineage UI for end-to-end lineage</li>
+</ul>
+
+<hr />
+
+<h2 id="checklist-summary">🧾 Checklist Summary</h2>
+
+<p><strong>1. Role definition</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Unity Catalog: security, permissions, lineage, compliance</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />dbt: modeling, transformation logic, tests, documentation</li>
+</ul>
+
+<p><strong>2. Namespace / environment strategy</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">catalog.schema.table</code> designed in a domain-centric way?</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Decided whether dev/stg/prod are separated by catalog vs schema/workspace?</li>
+</ul>
+
+<p><strong>3. Permission model</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />dbt execution (machine) account separate from human accounts?</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />UC permissions designed around groups/roles?</li>
+</ul>
+
+<p><strong>4. Quality and policy</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Domain rules and model quality in dbt tests?</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Security, masking, and compliance in UC/platform?</li>
+</ul>
+
+<p><strong>5. Lineage and observability</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Lineage visible in both dbt and Unity Catalog?</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Change history traceable via system tables and logs?</li>
+</ul>
+
+<hr />
+
+<blockquote>
+  <p><strong>“Unity Catalog and dbt are not replacements for each other – they fill each other’s gaps in the lakehouse.”</strong></p>
+</blockquote>
+
+<p>Use UC for <strong>organization-wide governance and safe data access</strong>, and dbt for <strong>domain logic, tests, and documentation</strong>. That way, data and governance teams can collaborate without stepping on each other’s toes.<br />
+Use this post as a reference to design a UC + dbt pattern that fits your team.</p>
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2026 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
