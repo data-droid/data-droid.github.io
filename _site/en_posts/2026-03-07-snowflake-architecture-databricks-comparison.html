@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="Compare Snowflake's platform architecture with Databricks, positioning differences, use-case recommendations, and combined usage patterns.">
+
+
+
+<title>Snowflake Architecture and Databricks Comparison - When to Use Which - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Snowflake Architecture and Databricks Comparison - When to Use Which">
+<meta property="og:description" content="Compare Snowflake's platform architecture with Databricks, positioning differences, use-case recommendations, and combined usage patterns.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2026-03-07-snowflake-architecture-databricks-comparison.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Snowflake Architecture and Databricks Comparison - When to Use Which">
+<meta name="twitter:description" content="Compare Snowflake's platform architecture with Databricks, positioning differences, use-case recommendations, and combined usage patterns.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2026/03/07/snowflake-architecture-databricks-comparison.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2026-03-07-snowflake-architecture-databricks-comparison.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2026년 03월 07일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Snowflake Architecture and Databricks Comparison - When to Use Which</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Snowflake</span>
+      
+        <span class="tag">Databricks</span>
+      
+        <span class="tag">Lakehouse</span>
+      
+        <span class="tag">Data-Warehouse</span>
+      
+        <span class="tag">Cloud-Data-Platform</span>
+      
+        <span class="tag">Data-Architecture</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 45 min</span>
+      
+      
+        <span class="difficulty">📊 Intermediate</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="snowflake-architecture-and-databricks-comparison---when-to-use-which">Snowflake Architecture and Databricks Comparison - When to Use Which</h1>
+
+<blockquote>
+  <p><strong>“Snowflake and Databricks have different positioning. Rather than a 1:1 winner-take-all, it’s important to have clear selection criteria for when to use which.”</strong></p>
+</blockquote>
+
+<p>Snowflake is a <strong>cloud-native data warehouse</strong>; Databricks is a <strong>lakehouse-based unified data and AI platform</strong>. Both handle large-scale data, but they differ in design philosophy and strengths, so having clear <strong>selection criteria</strong> is essential in practice.<br />
+This post first outlines Snowflake’s architecture, then covers positioning differences with Databricks, use-case recommendations, and patterns for using them together.</p>
+
+<hr />
+
+<h2 id="-table-of-contents">📚 Table of Contents</h2>
+
+<ol>
+  <li><a href="#snowflake-platform-architecture">Snowflake Platform Architecture</a></li>
+  <li><a href="#databricks-architecture-summary">Databricks Architecture Summary</a></li>
+  <li><a href="#positioning-and-strengths-comparison">Positioning and Strengths Comparison</a></li>
+  <li><a href="#use-case-recommendations-when-to-use-which">Use-Case Recommendations: When to Use Which</a></li>
+  <li><a href="#combined-usage-patterns">Combined Usage Patterns</a></li>
+  <li><a href="#summary">Summary</a></li>
+</ol>
+
+<hr />
+
+<h2 id="snowflake-platform-architecture">🏗️ Snowflake Platform Architecture</h2>
+
+<h3 id="big-picture-three-layer-separation">Big Picture: Three-Layer Separation</h3>
+
+<p>Snowflake was designed from the start with <strong>storage, compute, and services</strong> separated.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────────────────┐
+│  Services Layer (Cloud Services)                             │
+│  Authentication, metadata, query optimization, warehouse mgmt │
+└─────────────────────────────────────────────────────────────┘
+                              ↑
+┌─────────────────────────────────────────────────────────────┐
+│  Compute Layer (Virtual Warehouses)                          │
+│  Query execution, DML, data load/unload                      │
+└─────────────────────────────────────────────────────────────┘
+                              ↑
+┌─────────────────────────────────────────────────────────────┐
+│  Storage Layer (S3 / Azure Blob / GCS)                       │
+│  Actual data storage, auto compression &amp; partitioning        │
+└─────────────────────────────────────────────────────────────┘
+</code></pre></div></div>
+
+<h3 id="1-storage-layer">1. Storage Layer</h3>
+
+<ul>
+  <li>Data is stored in <strong>cloud object storage</strong> (S3, Azure Blob, GCS)</li>
+  <li><strong>Automatic compression and micro-partitioning</strong>: no need to specify partitions manually</li>
+  <li><strong>Billing</strong>: based on stored volume only (compute billed separately)</li>
+  <li><strong>Zero Copy Clone</strong>: clone table/schema/database by copying metadata only, no physical copy → fast dev/staging setup</li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Zero Copy Clone example</span>
+<span class="k">CREATE</span> <span class="k">DATABASE</span> <span class="n">analytics_dev</span> <span class="n">CLONE</span> <span class="n">analytics_prod</span><span class="p">;</span>
+<span class="k">CREATE</span> <span class="k">SCHEMA</span> <span class="n">analytics_dev</span><span class="p">.</span><span class="n">staging</span> <span class="n">CLONE</span> <span class="n">analytics_prod</span><span class="p">.</span><span class="n">staging</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="2-compute-layer-virtual-warehouses">2. Compute Layer (Virtual Warehouses)</h3>
+
+<ul>
+  <li><strong>Virtual Warehouse</strong> = unit of query execution</li>
+  <li>Sizes: X-Small ~ 6X-Large; multi-cluster warehouses for auto scale-out</li>
+  <li><strong>Auto suspend/resume</strong>: warehouse stops after idle time, resumes automatically on next query</li>
+  <li><strong>Queuing</strong>: when concurrent queries exceed capacity, queues or spins up additional clusters</li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Warehouse example</span>
+<span class="k">CREATE</span> <span class="n">WAREHOUSE</span> <span class="n">analytics_wh</span>
+  <span class="k">WITH</span>
+  <span class="n">WAREHOUSE_SIZE</span> <span class="o">=</span> <span class="s1">'MEDIUM'</span>
+  <span class="n">AUTO_SUSPEND</span> <span class="o">=</span> <span class="mi">300</span>
+  <span class="n">AUTO_RESUME</span> <span class="o">=</span> <span class="k">TRUE</span>
+  <span class="n">MIN_CLUSTER_COUNT</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="n">MAX_CLUSTER_COUNT</span> <span class="o">=</span> <span class="mi">4</span>
+  <span class="n">SCALING_POLICY</span> <span class="o">=</span> <span class="s1">'STANDARD'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="3-services-layer-cloud-services">3. Services Layer (Cloud Services)</h3>
+
+<ul>
+  <li><strong>Metadata management</strong>: tables, schemas, databases, permissions</li>
+  <li><strong>Query optimization and execution planning</strong>: automatically routes to appropriate warehouse if not specified</li>
+  <li><strong>Security and authentication</strong>: SSO, RBAC, network policies</li>
+</ul>
+
+<h3 id="4-distinctive-snowflake-features">4. Distinctive Snowflake Features</h3>
+
+<ul>
+  <li><strong>Data Sharing</strong>
+    <ul>
+      <li>Share data across accounts without physical copies</li>
+      <li>Data Marketplace, private listings</li>
+    </ul>
+  </li>
+  <li><strong>Time Travel</strong>
+    <ul>
+      <li>Restore data to a specific point in time or query ID</li>
+    </ul>
+  </li>
+  <li><strong>Snowpark</strong>
+    <ul>
+      <li>DataFrame-style processing in Snowflake with Python, Scala, Java</li>
+    </ul>
+  </li>
+  <li><strong>Dynamic Tables</strong>
+    <ul>
+      <li>Declarative pipelines with streaming/batch semantics (similar to dbt incremental)</li>
+    </ul>
+  </li>
+  <li><strong>Snowpipe</strong>
+    <ul>
+      <li>Event-driven automatic ingestion (e.g., S3 event triggers)</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="5-snowflake-architecture-summary">5. Snowflake Architecture Summary</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Position</strong></td>
+      <td>Cloud-native <strong>data warehouse</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Core strengths</strong></td>
+      <td>SQL-centric analytics, data sharing, operational simplicity, auto tuning</td>
+    </tr>
+    <tr>
+      <td><strong>Processing model</strong></td>
+      <td>MPP (Massively Parallel Processing) SQL engine</td>
+    </tr>
+    <tr>
+      <td><strong>Storage</strong></td>
+      <td>Object storage–based, auto compression and partitioning</td>
+    </tr>
+    <tr>
+      <td><strong>Compute</strong></td>
+      <td>Virtual warehouses, auto scale, suspend/resume</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="databricks-architecture-summary">🔷 Databricks Architecture Summary</h2>
+
+<p>Databricks is a unified platform centered on the <strong>lakehouse</strong> (see Databricks ecosystem post for details).</p>
+
+<h3 id="core-components">Core Components</h3>
+
+<ul>
+  <li><strong>Delta Lake</strong>: Table format on Parquet + transaction log (ACID, Time Travel, CDC)</li>
+  <li><strong>Apache Spark</strong>: Unified engine for batch, streaming, SQL, ML</li>
+  <li><strong>Unity Catalog</strong>: Unified governance (permissions, lineage, tags)</li>
+  <li><strong>MLflow</strong>: Experiments, models, registry</li>
+  <li><strong>Photon</strong>: C++-based high-performance SQL engine (commercial)</li>
+</ul>
+
+<h3 id="databricks-architecture-summary">Databricks Architecture Summary</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Position</strong></td>
+      <td><strong>Lakehouse</strong>-based unified data &amp; AI platform</td>
+    </tr>
+    <tr>
+      <td><strong>Core strengths</strong></td>
+      <td>Batch + streaming + ML integration, code-first (Spark/Python), open source ecosystem</td>
+    </tr>
+    <tr>
+      <td><strong>Processing model</strong></td>
+      <td>Spark-based distributed processing (SQL, Python, Scala, R)</td>
+    </tr>
+    <tr>
+      <td><strong>Storage</strong></td>
+      <td>Object storage + Delta Lake metadata</td>
+    </tr>
+    <tr>
+      <td><strong>Compute</strong></td>
+      <td>Spark clusters, Photon, serverless SQL warehouses</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="positioning-and-strengths-comparison">⚖️ Positioning and Strengths Comparison</h2>
+
+<h3 id="why-a-11-comparison-is-misleading">Why a 1:1 Comparison Is Misleading</h3>
+
+<ul>
+  <li><strong>Snowflake</strong>: <strong>“Data warehouse”</strong> — SQL-centric analytics, BI, reporting, data sharing</li>
+  <li><strong>Databricks</strong>: <strong>“Lakehouse”</strong> — DW + lake + streaming + ML in one platform</li>
+</ul>
+
+<p>Both support <strong>large-scale analytics</strong>, but Snowflake is <strong>SQL/analytics-focused</strong>, Databricks is <strong>code/pipeline/ML-focused</strong>.</p>
+
+<h3 id="feature-and-positioning-comparison">Feature and Positioning Comparison</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Snowflake</th>
+      <th>Databricks</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Position</strong></td>
+      <td>Cloud-native DW</td>
+      <td>Lakehouse unified platform</td>
+    </tr>
+    <tr>
+      <td><strong>Primary language</strong></td>
+      <td>SQL</td>
+      <td>SQL + Python/Scala/R</td>
+    </tr>
+    <tr>
+      <td><strong>Batch processing</strong></td>
+      <td>✅ SQL-centric</td>
+      <td>✅ Spark (SQL, DataFrame, RDD)</td>
+    </tr>
+    <tr>
+      <td><strong>Streaming</strong></td>
+      <td>Snowpipe, Dynamic Tables</td>
+      <td>Structured Streaming, Delta Live Tables</td>
+    </tr>
+    <tr>
+      <td><strong>ML / Models</strong></td>
+      <td>Snowpark ML, model serving</td>
+      <td>MLflow, Feature Store, AutoML, Model Serving</td>
+    </tr>
+    <tr>
+      <td><strong>Data sharing</strong></td>
+      <td>✅ Zero Copy sharing across accounts, Marketplace</td>
+      <td>External sharing uses different patterns</td>
+    </tr>
+    <tr>
+      <td><strong>Governance</strong></td>
+      <td>RBAC, tags, masking, lineage</td>
+      <td>Unity Catalog (permissions, lineage, tags)</td>
+    </tr>
+    <tr>
+      <td><strong>Operational complexity</strong></td>
+      <td>Relatively low (SQL and warehouse–centric)</td>
+      <td>Relatively high (Spark and cluster knowledge)</td>
+    </tr>
+    <tr>
+      <td><strong>Open source use</strong></td>
+      <td>Proprietary engine–centric</td>
+      <td>Spark, Delta Lake, MLflow, etc.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="where-snowflake-excels">Where Snowflake Excels</h3>
+
+<ul>
+  <li><strong>SQL-centric analytics, BI, and reporting</strong></li>
+  <li><strong>Data sharing and Marketplace</strong></li>
+  <li><strong>Operational simplicity</strong> (less partition/tuning burden)</li>
+  <li><strong>Standard SQL</strong> workloads</li>
+</ul>
+
+<h3 id="where-databricks-excels">Where Databricks Excels</h3>
+
+<ul>
+  <li><strong>Batch + streaming + ML integration</strong></li>
+  <li><strong>Code-first pipelines</strong> (Spark/Python)</li>
+  <li><strong>Open source ecosystem</strong> (Delta, MLflow, Flink, etc.)</li>
+  <li><strong>Lakehouse pattern</strong> (raw → stg → mart + ML)</li>
+</ul>
+
+<hr />
+
+<h2 id="use-case-recommendations-when-to-use-which">🎯 Use-Case Recommendations: When to Use Which</h2>
+
+<h3 id="consider-snowflake-first-when">Consider Snowflake First When</h3>
+
+<ul>
+  <li><strong>BI, reporting, and analytics</strong> are primary workloads and the team is SQL-centric</li>
+  <li><strong>Data sharing</strong> (customers, partners, internal teams) is important</li>
+  <li><strong>Operational simplicity</strong> is a priority (avoid manual partitioning/tuning)</li>
+  <li>Running <strong>dbt + Snowflake</strong> ELT pipelines</li>
+</ul>
+
+<h3 id="consider-databricks-first-when">Consider Databricks First When</h3>
+
+<ul>
+  <li>You want <strong>batch + streaming + ML</strong> on a single platform</li>
+  <li>You already have <strong>Spark/Python</strong> pipelines or plan to extend code-first</li>
+  <li>You want the <strong>lakehouse pattern</strong> (raw lake + marts + ML)</li>
+  <li>Strong <strong>open source integration</strong> with Delta Lake, MLflow, dbt, etc.</li>
+</ul>
+
+<h3 id="when-to-use-both">When to Use Both</h3>
+
+<ul>
+  <li><strong>Snowflake</strong>: Analytics, BI, reporting, data sharing, customer/partner data delivery</li>
+  <li><strong>Databricks</strong>: Raw data ingestion, processing, streaming, ML, feature store, model training</li>
+  <li><strong>ETL/ELT</strong>: Build marts in Databricks, replicate to Snowflake for BI</li>
+</ul>
+
+<hr />
+
+<h2 id="combined-usage-patterns">🔗 Combined Usage Patterns</h2>
+
+<h3 id="pattern-1-databricks--snowflake-lake--dw">Pattern 1: Databricks → Snowflake (Lake → DW)</h3>
+
+<ul>
+  <li>Build raw, staging, and marts in Databricks</li>
+  <li>Replicate selected marts to Snowflake (Fivetran, Airflow, custom ETL)</li>
+  <li>Use Snowflake for BI, reporting, and data sharing</li>
+</ul>
+
+<h3 id="pattern-2-snowflake--databricks-dw--ml">Pattern 2: Snowflake → Databricks (DW → ML)</h3>
+
+<ul>
+  <li>Manage analytics marts in Snowflake</li>
+  <li>Extract needed data into Databricks for ML/experimentation</li>
+  <li>Train and serve models in Databricks</li>
+</ul>
+
+<h3 id="pattern-3-role-separation">Pattern 3: Role Separation</h3>
+
+<ul>
+  <li><strong>Snowflake</strong>: Analytics, BI, data sharing</li>
+  <li><strong>Databricks</strong>: Streaming, ML, lakehouse pipelines</li>
+</ul>
+
+<p>Both can be wired to dbt; switch targets in the dbt profile.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># dbt profiles.yml example (Snowflake + Databricks)</span>
+
+<span class="na">my_project</span><span class="pi">:</span>
+  <span class="na">target</span><span class="pi">:</span> <span class="s">snowflake_prod</span>
+  <span class="na">outputs</span><span class="pi">:</span>
+    <span class="na">snowflake_prod</span><span class="pi">:</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">snowflake</span>
+      <span class="na">account</span><span class="pi">:</span> <span class="s">xxx</span>
+      <span class="na">warehouse</span><span class="pi">:</span> <span class="s">analytics_wh</span>
+      <span class="na">database</span><span class="pi">:</span> <span class="s">analytics</span>
+      <span class="na">schema</span><span class="pi">:</span> <span class="s">mart</span>
+      <span class="s">...</span>
+    <span class="na">databricks_prod</span><span class="pi">:</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">databricks</span>
+      <span class="na">catalog</span><span class="pi">:</span> <span class="s">analytics</span>
+      <span class="na">schema</span><span class="pi">:</span> <span class="s">mart</span>
+      <span class="s">...</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="summary">📌 Summary</h2>
+
+<h3 id="key-takeaways">Key Takeaways</h3>
+
+<ol>
+  <li><strong>Snowflake</strong>: Cloud-native DW, SQL-centric, strong in data sharing and operational simplicity</li>
+  <li><strong>Databricks</strong>: Lakehouse, batch + streaming + ML, strong in code and open source ecosystem</li>
+  <li><strong>Not a 1:1 replacement</strong> — choose or combine based on team workload, skills, and requirements</li>
+</ol>
+
+<h3 id="selection-checklist">Selection Checklist</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Primary workload is SQL analytics/BI? → Consider Snowflake first</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Need streaming, ML, or code-first pipelines? → Consider Databricks first</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Data sharing/Marketplace important? → Snowflake strength</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Prioritize open source/lakehouse pattern? → Databricks strength</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Need both? → Consider role separation and combined usage</li>
+</ul>
+
+<hr />
+
+<blockquote>
+  <p><strong>“Snowflake and Databricks aren’t locked in competition – they’re about choosing and combining based on your team’s situation.”</strong></p>
+</blockquote>
+
+<p>Use your team’s workload, skills, and budget to decide whether to use Snowflake only, Databricks only, or both together.<br />
+We hope this post helps you define your selection criteria.</p>
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2026 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
