@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="A complete walkthrough of building CareerWeb, a job posting tracker, from scratch using Cursor AI as a pair programming partner. Covers tech stack decisions, LLM integration, Notion automation, and ATS analysis.">
+
+
+
+<title>Building a Full-Stack Side Project with Cursor AI - The CareerWeb Journey - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="Building a Full-Stack Side Project with Cursor AI - The CareerWeb Journey">
+<meta property="og:description" content="A complete walkthrough of building CareerWeb, a job posting tracker, from scratch using Cursor AI as a pair programming partner. Covers tech stack decisions, LLM integration, Notion automation, and ATS analysis.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2026-03-13-cursor-ai-careerweb-development-journey.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Building a Full-Stack Side Project with Cursor AI - The CareerWeb Journey">
+<meta name="twitter:description" content="A complete walkthrough of building CareerWeb, a job posting tracker, from scratch using Cursor AI as a pair programming partner. Covers tech stack decisions, LLM integration, Notion automation, and ATS analysis.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/data-engineering/2026/03/13/cursor-ai-careerweb-development-journey.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2026-03-13-cursor-ai-careerweb-development-journey.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Data engineering</span>
+      <span class="post-date">2026년 03월 13일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">Building a Full-Stack Side Project with Cursor AI - The CareerWeb Journey</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">Cursor</span>
+      
+        <span class="tag">AI-Pair-Programming</span>
+      
+        <span class="tag">React</span>
+      
+        <span class="tag">FastAPI</span>
+      
+        <span class="tag">Gemini</span>
+      
+        <span class="tag">Notion-API</span>
+      
+        <span class="tag">Side-Project</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 50 min</span>
+      
+      
+        <span class="difficulty">📊 Intermediate</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="building-a-full-stack-side-project-with-cursor-ai---the-careerweb-journey">Building a Full-Stack Side Project with Cursor AI - The CareerWeb Journey</h1>
+
+<blockquote>
+  <p>“When an idea meets an AI coding assistant, one person can build a full-stack web app from scratch.”</p>
+</blockquote>
+
+<p>While job hunting, I found myself doing the same tedious work over and over: copying job posting URLs, transcribing key details into Notion, and manually comparing requirements against my resume. I wanted to automate this entire workflow, and that’s how <strong>CareerWeb</strong> was born.</p>
+
+<p>What makes this project special is that it was built entirely through <strong>conversations with Cursor AI</strong> – from tech stack selection to UI design, API architecture, and LLM prompt engineering. In this post, I’ll share that journey with all the technical details.</p>
+
+<hr />
+
+<h2 id="toc">Table of Contents</h2>
+
+<ul>
+  <li><a href="#what-is-careerweb">What is CareerWeb?</a></li>
+  <li><a href="#tech-stack">Choosing the Tech Stack - First Conversation with Cursor</a></li>
+  <li><a href="#frontend-evolution">Frontend UI Evolution</a></li>
+  <li><a href="#backend-api">Backend API Design and Vite Proxy</a></li>
+  <li><a href="#llm-integration">LLM Integration Trial and Error</a></li>
+  <li><a href="#linkedin-autofill">LinkedIn Auto-Fill Implementation</a></li>
+  <li><a href="#notion-integration">Notion Integration - Structured Data Store</a></li>
+  <li><a href="#ats-analysis">ATS Analysis and Job Closure Detection</a></li>
+  <li><a href="#architecture">Overall Architecture</a></li>
+  <li><a href="#cursor-experience">Lessons from Developing with Cursor AI</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+</ul>
+
+<hr />
+
+<h2 id="what-is-careerweb">What is CareerWeb?</h2>
+
+<p>CareerWeb is a personal job posting tracker that connects <strong>job collection, LLM parsing, Notion organization, and ATS analysis</strong> into one seamless pipeline.</p>
+
+<p><strong>Core Features:</strong></p>
+
+<ul>
+  <li><strong>Job Input</strong>: Paste a LinkedIn URL to auto-fill title, body, company name, and posting date</li>
+  <li><strong>LLM Analysis</strong>: Google Gemini extracts structured fields – salary, work type, required/preferred skills, experience</li>
+  <li><strong>Notion Storage</strong>: Automatically creates Notion database pages with formatted summaries and original text</li>
+  <li><strong>ATS Score</strong>: Compares your resume (Notion page) against the posting to generate a fit score, gaps, and suggestions</li>
+  <li><strong>Closure Detection</strong>: Revisits LinkedIn pages to detect when a position is no longer accepting applications</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────────┐
+│                    CareerWeb Flow                    │
+│                                                     │
+│  URL Input → LinkedIn Parse → DB Save → LLM Parse   │
+│      ↓                                    ↓         │
+│  Auto-fill       Notion Page Creation ← Structured  │
+│                        ↓                            │
+│              Resume Comparison → ATS Score/Feedback  │
+└─────────────────────────────────────────────────────┘
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="tech-stack">Choosing the Tech Stack - First Conversation with Cursor</h2>
+
+<p>The project began with explaining the idea to Cursor:</p>
+
+<blockquote>
+  <p>“I want to build a web app where I paste a job posting URL, it gets organized in Notion, and my resume is compared against it for an ATS score.”</p>
+</blockquote>
+
+<p>From this single sentence, Cursor and I worked through the technical decisions together.</p>
+
+<h3 id="frontend-vite-7--react-19">Frontend: Vite 7 + React 19</h3>
+
+<p>We chose <strong>Vite + React</strong> for rapid development. The deliberate choice to skip TypeScript was about prioritizing speed for a side project.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm create vite@latest CareerWeb <span class="nt">--</span> <span class="nt">--template</span> react
+</code></pre></div></div>
+
+<h3 id="backend-fastapi--sqlmodel--sqlite">Backend: FastAPI + SQLModel + SQLite</h3>
+
+<p>Python was the natural choice given its rich LLM and scraping ecosystem. <strong>FastAPI</strong> offered auto-documentation and async support that fit perfectly.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fastapi          # Async web framework
+google-genai     # Gemini API client
+httpx            # HTTP client (LinkedIn scraping)
+beautifulsoup4   # HTML parsing
+notion-client    # Notion API
+sqlmodel         # ORM (SQLAlchemy + Pydantic)
+uvicorn          # ASGI server
+</code></pre></div></div>
+
+<h3 id="monorepo-vs-separate-repos">Monorepo vs Separate Repos</h3>
+
+<p>Initially I considered a monorepo, but through discussion with Cursor, we decided on <strong>separate repositories</strong>:</p>
+
+<ul>
+  <li>Independent dependency management for frontend and backend</li>
+  <li>Cleaner .gitignore and environment configuration</li>
+  <li>Clearer context when working in Cursor</li>
+</ul>
+
+<p>This resulted in two repos: <code class="language-plaintext highlighter-rouge">CareerWeb</code> (frontend) and <code class="language-plaintext highlighter-rouge">CareerWeb-backend</code> (backend).</p>
+
+<hr />
+
+<h2 id="frontend-evolution">Frontend UI Evolution</h2>
+
+<h3 id="initial-card-based-layout">Initial: Card-Based Layout</h3>
+
+<p>The first UI Cursor generated consisted of <code class="language-plaintext highlighter-rouge">JobForm</code>, <code class="language-plaintext highlighter-rouge">SummaryList</code>, <code class="language-plaintext highlighter-rouge">DataModeToggle</code>, and <code class="language-plaintext highlighter-rouge">AtsResult</code> components in a card-based layout. Results appeared as cards below the input form.</p>
+
+<h3 id="pivot-table-list-view">Pivot: Table List View</h3>
+
+<p>After actual usage, comparing many postings in card form was difficult. When I told Cursor “a table-based list would be more efficient,” the UI changed dramatically.</p>
+
+<p><strong>Key Changes:</strong></p>
+<ul>
+  <li>“New Posting” button switches to form (list-first view)</li>
+  <li>Company, title, date, links, ATS score displayed in one row</li>
+  <li>Click to expand detail panel</li>
+</ul>
+
+<h3 id="toolbar-and-filtering">Toolbar and Filtering</h3>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// App.jsx - State management</span>
+<span class="kd">const</span> <span class="p">[</span><span class="nx">searchQuery</span><span class="p">,</span> <span class="nx">setSearchQuery</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="dl">''</span><span class="p">)</span>
+<span class="kd">const</span> <span class="p">[</span><span class="nx">sortOrder</span><span class="p">,</span> <span class="nx">setSortOrder</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="dl">'</span><span class="s1">recent</span><span class="dl">'</span><span class="p">)</span>
+<span class="kd">const</span> <span class="p">[</span><span class="nx">hideClosed</span><span class="p">,</span> <span class="nx">setHideClosed</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Adding search, sort (by date or ATS score), and closed-posting hiding dramatically improved usability. Cursor suggested clean filtering logic using <code class="language-plaintext highlighter-rouge">useMemo</code>.</p>
+
+<h3 id="expandable-detail-panel">Expandable Detail Panel</h3>
+
+<p>Clicking a table row reveals a detail panel directly below it:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// SummaryList.jsx - Detail panel toggle</span>
+<span class="kd">const</span> <span class="p">[</span><span class="nx">detailId</span><span class="p">,</span> <span class="nx">setDetailId</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="kc">null</span><span class="p">)</span>
+
+<span class="p">{</span><span class="nx">isDetailOpen</span> <span class="o">&amp;&amp;</span> <span class="p">(</span>
+  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">className</span><span class="p">=</span><span class="s">"detail-row"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">colSpan</span><span class="p">=</span><span class="si">{</span><span class="mi">8</span><span class="si">}</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"detail-card"</span><span class="p">&gt;</span>
+        <span class="si">{</span><span class="cm">/* position, workType, salaryRange, experience */</span><span class="si">}</span>
+        <span class="si">{</span><span class="cm">/* required/preferred skills */</span><span class="si">}</span>
+        <span class="si">{</span><span class="cm">/* ATS analysis: score, feedback, re-analyze, close */</span><span class="si">}</span>
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+<span class="p">)}</span>
+</code></pre></div></div>
+
+<p>The detail panel contains position, work type, salary, experience, skills, and ATS results – all visible from a single row.</p>
+
+<hr />
+
+<h2 id="backend-api">Backend API Design and Vite Proxy</h2>
+
+<h3 id="restful-api-endpoints">RESTful API Endpoints</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST   /api/job-postings          # Submit posting (async processing)
+GET    /api/job-postings          # List all postings
+PUT    /api/job-postings/{id}     # Update a posting
+POST   /api/job-postings/preview  # LinkedIn URL preview
+POST   /api/job-postings/{id}/ats # Re-run ATS analysis
+POST   /api/job-postings/{id}/close # Mark as closed
+</code></pre></div></div>
+
+<h3 id="async-backgroundtasks-pattern">Async BackgroundTasks Pattern</h3>
+
+<p>LLM parsing, Notion page creation, and ATS analysis are time-consuming. To avoid blocking the user, we leverage <strong>FastAPI’s BackgroundTasks</strong>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@app.post</span><span class="p">(</span><span class="sh">"</span><span class="s">/api/job-postings</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">submit_job_posting</span><span class="p">(</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="n">JobPostingCreate</span><span class="p">,</span>
+    <span class="n">background_tasks</span><span class="p">:</span> <span class="n">BackgroundTasks</span><span class="p">,</span>
+    <span class="n">session</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="nc">Depends</span><span class="p">(</span><span class="n">get_session</span><span class="p">),</span>
+<span class="p">):</span>
+    <span class="c1"># Duplicate check
+</span>    <span class="n">duplicate</span> <span class="o">=</span> <span class="n">crud</span><span class="p">.</span><span class="nf">find_duplicate_by_job_id</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span> <span class="n">job_id</span><span class="o">=</span><span class="n">job_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">duplicate</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">duplicate</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">existingId</span><span class="sh">"</span><span class="p">:</span> <span class="n">duplicate</span><span class="p">.</span><span class="nb">id</span><span class="p">}</span>
+
+    <span class="c1"># Save to DB immediately
+</span>    <span class="n">job</span> <span class="o">=</span> <span class="n">crud</span><span class="p">.</span><span class="nf">create_job_posting</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span> <span class="p">...)</span>
+
+    <span class="c1"># Heavy processing in background
+</span>    <span class="n">background_tasks</span><span class="p">.</span><span class="nf">add_task</span><span class="p">(</span>
+        <span class="n">process_job_posting</span><span class="p">,</span>
+        <span class="n">job_id</span><span class="o">=</span><span class="n">job</span><span class="p">.</span><span class="nb">id</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">payload</span><span class="p">.</span><span class="n">title</span><span class="p">,</span>
+        <span class="n">body</span><span class="o">=</span><span class="n">payload</span><span class="p">.</span><span class="n">body</span><span class="p">,</span>
+        <span class="n">url</span><span class="o">=</span><span class="n">payload</span><span class="p">.</span><span class="n">url</span><span class="p">,</span>
+        <span class="n">posted_at_hint</span><span class="o">=</span><span class="n">payload</span><span class="p">.</span><span class="n">postedAt</span><span class="p">,</span>
+        <span class="n">company_name_hint</span><span class="o">=</span><span class="n">payload</span><span class="p">.</span><span class="n">companyName</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">queued</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">jobId</span><span class="sh">"</span><span class="p">:</span> <span class="n">job</span><span class="p">.</span><span class="nb">id</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>The frontend shows “Analysis pending” and uses <strong>optimistic updates</strong> to immediately add the item to the list.</p>
+
+<h3 id="vite-proxy-for-cors">Vite Proxy for CORS</h3>
+
+<p>In development, the frontend (port 5173) and backend (port 8000) run on different ports. Vite’s proxy configuration handles this cleanly:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// vite.config.js</span>
+<span class="k">export</span> <span class="k">default</span> <span class="nf">defineConfig</span><span class="p">({</span>
+  <span class="na">plugins</span><span class="p">:</span> <span class="p">[</span><span class="nf">react</span><span class="p">()],</span>
+  <span class="na">server</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">proxy</span><span class="p">:</span> <span class="p">{</span>
+      <span class="dl">'</span><span class="s1">/api</span><span class="dl">'</span><span class="p">:</span> <span class="dl">'</span><span class="s1">http://localhost:8000</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">},</span>
+  <span class="p">},</span>
+<span class="p">})</span>
+</code></pre></div></div>
+
+<p>The API client uses relative paths (<code class="language-plaintext highlighter-rouge">/api/job-postings</code>), and Vite automatically proxies to the backend.</p>
+
+<h3 id="sqlmodel---pydantic-meets-sqlalchemy">SQLModel - Pydantic Meets SQLAlchemy</h3>
+
+<p><strong>SQLModel</strong> lets us define a single model that covers both the DB schema and API schema:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">JobPosting</span><span class="p">(</span><span class="n">SQLModel</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nc">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">job_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nc">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">company_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">posted_at</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">salary_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">work_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">position</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">required_skills</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">preferred_skills</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">notion_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">ats_score</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">ats_feedback</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="sh">"</span><span class="s">queued</span><span class="sh">"</span>
+    <span class="n">hiring_status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="sh">"</span><span class="s">채용중</span><span class="sh">"</span>
+    <span class="n">created_at</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="nc">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">datetime</span><span class="p">.</span><span class="n">utcnow</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Choosing SQLite was intentional – for a personal local app, a single file database with no separate server is more than enough.</p>
+
+<hr />
+
+<h2 id="llm-integration">LLM Integration Trial and Error</h2>
+
+<p>The LLM integration was where we experienced the most trial and error. Cursor and I iterated through multiple options to find the right fit.</p>
+
+<h3 id="attempt-1-huggingface-serverless-api">Attempt 1: HuggingFace Serverless API</h3>
+
+<p>First, we tried the free HuggingFace Serverless Inference API with Mistral, Qwen, and flan-t5 models. All returned <strong>410 Gone</strong> errors – HuggingFace had deprecated their free Serverless API.</p>
+
+<h3 id="attempt-2-ollama-local-llm">Attempt 2: Ollama (Local LLM)</h3>
+
+<p>“How about a local LLM?” I asked Cursor, and it suggested <strong>Ollama + llama3.1:8b</strong>. It worked well locally without any API keys, but the dependency on local environment was a limitation.</p>
+
+<h3 id="final-choice-google-gemini-api">Final Choice: Google Gemini API</h3>
+
+<p>We settled on the <strong>Google Gemini API</strong>. The <code class="language-plaintext highlighter-rouge">gemini-3.1-flash-lite-preview</code> model proved fast, affordable, and capable enough for JSON extraction tasks.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">google</span> <span class="kn">import</span> <span class="n">genai</span>
+
+<span class="k">def</span> <span class="nf">call_gemini</span><span class="p">(</span><span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="p">.</span><span class="nc">Client</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">os</span><span class="p">.</span><span class="nf">getenv</span><span class="p">(</span><span class="sh">"</span><span class="s">GEMINI_API_KEY</span><span class="sh">"</span><span class="p">))</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">models</span><span class="p">.</span><span class="nf">generate_content</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">os</span><span class="p">.</span><span class="nf">getenv</span><span class="p">(</span><span class="sh">"</span><span class="s">GEMINI_MODEL</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">gemini-1.5-flash</span><span class="sh">"</span><span class="p">),</span>
+        <span class="n">contents</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="p">{</span>
+            <span class="sh">"</span><span class="s">temperature</span><span class="sh">"</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">max_output_tokens</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">response</span><span class="p">.</span><span class="n">text</span>
+</code></pre></div></div>
+
+<h3 id="three-roles-for-the-llm">Three Roles for the LLM</h3>
+
+<p><strong>1. Structured Field Extraction (<code class="language-plaintext highlighter-rouge">parse_job_fields</code>)</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">parse_job_fields</span><span class="p">(</span><span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sh">"</span><span class="s">Extract the following fields from the job posting in JSON: </span><span class="sh">"</span>
+        <span class="sh">"</span><span class="s">salaryRange, workType (Remote, Onsite, Hybrid), </span><span class="sh">"</span>
+        <span class="sh">"</span><span class="s">hybridDaysOnsite (number of onsite days if Hybrid), </span><span class="sh">"</span>
+        <span class="sh">"</span><span class="s">postedAt, position, requiredSkills, preferredSkills, </span><span class="sh">"</span>
+        <span class="sh">"</span><span class="s">requiredExperience. If unknown, use null.</span><span class="se">\n\n</span><span class="sh">"</span>
+        <span class="sa">f</span><span class="sh">"</span><span class="s">Title: </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="se">\n\n</span><span class="s">Body:</span><span class="se">\n</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="se">\n</span><span class="sh">"</span>
+    <span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="nf">call_gemini</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+    <span class="n">parsed</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>  <span class="c1"># with fallback parsing
+</span>    <span class="k">return</span> <span class="n">parsed</span>
+</code></pre></div></div>
+
+<p>Extracts salary, work type, skills, experience, and more from unstructured posting text.</p>
+
+<p><strong>2. Job Body Formatting (<code class="language-plaintext highlighter-rouge">format_job_body</code>)</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">format_job_body</span><span class="p">(</span><span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sh">"</span><span class="s">You are a helpful editor. Rewrite the job posting body into a clear, </span><span class="sh">"</span>
+        <span class="sh">"</span><span class="s">well-structured summary in Korean. Use short sections with headings </span><span class="sh">"</span>
+        <span class="sh">"</span><span class="s">and bullet points. Organize using these headings where possible: </span><span class="sh">"</span>
+        <span class="sh">"</span><span class="s">역할, 자격요건, 우대사항, 베네핏.</span><span class="se">\n\n</span><span class="sh">"</span>
+        <span class="sa">f</span><span class="sh">"</span><span class="s">Job Title: </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="se">\n\n</span><span class="s">Job Posting:</span><span class="se">\n</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="se">\n</span><span class="sh">"</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="nf">call_gemini</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Rewrites English postings into structured Korean summaries for better readability in Notion.</p>
+
+<p><strong>3. ATS Analysis (<code class="language-plaintext highlighter-rouge">analyze_ats</code>)</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">analyze_ats</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">resume_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sh">"</span><span class="s">You are an ATS reviewer. Return JSON with fields: </span><span class="sh">"</span>
+        <span class="sh">"</span><span class="s">score (0-100 integer), gaps (array of short strings), </span><span class="sh">"</span>
+        <span class="sh">"</span><span class="s">suggestions (array). </span><span class="sh">"</span>
+        <span class="sh">"</span><span class="s">Use only information from the resume and job posting.</span><span class="se">\n\n</span><span class="sh">"</span>
+        <span class="sa">f</span><span class="sh">"</span><span class="s">Job Title: </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="se">\n\n</span><span class="s">Job Posting:</span><span class="se">\n</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="se">\n\n</span><span class="sh">"</span>
+        <span class="sa">f</span><span class="sh">"</span><span class="s">Resume:</span><span class="se">\n</span><span class="si">{</span><span class="n">resume_text</span><span class="si">}</span><span class="se">\n</span><span class="sh">"</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="nf">call_gemini</span><span class="p">(</span><span class="n">prompt</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>Compares resume text against the posting to generate a fitness score, gaps, and improvement suggestions.</p>
+
+<h3 id="safe-json-parsing">Safe JSON Parsing</h3>
+
+<p>LLM responses aren’t always clean JSON. They might be wrapped in markdown code blocks or include explanatory text. We added fallback parsing:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">try</span><span class="p">:</span>
+    <span class="n">parsed</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">json</span><span class="p">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+    <span class="n">json_start</span> <span class="o">=</span> <span class="n">text</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="sh">"</span><span class="s">{</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">json_end</span> <span class="o">=</span> <span class="n">text</span><span class="p">.</span><span class="nf">rfind</span><span class="p">(</span><span class="sh">"</span><span class="s">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">json_start</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">json_end</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sh">"</span><span class="s">Invalid response</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">parsed</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">json_start</span> <span class="p">:</span> <span class="n">json_end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="linkedin-autofill">LinkedIn Auto-Fill Implementation</h2>
+
+<p>This was the most impactful feature for daily usability. Just paste a LinkedIn URL to auto-fill title, body, company name, and posting date.</p>
+
+<h3 id="frontend-url-input-debounce">Frontend: URL Input Debounce</h3>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// JobForm.jsx - Auto-preview on URL change</span>
+<span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">urlAutoTimer</span><span class="p">.</span><span class="nx">current</span><span class="p">)</span> <span class="nf">clearTimeout</span><span class="p">(</span><span class="nx">urlAutoTimer</span><span class="p">.</span><span class="nx">current</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">url</span> <span class="o">=</span> <span class="nx">form</span><span class="p">.</span><span class="nx">url</span><span class="p">.</span><span class="nf">trim</span><span class="p">()</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">url</span> <span class="o">||</span> <span class="nx">url</span> <span class="o">===</span> <span class="nx">lastPreviewUrl</span><span class="p">.</span><span class="nx">current</span> <span class="o">||</span> <span class="nx">autoPreviewed</span><span class="p">.</span><span class="nx">current</span><span class="p">)</span> <span class="k">return</span>
+
+  <span class="nx">urlAutoTimer</span><span class="p">.</span><span class="nx">current</span> <span class="o">=</span> <span class="nf">setTimeout</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nf">handlePreview</span><span class="p">()</span>
+    <span class="nx">autoPreviewed</span><span class="p">.</span><span class="nx">current</span> <span class="o">=</span> <span class="kc">true</span>
+  <span class="p">},</span> <span class="mi">600</span><span class="p">)</span>
+<span class="p">},</span> <span class="p">[</span><span class="nx">form</span><span class="p">.</span><span class="nx">url</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>After a 600ms debounce, the preview is automatically triggered. The <code class="language-plaintext highlighter-rouge">lastPreviewUrl</code> ref prevents duplicate requests for the same URL.</p>
+
+<h3 id="relative-time-conversion">Relative Time Conversion</h3>
+
+<p>LinkedIn shows posting dates as “1 month ago”, “3 weeks ago”. We convert these to actual dates:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">normalizePostedAt</span> <span class="o">=</span> <span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">value</span><span class="p">)</span> <span class="k">return</span> <span class="dl">''</span>
+  <span class="kd">const</span> <span class="nx">relativeMatch</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nf">match</span><span class="p">(</span>
+    <span class="sr">/</span><span class="se">(\d</span><span class="sr">+</span><span class="se">)\s</span><span class="sr">+</span><span class="se">(</span><span class="sr">day|week|month|hour|minute</span><span class="se">)</span><span class="sr">s</span><span class="se">?\s</span><span class="sr">+ago/i</span><span class="p">,</span>
+  <span class="p">)</span>
+  <span class="kd">let</span> <span class="nx">date</span> <span class="o">=</span> <span class="kc">null</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">relativeMatch</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">amount</span> <span class="o">=</span> <span class="nc">Number</span><span class="p">(</span><span class="nx">relativeMatch</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="kd">const</span> <span class="nx">unit</span> <span class="o">=</span> <span class="nx">relativeMatch</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="nf">toLowerCase</span><span class="p">()</span>
+    <span class="nx">date</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Date</span><span class="p">()</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">unit</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">day</span><span class="dl">'</span><span class="p">)</span> <span class="nx">date</span><span class="p">.</span><span class="nf">setDate</span><span class="p">(</span><span class="nx">date</span><span class="p">.</span><span class="nf">getDate</span><span class="p">()</span> <span class="o">-</span> <span class="nx">amount</span><span class="p">)</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">unit</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">week</span><span class="dl">'</span><span class="p">)</span> <span class="nx">date</span><span class="p">.</span><span class="nf">setDate</span><span class="p">(</span><span class="nx">date</span><span class="p">.</span><span class="nf">getDate</span><span class="p">()</span> <span class="o">-</span> <span class="nx">amount</span> <span class="o">*</span> <span class="mi">7</span><span class="p">)</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">unit</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">month</span><span class="dl">'</span><span class="p">)</span> <span class="nx">date</span><span class="p">.</span><span class="nf">setMonth</span><span class="p">(</span><span class="nx">date</span><span class="p">.</span><span class="nf">getMonth</span><span class="p">()</span> <span class="o">-</span> <span class="nx">amount</span><span class="p">)</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">date</span> <span class="p">?</span> <span class="nx">date</span><span class="p">.</span><span class="nf">toISOString</span><span class="p">().</span><span class="nf">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="p">:</span> <span class="dl">''</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="backend-multi-level-fallback-parsing">Backend: Multi-Level Fallback Parsing</h3>
+
+<p>LinkedIn page HTML structure varies by login state, region, and time. A single parsing strategy isn’t enough, so we designed a <strong>multi-level fallback structure</strong>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">parse_linkedin_job</span><span class="p">(</span><span class="n">html</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">soup</span> <span class="o">=</span> <span class="nc">BeautifulSoup</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="sh">"</span><span class="s">html.parser</span><span class="sh">"</span><span class="p">)</span>
+
+    <span class="c1"># Title: h1 → og:title → &lt;title&gt;
+</span>    <span class="n">title</span> <span class="o">=</span> <span class="nf">_extract_title</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
+
+    <span class="c1"># Company: &lt;title&gt; parse → JSON-LD → og:description → About section → raw HTML
+</span>    <span class="n">company_name</span> <span class="o">=</span> <span class="nf">_extract_company_from_title_text</span><span class="p">(</span><span class="n">page_title</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">company_name</span><span class="p">:</span>
+        <span class="n">company_name</span> <span class="o">=</span> <span class="nf">_extract_json_ld_company</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">company_name</span><span class="p">:</span>
+        <span class="n">company_name</span> <span class="o">=</span> <span class="nf">_extract_company_from_og_description</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">company_name</span><span class="p">:</span>
+        <span class="n">company_name</span> <span class="o">=</span> <span class="nf">_extract_company_from_about_section</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">company_name</span><span class="p">:</span>
+        <span class="n">company_name</span> <span class="o">=</span> <span class="nf">_extract_company_from_html_raw</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+
+    <span class="c1"># Body: About the job section → show-more-less markup → og:description → JSON-LD
+</span>    <span class="n">body</span> <span class="o">=</span> <span class="nf">_extract_about_section</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">body</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="nf">_extract_show_more_markup</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">body</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="nf">_extract_json_ld_description</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
+
+    <span class="c1"># Login wall detection
+</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">title</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">body</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nf">_is_login_wall</span><span class="p">(</span><span class="n">text_blob</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">fallback</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">manual</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">reason</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">login_required</span><span class="sh">"</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">title</span><span class="sh">"</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span> <span class="sh">"</span><span class="s">body</span><span class="sh">"</span><span class="p">:</span> <span class="n">body</span><span class="p">,</span> <span class="sh">"</span><span class="s">companyName</span><span class="sh">"</span><span class="p">:</span> <span class="n">company_name</span><span class="p">,</span> <span class="sh">"</span><span class="s">postedAt</span><span class="sh">"</span><span class="p">:</span> <span class="n">posted_at</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>This fallback structure successfully parses most LinkedIn postings. When parsing fails, users see a “Manual input required” message.</p>
+
+<h3 id="company-name-extraction-logic">Company Name Extraction Logic</h3>
+
+<p>LinkedIn <code class="language-plaintext highlighter-rouge">&lt;title&gt;</code> tags typically follow the pattern <code class="language-plaintext highlighter-rouge">"Job Title | Company Name | LinkedIn"</code>. But some include the “hiring” keyword, so we handle both patterns:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_extract_company_from_title_text</span><span class="p">(</span><span class="n">title_text</span><span class="p">):</span>
+    <span class="c1"># "Company hiring Job Title..." pattern
+</span>    <span class="n">hiring_match</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="nf">match</span><span class="p">(</span><span class="sa">r</span><span class="sh">"</span><span class="s">^(.*?)\s+hiring\b</span><span class="sh">"</span><span class="p">,</span> <span class="n">title_text</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="p">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">hiring_match</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">hiring_match</span><span class="p">.</span><span class="nf">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># "Job Title | Company | LinkedIn" pattern
+</span>    <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">part</span><span class="p">.</span><span class="nf">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">title_text</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s">|</span><span class="sh">"</span><span class="p">)</span> <span class="k">if</span> <span class="n">part</span><span class="p">.</span><span class="nf">strip</span><span class="p">()]</span>
+    <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nf">lower</span><span class="p">()</span> <span class="o">==</span> <span class="sh">"</span><span class="s">linkedin</span><span class="sh">"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="bp">None</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="notion-integration">Notion Integration - Structured Data Store</h2>
+
+<h3 id="the-notion-integration-challenge">The Notion Integration Challenge</h3>
+
+<p>The trickiest part of Notion API integration was <strong>workspace permissions</strong>. Initially, I tried connecting an Integration in a Personal workspace, but Database Connections only worked properly in a Team workspace. Cursor and I debugged this together.</p>
+
+<h3 id="page-structure">Page Structure</h3>
+
+<p>Each Notion page is organized as follows:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────┐
+│  [Properties]                       │
+│  Name: Job Title                    │
+│  Company: Company Name              │
+│  URL: Original Link                 │
+│  Position: Role Title               │
+│  WorkType: Remote/Hybrid/Onsite     │
+│  SalaryRange: Salary Range          │
+│  RequiredSkills: Required Skills    │
+│  PostedAt: Posting Date             │
+├─────────────────────────────────────┤
+│  [Body]                             │
+│  LLM-formatted Korean summary       │
+│  (Role / Requirements / Nice-to-    │
+│   have / Benefits)                  │
+│                                     │
+│  ── Original ──                     │
+│  Original English posting text      │
+├─────────────────────────────────────┤
+│  [ATS Analysis]                     │
+│  Score: 75                          │
+│  Gaps: [...]                        │
+│  Suggestions: [...]                 │
+└─────────────────────────────────────┘
+</code></pre></div></div>
+
+<h3 id="text-chunking">Text Chunking</h3>
+
+<p>The Notion API has a <strong>2000-character limit</strong> per rich_text block. We implemented chunking and batch append for long posting bodies:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">chunk_text</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_len</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1800</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="n">normalized</span> <span class="o">=</span> <span class="p">(</span><span class="n">text</span> <span class="ow">or</span> <span class="sh">""</span><span class="p">).</span><span class="nf">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">normalized</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="sh">"</span><span class="s">-</span><span class="sh">"</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">normalized</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">max_len</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">normalized</span><span class="p">),</span> <span class="n">max_len</span><span class="p">)]</span>
+
+<span class="k">def</span> <span class="nf">append_children_in_batches</span><span class="p">(</span>
+    <span class="n">notion</span><span class="p">,</span> <span class="n">page_id</span><span class="p">,</span> <span class="n">children</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">80</span>
+<span class="p">):</span>
+    <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">children</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
+        <span class="n">notion</span><span class="p">.</span><span class="n">blocks</span><span class="p">.</span><span class="n">children</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span>
+            <span class="n">block_id</span><span class="o">=</span><span class="n">page_id</span><span class="p">,</span>
+            <span class="n">children</span><span class="o">=</span><span class="n">children</span><span class="p">[</span><span class="n">start</span> <span class="p">:</span> <span class="n">start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
+        <span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="notion-sync-on-update">Notion Sync on Update</h3>
+
+<p>When a posting is updated, both the DB and Notion page are synchronized. Existing blocks are deleted and recreated:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">update_notion_page</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">notion</span><span class="p">,</span> <span class="n">page_id</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">parsed</span><span class="p">):</span>
+    <span class="c1"># Update properties
+</span>    <span class="n">notion</span><span class="p">.</span><span class="n">pages</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">page_id</span><span class="o">=</span><span class="n">page_id</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">)</span>
+
+    <span class="c1"># Delete all existing blocks
+</span>    <span class="n">cursor</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">notion</span><span class="p">.</span><span class="n">blocks</span><span class="p">.</span><span class="n">children</span><span class="p">.</span><span class="nf">list</span><span class="p">(</span><span class="n">block_id</span><span class="o">=</span><span class="n">page_id</span><span class="p">,</span> <span class="n">start_cursor</span><span class="o">=</span><span class="n">cursor</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">response</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">results</span><span class="sh">"</span><span class="p">,</span> <span class="p">[]):</span>
+            <span class="n">notion</span><span class="p">.</span><span class="n">blocks</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="n">block_id</span><span class="o">=</span><span class="n">block</span><span class="p">[</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">has_more</span><span class="sh">"</span><span class="p">):</span>
+            <span class="k">break</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">next_cursor</span><span class="sh">"</span><span class="p">)</span>
+
+    <span class="c1"># Append new blocks
+</span>    <span class="nf">append_children_in_batches</span><span class="p">(</span><span class="n">notion</span><span class="p">,</span> <span class="n">page_id</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="ats-analysis">ATS Analysis and Job Closure Detection</h2>
+
+<h3 id="ats-analysis-flow">ATS Analysis Flow</h3>
+
+<p>The ATS (Applicant Tracking System) analysis compares your resume against a job posting to score fitness:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Resume (Notion page) ──┐
+                       ├─→ Gemini API ─→ { score, gaps, suggestions }
+Job posting body ──────┘
+</code></pre></div></div>
+
+<ol>
+  <li>Extract resume text from a Notion page via the API</li>
+  <li>Send both the resume and job posting to Gemini</li>
+  <li>Receive a 0-100 score, gaps, and improvement suggestions as JSON</li>
+  <li>Append results to the Notion job page and save to DB</li>
+</ol>
+
+<h3 id="job-closure-detection">Job Closure Detection</h3>
+
+<p>LinkedIn posting pages are revisited to check for “No longer accepting applications” text or missing “Apply” buttons. Closed postings are shown with grey rows and can be filtered with a “Hide closed” toggle.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@app.post</span><span class="p">(</span><span class="sh">"</span><span class="s">/api/job-postings/{job_id}/close</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">close_job_posting</span><span class="p">(</span><span class="n">job_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="nc">Depends</span><span class="p">(</span><span class="n">get_session</span><span class="p">)):</span>
+    <span class="n">job</span> <span class="o">=</span> <span class="n">crud</span><span class="p">.</span><span class="nf">get_job_posting</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span> <span class="n">job_id</span><span class="o">=</span><span class="n">job_id</span><span class="p">)</span>
+    <span class="n">crud</span><span class="p">.</span><span class="nf">update_job_posting</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">hiring_status</span><span class="o">=</span><span class="sh">"</span><span class="s">종료</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">status</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">closed</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">jobId</span><span class="sh">"</span><span class="p">:</span> <span class="n">job_id</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>The frontend visually distinguishes closed postings:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nt">tr</span> <span class="na">className</span><span class="p">=</span><span class="si">{</span><span class="p">[</span>
+    <span class="nx">submission</span><span class="p">.</span><span class="nx">id</span> <span class="o">===</span> <span class="nx">activeId</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">active</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">''</span><span class="p">,</span>
+    <span class="nx">isClosed</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">summary-row-closed</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">''</span><span class="p">,</span>
+  <span class="p">].</span><span class="nf">filter</span><span class="p">(</span><span class="nb">Boolean</span><span class="p">).</span><span class="nf">join</span><span class="p">(</span><span class="dl">'</span><span class="s1"> </span><span class="dl">'</span><span class="p">)</span><span class="si">}</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="architecture">Overall Architecture</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌───────────────────────────────────────────────────────────────┐
+│                     Frontend (React + Vite)                   │
+│  ┌──────────┐  ┌──────────────┐  ┌───────────────┐           │
+│  │ JobForm  │  │ SummaryList  │  │ apiClient.js  │           │
+│  └──────────┘  └──────────────┘  └───────┬───────┘           │
+│                                          │ /api proxy        │
+├──────────────────────────────────────────┼───────────────────┤
+│                     Backend (FastAPI)     │                   │
+│  ┌───────────┐  ┌──────────┐  ┌──────────▼───────┐          │
+│  │ models.py │  │ crud.py  │  │    main.py       │          │
+│  │ schemas.py│  │          │  │  (API Routes)    │          │
+│  └─────┬─────┘  └────┬─────┘  └──┬──────┬───────┘          │
+│        │             │            │      │                   │
+│        ▼             ▼            ▼      ▼                   │
+│  ┌──────────┐  ┌──────────┐  ┌────────────────┐             │
+│  │ SQLite   │  │ parsers/ │  │  services.py   │             │
+│  │ (data.db)│  │linkedin  │  │  (LLM+Notion)  │             │
+│  └──────────┘  └────┬─────┘  └──┬─────┬───────┘             │
+│                     │           │     │                      │
+├─────────────────────┼───────────┼─────┼──────────────────────┤
+│  External Services  │           │     │                      │
+│             ┌───────▼──┐  ┌─────▼─┐  ┌▼───────────┐         │
+│             │ LinkedIn │  │Gemini │  │ Notion API │         │
+│             │(Scraping)│  │  API  │  │            │         │
+│             └──────────┘  └───────┘  └────────────┘         │
+└───────────────────────────────────────────────────────────────┘
+</code></pre></div></div>
+
+<p><strong>Data Flow Summary:</strong></p>
+
+<ol>
+  <li>User enters URL -&gt; LinkedIn HTML scraping -&gt; Auto-fill</li>
+  <li>Submit posting -&gt; Immediate DB save -&gt; Background processing starts</li>
+  <li>Gemini API for structured parsing + body formatting</li>
+  <li>Notion page auto-creation (Properties + formatted body + original text)</li>
+  <li>Resume vs posting ATS analysis -&gt; Results appended to Notion</li>
+  <li>Frontend list management (search, sort, detail view, edit)</li>
+</ol>
+
+<hr />
+
+<h2 id="cursor-experience">Lessons from Developing with Cursor AI</h2>
+
+<h3 id="what-worked-well">What Worked Well</h3>
+
+<p><strong>1. Rapid Scaffolding</strong></p>
+
+<p>“Create a Vite + React project with a job posting form and result list component” – and the basic structure appears immediately. Boilerplate writing time was dramatically reduced.</p>
+
+<p><strong>2. Repetitive CRUD Code</strong></p>
+
+<p>The create/read/update/delete functions in <code class="language-plaintext highlighter-rouge">crud.py</code>, Pydantic models in <code class="language-plaintext highlighter-rouge">schemas.py</code>, API response mappings – Cursor generated these consistently and accurately.</p>
+
+<p><strong>3. Debugging Partner</strong></p>
+
+<p>When the HuggingFace API returned 410, when Notion permissions failed – working through root causes and finding alternatives with Cursor felt like genuine pair programming with a colleague.</p>
+
+<p><strong>4. UI/UX Improvement Ideas</strong></p>
+
+<p>Saying “I think a table would work better than cards” prompted an immediate table-based UI proposal, along with proactive suggestions for toolbar, filtering, and detail panels.</p>
+
+<p><strong>5. Understanding the Whole Process</strong></p>
+
+<p>Beyond just generating code, Cursor engaged in discussions about “why this technology,” “what are the trade-offs of this pattern” – genuine technical decision-making conversations.</p>
+
+<h3 id="things-to-watch-out-for">Things to Watch Out For</h3>
+
+<p><strong>1. Context Window Limitations</strong></p>
+
+<p>In long development sessions, early decisions sometimes weren’t reflected later. Important decisions should be explicitly re-stated.</p>
+
+<p><strong>2. Precise Requirements Matter</strong></p>
+
+<p>“Make it prettier” produces vague results. “Change the card layout to a table, with expandable detail panels on row click” yields much better outcomes.</p>
+
+<p><strong>3. External API Changes</strong></p>
+
+<p>For issues like HuggingFace API deprecation or LinkedIn HTML structure changes, Cursor may not have the latest information. Sharing exact error messages helps find alternatives quickly.</p>
+
+<h3 id="why-ai-pair-programming-suits-side-projects">Why AI Pair Programming Suits Side Projects</h3>
+
+<ol>
+  <li><strong>Reduced decision cost</strong>: Technology choices that would take hours of solo deliberation can be quickly discussed and decided</li>
+  <li><strong>Flattened learning curves</strong>: Unfamiliar technologies (Notion API, Gemini API) can be applied immediately with examples</li>
+  <li><strong>Sustained motivation</strong>: Visible rapid progress keeps the project from stalling</li>
+  <li><strong>Quality maintenance</strong>: Error handling and edge cases are addressed together, not forgotten</li>
+</ol>
+
+<hr />
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>CareerWeb started from a simple frustration – “organizing job postings is tedious” – and evolved into a full-stack web app through conversations with Cursor AI.</p>
+
+<p><strong>Tech Stack Summary:</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Area</th>
+      <th>Technology</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Frontend</td>
+      <td>Vite 7 + React 19</td>
+    </tr>
+    <tr>
+      <td>Backend</td>
+      <td>FastAPI + SQLModel + SQLite</td>
+    </tr>
+    <tr>
+      <td>LLM</td>
+      <td>Google Gemini API</td>
+    </tr>
+    <tr>
+      <td>Data Storage</td>
+      <td>Notion API</td>
+    </tr>
+    <tr>
+      <td>Scraping</td>
+      <td>BeautifulSoup + httpx</td>
+    </tr>
+    <tr>
+      <td>Development Tool</td>
+      <td>Cursor AI</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The most impressive takeaway from building with Cursor was that AI isn’t just a code generation tool – it’s a <strong>partner for technical decision-making</strong>. Of course, not every decision should be delegated to AI. Final judgment and direction remain the developer’s responsibility. But the perspectives AI provides and its rapid prototyping capability significantly increase the completion rate of side projects.</p>
+
+<p>If you’re job hunting, building an automation tool like this can itself become a great portfolio piece. And in that process, an AI coding assistant like Cursor will be a reliable partner.</p>
+
+<hr />
+
+<p><em>The CareerWeb project discussed in this post is available on <a href="https://github.com/data-droid">GitHub</a>.</em></p>
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2026 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,695 @@
+---
+layout: post
+lang: ko
+title: "Cursor AI로 풀스택 사이드 프로젝트 만들기 - CareerWeb 개발기"
+description: "채용공고 트래커 CareerWeb을 Cursor AI와 대화하며 처음부터 끝까지 만들어간 과정을 정리합니다. 기술 스택 선정부터 LLM 통합, Notion 연동, ATS 분석까지 AI 페어 프로그래밍의 실전 경험을 공유합니다."
+date: 2026-03-13
+author: Data Droid
+category: data-engineering
+tags: [Cursor, AI-Pair-Programming, React, FastAPI, Gemini, Notion-API, 사이드프로젝트]
+reading_time: "50분"
+difficulty: "중급"
+---
+
+# Cursor AI로 풀스택 사이드 프로젝트 만들기 - CareerWeb 개발기
+
+> "아이디어 하나와 AI 코딩 어시스턴트가 만나면, 혼자서도 풀스택 웹앱을 완성할 수 있다."
+
+구직 활동을 하면서 채용공고를 하나하나 정리하는 게 너무 번거로웠습니다. URL을 복사하고, 주요 내용을 노션에 옮기고, 이력서와 비교해서 부족한 점을 체크하는 반복 작업. 이걸 자동화하면 어떨까 싶어 시작한 사이드 프로젝트가 **CareerWeb**입니다.
+
+특별한 점은 이 프로젝트를 처음부터 끝까지 **Cursor AI와 대화하며** 만들었다는 것입니다. 기술 스택 선정, UI 설계, API 구조, LLM 프롬프트 설계까지 모든 과정에서 AI와 함께 고민하고 결정했습니다. 이 글에서는 그 여정을 기술적 디테일과 함께 공유합니다.
+
+---
+
+## 📚 목차 {#toc}
+
+- [완성된 CareerWeb은 어떤 앱인가](#what-is-careerweb)
+- [기술 스택 선정 - Cursor와의 첫 대화](#tech-stack)
+- [프론트엔드 UI의 진화](#frontend-evolution)
+- [백엔드 API 설계와 Vite 프록시](#backend-api)
+- [LLM 통합의 시행착오](#llm-integration)
+- [LinkedIn 자동 채움 구현](#linkedin-autofill)
+- [Notion 연동 - 구조화된 데이터 저장소](#notion-integration)
+- [ATS 분석과 채용 종료 감지](#ats-analysis)
+- [전체 아키텍처](#architecture)
+- [Cursor AI와 함께 개발하며 느낀 점](#cursor-experience)
+- [마무리](#conclusion)
+
+---
+
+## 🎯 완성된 CareerWeb은 어떤 앱인가 {#what-is-careerweb}
+
+CareerWeb은 **채용공고 수집 → LLM 파싱 → Notion 정리 → ATS 분석**을 하나로 연결하는 개인용 채용공고 트래커입니다.
+
+**핵심 기능:**
+
+- **공고 입력**: URL을 붙여넣으면 LinkedIn 공고를 자동으로 파싱해서 제목, 본문, 회사명, 게시일을 채움
+- **LLM 분석**: Google Gemini가 공고를 구조화 — 연봉, 근무형태, 필수/우대 스킬, 경력 요구사항 등 추출
+- **Notion 저장**: 파싱된 정보를 Notion 데이터베이스에 자동 페이지 생성 (포맷팅된 요약 + 원문)
+- **ATS 점수**: 내 이력서(Notion 페이지)와 공고를 비교해서 적합도 점수, 갭, 개선 제안을 생성
+- **채용 종료 감지**: LinkedIn 재방문으로 종료된 공고를 자동 감지
+
+```
+┌─────────────────────────────────────────────────────┐
+│                    CareerWeb Flow                    │
+│                                                     │
+│  URL 입력 → LinkedIn 파싱 → DB 저장 → LLM 분석     │
+│      ↓                                    ↓         │
+│  자동 채움        Notion 페이지 생성 ← 구조화       │
+│                        ↓                            │
+│              이력서 비교 → ATS 점수/피드백           │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🛠 기술 스택 선정 - Cursor와의 첫 대화 {#tech-stack}
+
+프로젝트의 첫 시작은 Cursor에게 아이디어를 설명하는 것이었습니다.
+
+> "채용공고 URL을 입력하면 Notion에 정리하고, 이력서와 비교해서 ATS 점수를 매기는 웹앱을 만들고 싶어"
+
+이 한 문장에서 시작해 Cursor와 함께 기술 스택을 결정했습니다.
+
+### 프론트엔드: Vite 7 + React 19
+
+빠른 개발 속도를 위해 **Vite + React** 조합을 선택했습니다. TypeScript를 사용하지 않은 것은 의도적인 결정으로, 사이드 프로젝트의 속도를 최우선으로 두었기 때문입니다.
+
+```bash
+npm create vite@latest CareerWeb -- --template react
+```
+
+### 백엔드: FastAPI + SQLModel + SQLite
+
+Python 생태계의 LLM/스크래핑 라이브러리를 활용하기 위해 Python 백엔드를 선택했고, **FastAPI**의 자동 문서화와 비동기 처리가 이 프로젝트에 잘 맞았습니다.
+
+```
+fastapi          # 비동기 웹 프레임워크
+google-genai     # Gemini API 클라이언트
+httpx            # HTTP 클라이언트 (LinkedIn 스크래핑)
+beautifulsoup4   # HTML 파싱
+notion-client    # Notion API
+sqlmodel         # ORM (SQLAlchemy + Pydantic)
+uvicorn          # ASGI 서버
+```
+
+### 단일 레포 vs 분리 레포
+
+처음에는 하나의 레포에 프론트/백을 모두 넣으려 했지만, Cursor와 논의하면서 **분리 레포**로 결정했습니다. 이유는:
+
+- 프론트엔드와 백엔드의 의존성 관리가 독립적
+- 각각의 .gitignore와 환경 설정이 깔끔
+- Cursor에서 작업할 때 컨텍스트가 명확
+
+결과적으로 `CareerWeb` (프론트엔드)과 `CareerWeb-backend` (백엔드) 두 개의 레포가 만들어졌습니다.
+
+---
+
+## 🎨 프론트엔드 UI의 진화 {#frontend-evolution}
+
+### 초기: 카드형 레이아웃
+
+처음 Cursor가 생성한 UI는 `JobForm`, `SummaryList`, `DataModeToggle`, `AtsResult` 컴포넌트로 구성된 카드 기반 레이아웃이었습니다. 공고를 입력하면 아래쪽에 카드 형태로 결과가 나타나는 구조였죠.
+
+### 전환: 테이블 리스트 뷰
+
+실제로 사용해보니 공고가 많아질수록 카드형은 한눈에 비교가 어려웠습니다. Cursor에게 "리스트 형태의 테이블이 더 효율적일 것 같아"라고 요청하면서 UI가 크게 바뀌었습니다.
+
+**변경 포인트:**
+- "채용공고 입력" 버튼으로 폼 전환 (리스트 우선 뷰)
+- 회사명, 제목, 날짜, 링크, ATS 점수를 한 줄에 표시
+- 행 클릭으로 상세 정보 패널 확장
+
+### 도구바와 필터링
+
+```jsx
+// App.jsx - 상태 관리
+const [searchQuery, setSearchQuery] = useState('')
+const [sortOrder, setSortOrder] = useState('recent')
+const [hideClosed, setHideClosed] = useState(false)
+```
+
+검색, 정렬(최신순/ATS 점수순), 종료 공고 숨기기 등 도구바 기능을 추가하면서 실사용성이 크게 올라갔습니다. 이 과정에서 Cursor는 `useMemo`를 활용한 필터링 로직을 깔끔하게 제안해주었습니다.
+
+### 상세 패널 UX
+
+테이블의 행을 클릭하면 바로 아래에 상세 정보가 펼쳐지는 패턴을 적용했습니다.
+
+```jsx
+// SummaryList.jsx - 상세 패널 토글
+const [detailId, setDetailId] = useState(null)
+
+{isDetailOpen && (
+  <tr className="detail-row">
+    <td colSpan={8}>
+      <div className="detail-card">
+        {/* position, workType, salaryRange, experience */}
+        {/* required/preferred skills */}
+        {/* ATS 분석: 점수, 피드백, 재분석, 종료 처리 */}
+      </div>
+    </td>
+  </tr>
+)}
+```
+
+상세 패널에는 포지션, 근무형태, 연봉, 경력, 스킬, ATS 분석 결과가 모두 포함됩니다. 하나의 행에서 필요한 모든 정보를 확인할 수 있어 UX가 훨씬 좋아졌습니다.
+
+---
+
+## ⚡ 백엔드 API 설계와 Vite 프록시 {#backend-api}
+
+### RESTful API 엔드포인트
+
+```
+POST   /api/job-postings          # 공고 등록 (비동기 처리)
+GET    /api/job-postings          # 공고 목록 조회
+PUT    /api/job-postings/{id}     # 공고 수정
+POST   /api/job-postings/preview  # LinkedIn URL 미리보기
+POST   /api/job-postings/{id}/ats # ATS 재분석
+POST   /api/job-postings/{id}/close # 채용 종료 처리
+```
+
+### 비동기 BackgroundTasks 패턴
+
+공고 등록 시 LLM 파싱 → Notion 페이지 생성 → ATS 분석은 시간이 오래 걸리는 작업입니다. 사용자가 기다리지 않도록 **FastAPI의 BackgroundTasks**를 활용했습니다.
+
+```python
+@app.post("/api/job-postings")
+def submit_job_posting(
+    payload: JobPostingCreate,
+    background_tasks: BackgroundTasks,
+    session: Session = Depends(get_session),
+):
+    # 중복 체크
+    duplicate = crud.find_duplicate_by_job_id(session=session, job_id=job_id)
+    if duplicate:
+        return {"status": "duplicate", "existingId": duplicate.id}
+
+    # DB에 즉시 저장
+    job = crud.create_job_posting(session=session, ...)
+
+    # 무거운 작업은 백그라운드로
+    background_tasks.add_task(
+        process_job_posting,
+        job_id=job.id,
+        title=payload.title,
+        body=payload.body,
+        url=payload.url,
+        posted_at_hint=payload.postedAt,
+        company_name_hint=payload.companyName,
+    )
+    return {"status": "queued", "jobId": job.id}
+```
+
+프론트엔드에서는 "분석 대기 중입니다"라는 메시지를 보여주고, 목록에 **낙관적 업데이트(Optimistic Update)**로 아이템을 즉시 추가합니다.
+
+### Vite 프록시로 CORS 해결
+
+개발 환경에서 프론트엔드(5173)와 백엔드(8000)가 다른 포트를 사용하므로 CORS 이슈가 발생합니다. Vite의 프록시 설정으로 깔끔하게 해결했습니다.
+
+```javascript
+// vite.config.js
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/api': 'http://localhost:8000',
+    },
+  },
+})
+```
+
+프론트엔드의 API 클라이언트에서는 상대 경로(`/api/job-postings`)만 사용하면 Vite가 자동으로 백엔드로 프록시합니다.
+
+### SQLModel - Pydantic + SQLAlchemy의 만남
+
+데이터 모델을 한 번 정의하면 DB 스키마와 API 스키마를 모두 커버할 수 있는 **SQLModel**을 사용했습니다.
+
+```python
+class JobPosting(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    job_id: Optional[str] = Field(default=None, index=True)
+    company_name: Optional[str] = None
+    title: str
+    url: Optional[str] = None
+    body: str
+    posted_at: Optional[datetime] = None
+    salary_range: Optional[str] = None
+    work_type: Optional[str] = None
+    position: Optional[str] = None
+    required_skills: Optional[str] = None
+    preferred_skills: Optional[str] = None
+    notion_url: Optional[str] = None
+    ats_score: Optional[int] = None
+    ats_feedback: Optional[str] = None
+    status: str = "queued"
+    hiring_status: str = "채용중"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+```
+
+SQLite를 DB로 선택한 것도 의도적입니다. 개인용 로컬 앱이므로 별도의 DB 서버 없이 파일 하나로 충분합니다.
+
+---
+
+## 🤖 LLM 통합의 시행착오 {#llm-integration}
+
+이 프로젝트에서 가장 많은 시행착오를 겪은 부분이 LLM 통합입니다. Cursor와 함께 여러 옵션을 시도하며 최적의 선택을 찾아갔습니다.
+
+### 1차 시도: HuggingFace Serverless API
+
+처음에는 무료 API인 HuggingFace Serverless Inference를 시도했습니다. Mistral, Qwen, flan-t5 모델을 차례로 시도했지만, 모두 **410 Gone** 에러를 반환했습니다. HuggingFace가 무료 Serverless API를 deprecated 시킨 것이었죠.
+
+### 2차 시도: Ollama (로컬 LLM)
+
+"그럼 로컬 LLM을 써볼까?" 하고 Cursor에게 물어보니, **Ollama + llama3.1:8b** 조합을 제안해주었습니다. 로컬에서 동작하니 API 키도 필요 없고, 실제로 잘 동작했습니다. 하지만 로컬 환경에 의존한다는 점이 아쉬웠습니다.
+
+### 최종 선택: Google Gemini API
+
+최종적으로 **Google Gemini API**를 선택했습니다. `gemini-3.1-flash-lite-preview` 모델은 빠르고 저렴하면서도 JSON 추출 작업에 충분한 성능을 보였습니다.
+
+```python
+from google import genai
+
+def call_gemini(prompt: str) -> str:
+    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    response = client.models.generate_content(
+        model=os.getenv("GEMINI_MODEL", "gemini-1.5-flash"),
+        contents=prompt,
+        config={
+            "temperature": 0.2,
+            "max_output_tokens": 1024,
+        },
+    )
+    return response.text
+```
+
+### LLM이 수행하는 세 가지 역할
+
+**1. 채용공고 구조화 파싱 (`parse_job_fields`)**
+
+```python
+def parse_job_fields(title: str, body: str) -> dict:
+    prompt = (
+        "Extract the following fields from the job posting in JSON: "
+        "salaryRange, workType (Remote, Onsite, Hybrid), "
+        "hybridDaysOnsite (number of onsite days if Hybrid), "
+        "postedAt, position, requiredSkills, preferredSkills, "
+        "requiredExperience. If unknown, use null.\n\n"
+        f"Title: {title}\n\nBody:\n{body}\n"
+    )
+    text = call_gemini(prompt)
+    parsed = json.loads(text)  # JSON 파싱 + 폴백 처리
+    return parsed
+```
+
+비정형 공고 텍스트에서 연봉, 근무형태, 스킬, 경력 등을 구조화된 JSON으로 추출합니다.
+
+**2. 공고 본문 포맷팅 (`format_job_body`)**
+
+```python
+def format_job_body(title: str, body: str) -> str:
+    prompt = (
+        "You are a helpful editor. Rewrite the job posting body into a clear, "
+        "well-structured summary in Korean. Use short sections with headings and "
+        "bullet points. Organize using these headings where possible: "
+        "역할, 자격요건, 우대사항, 베네핏. "
+        "Preserve all factual details and do not add new info. "
+        "Output plain text only in Korean.\n\n"
+        f"Job Title: {title}\n\nJob Posting:\n{body}\n"
+    )
+    return call_gemini(prompt)
+```
+
+영문 공고를 한국어로 정리하면서 역할/자격요건/우대사항/베네핏 구조로 재작성합니다. Notion에 저장할 때 가독성이 훨씬 좋아집니다.
+
+**3. ATS 분석 (`analyze_ats`)**
+
+```python
+def analyze_ats(*, title: str, body: str, resume_text: str) -> dict:
+    prompt = (
+        "You are an ATS reviewer. Return JSON with fields: "
+        "score (0-100 integer), gaps (array of short strings), "
+        "suggestions (array). "
+        "Use only information from the resume and job posting.\n\n"
+        f"Job Title: {title}\n\nJob Posting:\n{body}\n\n"
+        f"Resume:\n{resume_text}\n"
+    )
+    return json.loads(call_gemini(prompt))
+```
+
+이력서 텍스트와 공고를 비교해서 적합도 점수, 부족한 점(gaps), 개선 제안(suggestions)을 JSON으로 반환합니다.
+
+### JSON 파싱의 안전 처리
+
+LLM 응답이 항상 깨끗한 JSON은 아닙니다. 마크다운 코드 블록으로 감싸거나 앞뒤에 설명 텍스트가 붙는 경우가 있어, 폴백 파싱 로직을 추가했습니다.
+
+```python
+try:
+    parsed = json.loads(text)
+except json.JSONDecodeError:
+    json_start = text.find("{")
+    json_end = text.rfind("}")
+    if json_start == -1 or json_end == -1:
+        raise ValueError("Invalid response")
+    parsed = json.loads(text[json_start : json_end + 1])
+```
+
+---
+
+## 🔗 LinkedIn 자동 채움 구현 {#linkedin-autofill}
+
+가장 사용성에 직결되는 기능이었습니다. LinkedIn URL만 입력하면 제목, 본문, 회사명, 게시일을 자동으로 채워주는 기능입니다.
+
+### 프론트엔드: URL 입력 디바운스
+
+```jsx
+// JobForm.jsx - URL 변경 감지 후 자동 미리보기
+useEffect(() => {
+  if (urlAutoTimer.current) clearTimeout(urlAutoTimer.current)
+  const url = form.url.trim()
+  if (!url || url === lastPreviewUrl.current || autoPreviewed.current) return
+
+  urlAutoTimer.current = setTimeout(() => {
+    handlePreview()
+    autoPreviewed.current = true
+  }, 600)
+}, [form.url])
+```
+
+URL을 입력하면 600ms 디바운스 후 자동으로 미리보기를 요청합니다. `lastPreviewUrl` ref로 동일 URL에 대한 중복 요청도 방지합니다.
+
+### 게시일 상대 시간 변환
+
+LinkedIn은 게시일을 "1 month ago", "3 weeks ago" 같은 상대 시간으로 표시합니다. 이를 실제 날짜로 변환하는 로직이 필요했습니다.
+
+```jsx
+const normalizePostedAt = (value) => {
+  if (!value) return ''
+  const relativeMatch = value.match(
+    /(\d+)\s+(day|week|month|hour|minute)s?\s+ago/i,
+  )
+  let date = null
+  if (relativeMatch) {
+    const amount = Number(relativeMatch[1])
+    const unit = relativeMatch[2].toLowerCase()
+    date = new Date()
+    if (unit === 'day') date.setDate(date.getDate() - amount)
+    if (unit === 'week') date.setDate(date.getDate() - amount * 7)
+    if (unit === 'month') date.setMonth(date.getMonth() - amount)
+  }
+  return date ? date.toISOString().slice(0, 10) : ''
+}
+```
+
+### 백엔드: 다단계 폴백 파싱
+
+LinkedIn 페이지의 HTML 구조는 로그인 상태, 지역, 시기에 따라 달라집니다. 하나의 파싱 전략만으로는 불충분해서 **다단계 폴백 구조**를 설계했습니다.
+
+```python
+def parse_linkedin_job(html: str) -> dict:
+    soup = BeautifulSoup(html, "html.parser")
+
+    # 제목 추출: h1 → og:title → <title>
+    title = _extract_title(soup)
+
+    # 회사명: <title> 파싱 → JSON-LD → og:description → About 섹션 → 원시 HTML
+    company_name = _extract_company_from_title_text(page_title)
+    if not company_name:
+        company_name = _extract_json_ld_company(soup)
+    if not company_name:
+        company_name = _extract_company_from_og_description(soup)
+    if not company_name:
+        company_name = _extract_company_from_about_section(soup)
+    if not company_name:
+        company_name = _extract_company_from_html_raw(html)
+
+    # 본문: About the job 섹션 → show-more-less 마크업 → og:description → JSON-LD
+    body = _extract_about_section(soup)
+    if not body:
+        body = _extract_show_more_markup(soup)
+    if not body:
+        body = _extract_json_ld_description(soup)
+
+    # 로그인 월 감지
+    if not title or not body:
+        if _is_login_wall(text_blob):
+            return {"fallback": "manual", "reason": "login_required"}
+
+    return {"title": title, "body": body, "companyName": company_name, "postedAt": posted_at}
+```
+
+이 폴백 구조 덕분에 대부분의 LinkedIn 공고를 성공적으로 파싱할 수 있었습니다. 파싱 실패 시에는 "수동 입력이 필요합니다"라는 안내 메시지를 표시합니다.
+
+### 회사명 추출의 특별한 로직
+
+LinkedIn `<title>` 태그는 보통 `"Job Title | Company Name | LinkedIn"` 형식입니다. 하지만 "hiring" 키워드가 포함된 경우도 있어서 두 가지 패턴을 모두 처리합니다.
+
+```python
+def _extract_company_from_title_text(title_text):
+    # "Company hiring Job Title..." 패턴
+    hiring_match = re.match(r"^(.*?)\s+hiring\b", title_text, flags=re.IGNORECASE)
+    if hiring_match:
+        return hiring_match.group(1)
+    # "Job Title | Company | LinkedIn" 패턴
+    parts = [part.strip() for part in title_text.split("|") if part.strip()]
+    if len(parts) >= 3 and parts[-1].lower() == "linkedin":
+        return parts[1]
+    return None
+```
+
+---
+
+## 📝 Notion 연동 - 구조화된 데이터 저장소 {#notion-integration}
+
+### Notion 통합의 도전
+
+Notion API 연동 과정에서 가장 헤맸던 부분은 **워크스페이스 권한** 설정이었습니다. 처음에는 Personal 워크스페이스에서 Integration을 연결하려 했는데, Team 워크스페이스에서만 Database Connection이 제대로 작동했습니다. Cursor와 함께 디버깅하면서 이 부분을 해결했습니다.
+
+### 페이지 생성 구조
+
+Notion 페이지는 다음과 같이 구성됩니다:
+
+```
+┌─────────────────────────────────────┐
+│  [Properties]                       │
+│  Name: Job Title                    │
+│  Company: 회사명                    │
+│  URL: 원본 링크                     │
+│  Position: 포지션명                 │
+│  WorkType: Remote/Hybrid/Onsite     │
+│  SalaryRange: 연봉 범위            │
+│  RequiredSkills: 필수 스킬          │
+│  PostedAt: 게시일                   │
+├─────────────────────────────────────┤
+│  [Body]                             │
+│  LLM이 정리한 한국어 요약           │
+│  (역할 / 자격요건 / 우대 / 베네핏)  │
+│                                     │
+│  ── 원문 ──                         │
+│  원본 영문 공고 텍스트              │
+├─────────────────────────────────────┤
+│  [ATS Analysis]                     │
+│  Score: 75                          │
+│  Gaps: [...]                        │
+│  Suggestions: [...]                 │
+└─────────────────────────────────────┘
+```
+
+### 텍스트 청킹
+
+Notion API는 하나의 rich_text 블록에 **2000자 제한**이 있습니다. 긴 공고 본문을 처리하기 위해 청킹 로직과 배치 append를 구현했습니다.
+
+```python
+def chunk_text(text: str, max_len: int = 1800) -> list[str]:
+    normalized = (text or "").strip()
+    if not normalized:
+        return ["-"]
+    return [normalized[i : i + max_len] for i in range(0, len(normalized), max_len)]
+
+def append_children_in_batches(
+    notion, page_id, children, batch_size=80
+):
+    for start in range(0, len(children), batch_size):
+        notion.blocks.children.append(
+            block_id=page_id,
+            children=children[start : start + batch_size]
+        )
+```
+
+### 공고 수정 시 Notion 동기화
+
+공고를 수정하면 DB뿐만 아니라 Notion 페이지도 함께 업데이트됩니다. 기존 블록을 모두 삭제하고 새로 작성하는 방식입니다.
+
+```python
+def update_notion_page(*, notion, page_id, title, url, body, parsed):
+    # Properties 업데이트
+    notion.pages.update(page_id=page_id, properties=properties)
+
+    # 기존 블록 모두 삭제
+    cursor = None
+    while True:
+        response = notion.blocks.children.list(block_id=page_id, start_cursor=cursor)
+        for block in response.get("results", []):
+            notion.blocks.delete(block_id=block["id"])
+        if not response.get("has_more"):
+            break
+        cursor = response.get("next_cursor")
+
+    # 새 블록 추가
+    append_children_in_batches(notion, page_id, children)
+```
+
+---
+
+## 📊 ATS 분석과 채용 종료 감지 {#ats-analysis}
+
+### ATS 분석 흐름
+
+ATS(Applicant Tracking System) 분석은 내 이력서와 채용공고를 비교해서 적합도를 점수화합니다.
+
+```
+이력서 (Notion 페이지) ─┐
+                        ├─→ Gemini API ─→ { score, gaps, suggestions }
+채용공고 본문 ──────────┘
+```
+
+1. Notion API로 이력서 페이지의 텍스트를 추출
+2. 채용공고 본문과 함께 Gemini에 전달
+3. 0-100 점수, 부족한 점, 개선 제안을 JSON으로 받음
+4. 결과를 Notion 공고 페이지에 append + DB에 저장
+
+### 채용 종료 감지
+
+LinkedIn 공고 페이지를 재방문해서 "No longer accepting applications" 문구나 "Apply" 버튼의 부재를 확인합니다. 종료된 공고는 목록에서 회색으로 표시되고, "종료 숨기기" 토글로 필터링할 수 있습니다.
+
+```python
+# 종료 처리
+@app.post("/api/job-postings/{job_id}/close")
+def close_job_posting(job_id: int, session: Session = Depends(get_session)):
+    job = crud.get_job_posting(session=session, job_id=job_id)
+    crud.update_job_posting(session=session, job=job, hiring_status="종료")
+    return {"status": "closed", "jobId": job_id}
+```
+
+프론트엔드에서는 종료된 공고를 시각적으로 구분합니다.
+
+```jsx
+<tr className={[
+    submission.id === activeId ? 'active' : '',
+    isClosed ? 'summary-row-closed' : '',
+  ].filter(Boolean).join(' ')}>
+```
+
+---
+
+## 🏗 전체 아키텍처 {#architecture}
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│                     Frontend (React + Vite)                   │
+│  ┌──────────┐  ┌──────────────┐  ┌───────────────┐           │
+│  │ JobForm  │  │ SummaryList  │  │ apiClient.js  │           │
+│  └──────────┘  └──────────────┘  └───────┬───────┘           │
+│                                          │ /api proxy        │
+├──────────────────────────────────────────┼───────────────────┤
+│                     Backend (FastAPI)     │                   │
+│  ┌───────────┐  ┌──────────┐  ┌──────────▼───────┐          │
+│  │ models.py │  │ crud.py  │  │    main.py       │          │
+│  │ schemas.py│  │          │  │  (API Routes)    │          │
+│  └─────┬─────┘  └────┬─────┘  └──┬──────┬───────┘          │
+│        │             │            │      │                   │
+│        ▼             ▼            ▼      ▼                   │
+│  ┌──────────┐  ┌──────────┐  ┌────────────────┐             │
+│  │ SQLite   │  │ parsers/ │  │  services.py   │             │
+│  │ (data.db)│  │linkedin  │  │  (LLM+Notion)  │             │
+│  └──────────┘  └────┬─────┘  └──┬─────┬───────┘             │
+│                     │           │     │                      │
+├─────────────────────┼───────────┼─────┼──────────────────────┤
+│  External Services  │           │     │                      │
+│             ┌───────▼──┐  ┌─────▼─┐  ┌▼───────────┐         │
+│             │ LinkedIn │  │Gemini │  │ Notion API │         │
+│             │(Scraping)│  │  API  │  │            │         │
+│             └──────────┘  └───────┘  └────────────┘         │
+└───────────────────────────────────────────────────────────────┘
+```
+
+**데이터 흐름 요약:**
+
+1. 사용자가 URL 입력 → LinkedIn HTML 스크래핑 → 자동 채움
+2. 공고 제출 → DB 즉시 저장 → 백그라운드 처리 시작
+3. Gemini API로 구조화 파싱 + 본문 포맷팅
+4. Notion 페이지 자동 생성 (Properties + 포맷 본문 + 원문)
+5. 이력서 vs 공고 ATS 분석 → Notion에 결과 append
+6. 프론트엔드 목록에서 전체 관리 (검색, 정렬, 상세 보기, 수정)
+
+---
+
+## 💡 Cursor AI와 함께 개발하며 느낀 점 {#cursor-experience}
+
+### 잘 된 점
+
+**1. 빠른 스캐폴딩**
+
+"Vite + React 프로젝트를 만들고, 채용공고 입력 폼과 결과 리스트 컴포넌트를 만들어줘"라고 하면 기본 구조가 바로 생성됩니다. 보일러플레이트 작성 시간이 크게 줄었습니다.
+
+**2. 반복적인 CRUD 코드**
+
+`crud.py`의 create/read/update/delete 함수들, `schemas.py`의 Pydantic 모델들, API 응답 매핑 같은 반복적인 코드를 Cursor가 일관성 있게 생성해주었습니다.
+
+**3. 디버깅 파트너**
+
+HuggingFace API가 410을 반환했을 때, Notion 권한 이슈가 발생했을 때, Cursor와 함께 원인을 분석하고 대안을 찾는 과정이 마치 실제 동료와 페어 프로그래밍하는 것 같았습니다.
+
+**4. UI/UX 개선 아이디어**
+
+"카드형보다 테이블이 나을 것 같아"라고 하면 바로 테이블 기반 UI를 제안해주고, 도구바, 필터링, 상세 패널 같은 UX 패턴도 적극적으로 제안했습니다.
+
+**5. 프로세스 전체를 이해하는 대화**
+
+단순히 코드를 생성하는 것이 아니라, "왜 이 기술을 선택하는지", "이 패턴의 장단점은 무엇인지" 등 기술적 의사결정에 대한 논의가 가능했습니다.
+
+### 주의할 점
+
+**1. 맥락 유지의 한계**
+
+긴 개발 세션에서 초반에 논의했던 내용이 후반에 반영되지 않는 경우가 있었습니다. 중요한 결정사항은 명시적으로 다시 언급해주는 것이 좋습니다.
+
+**2. 정확한 요구사항 전달**
+
+"좀 더 예쁘게 만들어줘"보다 "카드형 레이아웃을 테이블 형태로 변경하고, 행 클릭 시 상세 패널이 펼쳐지게 해줘"처럼 구체적인 요구사항이 훨씬 좋은 결과를 냅니다.
+
+**3. 외부 API 변경에 대한 대응**
+
+HuggingFace API deprecated, LinkedIn HTML 구조 변경 등 외부 요인에 대해서는 Cursor도 최신 정보가 없을 수 있습니다. 에러 메시지를 정확히 공유하면 빠르게 대안을 찾아줍니다.
+
+### AI 페어 프로그래밍이 사이드 프로젝트에 적합한 이유
+
+1. **의사결정 비용 감소**: 혼자 고민하면 오래 걸릴 기술 선택을 빠르게 논의하고 결정
+2. **학습 곡선 완화**: 익숙하지 않은 기술(Notion API, Gemini API)도 예제와 함께 바로 적용
+3. **지속적인 동기 부여**: 빠른 진전이 보이니 프로젝트가 중단되지 않음
+4. **품질 유지**: 에러 처리, 엣지 케이스 등을 빠뜨리지 않고 함께 챙김
+
+---
+
+## 🎯 마무리 {#conclusion}
+
+CareerWeb은 "채용공고 정리가 귀찮다"는 단순한 불편함에서 시작해서, Cursor AI와 대화하며 풀스택 웹앱으로 완성한 프로젝트입니다.
+
+**사용한 기술 요약:**
+
+| 영역 | 기술 |
+|------|------|
+| 프론트엔드 | Vite 7 + React 19 |
+| 백엔드 | FastAPI + SQLModel + SQLite |
+| LLM | Google Gemini API |
+| 데이터 저장 | Notion API |
+| 스크래핑 | BeautifulSoup + httpx |
+| 개발 도구 | Cursor AI |
+
+Cursor와 함께 만든 이 경험에서 가장 인상적이었던 것은, AI가 단순히 코드를 생성해주는 도구가 아니라 **기술적 의사결정을 함께 논의할 수 있는 파트너**라는 점입니다. 물론 모든 결정을 AI에 맡기는 것은 아닙니다. 최종 판단과 방향 설정은 여전히 개발자의 몫이지만, 그 과정에서 AI가 제공하는 관점과 빠른 프로토타이핑 능력은 사이드 프로젝트의 완성률을 크게 높여줍니다.
+
+구직 중인 분들이라면, 이런 자동화 도구를 만들어보는 것 자체가 좋은 포트폴리오가 될 수 있습니다. 그리고 그 과정에서 Cursor 같은 AI 코딩 어시스턴트가 든든한 파트너가 되어줄 것입니다.
+
+---
+
+*이 글에서 다룬 CareerWeb 프로젝트는 [GitHub](https://github.com/data-droid)에서 확인할 수 있습니다.*
