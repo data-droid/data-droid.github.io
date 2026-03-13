@@ -3,7 +3,7 @@ layout: post
 lang: ko
 title: "Snowflake 아키텍처와 Databricks 비교 - 어떤 경우에 무엇을 쓸 것인가"
 description: "Snowflake의 전체 플랫폼 아키텍처와 Databricks를 비교하고, 포지셔닝 차이와 사례별 추천, 함께 쓰는 패턴을 정리합니다."
-date: 2026-03-07
+date: 2026-03-09
 author: Data Droid
 category: data-engineering
 tags: [Snowflake, Databricks, Lakehouse, Data-Warehouse, 클라우드데이터플랫폼, 데이터아키텍처]
