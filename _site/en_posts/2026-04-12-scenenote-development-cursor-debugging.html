@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Head includes for Jekyll -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- SEO -->
+
+<meta name="description" content="SceneNote—an iOS app built with Cursor—through a data engineer’s lens: subtitle-to-LLM pipeline, SubtitleCore boundaries, external APIs and local consistency, plus real chat excerpts in one narrative.">
+
+
+
+<title>An iOS App Built with Cursor: SceneNote Through a Data Engineer’s Lens - Data Droid Blog</title>
+
+
+<!-- Open Graph -->
+<meta property="og:title" content="An iOS App Built with Cursor: SceneNote Through a Data Engineer’s Lens">
+<meta property="og:description" content="SceneNote—an iOS app built with Cursor—through a data engineer’s lens: subtitle-to-LLM pipeline, SubtitleCore boundaries, external APIs and local consistency, plus real chat excerpts in one narrative.">
+<meta property="og:url" content="http://localhost:4000/en_posts/2026-04-12-scenenote-development-cursor-debugging.html">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="An iOS App Built with Cursor: SceneNote Through a Data Engineer’s Lens">
+<meta name="twitter:description" content="SceneNote—an iOS app built with Cursor—through a data engineer’s lens: subtitle-to-LLM pipeline, SubtitleCore boundaries, external APIs and local consistency, plus real chat excerpts in one narrative.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title="Data Droid Blog" href="/feed.xml">
+
+<!-- Google Analytics -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GP9LT745PP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GP9LT745PP');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <div class="site-title">
+      <a href="/">Data Droid Blog</a>
+    </div>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" aria-label="메뉴 열기/닫기">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+                  <li class="dropdown">
+            <a href="#" class="dropdown-toggle">Categories</a>
+            <ul class="dropdown-menu">
+
+              <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+              <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+              <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+              <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+              <li><a href="/en/categories/data-ai/">Data AI</a></li>
+            </ul>
+          </li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/en/about/">About</a></li>
+      </ul>
+    </nav>
+    
+    <div class="language-switcher">
+      
+        <!-- 포스트용 언어 전환 -->
+        
+          
+          <a href="/infrastructure-tools/2026/04/12/scenenote-development-cursor-debugging.html" class="lang-btn">한국어</a>
+          <a href="/en_posts/2026-04-12-scenenote-development-cursor-debugging.html" class="lang-btn active">English</a>
+        
+      
+    </div>
+  </div>
+</header>
+
+  
+  <main class="site-main">
+    <div class="container">
+      <article class="post">
+  <header class="post-header">
+    <div class="post-meta">
+      <span class="post-category">Infrastructure tools</span>
+      <span class="post-date">2026년 04월 12일</span>
+      <span class="post-author">Data Droid</span>
+    </div>
+    
+    <h1 class="post-title">An iOS App Built with Cursor: SceneNote Through a Data Engineer’s Lens</h1>
+    
+    
+    <div class="post-tags">
+      
+        <span class="tag">sceneNote</span>
+      
+        <span class="tag">Cursor</span>
+      
+        <span class="tag">iOS</span>
+      
+        <span class="tag">SwiftUI</span>
+      
+        <span class="tag">Swift-Package-Manager</span>
+      
+        <span class="tag">Gemini</span>
+      
+        <span class="tag">AI-Pair-Programming</span>
+      
+        <span class="tag">Mobile-App</span>
+      
+        <span class="tag">Architecture</span>
+      
+    </div>
+    
+    
+    
+    
+    
+    <div class="post-info">
+      
+        <span class="reading-time">⏱️ 42 min</span>
+      
+      
+        <span class="difficulty">📊 Intermediate</span>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h1 id="an-ios-app-built-with-cursor-scenenote-through-a-data-engineers-lens">An iOS App Built with Cursor: SceneNote Through a Data Engineer’s Lens</h1>
+
+<blockquote>
+  <p>“If one subtitle file is study material, the app’s job is to run that pipeline reliably.”</p>
+</blockquote>
+
+<p><strong>SceneNote</strong> is an iOS app that pulls <strong>English SRT subtitles</strong> for TV and film, runs <strong>Gemini</strong> over the <strong>full script</strong> to extract <strong>phrases</strong> and <strong>vocabulary</strong>, and lets you move between <strong>shows, expressions, words, study, and settings</strong>. I work as a <strong>data engineer</strong> day to day—pipelines, schemas, and incident response are familiar; mobile was not. I used <strong>Cursor</strong> as a pair for design, implementation, and debugging. This post tells that story in <strong>data-engineering terms</strong> (pipeline, boundaries, sources and sinks, quality) and weaves in <strong>today’s code</strong> and <strong>what we actually typed in chat</strong>.</p>
+
+<p>Repository: <a href="https://github.com/data-droid/sceneNote">https://github.com/data-droid/sceneNote</a></p>
+
+<hr />
+
+<h2 id="toc">Table of Contents</h2>
+
+<ul>
+  <li><a href="#what-is-scenenote">What SceneNote Does</a></li>
+  <li><a href="#app-structure">App Structure at a Glance</a></li>
+  <li><a href="#architecture">Architecture - SubtitleCore and the App Shell</a></li>
+  <li><a href="#building-together">Building It Together with Cursor</a></li>
+  <li><a href="#cursor-tips">What Helped When Working with Cursor</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+</ul>
+
+<hr />
+
+<h2 id="what-is-scenenote">What SceneNote Does</h2>
+
+<ol>
+  <li><strong>Browse</strong>: Save shows from TMDB search, open seasons and episodes, download subtitles from <strong>OpenSubtitles</strong>.</li>
+  <li><strong>Episode detail</strong>: Load local SRT and run <strong>full-script analysis</strong> (one or a few LLM calls, JSON results).</li>
+  <li><strong>Expressions / Words</strong>: Library-style browsing and detail (meaning, example, CEFR-style level).</li>
+  <li><strong>Study</strong>: Review saved items.</li>
+  <li><strong>Settings</strong>: Gemini API key, OpenSubtitles options, etc.</li>
+</ol>
+
+<p>In one line: <strong>subtitle file → preprocess → LLM → parse &amp; merge → local persistence → UI</strong>.</p>
+
+<hr />
+
+<h2 id="app-structure">App Structure at a Glance</h2>
+
+<p>Five tabs from <code class="language-plaintext highlighter-rouge">MainTabView</code>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tab</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Shows (<code class="language-plaintext highlighter-rouge">BrowseView</code>)</td>
+      <td>Library, search, TMDB</td>
+    </tr>
+    <tr>
+      <td>Expressions (<code class="language-plaintext highlighter-rouge">ExpressionListView</code>)</td>
+      <td>Analyzed phrases</td>
+    </tr>
+    <tr>
+      <td>Words (<code class="language-plaintext highlighter-rouge">WordListView</code>)</td>
+      <td>Analyzed vocabulary</td>
+    </tr>
+    <tr>
+      <td>Study (<code class="language-plaintext highlighter-rouge">StudyView</code>)</td>
+      <td>Review</td>
+    </tr>
+    <tr>
+      <td>Settings (<code class="language-plaintext highlighter-rouge">SettingsView</code>)</td>
+      <td>API keys and services</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Remote</strong>: TMDB, OpenSubtitles, Gemini. <strong>Local</strong>: subtitle files, per-episode analysis snapshots, saved shows — file and UserDefaults stores.</p>
+
+<p><strong>Stack</strong>: SwiftUI, iOS 17+, SPM library <code class="language-plaintext highlighter-rouge">SubtitleCore</code> + tests, thin Xcode app target <code class="language-plaintext highlighter-rouge">SceneNote</code> with <code class="language-plaintext highlighter-rouge">@main</code> → <code class="language-plaintext highlighter-rouge">MainTabView()</code>.</p>
+
+<hr />
+
+<h2 id="architecture">Architecture - SubtitleCore and the App Shell</h2>
+
+<p>Roughly MVVM. Dependency flow:</p>
+
+<pre><code class="language-mermaid">flowchart TB
+    subgraph app [SceneNote App Target]
+        Entry[SceneNoteApp]
+    end
+    subgraph ui [SwiftUI Views]
+        Tabs[MainTabView]
+        Browse[BrowseView]
+        Episode[EpisodeDetailView]
+    end
+    subgraph vm [ViewModels]
+        EpVM[EpisodeDetailViewModel]
+        Others[Other ViewModels]
+    end
+    subgraph domain [Domain / Pipeline]
+        Pipeline[FullTranscriptAnalysisPipeline]
+        Parsers[SRT Parser / Chunk Parser]
+    end
+    subgraph services [Services]
+        LLM[LLMService / GeminiProvider]
+        OS[OpenSubtitlesSubtitleService]
+        TMDB[TMDBSearchService etc]
+    end
+    subgraph storage [Storage]
+        SubStore[EpisodeSubtitleFileStore]
+        Analysis[EpisodeAnalysisFileStore]
+        Shows[SavedShowsStore]
+    end
+    Entry --&gt; Tabs
+    Tabs --&gt; Browse
+    Tabs --&gt; Episode
+    Episode --&gt; EpVM
+    EpVM --&gt; Pipeline
+    EpVM --&gt; SubStore
+    EpVM --&gt; OS
+    Pipeline --&gt; LLM
+    Pipeline --&gt; Parsers
+    EpVM --&gt; Analysis
+    Browse --&gt; TMDB
+    Browse --&gt; Shows
+</code></pre>
+
+<p><strong>Full-script analysis</strong> lives in <code class="language-plaintext highlighter-rouge">FullTranscriptAnalysisPipeline</code>: <strong>one request</strong> when the script fits, otherwise <strong>chunked sequential calls</strong> with normalized-key merge. <code class="language-plaintext highlighter-rouge">singleShotCharacterLimit</code>, <code class="language-plaintext highlighter-rouge">maxChunkCharacters</code>, and <code class="language-plaintext highlighter-rouge">maxChunksPerRun</code> bound tokens, cost, and latency; <code class="language-plaintext highlighter-rouge">scriptTruncated</code> surfaces truncation in the UI.</p>
+
+<hr />
+
+<h2 id="building-together">Building It Together with Cursor</h2>
+
+<h3 id="1-starting-point---dont-build-everything-at-once">1. Starting point - don’t build everything at once</h3>
+
+<p>The first message to Cursor sketched the big picture but insisted on <strong>incremental</strong> work—SwiftUI, MVVM, async/await, modularity—including this line:</p>
+
+<blockquote>
+  <p><strong>Do NOT implement everything at once. Wait for my step-by-step instructions.</strong></p>
+</blockquote>
+
+<p>A later one-line roadmap in chat looked like:</p>
+
+<blockquote>
+  <p>Parser → n-gram → LLM 구조 → Gemini → Settings → Pipeline → UI → Local LLM</p>
+</blockquote>
+
+<p>The shipped code shifted weight from n-grams toward <strong>full-script LLM analysis</strong>, but the habit of <strong>small, stackable steps</strong> stayed the same.</p>
+
+<h3 id="2-srt-parser-and-tests---spell-out-io-and-edge-cases">2. SRT parser and tests - spell out I/O and edge cases</h3>
+
+<p>The parser request was a classic bullet list:</p>
+
+<blockquote>
+  <p>Implement a robust SRT subtitle parser in Swift. … Remove index numbers and timestamps, merge multiline subtitles… Handle edge cases (empty lines, malformed SRT). Write clean, testable code.</p>
+</blockquote>
+
+<p>That was followed by unit tests, then n-gram quality tweaks (filtering low-meaning phrases like “I don’t”, “you know”), and iterative polish.</p>
+
+<h3 id="3-llm-and-json---when-the-model-wont-behave">3. LLM and JSON - when the model won’t behave</h3>
+
+<p>After wiring <code class="language-plaintext highlighter-rouge">LLMProvider</code> and <code class="language-plaintext highlighter-rouge">GeminiProvider</code>, parsing broke often. The follow-up prompt was:</p>
+
+<blockquote>
+  <p>Ensure the Gemini response strictly parses JSON. If needed, extract JSON safely from text response.</p>
+</blockquote>
+
+<p>Today’s <code class="language-plaintext highlighter-rouge">ExpressionJSONParser.extractJSONPayload</code> and <code class="language-plaintext highlighter-rouge">TranscriptChunkAnalysisParser</code> <strong>key aliases</strong> (<code class="language-plaintext highlighter-rouge">expressions</code> / <code class="language-plaintext highlighter-rouge">phrases</code>, <code class="language-plaintext highlighter-rouge">phrase</code> / <code class="language-plaintext highlighter-rouge">expression</code> / <code class="language-plaintext highlighter-rouge">term</code>, etc.) are the hardened outcome of that thread.</p>
+
+<h3 id="4-long-scripts-timeouts-noisy-cues">4. Long scripts, timeouts, noisy cues</h3>
+
+<p>Long episodes don’t fit one shot; big prompts hit <code class="language-plaintext highlighter-rouge">URLSession</code> timeouts. We set <strong>numeric limits</strong> with Cursor for the pipeline, and <code class="language-plaintext highlighter-rouge">GeminiProvider</code> uses a <strong>prompt-length-scaled timeout</strong> with a ceiling.</p>
+
+<p>Noisy one-line cues (“Hi”, “Thanks”) are stripped by <code class="language-plaintext highlighter-rouge">SubtitleTrivialCueFilter</code> as a <strong>dedicated preprocessing layer</strong>. Asking for <strong>pure functions + tests</strong> lined up well with <code class="language-plaintext highlighter-rouge">SubtitleCoreTests</code>.</p>
+
+<h3 id="5-new-subtitle-file-new-analysis">5. New subtitle file, new analysis</h3>
+
+<p>Re-downloading subtitles changes the file, so stale analysis is wrong. <code class="language-plaintext highlighter-rouge">EpisodeDetailViewModel</code> calls <code class="language-plaintext highlighter-rouge">clearAnalysisBecauseSubtitleChanged()</code> after a successful save—something we refined with language like “only on successful save, not mixed with load failures.”</p>
+
+<p>OpenSubtitles assumes TMDB linkage, so <code class="language-plaintext highlighter-rouge">refreshSubtitleStatus()</code> splits <strong>guidance copy</strong> from raw errors. Later, Browse-focused prompts (search more titles, <strong>free</strong> API options) pushed the TMDB direction further.</p>
+
+<h3 id="6-compiler-errors---paste-verbatim">6. Compiler errors - paste verbatim</h3>
+
+<p>The fastest loop was pasting Swift diagnostics as-is, for example:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Cannot assign to property: 'settingsStore' is a 'let' constant
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Call to main actor-isolated initializer 'init(pipeline:settingsStore:)'
+in a synchronous nonisolated context
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>'.600' is not a valid floating point literal; it must be written '0.600'
+</code></pre></div></div>
+
+<p>Even <strong>file path + one error line</strong> was enough for Cursor to target <code class="language-plaintext highlighter-rouge">let</code> vs <code class="language-plaintext highlighter-rouge">var</code>, <code class="language-plaintext highlighter-rouge">@MainActor</code>, or literal syntax.</p>
+
+<h3 id="7-xcode-and-spm---when-the-app-wont-launch">7. Xcode and SPM - when the app won’t launch</h3>
+
+<p>The same chat log has plain questions:</p>
+
+<blockquote>
+  <p>How do I run the app in Xcode?<br />
+Rebuild still doesn’t start the app.</p>
+</blockquote>
+
+<p>Alongside <code class="language-plaintext highlighter-rouge">No such module 'SubtitleCore'</code> / <code class="language-plaintext highlighter-rouge">Missing package product 'SubtitleCore'</code>, we asked Cursor to <strong>unblock SPM ↔ app target wiring</strong>. The repo shows the end state; a lot of wall-clock time lived in these messages.</p>
+
+<hr />
+
+<h2 id="cursor-tips">What Helped When Working with Cursor</h2>
+
+<ol>
+  <li><strong>Repro as user steps</strong>: “Save show → episode → download → analyze” narrows view model bugs fast.</li>
+  <li><strong>Paste logs whole</strong>: One Swift error block or a slice of Gemini HTTP cuts guesswork.</li>
+  <li><strong>One axis per change</strong>: Keep pipeline changes separate from UI copy—smaller diffs, easier rollback.</li>
+  <li><strong>Protocols first</strong>: Boundaries like <code class="language-plaintext highlighter-rouge">EpisodeSubtitleStoring</code>, <code class="language-plaintext highlighter-rouge">OpenSubtitlesSubtitleFetching</code> enable tests and mocks.</li>
+</ol>
+
+<hr />
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>SceneNote keeps <strong>subtitle → LLM → local library</strong> inside <strong><code class="language-plaintext highlighter-rouge">SubtitleCore</code></strong> and the app target thin. The Cursor thread mixed <strong>stepwise delivery</strong>, <strong>defensive JSON</strong>, <strong>long scripts and timeouts</strong>, <strong>data consistency</strong>, and <strong>SPM/Xcode wiring</strong>—the quotes above are just a sample.</p>
+
+<p>Agents write code quickly; <strong>what “correct” means</strong> is still the developer’s job. Next I want retries/rate limits, offline behavior, and backup (<code class="language-plaintext highlighter-rouge">SceneNoteDataBackup</code>, etc.) so it becomes a <strong>daily driver</strong>.</p>
+
+<hr />
+
+<p><em>Repository: <a href="https://github.com/data-droid/sceneNote">github.com/data-droid/sceneNote</a></em></p>
+
+  </div>
+
+  
+</article>
+
+    </div>
+  </main>
+  
+  
+  <footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Data Droid Blog</h3>
+        <p>데이터 엔지니어가 다루는 기술 블로그</p>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="/en/categories/data-engineering/">Data Engineering</a></li>
+          <li><a href="/en/categories/bi-engineering/">BI Engineering</a></li>
+          <li><a href="/en/categories/infrastructure-tools/">Infrastructure & Tools</a></li>
+          <li><a href="/en/categories/data-quality/">Data Quality</a></li>
+          <li><a href="/en/categories/data-ai/">Data AI</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/en/">Home</a></li>
+          <li><a href="/en/blog/">Blog</a></li>
+          <li><a href="/en/about/">About</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Social</h4>
+        <ul>
+          
+          <li><a href="https://github.com/data-droid">GitHub</a></li>
+          
+          <li><a href="https://www.linkedin.com/in/jaekyung-lee/">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2026 Data Droid Blog. All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+
+
+  
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
