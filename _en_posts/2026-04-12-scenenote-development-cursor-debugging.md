@@ -5,7 +5,7 @@ title: "An iOS App Built with Cursor: SceneNote Through a Data Engineer’s Lens
 description: "SceneNote—an iOS app built with Cursor—through a data engineer’s lens: subtitle-to-LLM pipeline, SubtitleCore boundaries, external APIs and local consistency, plus real chat excerpts in one narrative."
 date: 2026-04-12
 author: Data Droid
-category: infrastructure-tools
+category: development
 tags: [sceneNote, Cursor, iOS, SwiftUI, Swift-Package-Manager, Gemini, AI-Pair-Programming, Mobile-App, Architecture]
 reading_time: "42 min"
 difficulty: "Intermediate"

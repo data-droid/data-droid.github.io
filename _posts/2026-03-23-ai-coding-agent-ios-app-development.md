@@ -5,7 +5,7 @@ title: "AI 코딩 에이전트로 iOS 앱 만들기 - 경험 없는 나의 레�
 description: "iOS 개발 경험이 전혀 없는 상태에서 Flexibility AI로 시장조사·기능 구체화를 하고, Cursor로 레시피북과 커피 저널 앱을 개발한 경험을 공유합니다. 생산성 앱 시장이 사라지는 시대, 개인이 필요한 앱을 직접 만드는 여정."
 date: 2026-03-23
 author: Data Droid
-category: infrastructure-tools
+category: development
 tags: [Cursor, Flexibility-AI, iOS, Swift, SwiftUI, AI-Coding-Agent, 사이드프로젝트, 모바일앱]
 reading_time: "35분"
 difficulty: "초급"

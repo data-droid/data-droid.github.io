@@ -5,7 +5,7 @@ title: "Building iOS Apps with AI Coding Agents - My Recipe Book & Coffee Journa
 description: "I had zero iOS development experience. Using Flexibility AI for market research and feature specification, and Cursor for development, I built Recipe Book and Coffee Journal apps. Here's the full story."
 date: 2026-03-23
 author: Data Droid
-category: infrastructure-tools
+category: development
 tags: [Cursor, Flexibility-AI, iOS, Swift, SwiftUI, AI-Coding-Agent, Side-Project, Mobile-App]
 reading_time: "35 min"
 difficulty: "Beginner"

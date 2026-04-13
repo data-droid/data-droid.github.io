@@ -9,18 +9,22 @@
   {% assign category_posts = site.posts | where: "category", include.category | sort: 'date' | reverse %}
 {% endif %}
 
+{% capture _cat_heading %}{% include category-display-name.html category=include.category %}{% endcapture %}
+{% assign _cat_heading = _cat_heading | strip %}
+
 {% if category_posts.size > 0 %}
   <div class="category-posts">
     {% if page.lang == 'en' %}
-      <h3 class="category-posts-title">📚 {{ include.category | replace: '-', ' ' | capitalize }} Posts</h3>
+      <h3 class="category-posts-title">📚 {{ _cat_heading }} Posts</h3>
     {% else %}
-      <h3 class="category-posts-title">📚 {{ include.category | replace: '-', ' ' | capitalize }} 포스트</h3>
+      <h3 class="category-posts-title">📚 {{ _cat_heading }} 포스트</h3>
     {% endif %}
     <div class="posts-list-simple">
       {% for post in category_posts %}
         <div class="post-item-simple">
           <div class="post-meta-simple">
-            <span class="post-category">{{ post.category | replace: '-', ' ' | capitalize }}</span>
+            {% capture _item_cat %}{% include category-display-name.html category=post.category lang=post.lang %}{% endcapture %}
+            <span class="post-category">{{ _item_cat | strip }}</span>
             {% if page.lang == 'en' %}
               <span class="post-date">{{ post.date | date: "%B %d, %Y" }}</span>
             {% else %}
@@ -53,10 +57,10 @@
       <div class="placeholder-icon">📝</div>
       {% if page.lang == 'en' %}
         <h3>Posts Coming Soon</h3>
-        <p>Additional {{ include.category | replace: '-', ' ' | capitalize }} posts will be added soon.</p>
+        <p>Additional {{ _cat_heading }} posts will be added soon.</p>
       {% else %}
         <h3>포스트 준비 중</h3>
-        <p>곧 {{ include.category | replace: '-', ' ' | capitalize }} 관련 포스트가 추가될 예정입니다.</p>
+        <p>곧 {{ _cat_heading }} 관련 포스트가 추가될 예정입니다.</p>
       {% endif %}
     </div>
   </div>

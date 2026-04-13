@@ -5,7 +5,7 @@ title: "Cursor로 만든 iOS 앱, 데이터 엔지니어의 시선으로 풀어�
 description: "Cursor로 만든 iOS 앱 SceneNote를 데이터 엔지니어의 시선으로 풀었습니다. 자막·LLM 파이프라인, SubtitleCore 경계, 외부 API·로컬 저장 일관성, 그리고 실제 Cursor 대화 발췌까지 한 흐름으로 정리합니다."
 date: 2026-04-12
 author: Data Droid
-category: infrastructure-tools
+category: development
 tags: [sceneNote, Cursor, iOS, SwiftUI, Swift-Package-Manager, Gemini, AI-Pair-Programming, 앱개발, 아키텍처]
 reading_time: "42분"
 difficulty: "중급"

@@ -5,7 +5,7 @@ title: "Building a Full-Stack Side Project with Cursor AI - The CareerWeb Journe
 description: "A complete walkthrough of building CareerWeb, a job posting tracker, from scratch using Cursor AI as a pair programming partner. Covers tech stack decisions, LLM integration, Notion automation, and ATS analysis."
 date: 2026-03-13
 author: Data Droid
-category: data-engineering
+category: development
 tags: [Cursor, AI-Pair-Programming, React, FastAPI, Gemini, Notion-API, Side-Project]
 reading_time: "50 min"
 difficulty: "Intermediate"

@@ -5,7 +5,7 @@ title: "Cursor AI로 풀스택 사이드 프로젝트 만들기 - CareerWeb 개�
 description: "채용공고 트래커 CareerWeb을 Cursor AI와 대화하며 처음부터 끝까지 만들어간 과정을 정리합니다. 기술 스택 선정부터 LLM 통합, Notion 연동, ATS 분석까지 AI 페어 프로그래밍의 실전 경험을 공유합니다."
 date: 2026-03-13
 author: Data Droid
-category: data-engineering
+category: development
 tags: [Cursor, AI-Pair-Programming, React, FastAPI, Gemini, Notion-API, 사이드프로젝트]
 reading_time: "50분"
 difficulty: "중급"
